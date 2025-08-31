@@ -25,7 +25,9 @@
 	let videoContainer: VendorEl | null = null;
 	let progressRef: HTMLDivElement | null = null;
 
-	const BUFFER_TARGET = 15; // seconds we want buffered after current time
+	const BUFFER_START = 7;
+	const BUFFER_SAFE = 3;
+
 	let buffering: boolean = false;
 
 	const togglePlay = (): void => {
@@ -155,21 +157,18 @@
 	const bufferCheck = () => {
 		if (!videoEl) return;
 
-		const needed = BUFFER_TARGET;
 		const buffered = bufferedAfter(videoEl.currentTime);
 
-		if (buffered < needed && !paused) {
-			// not enough – pause
+		if (!paused && buffered < BUFFER_SAFE) {
 			buffering = true;
-			togglePlay(); // pauses both video & audio
-		} else if (buffered >= needed && buffering) {
-			// enough – resume
+			togglePlay();
+		} else if (paused && buffered >= BUFFER_START) {
 			buffering = false;
-			if (!paused) togglePlay(); // only play if we were playing before pause
+			togglePlay();
 		}
 	};
 
-	const intervalId = setInterval(bufferCheck, 250);
+	const intervalId = setInterval(bufferCheck, 200);
 
 	onDestroy(() => clearInterval(intervalId));
 </script>
