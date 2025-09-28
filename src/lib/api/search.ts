@@ -6,7 +6,7 @@ export async function getSearchResults(
 ): Promise<SearchResult> {
 	const fetcher = fetchFn ?? globalThis.fetch;
 
-	const res = await fetcher(`http://localhost:8000/api/video/search/?q=${encodeURIComponent(query)}`);
+	const res = await fetcher(`http://localhost:8000/api/v1/search?serviceId=0&searchString=${encodeURIComponent(query)}&sortFilter=asc`);
 
 	if (!res.ok) {
 		throw new Error(`Could not load search results: ${res.status} ${res.statusText}`);

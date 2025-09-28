@@ -1,6 +1,7 @@
 <script lang="ts">
 	import roundLogo from '$lib/assets/logo-placeholder.svg';
 
+	export let channelAvatar = roundLogo;
 	export let videoTitle = 'Video Title';
 	export let channelName = 'Channel Name';
 	export let viewCount = 147977;
@@ -19,7 +20,7 @@
 	</div>
 	<div class="grid grid-cols-2 gap-3">
 		<div class="col-spacn-2 flex items-center space-x-3">
-			<img src={roundLogo} alt={channelName} class="h-8 w-8 rounded-full object-cover" />
+			<img src={channelAvatar} alt={channelName} class="h-8 w-8 rounded-full object-cover" />
 			<h3 class="text-md font-semibold text-white">{channelName}</h3>
 			<button
 				type="button"

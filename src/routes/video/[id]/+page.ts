@@ -1,5 +1,5 @@
 import type { PageLoad } from './$types';
-import type { Video, Format } from '$lib/types';
+import type { Video, Stream } from '$lib/types';
 import { getVideo } from '$lib/api/video';
 
 
@@ -33,38 +33,47 @@ function getBaseItag(formatId: string): string {
 	return dash === -1 ? formatId : formatId.slice(0, dash);
 };
 
-function pickByFormatId<T extends Format>(
-	formats: T[],
+function pickByStreamId<T extends Stream>(
+	streams: T[],
 	priorityList: readonly string[]
 ): T | undefined {
 	for (const itag of priorityList) {
-		const match = formats.find(f => getBaseItag(f.format_id) === itag);
+		const match = streams.find(s => getBaseItag(s.id) === itag);
 		if (match) return match;
 	}
 };
 
-function bestVideoFormat(formats: Format[]): Format | undefined {
-	const candidate = pickByFormatId(formats, PREFERRED_VIDEO_ITAGS);
-	if (candidate && candidate.acodec === 'none') return candidate;
+function bestVideoStream(streams: Stream[]): Stream | undefined {
+	const candidate = pickByStreamId(streams, PREFERRED_VIDEO_ITAGS);
+	if (candidate && candidate.videoOnly) return candidate;
 
-	const fallback = formats.filter(f => f.ext === 'mp4' && f.vcodec?.startsWith('av') && !f.acodec);
+	const fallback = streams.filter(s => s.format === 'MPEG_4' && s.codec.startsWith('av'));
+
 	if (!fallback.length) return undefined;
+
 	fallback.sort((a, b) => (b.width ?? 0) * (b.height ?? 1) - (a.width ?? 0) * (a.height ?? 1));
 	return fallback[0];
-};
+}
 
-function bestAudioFormat(formats: Format[]): Format | undefined {
-	const english = formats.filter(f =>
-		f.format_note?.toLowerCase().includes('english') ||
-		f.format_note?.toLowerCase().includes('eng')
-	);
+// function bestVideoFormat(formats: Format[]): Format | undefined {
+// 	const candidate = pickByFormatId(formats, PREFERRED_VIDEO_ITAGS);
+// 	if (candidate && candidate.acodec === 'none') return candidate;
 
-	if (english.length) {
-		const audio = pickByFormatId(english, PREFERRED_AUDIO_ITAGS);
-		return audio;
-	}
+// 	const fallback = formats.filter(f => f.ext === 'mp4' && f.vcodec?.startsWith('av') && !f.acodec);
+// 	if (!fallback.length) return undefined;
+// 	fallback.sort((a, b) => (b.width ?? 0) * (b.height ?? 1) - (a.width ?? 0) * (a.height ?? 1));
+// 	return fallback[0];
+// };
 
-	return pickByFormatId(formats, PREFERRED_AUDIO_ITAGS);
+function bestAudioStream(streams: Stream[]): Stream | undefined {
+	const candidate = pickByStreamId(streams, PREFERRED_AUDIO_ITAGS);
+	if (candidate && !candidate.videoOnly) return candidate;
+
+	const fallback = streams.filter(s => s.format === 'MP4A' && s.codec.startsWith('mp4a'));
+
+	if (!fallback.length) return undefined;
+
+	return fallback[0];
 };
 
 
@@ -74,8 +83,8 @@ export const load: PageLoad = async ({ params, fetch }) => {
 
 		return {
 			video,
-			videoFormat: bestVideoFormat(video.formats),
-			audioFormat: bestAudioFormat(video.formats),
+			videoFormat: bestVideoStream(video.videoOnlyStreams),
+			audioFormat: bestAudioStream(video.audioStreams),
 		};
 	} catch (error) {
 		return { error: error instanceof Error ? error.message : 'Unknown error' };

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import type { Format, Video } from '$lib/types';
+	import type { Format, RelatedItem, Video } from '$lib/types';
 
 	import { onMount } from 'svelte';
 	import thumbnailPlaceholder from '$lib/assets/thumbnail-placeholder.jpg';
@@ -10,27 +10,37 @@
 
 	export let data: PageData;
 
-	const videoSrc = data.videoFormat?.url;
-	const audioSrc = data.audioFormat?.url;
-	const videoHeight = data.videoFormat?.height;
-	const videoWidth = data.videoFormat?.width;
-	const poster = data.video?.thumbnail ?? thumbnailPlaceholder;
-	const duration = data.video?.duration_in_seconds ?? 0;
-	const videoTitle = data.video?.title ?? 'Video Title';
-	const viewCount = data.video?.view_count;
+	const videoSrc = data.video?.videoOnlyStreams?.[2]?.url ?? '';
+	const audioSrc = data.video?.audioStreams?.[0]?.url ?? '';
+	const videoHeight = data.video?.videoOnlyStreams?.[2]?.height ?? 1440;
+	const videoWidth = data.video?.videoOnlyStreams?.[2]?.width ?? 2560;
+	const poster = data.video?.thumbnails?.[data.video?.thumbnails?.length - 1]?.url ?? thumbnailPlaceholder;
+	const duration = data.video?.duration ?? 0;
+	const videoTitle = data.video?.name ?? 'Video Title';
+	const channelAvatar = data.video?.uploaderAvatars?.[2]?.url;
+	const channelName = data.video?.uploaderName ?? 'Channel Name';
+	const viewCount = data.video?.viewCount ?? 237951;
+	const videoDescription = data.video?.description?.content ?? 'No description available';
 
-	console.log('Video Format:', data.videoFormat);
+console.log('Video: ', data.video);
 
 	const formats: Format[] = [];
 
-	const videos: Video[] = Array.from({ length: 8 }, (_, i) => ({
-		id: `vid-${i}`, // unique key
-		title: videoTitle,
-		url: 'https://youtube.com',
-		thumbnail: poster,
-		duration_in_seconds: 600,
-		formats: formats,
-		view_count: viewCount ?? 0
+	const videos: RelatedItem[] = Array.from({ length: 8 }, (_, i) => ({
+		id: `vid-${i}`,
+		infoType: data.video?.relatedItems?.[i]?.infoType ?? 'STREAM',
+		url: data.video?.relatedItems?.[i]?.url ?? '',
+		name: data.video?.relatedItems?.[i]?.name ?? '',
+		thumbnails: data.video?.relatedItems?.[i]?.thumbnails ?? [],
+		streamType: data.video?.relatedItems?.[i]?.streamType ?? '',
+		textualUploadDate: data.video?.relatedItems?.[i]?.textualUploadDate ?? 'Date unknown',
+		viewCount: data.video?.relatedItems?.[i]?.viewCount ?? 1000,
+		duration: data.video?.relatedItems?.[i]?.duration ?? 600,
+		uploaderName: data.video?.relatedItems?.[i]?.uploaderName ?? '',
+		uploaderUrl: data.video?.relatedItems?.[i]?.uploaderUrl ?? '',
+		uploaderAvatars: data.video?.relatedItems?.[i]?.uploaderAvatars ?? [],
+		uploaderSubscriberCount: data.video?.relatedItems?.[i]?.uploaderSubscriberCount ?? 0,
+		shortFormContent: data.video?.relatedItems?.[i]?.shortFormContent ?? false
 	}));
 
 	let showPlayer = false;
@@ -46,7 +56,7 @@
 			{#if showPlayer}
 				<Player {videoSrc} {audioSrc} {videoHeight} {videoWidth} {poster} {duration} />
 			{/if}
-			<VideoDetail {videoTitle} {viewCount} />
+			<VideoDetail {videoTitle} {channelAvatar} {channelName} {viewCount} {videoDescription}/>
 		</div>
 	</section>
 	<aside class="mt-7.75 flex w-1/3 flex-col gap-5">
