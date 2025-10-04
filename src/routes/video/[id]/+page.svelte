@@ -4,7 +4,7 @@
 
 	import { onMount } from 'svelte';
 	import thumbnailPlaceholder from '$lib/assets/thumbnail-placeholder.jpg';
-	import Player from '$lib/components/player.svelte';
+	import VideoPlayer from '$lib/components/VideoPlayer.svelte';
 	import VideoDetail from '$lib/components/VideoDetail.svelte';
 	import VideoListings from '$lib/components/VideoListings.svelte';
 
@@ -22,7 +22,7 @@
 	const viewCount = data.video?.viewCount ?? 237951;
 	const videoDescription = data.video?.description?.content ?? 'No description available';
 
-console.log('Video: ', data.video);
+// console.log('Video: ', data.video);
 
 	const formats: Format[] = [];
 
@@ -54,7 +54,8 @@ console.log('Video: ', data.video);
 	<section class="flex w-2/3 flex-col items-start justify-start">
 		<div class="p-4 sm:p-6 lg:p-8">
 			{#if showPlayer}
-				<Player {videoSrc} {audioSrc} {videoHeight} {videoWidth} {poster} {duration} />
+				<!-- <Player {videoSrc} {audioSrc} {videoHeight} {videoWidth} {poster} {duration} /> -->
+				<VideoPlayer {videoSrc} {audioSrc} {poster} {videoHeight} {videoWidth} />
 			{/if}
 			<VideoDetail {videoTitle} {channelAvatar} {channelName} {viewCount} {videoDescription}/>
 		</div>

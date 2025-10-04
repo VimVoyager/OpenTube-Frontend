@@ -123,3 +123,90 @@ export interface Video {
 };
 
 export type SearchResult = Video[];
+
+export interface PlayerConfiguration {
+	streaming?: {
+		bufferingGoal?: number;
+		rebufferingGoal?: number;
+		bufferBehind?: number;
+	};
+	drm?: Record<string, unknown>;
+	manifest?: Record<string, unknown>;
+}
+
+export interface UIConfiguration {
+	overflowMenuButtons?: string[];
+	seekBarColors?: {
+		base?: string;
+		buffered?: string;
+		played?: string;
+	};
+	controlPanelElements?: string[];
+	addSeekBar?: boolean;
+	addBigPlayButton?: boolean;
+}
+
+export interface ErrorEvent extends Event {
+	detail: ShakaError;
+}
+
+export interface ShakaError {
+	code: number;
+	message: string;
+	severity: number;
+	category: number;
+	data: unknown[];
+}
+
+export interface ShakaPlayerConfiguration {
+	streaming?: {
+		bufferingGoal?: number;
+		rebufferingGoal?: number;
+		bufferBehind?: number;
+	};
+	drm?: Record<string, unknown>;
+	manifest?: Record<string, unknown>;
+}
+
+export interface ShakaUIConfiguration {
+	overflowMenuButtons?: string[];
+	seekBarColors?: {
+		base?: string;
+		buffered?: string;
+		played?: string;
+	};
+	controlPanelElements?: string[];
+	addSeekBar?: boolean;
+	addBigPlayButton?: boolean;
+}
+
+export interface ShakaErrorEvent extends Event {
+	detail: ShakaError;
+}
+
+export interface ShakaPlayerClass {
+	new (video?: HTMLMediaElement): ShakaPlayerInstance;
+	isBrowserSupported(): boolean;
+}
+
+export interface ShakaPlayerInstance {
+	attach(video: HTMLMediaElement): Promise<void>;
+	load(manifestUri: string, startTime?: number, mimeType?: string): Promise<void>;
+	configure(config: ShakaPlayerConfiguration): void;
+	destroy(): Promise<void>;
+	addEventListener(type: string, listener: (event: ShakaErrorEvent) => void): void;
+	removeEventListener(type: string, listener: (event: ShakaErrorEvent) => void): void;
+}
+
+export interface ShakaUIOverlayClass {
+	new (player: ShakaPlayerInstance, videoContainer: HTMLElement, video: HTMLMediaElement): ShakaUIOverlayInstance;
+}
+
+export interface ShakaUIOverlayInstance {
+	configure(config: ShakaUIConfiguration): void;
+	destroy(): Promise<void>;
+}
+
+export interface ShakaPolyfill {
+	installAll(): void;
+}
