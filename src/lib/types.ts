@@ -26,6 +26,33 @@ export interface Format {
 	filesize_in_bytes?: number;
 };
 
+export interface ItagItem {
+	mediaFormat: string;
+	id: number;
+	itagType: string;
+	avgBitrate: number;
+	sampleRate?: number;
+	audioChannels?: number;
+	resolutionString?: string;
+	fps: number;
+	bitrate: number;
+	width?: number;
+	height?: number;
+	initStart: number;
+	initEnd: number;
+	indexStart: number;
+	indexEnd: number;
+	quality?: string;
+	codec: string;
+	targetDurationSec: number;
+	approxDurationMs: number;
+	contentLength: number;
+	audioTrackId?: string;
+	audioTrackName?: string;
+	aduioLocale?: string;
+	averageBitrate: number;
+}
+
 export interface Stream {
 	id: string;
 	content: string;
@@ -37,6 +64,7 @@ export interface Stream {
 	fps: number;
 	quality: string;
 	codec: string;
+	itagItem: ItagItem;
 	videoOnly: boolean;
 	format: string;
 	url: string;
