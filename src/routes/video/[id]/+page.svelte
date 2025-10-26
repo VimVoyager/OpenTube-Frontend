@@ -18,17 +18,6 @@
 	const videoFormat = data.videoFormat;
 	const audioFormat = data.audioFormat;
 
-	// Debug logging - complete format objects
-  console.group('🔍 Stream Format Debugging');
-  console.log('Raw video format from backend:', JSON.stringify(videoFormat, null, 2));
-  console.log('Raw audio format from backend:', JSON.stringify(audioFormat, null, 2));
-  console.log('Video metadata from backend:', {
-    duration: data.video?.duration,
-    name: data.video?.name,
-    id: data.video?.id
-  });
-  console.groupEnd();
-
 	// Video stream props
 	const videoUrl = videoFormat?.url ?? '';
 	const videoCodec = videoFormat?.codec ?? 'avc1.42E01E';
@@ -147,24 +136,6 @@
           {audioIndexStart}
           {audioIndexEnd}
 				/>
-				<!-- <VideoPlayerMSN
-					{videoUrl}
-					{audioUrl}
-					{poster}
-					{duration}
-					{videoCodec}
-					{videoMimeType}
-					{videoInitStart}
-					{videoInitEnd}
-					{videoIndexStart}
-					{videoIndexEnd}
-					{audioCodec}
-					{audioMimeType}
-					{audioInitStart}
-					{audioInitEnd}
-					{audioIndexStart}
-					{audioIndexEnd}
-					/> -->
 			{/if}
 
 			{#if !hasError}

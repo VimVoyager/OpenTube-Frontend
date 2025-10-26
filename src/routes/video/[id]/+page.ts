@@ -82,7 +82,6 @@ function bestVideoStream(streams: Stream[]): Stream | undefined {
 	}
 
 	return undefined;
-
 }
 
 /**
@@ -124,9 +123,6 @@ export const load: PageLoad = async ({ params, fetch }) => {
 			getAllStreams(params.id, fetch)
 		]);
 
-		console.log('Fetched video streams:', videoStreams.length);
-		console.log('Fetched audio streams:', audioStreams.length);
-
 		// Select best streams
 		const videoStream = bestVideoStream(videoStreams);
 		const audioStream = bestAudioStream(audioStreams);
@@ -158,20 +154,15 @@ export const load: PageLoad = async ({ params, fetch }) => {
 			0;
 		const durationSeconds = durationMs / 1000;
 
-		console.log('Duration extracted:', {
-			approxDurationMs: durationMs,
-			durationSeconds: durationSeconds
-		});
-
-		// Enhance stream metadata - don't add mimeType here, let manifest generator infer it
+		// Enhance stream metadata
 		const videoFormat = videoStream ? {
 			...videoStream,
-			sampleRate: undefined // video doesn't have sample rate
+			sampleRate: undefined 
 		} : undefined;
 
 		const audioFormat = audioStream ? {
 			...audioStream,
-			sampleRate: 44100 // default for audio, can be overridden if provided
+			sampleRate: 44100 // default for audio
 		} : undefined;
 
 		return {
