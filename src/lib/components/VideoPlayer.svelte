@@ -48,8 +48,6 @@
 	let isLoading: boolean = true;
 	let manifestBlobUrl: string = '';
 
-	const PROXY_URL = 'http://localhost:8081';
-
 	onMount(async () => {
 		if (!browser) return;
 
@@ -78,7 +76,6 @@
 
 	async function initializePlayer(shaka: any) {
 		try {
-			// Initialize Shaka Player
 			player = new shaka.Player();
 			await player.attach(video);
 
@@ -101,20 +98,15 @@
 						try {
 							const url = new URL(uri);
 
-							// Only proxy googlevideo.com requests
+							//Proxy requests to googlevideo.com through local proxy
 							if (url.host.endsWith('.googlevideo.com')) {
-								console.log('🔄 Intercepting googlevideo.com request:', url.host);
+								console.log('Intercepting googlevideo.com request:', url.host);
 
 								const headers = request.headers;
-
-								// Save the original host as a query parameter
 								url.searchParams.set('host', url.host);
-
-								// Rewrite URL to go through our proxy
 
 								url.protocol = 'http:';
 								url.host = 'localhost:8081';
-								// Path stays the same (usually /videoplayback)
 
 								// Convert Range header to query parameter (this is the KEY!)
 								if (headers.Range) {
@@ -125,15 +117,15 @@
 								}
 
 								request.uris[0] = url.toString();
-								console.log('✅ Proxied request URL:', request.uris[0].substring(0, 100) + '...');
+								console.log('Proxied request URL:', request.uris[0].substring(0, 100) + '...');
 							}
 						} catch (error) {
-							console.error('❌ Error in request filter:', error);
+							console.error('Error in request filter:', error);
 						}
 					}
 				);
 
-			// Configure player
+			// Configure player settings
 			player.configure({
 				streaming: {
 					bufferingGoal: 30,
@@ -184,7 +176,6 @@
 			ui = new shaka.ui.Overlay(player, videoContainer, video);
 			ui.configure(uiConfig);
 
-			// Listen for errors
 			player.addEventListener('error', onErrorEvent);
 
 			// Generate and load DASH manifest
@@ -207,16 +198,6 @@
 		}
 
 		try {
-			console.group('🎬 VideoPlayer - Loading DASH Manifest');
-			console.log('Props received by VideoPlayer:');
-			console.log('- duration:', duration);
-			console.log('- videoUrl:', videoUrl ? 'present' : 'missing');
-			console.log('- audioUrl:', audioUrl ? 'present' : 'missing');
-			console.log('- videoFormat:', videoFormat);
-			console.log('- videoCodec:', videoCodec);
-			console.log('- audioFormat:', audioFormat);
-			console.log('- audioCodec:', audioCodec);
-
 			// Prepare stream metadata
 			const videoStream: StreamMetadata | undefined = videoUrl
 				? {
@@ -345,7 +326,9 @@
 	{/if}
 
 	<div bind:this={videoContainer} class="video-container">
-		<video bind:this={video} class="shaka-video" {poster} playsinline crossorigin="anonymous" />
+		<video bind:this={video} class="shaka-video" {poster} playsinline crossorigin="anonymous" >
+			<track kind="captions" />
+		</video>
 	</div>
 </div>
 
