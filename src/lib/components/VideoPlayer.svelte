@@ -268,18 +268,24 @@
 		// Provide user-friendly error messages
 		let message = 'An error occurred while playing the video.';
 
-		if (error.code === 1001) {
-			message = 'Network error. Please check your connection.';
-		} else if (error.code === 3016) {
-			message = 'Video format not supported by your browser.';
-		} else if (error.code === 4012) {
-			message = 'Unable to load video. The stream may have expired.';
-		} else if (error.code === 4006) {
-			message = 'Unable to load video manifest. The stream format may not be supported.';
-		} else if (error.message) {
-			message = error.message;
-		}
-
+		switch (error.code) {
+			case 1001: 
+				message = 'Network error. Please check your connection.';
+				break;
+			case 3016:
+				message = 'Video format not supported by your browser.';
+				break;
+			case 4012: 
+				message = 'Unable to load video. The stream may have expired.';
+				break;
+			case 4006: 
+				message = 'Unable to load video manifest. The stream format may not be supported.';
+				break;
+			default:
+				message = error.message;
+				break
+		}	
+		
 		errorMessage = message;
 		isLoading = false;
 	}
