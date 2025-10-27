@@ -17,6 +17,7 @@
 	// Extract video stream data
 	const videoFormat = data.videoFormat;
 	const audioFormat = data.audioFormat;
+	const details = data.details;
 
 	// Video stream props
 	const videoUrl = videoFormat?.url ?? '';
@@ -47,7 +48,7 @@
 
 	// Video metadata
 	const poster =
-		data.video?.thumbnails?.[data.video?.thumbnails?.length - 1]?.url ?? thumbnailPlaceholder;
+		details?.uploaderAvatars?.[details?.uploaderAvatars?.length - 1]?.url ?? thumbnailPlaceholder;
 	const duration = data.duration ?? 0;
 
 	// Log if duration is missing or zero
@@ -56,10 +57,10 @@
   }
 
 	const videoTitle = data.video?.name ?? 'Video Title';
-	const channelAvatar = data.video?.uploaderAvatars?.[2]?.url;
-	const channelName = data.video?.uploaderName ?? 'Channel Name';
-	const viewCount = data.video?.viewCount ?? 0;
-	const videoDescription = data.video?.description?.content ?? 'No description available';
+	const channelAvatar = details?.uploaderAvatars?.[2]?.url;
+	const channelName = details?.channelName ?? 'Channel Name';
+	const viewCount = details?.viewCount ?? 0;
+	const videoDescription = details?.description?.content ?? 'No description available';
 
 	// Check if we have valid streams
 	$: hasValidStreams = !!videoUrl || !!audioUrl;

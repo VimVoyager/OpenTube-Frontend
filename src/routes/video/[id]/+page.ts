@@ -1,6 +1,6 @@
 import type { PageLoad } from './$types';
 import type { Stream } from '$lib/types';
-import { getVideo } from '$lib/api/video';
+import { getVideoDetails } from '$lib/api/details';
 import { getAllStreams } from '$lib/api/streams';
 
 
@@ -118,8 +118,8 @@ function bestAudioStream(streams: Stream[]): Stream | undefined {
 export const load: PageLoad = async ({ params, fetch }) => {
 	try {
 		// Fetch video metadata and streams in parallel
-		const [video, { videoStreams, audioStreams }] = await Promise.all([
-			getVideo(params.id, fetch),
+		const [details, { videoStreams, audioStreams }] = await Promise.all([
+			getVideoDetails(params.id, fetch),
 			getAllStreams(params.id, fetch)
 		]);
 
@@ -166,7 +166,7 @@ export const load: PageLoad = async ({ params, fetch }) => {
 		} : undefined;
 
 		return {
-			video,
+			details,
 			videoStreams,
 			audioStreams,
 			videoFormat,
