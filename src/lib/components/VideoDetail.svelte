@@ -38,7 +38,7 @@
 					{formatViewCount(viewCount)} views
 				</h3>
 				<div class="mt-2 text-sm text-gray-500 dark:text-gray-400">
-					<p>{videoDescription}</p>
+					<p>{@html videoDescription}</p>
 				</div>
 			</div>
 		</div>

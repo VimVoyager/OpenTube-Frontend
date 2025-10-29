@@ -47,8 +47,7 @@
   const audioIndexEnd = audioFormat?.itagItem.indexEnd;
 
 	// Video metadata
-	const poster =
-		details?.uploaderAvatars?.[details?.uploaderAvatars?.length - 1]?.url ?? thumbnailPlaceholder;
+	const poster = thumbnailPlaceholder;
 	const duration = data.duration ?? 0;
 
 	// Log if duration is missing or zero
@@ -56,7 +55,7 @@
     console.warn('Video duration is missing or zero, this may cause playback issues');
   }
 
-	const videoTitle = data.video?.name ?? 'Video Title';
+	const videoTitle = data.details?.videoTitle ?? 'Video Title';
 	const channelAvatar = details?.uploaderAvatars?.[2]?.url;
 	const channelName = details?.channelName ?? 'Channel Name';
 	const viewCount = details?.viewCount ?? 0;

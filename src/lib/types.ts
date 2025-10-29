@@ -53,16 +53,12 @@ export interface ItagItem {
 	averageBitrate: number;
 }
 
-export interface Avatar {
-	url: string;
-	height: number;
-	width: number;
-	estimatedResolutionLevel: string;
-}
-
 export interface Details {
 	uploaderAvatars: Avatar[];
-	description: string;
+	videoTitle: string;
+	description: {
+		content: string;
+	};
 	uploadDate: string;
 	channelSubscriberCount: number;
 	dislikeCount: number;

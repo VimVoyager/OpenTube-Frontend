@@ -9,7 +9,7 @@ const API_BASE_URL = env.PUBLIC_API_URL + '/api/v1';
 export async function getVideoDetails(
     id: string,
     fetchFn?: typeof globalThis.fetch
-): Promise<Details[]> {
+): Promise<Details> {
     const fetcher = fetchFn ?? globalThis.fetch;
 
     try {
