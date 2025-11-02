@@ -2,7 +2,23 @@ import type { PageLoad } from './$types';
 import type { Stream } from '$lib/types';
 import { getVideoDetails } from '$lib/api/details';
 import { getAllStreams } from '$lib/api/streams';
+import {
+	adaptPlayerConfig,
+	adaptVideoMetadata,
+	calculateDuration,
+	type VideoPlayerConfig,
+	type VideoMetadata
+} from '$lib/adapters';
+import thumbnailPlaceholder from '$lib/assets/thumbnail-placeholder.jpg';
 
+/**
+ * Page data structure
+ */
+export interface PageData {
+	playerConfig: VideoPlayerConfig;
+	metadata: VideoMetadata;
+	error?: string;
+}
 
 const PREFERRED_VIDEO_ITAGS = [
 	'264',	// 1440p MP4 AVC
@@ -53,12 +69,12 @@ function pickByStreamId<T extends Stream>(
 /**
  * Select best video stream based on priority and quality
  */
-function bestVideoStream(streams: Stream[]): Stream | undefined {
-	// Try to find preferred itag
+function selectBestVideoStream(streams: Stream[]): Stream | undefined {
+	// Try preferred itag
 	const candidate = pickByStreamId(streams, PREFERRED_VIDEO_ITAGS);
 	if (candidate && candidate.videoOnly) return candidate;
 
-	// Fallback: Find best MP4 AVC stream by resolution
+	// Fallback: Best MP4 AVC stream by resolution
 	const mp4Streams = streams.filter(
 		s => s.videoOnly &&
 			(s.format === 'MPEG_4') &&
@@ -87,12 +103,12 @@ function bestVideoStream(streams: Stream[]): Stream | undefined {
 /**
  * Select best audio stream based on priority and quality 
  */
-function bestAudioStream(streams: Stream[]): Stream | undefined {
-	// Try to find preferred itag
+function selectBestAudioStream(streams: Stream[]): Stream | undefined {
+	// Try preferred itag
 	const candidate = pickByStreamId(streams, PREFERRED_AUDIO_ITAGS);
 	if (candidate && !candidate.videoOnly) return candidate;
 
-	// Fallback: Find best M4A AAC stream by bitrate
+	// Fallback: Best M4A AAC stream by bitrate
 	const m4aStreams = streams.filter(
 		s => !s.videoOnly &&
 			(s.format === 'M4A' || s.format === 'MP4A') &&
@@ -104,7 +120,7 @@ function bestAudioStream(streams: Stream[]): Stream | undefined {
 		return m4aStreams[0];
 	}
 
-	// Last resort: any audio-only stream with highest bitrate
+	// Last resort: Highest bitrate audio-only stream
 	const audioOnlyStreams = streams.filter(s => !s.videoOnly);
 	if (audioOnlyStreams.length > 0) {
 		audioOnlyStreams.sort((a, b) => (b.bitrate ?? 0) - (a.bitrate ?? 0));
@@ -114,8 +130,10 @@ function bestAudioStream(streams: Stream[]): Stream | undefined {
 	return undefined;
 }
 
-
-export const load: PageLoad = async ({ params, fetch }) => {
+/**
+ * Page load function - fetches and transforms data
+ */
+export const load: PageLoad = async ({ params, fetch }): Promise<PageData> => {
 	try {
 		// Fetch video metadata and streams in parallel
 		const [details, { videoStreams, audioStreams }] = await Promise.all([
@@ -124,9 +142,10 @@ export const load: PageLoad = async ({ params, fetch }) => {
 		]);
 
 		// Select best streams
-		const videoStream = bestVideoStream(videoStreams);
-		const audioStream = bestAudioStream(audioStreams);
+		const videoStream = selectBestVideoStream(videoStreams);
+		const audioStream = selectBestAudioStream(audioStreams);
 
+		// Log selected streams for debugging
 		if (!videoStream) {
 			console.warn('No suitable video stream found');
 		} else {
@@ -148,34 +167,52 @@ export const load: PageLoad = async ({ params, fetch }) => {
 			});
 		}
 
-		// Extract duration from itagItem (it's in milliseconds as approxDurationMs)
-		const durationMs = videoStream?.itagItem?.approxDurationMs ||
-			audioStream?.itagItem?.approxDurationMs ||
-			0;
-		const durationSeconds = durationMs / 1000;
+		// Calculate duration
+		const duration = calculateDuration(videoStream, audioStream);
 
-		// Enhance stream metadata
-		const videoFormat = videoStream ? {
-			...videoStream,
-			sampleRate: undefined 
-		} : undefined;
+		if (!duration || duration === 0) {
+			console.warn('Video duration is missing or zero, this may cause playback issues.');
+		}
 
-		const audioFormat = audioStream ? {
-			...audioStream,
-			sampleRate: 44100 // default for audio
-		} : undefined;
+		// Transform data using adapters
+		const playerConfig = adaptPlayerConfig(
+			videoStream,
+			audioStream,
+			duration,
+			thumbnailPlaceholder
+		);
+
+		const metadata = adaptVideoMetadata(
+			details,
+			thumbnailPlaceholder // fallback avatar
+		);
 
 		return {
-			details,
-			videoStreams,
-			audioStreams,
-			videoFormat,
-			audioFormat,
-			duration: durationSeconds
+			playerConfig,
+			metadata
 		};
+		
 	} catch (error) {
 		console.error('Error loading video data:', error);
+
 		return {
+			playerConfig: {
+				videoStream: null,
+				audioStream: null,
+				duration: 0,
+				poster: thumbnailPlaceholder
+			},
+			metadata: {
+				title: 'Error Loading Video',
+				description: 'Failed to load video information',
+				channelName: 'Unknown',
+				channelAvatar: null,
+				viewCount: 0,
+				uploadDate: '',
+				likeCount: 0,
+				dislikeCount: 0,
+				subscriberCount: 0
+			},
 			error: error instanceof Error ? error.message : 'Unknown error loading video'
 		};
 	}
