@@ -7,37 +7,9 @@
 		type DashManifestConfig,
 		type StreamMetadata
 	} from '$lib/utils/dashManifestGenerator';
+	import type { VideoPlayerConfig } from '$lib/adapters';
 
-	// Props
-	export let videoUrl: string = '';
-	export let audioUrl: string = '';
-	export let poster: string = '';
-	export let duration: number = 0;
-
-	// Video stream metadata
-	export let videoCodec: string = 'avc1.42E01E';
-	export let videoMimeType: string = 'video/mp4';
-	export let videoWidth: number = 1920;
-	export let videoHeight: number = 1080;
-	export let videoBandwidth: number = 1000000;
-	export let videoFrameRate: number = 30;
-	export let videoFormat: string = 'MPEG_4';
-	export let videoInitStart: number | undefined = undefined;
-	export let videoInitEnd: number | undefined = undefined;
-	export let videoIndexStart: number | undefined = undefined;
-	export let videoIndexEnd: number | undefined = undefined;
-
-	// Audio stream metadata
-	export let audioCodec: string = 'mp4a.40.2';
-	export let audioMimeType: string = 'audio/mp4';
-	export let audioBandwidth: number = 128000;
-	export let audioSampleRate: number = 44100;
-	export let audioChannels: number = 2;
-	export let audioFormat: string = 'M4A';
-	export let audioInitStart: number | undefined = undefined;
-	export let audioInitEnd: number | undefined = undefined;
-	export let audioIndexStart: number | undefined = undefined;
-	export let audioIndexEnd: number | undefined = undefined;
+	export let config: VideoPlayerConfig;
 
 	// Component state
 	let videoContainer: HTMLDivElement;
@@ -59,13 +31,13 @@
 
 			// Check if browser supports Shaka Player
 			if (!shaka.Player.isBrowserSupported()) {
-				errorMessage = 'Browser not supported. Please use a modern browser with DASH support.';
+				errorMessage = 'Browser not supported. Please use a modern browser.';
 				console.error(errorMessage);
 				isLoading = false;
 				return;
 			}
 
-			// Generate DASH manifest client-side
+			// Initialize the player
 			await initializePlayer(shaka);
 		} catch (error) {
 			console.error('Error initializing video player:', error);
@@ -108,11 +80,11 @@
 								url.protocol = 'http:';
 								url.host = 'localhost:8081';
 
-								// Convert Range header to query parameter (this is the KEY!)
+								// Convert Range header to query parameter 
 								if (headers.Range) {
 									const rangeValue = headers.Range.split('=')[1]; // "bytes=0-1000" -> "0-1000"
 									url.searchParams.set('range', rangeValue);
-									console.log('📦 Converted Range header to query param:', rangeValue);
+									console.log('Converted Range header to query param:', rangeValue);
 									request.headers = {}; // Remove ALL headers to avoid CORS preflight
 								}
 
@@ -193,42 +165,42 @@
 			throw new Error('Player not initialized');
 		}
 
-		if (!videoUrl && !audioUrl) {
-			throw new Error('No video or audio URL provided');
+		if (!config.videoStream && !config.audioStream) {
+			throw new Error('No video or audio stream provided');
 		}
 
 		try {
 			// Prepare stream metadata
-			const videoStream: StreamMetadata | undefined = videoUrl
+			const videoStream: StreamMetadata | undefined = config.videoStream
 				? {
-						url: videoUrl,
-						codec: videoCodec,
-						mimeType: videoMimeType,
-						bandwidth: videoBandwidth,
-						width: videoWidth,
-						height: videoHeight,
-						frameRate: videoFrameRate,
-						format: videoFormat,
-						initStart: videoInitStart,
-						initEnd: videoInitEnd,
-						indexStart: videoIndexStart,
-						indexEnd: videoIndexEnd
+						url: config.videoStream?.url,
+						codec: config.videoStream?.codec,
+						mimeType: config.videoStream?.mimeType,
+						bandwidth: config.videoStream?.bandwidth,
+						width: config.videoStream?.width,
+						height: config.videoStream?.height,
+						frameRate: config.videoStream?.frameRate,
+						format: config.videoStream?.format,
+						initStart: config.videoStream?.initStart,
+						initEnd: config.videoStream?.initEnd,
+						indexStart: config.videoStream?.indexStart,
+						indexEnd: config.videoStream?.indexEnd
 					}
 				: undefined;
 
-			const audioStream: StreamMetadata | undefined = audioUrl
+			const audioStream: StreamMetadata | undefined = config.audioStream
 				? {
-						url: audioUrl,
-						codec: audioCodec,
-						mimeType: audioMimeType,
-						bandwidth: audioBandwidth,
-						audioSampleRate: audioSampleRate,
-						audioChannels: audioChannels,
-						format: audioFormat,
-						initStart: audioInitStart,
-						initEnd: audioInitEnd,
-						indexStart: audioIndexStart,
-						indexEnd: audioIndexEnd
+						url: config.audioStream?.url,
+						codec: config.audioStream?.codec,
+						mimeType: config.audioStream?.mimeType,
+						bandwidth: config.audioStream?.bandwidth,
+						audioSampleRate: config.audioStream?.sampleRate,
+						audioChannels: config.audioStream?.channels,
+						format: config.audioStream?.format,
+						initStart: config.audioStream?.initStart,
+						initEnd: config.audioStream?.initEnd,
+						indexStart: config.audioStream?.indexStart,
+						indexEnd: config.audioStream?.indexEnd
 					}
 				: undefined;
 
@@ -236,7 +208,7 @@
 			const manifestConfig: DashManifestConfig = {
 				videoStream,
 				audioStream,
-				duration: duration || 0
+				duration: config.duration
 			};
 
 			console.log('Generating DASH manifest with config:', manifestConfig);
@@ -247,7 +219,6 @@
 			console.log('Loading DASH manifest from blob URL:', manifestBlobUrl);
 
 			// Load the manifest into Shaka Player
-			// The browser will make direct requests to Google's servers using the URLs in the manifest
 			await player.load(manifestBlobUrl);
 
 			console.log('DASH manifest loaded successfully');
@@ -310,9 +281,14 @@
 			manifestBlobUrl = '';
 		}
 	});
+
+	// Compute aspect ratio from video stream or 16:9 default
+	$: aspectRatio = config.videoStream
+		? `${config.videoStream.width}/${config.videoStream.height}`
+		: '16/9';
 </script>
 
-<div class="player-wrapper" style="aspect-ratio: {videoWidth}/{videoHeight};">
+<div class="player-wrapper" style="aspect-ratio: {aspectRatio};">
 	{#if isLoading}
 		<div class="loading-overlay">
 			<div class="loading-spinner"></div>
@@ -332,7 +308,7 @@
 	{/if}
 
 	<div bind:this={videoContainer} class="video-container">
-		<video bind:this={video} class="shaka-video" {poster} playsinline crossorigin="anonymous" >
+		<video bind:this={video} class="shaka-video" poster={config.poster} playsinline crossorigin="anonymous" >
 			<track kind="captions" />
 		</video>
 	</div>
