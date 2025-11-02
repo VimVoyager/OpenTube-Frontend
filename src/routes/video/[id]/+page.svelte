@@ -3,66 +3,26 @@
 	import type { RelatedItem } from '$lib/types';
 
 	import { onMount } from 'svelte';
-	import thumbnailPlaceholder from '$lib/assets/thumbnail-placeholder.jpg';
 	import VideoPlayer from '$lib/components/VideoPlayer.svelte';
 	import VideoDetail from '$lib/components/VideoDetail.svelte';
 	import VideoListings from '$lib/components/VideoListings.svelte';
 
 	export let data: PageData;
 
-	// Handle error state
-	$: hasError = !!data.error;
-	$: errorMessage = data.error ?? '';
+	// Destructure for clarity (use safe casts if PageData doesn't include these fields)
+	const playerConfig = (data as any)?.playerConfig ?? {};
+	const metadata = (data as any)?.metadata ?? null;
+	const error = (data as any)?.error ?? null;
 
-	// Extract video stream data
-	const videoFormat = data.videoFormat;
-	const audioFormat = data.audioFormat;
-	const details = data.details;
+	// Computed states
+	$: hasError = !!error;
+	$: hasValidStreams = !!(playerConfig.videoStream || playerConfig.audioStream);
 
-	// Video stream props
-	const videoUrl = videoFormat?.url ?? '';
-	const videoCodec = videoFormat?.codec ?? 'avc1.42E01E';
-	const videoMimeType = 'video/mp4';
-	const videoWidth = videoFormat?.width ?? 1920;
-	const videoHeight = videoFormat?.height ?? 1080;
-	const videoBandwidth = videoFormat?.bitrate ?? 1000000;
-	const videoFrameRate = videoFormat?.fps ?? 30;
-	const videoFormatStr = videoFormat?.format ?? 'MPEG_4';
-  const videoInitStart = videoFormat?.itagItem.initStart;
-  const videoInitEnd = videoFormat?.itagItem.initEnd;
-  const videoIndexStart = videoFormat?.itagItem.indexStart;
-  const videoIndexEnd = videoFormat?.itagItem.indexEnd;
-
-	// Audio stream props
-	const audioUrl = audioFormat?.url ?? '';
-	const audioCodec = audioFormat?.codec ?? 'mp4a.40.2';
-	const audioMimeType = 'audio/mp4';
-	const audioBandwidth = audioFormat?.bitrate ?? 128000;
-	const audioSampleRate = audioFormat?.itagItem.sampleRate ?? 44100;
-	const audioChannels = audioFormat?.itagItem.audioChannels ?? 2; // Default to stereo
-	const audioFormatStr = audioFormat?.format ?? 'M4A';
-  const audioInitStart = audioFormat?.itagItem.initStart;
-  const audioInitEnd = audioFormat?.itagItem.initEnd;
-  const audioIndexStart = audioFormat?.itagItem.indexStart;
-  const audioIndexEnd = audioFormat?.itagItem.indexEnd;
-
-	// Video metadata
-	const poster = thumbnailPlaceholder;
-	const duration = data.duration ?? 0;
-
-	// Log if duration is missing or zero
-  if (!duration || duration === 0) {
-    console.warn('Video duration is missing or zero, this may cause playback issues');
-  }
-
-	const videoTitle = data.details?.videoTitle ?? 'Video Title';
-	const channelAvatar = details?.uploaderAvatars?.[2]?.url;
-	const channelName = details?.channelName ?? 'Channel Name';
-	const viewCount = details?.viewCount ?? 0;
-	const videoDescription = details?.description?.content ?? 'No description available';
-
-	// Check if we have valid streams
-	$: hasValidStreams = !!videoUrl || !!audioUrl;
+	// Delay player initialisation until mounted (for Shaka Player)
+	let showPlayer = false;
+	onMount(() => {
+		showPlayer = true;
+	});
 
 	// Related videos
 	const videos: RelatedItem[] = Array.from({ length: 8 }, (_, i) => ({
@@ -81,12 +41,6 @@
 		uploaderSubscriberCount: data.video?.relatedItems?.[i]?.uploaderSubscriberCount ?? 0,
 		shortFormContent: data.video?.relatedItems?.[i]?.shortFormContent ?? false
 	}));
-
-	let showPlayer = false;
-
-	onMount(() => {
-		showPlayer = true;
-	});
 </script>
 
 <div class="mt-4 flex h-screen w-full">
@@ -96,7 +50,7 @@
 				<div class="error-container">
 					<div class="error-icon">⚠️</div>
 					<h2 class="error-title">Failed to Load Video</h2>
-					<p class="error-message">{errorMessage}</p>
+					<p class="error-message">{error}</p>
 					<button class="retry-btn" on:click={() => window.location.reload()}> Retry </button>
 				</div>
 			{:else if !hasValidStreams}
@@ -109,37 +63,11 @@
 					<button class="retry-btn" on:click={() => window.location.reload()}> Retry </button>
 				</div>
 			{:else if showPlayer}
-				<VideoPlayer
-					{videoUrl}
-					{audioUrl}
-					{poster}
-					{duration}
-					{videoCodec}
-					{videoMimeType}
-					{videoWidth}
-					{videoHeight}
-					{videoBandwidth}
-					{videoFrameRate}
-					videoFormat={videoFormatStr}
-          {videoInitStart}
-          {videoInitEnd}
-          {videoIndexStart}
-          {videoIndexEnd}
-					{audioCodec}
-					{audioMimeType}
-					{audioBandwidth}
-					{audioSampleRate}
-					{audioChannels}
-					audioFormat={audioFormatStr}
-          {audioInitStart}
-          {audioInitEnd}
-          {audioIndexStart}
-          {audioIndexEnd}
-				/>
+				<VideoPlayer config={playerConfig}/>
 			{/if}
 
 			{#if !hasError}
-				<VideoDetail {videoTitle} {channelAvatar} {channelName} {viewCount} {videoDescription} />
+				<VideoDetail {metadata} />
 			{/if}
 		</div>
 	</section>
