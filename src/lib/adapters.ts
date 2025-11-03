@@ -12,7 +12,7 @@ import type { Details, Stream } from '$lib/types';
  * Video player configuration derived from selected streams
  */
 export interface VideoPlayerConfig {
-    videoStream: {
+    videoStream: Array<{
 		url: string;
 		codec: string;
 		mimeType: string;
@@ -25,7 +25,7 @@ export interface VideoPlayerConfig {
 		initEnd?: number;
 		indexStart?: number;
 		indexEnd?: number;
-	} | null;
+	}> | null;
 	audioStream: {
 		url: string;
 		codec: string;
@@ -62,26 +62,27 @@ export interface VideoMetadata {
  * Adapt video and audio streams into player configuration
  */
 export function adaptPlayerConfig(
-	videoStream: Stream | undefined,
+	videoStreams: Stream[] | undefined,
 	audioStream: Stream | undefined,
 	duration: number,
 	posterUrl: string
 ): VideoPlayerConfig {
 	return {
-		videoStream: videoStream ? {
-			url: videoStream.url,
-			codec: videoStream.codec || 'avc1.42E01E',
+		videoStream: videoStreams && videoStreams.length > 0 
+		? videoStreams.map(stream => ({
+			url: stream.url,
+			codec: stream.codec || 'avc1.42E01E',
 			mimeType: 'video/mp4',
-			width: videoStream.width || 1920,
-			height: videoStream.height || 1080,
-			bandwidth: videoStream.bitrate || 1000000,
-			frameRate: videoStream.fps || 30,
-			format: videoStream.format || 'MPEG_4',
-			initStart: videoStream.itagItem?.initStart,
-			initEnd: videoStream.itagItem?.initEnd,
-			indexStart: videoStream.itagItem?.indexStart,
-			indexEnd: videoStream.itagItem?.indexEnd,
-		} : null,
+			width: stream.width || 1920,
+			height: stream.height || 1080,
+			bandwidth: stream.bitrate || 1000000,
+			frameRate: stream.fps || 30,
+			format: stream.format || 'MPEG_4',
+			initStart: stream.itagItem?.initStart,
+			initEnd: stream.itagItem?.initEnd,
+			indexStart: stream.itagItem?.indexStart,
+			indexEnd: stream.itagItem?.indexEnd,
+		})) : null,
 		audioStream: audioStream ? {
 			url: audioStream.url,
 			codec: audioStream.codec || 'mp4a.40.2',
@@ -128,11 +129,11 @@ export function adaptVideoMetadata(
  * Calculate video duration from stream metadata
  */
 export function calculateDuration(
-	videoStream: Stream | undefined,
+	videoStreams: Stream[] | undefined,
 	audioStream: Stream | undefined
 ): number {
 	const durationMs = 
-		videoStream?.itagItem?.approxDurationMs ||
+		videoStreams?.[0]?.itagItem?.approxDurationMs ||
 		audioStream?.itagItem?.approxDurationMs ||
 		0;
 	

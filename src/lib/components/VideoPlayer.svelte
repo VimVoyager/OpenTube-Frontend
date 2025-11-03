@@ -171,21 +171,21 @@
 
 		try {
 			// Prepare stream metadata
-			const videoStream: StreamMetadata | undefined = config.videoStream
-				? {
-						url: config.videoStream?.url,
-						codec: config.videoStream?.codec,
-						mimeType: config.videoStream?.mimeType,
-						bandwidth: config.videoStream?.bandwidth,
-						width: config.videoStream?.width,
-						height: config.videoStream?.height,
-						frameRate: config.videoStream?.frameRate,
-						format: config.videoStream?.format,
-						initStart: config.videoStream?.initStart,
-						initEnd: config.videoStream?.initEnd,
-						indexStart: config.videoStream?.indexStart,
-						indexEnd: config.videoStream?.indexEnd
-					}
+			const videoStreams: StreamMetadata[] | undefined = config.videoStream
+				? config.videoStream.map(stream => ({
+						url: stream?.url,
+						codec: stream?.codec,
+						mimeType: stream?.mimeType,
+						bandwidth: stream?.bandwidth,
+						width: stream?.width,
+						height: stream?.height,
+						frameRate: stream?.frameRate,
+						format: stream?.format,
+						initStart: stream?.initStart,
+						initEnd: stream?.initEnd,
+						indexStart: stream?.indexStart,
+						indexEnd: stream?.indexEnd
+					}))
 				: undefined;
 
 			const audioStream: StreamMetadata | undefined = config.audioStream
@@ -206,7 +206,7 @@
 
 			// Generate DASH manifest configuration
 			const manifestConfig: DashManifestConfig = {
-				videoStream,
+				videoStreams,
 				audioStream,
 				duration: config.duration
 			};
@@ -283,8 +283,8 @@
 	});
 
 	// Compute aspect ratio from video stream or 16:9 default
-	$: aspectRatio = config.videoStream
-		? `${config.videoStream.width}/${config.videoStream.height}`
+	$: aspectRatio = config.videoStream && config.videoStream.length > 0
+		? `${config.videoStream[0].width}/${config.videoStream[0].height}`
 		: '16/9';
 </script>
 

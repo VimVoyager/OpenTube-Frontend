@@ -21,9 +21,9 @@ export interface StreamMetadata {
 }
 
 export interface DashManifestConfig {
-    videoStream?: StreamMetadata;
+    videoStreams?: StreamMetadata[];
     audioStream?: StreamMetadata;
-    duration: number; // in seconds
+    duration: number;
 }
 
 /**
@@ -103,62 +103,62 @@ function inferMimeType(format?: string, codec?: string, isVideo?: boolean): stri
             return 'audio/webm';
         }
     }
-        // Final fallback
-        return isVideo ? 'video/mp4' : 'audio/mp4';
+    // Final fallback
+    return isVideo ? 'video/mp4' : 'audio/mp4';
+}
+
+/**
+ * Converts duration in seconds to ISO 8601 duration format
+ */
+function formatDuration(seconds: number): string {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = Math.floor(seconds % 60);
+    const ms = Math.round((seconds % 1) * 1000);
+
+    let duration = 'PT';
+    if (hours > 0) duration += `${hours}H`;
+    if (minutes > 0) duration += `${minutes}M`;
+    if (secs > 0 || ms > 0) {
+        if (ms > 0) {
+            duration += `${secs}.${ms.toString().padStart(3, '0')}S`;
+        } else {
+            duration += `${secs}S`;
+        }
     }
 
-    /**
-     * Converts duration in seconds to ISO 8601 duration format
-     */
-    function formatDuration(seconds: number): string {
-        const hours = Math.floor(seconds / 3600);
-        const minutes = Math.floor((seconds % 3600) / 60);
-        const secs = Math.floor(seconds % 60);
-        const ms = Math.round((seconds % 1) * 1000);
+    return duration === 'PT' ? 'PT0S' : duration;
+}
 
-        let duration = 'PT';
-        if (hours > 0) duration += `${hours}H`;
-        if (minutes > 0) duration += `${minutes}M`;
-        if (secs > 0 || ms > 0) {
-            if (ms > 0) {
-                duration += `${secs}.${ms.toString().padStart(3, '0')}S`;
-            } else {
-                duration += `${secs}S`;
-            }
-        }
+/**
+ * Escapes XML special characters
+ */
+function escapeXml(unsafe: string): string {
+    return unsafe
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&apos;');
+}
 
-        return duration === 'PT' ? 'PT0S' : duration;
+/**
+ * Generates a DASH MPD XML manifest with SegmentBase for byte-range requests
+ */
+export function generateDashManifest(config: DashManifestConfig): string {
+    const { videoStreams, audioStream, duration } = config;
+
+    if (!videoStreams || videoStreams.length === 0 && !audioStream) {
+        throw new Error('At least one stream (video or audio) must be provided');
     }
 
-    /**
-     * Escapes XML special characters
-     */
-    function escapeXml(unsafe: string): string {
-        return unsafe
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&apos;');
+    if (!duration || duration === 0) {
+        console.warn('Duration is 0 or undefined, this will likely cause playback issues');
     }
 
-    /**
-     * Generates a DASH MPD XML manifest with SegmentBase for byte-range requests
-     */
-    export function generateDashManifest(config: DashManifestConfig): string {
-        const { videoStream, audioStream, duration } = config;
+    const durationStr = formatDuration(duration);
 
-        if (!videoStream && !audioStream) {
-            throw new Error('At least one stream (video or audio) must be provided');
-        }
-
-        if (!duration || duration === 0) {
-            console.warn('Duration is 0 or undefined, this will likely cause playback issues');
-        }
-
-        const durationStr = formatDuration(duration);
-
-        let mpd = `<?xml version="1.0" encoding="UTF-8"?>
+    let mpd = `<?xml version="1.0" encoding="UTF-8"?>
         <MPD xmlns="urn:mpeg:dash:schema:mpd:2011" 
             type="static"
             mediaPresentationDuration="${durationStr}"
@@ -167,10 +167,22 @@ function inferMimeType(format?: string, codec?: string, isVideo?: boolean): stri
         <Period duration="${durationStr}">
         `;
 
-        // Add video adaptation set
-        if (videoStream) {
-            const videoCodec = normalizeDashCodec(videoStream.codec);
-            const mimeType = inferMimeType(videoStream.format, videoStream.codec, true);
+    // Add video adaptation set
+    if (videoStreams && videoStreams.length > 0) {
+        const firstStream = videoStreams[0];
+        const mimeType = inferMimeType(firstStream.format, firstStream.codec, true);
+        // const videoCodec = normalizeDashCodec(firstStream.codec);
+
+        // Start the AdaptationSet
+        mpd += `    <AdaptationSet 
+        id="0" 
+        contentType="video" 
+        mimeType="${escapeXml(mimeType)}"
+        subsegmentAlignment="true"
+        startWithSAP="1">
+`;
+        videoStreams.forEach((videoStream, index) => {
+            const streamCodec = normalizeDashCodec(videoStream.codec);
             const bandwidth = videoStream.bandwidth || 1000000;
             const width = videoStream.width || 1920;
             const height = videoStream.height || 1080;
@@ -180,20 +192,10 @@ function inferMimeType(format?: string, codec?: string, isVideo?: boolean): stri
             const hasInitRange = typeof videoStream.initStart === 'number' && typeof videoStream.initEnd === 'number';
             const hasIndexRange = typeof videoStream.indexStart === 'number' && typeof videoStream.indexEnd === 'number';
 
-            mpd += `    <AdaptationSet 
-        id="0" 
-        contentType="video" 
-        mimeType="${escapeXml(mimeType)}"
-        codecs="${escapeXml(videoCodec)}"
-        width="${width}"
-        height="${height}"
-        frameRate="${frameRate}"
-        subsegmentAlignment="true"
-        startWithSAP="1">
-      <Representation 
-          id="video-1" 
+            mpd += `    <Representation 
+          id="video-${index + 1}" 
           bandwidth="${bandwidth}"
-          codecs="${escapeXml(videoCodec)}"
+          codecs="${escapeXml(streamCodec)}"
           width="${width}"
           height="${height}"
           frameRate="${frameRate}">
@@ -210,23 +212,26 @@ function inferMimeType(format?: string, codec?: string, isVideo?: boolean): stri
             }
 
             mpd += `      </Representation>
-    </AdaptationSet>
 `;
-        }
+        });
 
-        // Add audio adaptation set
-        if (audioStream) {
-            const audioCodec = normalizeDashCodec(audioStream.codec);
-            const mimeType = inferMimeType(audioStream.format, audioStream.codec, false);
-            const bandwidth = audioStream.bandwidth || 128000;
-            const sampleRate = audioStream.audioSampleRate || 44100;
-            const channels = audioStream.audioChannels || 2;
+        mpd += `      </AdaptationSet> 
+`;
+    }
 
-            // Check if we have byte range information
-            const hasInitRange = typeof audioStream.initStart === 'number' && typeof audioStream.initEnd === 'number';
-            const hasIndexRange = typeof audioStream.indexStart === 'number' && typeof audioStream.indexEnd === 'number';
+    // Add audio adaptation set
+    if (audioStream) {
+        const audioCodec = normalizeDashCodec(audioStream.codec);
+        const mimeType = inferMimeType(audioStream.format, audioStream.codec, false);
+        const bandwidth = audioStream.bandwidth || 128000;
+        const sampleRate = audioStream.audioSampleRate || 44100;
+        const channels = audioStream.audioChannels || 2;
 
-            mpd += `    <AdaptationSet 
+        // Check if we have byte range information
+        const hasInitRange = typeof audioStream.initStart === 'number' && typeof audioStream.initEnd === 'number';
+        const hasIndexRange = typeof audioStream.indexStart === 'number' && typeof audioStream.indexEnd === 'number';
+
+        mpd += `    <AdaptationSet 
         id="1" 
         contentType="audio" 
         mimeType="${escapeXml(mimeType)}"
@@ -245,48 +250,48 @@ function inferMimeType(format?: string, codec?: string, isVideo?: boolean): stri
         <BaseURL>${escapeXml(audioStream.url)}</BaseURL>
 `;
 
-            if (hasInitRange && hasIndexRange) {
-                const initRange = `${audioStream.initStart}-${audioStream.initEnd}`;
-                const indexRange = `${audioStream.indexStart}-${audioStream.indexEnd}`;
-                mpd += `        <SegmentBase indexRange="${indexRange}">
+        if (hasInitRange && hasIndexRange) {
+            const initRange = `${audioStream.initStart}-${audioStream.initEnd}`;
+            const indexRange = `${audioStream.indexStart}-${audioStream.indexEnd}`;
+            mpd += `        <SegmentBase indexRange="${indexRange}">
           <Initialization range="${initRange}"/>
         </SegmentBase>
 `;
-            }
+        }
 
-            mpd += `      </Representation>
+        mpd += `      </Representation>
     </AdaptationSet>
 `;
-        }
+    }
 
-        mpd += `  </Period>
+    mpd += `  </Period>
 </MPD>`;
 
-        return mpd;
-    }
+    return mpd;
+}
 
-    /**
-     * Creates a Blob URL from the DASH manifest
-     */
-    export function createDashManifestBlobUrl(manifest: string): string {
-        const blob = new Blob([manifest], { type: 'application/dash+xml' });
-        return URL.createObjectURL(blob);
-    }
+/**
+ * Creates a Blob URL from the DASH manifest
+ */
+export function createDashManifestBlobUrl(manifest: string): string {
+    const blob = new Blob([manifest], { type: 'application/dash+xml' });
+    return URL.createObjectURL(blob);
+}
 
-    /**
-     * Revokes a previously created blob URL
-     */
-    export function revokeDashManifestBlobUrl(url: string): void {
-        if (url.startsWith('blob:')) {
-            URL.revokeObjectURL(url);
-        }
+/**
+ * Revokes a previously created blob URL
+ */
+export function revokeDashManifestBlobUrl(url: string): void {
+    if (url.startsWith('blob:')) {
+        URL.revokeObjectURL(url);
     }
+}
 
-    /**
-     * Convenience function that generates manifest and creates blob URL
-     */
-    export function generateDashManifestBlobUrl(config: DashManifestConfig): string {
-        const manifest = generateDashManifest(config);
-        console.log('Generated DASH manifest:', manifest);
-        return createDashManifestBlobUrl(manifest);
-    }
+/**
+ * Convenience function that generates manifest and creates blob URL
+ */
+export function generateDashManifestBlobUrl(config: DashManifestConfig): string {
+    const manifest = generateDashManifest(config);
+    console.log('Generated DASH manifest:', manifest);
+    return createDashManifestBlobUrl(manifest);
+}
