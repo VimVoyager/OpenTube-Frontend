@@ -109,7 +109,7 @@ export function adaptVideoMetadata(
 ): VideoMetadata {
 	// Select best quality avatar (usually index 2 for medium quality)
 	const avatars = details.uploaderAvatars || [];
-	const channelAvatar = avatars[2]?.url || avatars[0]?.url || null;
+	const channelAvatar = avatars[2]?.url || avatars[0]?.url || defaultAvatar;
 
 	return {
 		title: details.videoTitle || 'Untitled Video',
