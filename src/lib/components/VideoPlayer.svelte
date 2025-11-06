@@ -128,7 +128,7 @@
 
 			// Create UI overlay
 			const uiConfig = {
-				overflowMenuButtons: ['quality', 'playback_rate'],
+				overflowMenuButtons: ['quality', 'language', 'playback_rate', ],
 				seekBarColors: {
 					base: 'rgba(255, 255, 255, 0.3)',
 					buffered: 'rgba(255, 255, 255, 0.54)',
@@ -165,7 +165,7 @@
 			throw new Error('Player not initialized');
 		}
 
-		if (!config.videoStream && !config.audioStream) {
+		if (!config.videoStream && (!config.audioStream ||config.audioStream.length === 0)) {
 			throw new Error('No video or audio stream provided');
 		}
 
@@ -188,26 +188,28 @@
 					}))
 				: undefined;
 
-			const audioStream: StreamMetadata | undefined = config.audioStream
-				? {
-						url: config.audioStream?.url,
-						codec: config.audioStream?.codec,
-						mimeType: config.audioStream?.mimeType,
-						bandwidth: config.audioStream?.bandwidth,
-						audioSampleRate: config.audioStream?.sampleRate,
-						audioChannels: config.audioStream?.channels,
-						format: config.audioStream?.format,
-						initStart: config.audioStream?.initStart,
-						initEnd: config.audioStream?.initEnd,
-						indexStart: config.audioStream?.indexStart,
-						indexEnd: config.audioStream?.indexEnd
-					}
+			const audioStreams: StreamMetadata[] | undefined = config.audioStream
+				? config.audioStream.map(stream => ({
+						url: stream?.url,
+						codec: stream?.codec,
+						mimeType: stream?.mimeType,
+						bandwidth: stream?.bandwidth,
+						audioSampleRate: stream?.sampleRate,
+						audioChannels: stream?.channels,
+						format: stream?.format,
+						language: stream?.language,
+						languageName: stream?.languageName,
+						initStart: stream?.initStart,
+						initEnd: stream?.initEnd,
+						indexStart: stream?.indexStart,
+						indexEnd: stream?.indexEnd
+					}))
 				: undefined;
 
 			// Generate DASH manifest configuration
 			const manifestConfig: DashManifestConfig = {
 				videoStreams,
-				audioStream,
+				audioStreams,
 				duration: config.duration
 			};
 
