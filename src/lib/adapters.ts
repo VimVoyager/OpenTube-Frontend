@@ -6,39 +6,52 @@
  * sensible defaults for missing or malformed data.
  */
 
-import type { Details, Stream } from '$lib/types';
+import type { Details, Stream, ItagItem } from '$lib/types';
+import { normalizeLanguageCode, getLanguageName, extractLanguageFromUrl } from '$lib/utils/languageUtils';
+
+/**
+ * Video stream configuration for the player
+ */
+export interface VideoStreamConfig {
+	url: string;
+	codec: string;
+	mimeType: string;
+	width: number;
+	height: number;
+	bandwidth: number;
+	frameRate: number;
+	format: string;
+	initStart?: number;
+	initEnd?: number;
+	indexStart?: number;
+	indexEnd?: number;
+}
+
+/**
+ * Audio stream configuration for the player
+ */
+export interface AudioStreamConfig {
+	url: string;
+	codec: string;
+	mimeType: string;
+	bandwidth: number;
+	sampleRate: number;
+	channels: number;
+	format: string;
+	language: string;
+	languageName: string;
+	initStart?: number;
+	initEnd?: number;
+	indexStart?: number;
+	indexEnd?: number;
+}
 
 /**
  * Video player configuration derived from selected streams
  */
 export interface VideoPlayerConfig {
-    videoStream: Array<{
-		url: string;
-		codec: string;
-		mimeType: string;
-		width: number;
-		height: number;
-		bandwidth: number;
-		frameRate: number;
-		format: string;
-		initStart?: number;
-		initEnd?: number;
-		indexStart?: number;
-		indexEnd?: number;
-	}> | null;
-	audioStream: Array<{
-		url: string;
-		codec: string;
-		mimeType: string;
-		bandwidth: number;
-		sampleRate: number;
-		channels: number;
-		format: string;
-		initStart?: number;
-		initEnd?: number;
-		indexStart?: number;
-		indexEnd?: number;
-	}> | null;
+    videoStream: VideoStreamConfig[] | null;
+	audioStream: AudioStreamConfig[] | null;
 	duration: number;
 	poster: string;
 }
@@ -58,48 +71,108 @@ export interface VideoMetadata {
 	subscriberCount: number;
 }
 
-function extractLanguageFromUrl(url: string): string | null {
-    try {
-        // Look for lang= or lang%3D in the URL
-        const match = url.match(/lang(?:%3D|=)([^&]+)/i);
-        if (match) {
-            return decodeURIComponent(match[1]);
-        }
-        return null;
-    } catch {
-        return null;
-    }
+/**
+ * Default values for stream properties
+ */
+const DEFAULT_VIDEO = {
+	CODEC: 'avc1.42E01E',
+	MIME_TYPE: 'video/mp4',
+	WIDTH: 1920,
+	HEIGHT: 1080,
+	BANDWIDTH: 1000000,
+	FRAME_RATE: 30,
+	FORMAT: 'MPEG_4'
+} as const;
+
+const DEFAULT_AUDIO = {
+	CODEC: 'mp4a.40.2',
+	MIME_TYPE: 'audio/mp4',
+	BANDWIDTH: 128000,
+	SAMPLE_RATE: 44100,
+	CHANNELS: 2,
+	FORMAT: 'M4A'
+} as const;
+
+/**
+ * Extracts language information from a stream
+ * Tries multiple sources in order of reliability
+ */
+function extractLanguageInfo(stream: Stream): { code: string; name: string } {
+	const audioLocale = stream.itagItem?.audioLocale;
+	const audioTrackId = stream.itagItem?.audioTrackId;
+	const audioTrackName = stream.itagItem?.audioTrackName;
+	
+	let languageCode = audioLocale || audioTrackId;
+	
+	if (!languageCode) {
+		languageCode = extractLanguageFromUrl(stream.url) || 'und';
+	}
+	
+	const normalizedCode = normalizeLanguageCode(languageCode);
+	const languageName = audioTrackName || getLanguageName(normalizedCode);
+	
+	return {
+		code: normalizedCode,
+		name: languageName
+	};
 }
 
 /**
- * Get friendly language name from code
+ * Extracts byte range information from itagItem
  */
-function getLanguageName(code: string): string {
-	const languageNames: Record<string, string> = {
-		'de': 'German',
-		'en': 'English',
-		'es': 'Spanish',
-		'es-419': 'Spanish (Latin America)',
-		'es_419': 'Spanish (Latin America)',
-		'id': 'Indonesian',
-		'pt': 'Portuguese',
-		'pt-BR': 'Portuguese (Brazil)',
-		'ru': 'Russian',
-		'fr': 'French',
-		'it': 'Italian',
-		'ja': 'Japanese',
-		'ko': 'Korean',
-		'zh': 'Chinese',
-		'zh-CN': 'Chinese (Simplified)',
-		'zh-TW': 'Chinese (Traditional)',
-		'ar': 'Arabic',
-		'hi': 'Hindi',
-		'und': 'Unknown'
-	};
+function extractByteRanges(itagItem: ItagItem | undefined): {
+	initStart?: number;
+	initEnd?: number;
+	indexStart?: number;
+	indexEnd?: number;
+} {
+	if (!itagItem) return {};
 	
-	return languageNames[code] || code.toUpperCase();
+	return {
+		initStart: itagItem.initStart,
+		initEnd: itagItem.initEnd,
+		indexStart: itagItem.indexStart,
+		indexEnd: itagItem.indexEnd
+	};
 }
 
+/**
+ * Adapts a single video stream to player configuration format
+ */
+function adaptVideoStream(stream: Stream): VideoStreamConfig {
+	return {
+		url: stream.url,
+		codec: stream.codec || DEFAULT_VIDEO.CODEC,
+		mimeType: DEFAULT_VIDEO.MIME_TYPE,
+		width: stream.width || DEFAULT_VIDEO.WIDTH,
+		height: stream.height || DEFAULT_VIDEO.HEIGHT,
+		bandwidth: stream.bitrate || DEFAULT_VIDEO.BANDWIDTH,
+		frameRate: stream.fps || DEFAULT_VIDEO.FRAME_RATE,
+		format: stream.format || DEFAULT_VIDEO.FORMAT,
+		...extractByteRanges(stream.itagItem)
+	};
+}
+
+/**
+ * Adapts a single audio stream to player configuration format
+ */
+function adaptAudioStream(stream: Stream): AudioStreamConfig {
+	const language = extractLanguageInfo(stream);
+	const itagItem = stream.itagItem;
+	
+	return {
+		url: stream.url,
+		codec: stream.codec || DEFAULT_AUDIO.CODEC,
+		mimeType: DEFAULT_AUDIO.MIME_TYPE,
+		bandwidth: stream.bitrate || DEFAULT_AUDIO.BANDWIDTH,
+		sampleRate: itagItem?.sampleRate || DEFAULT_AUDIO.SAMPLE_RATE,
+		channels: itagItem?.audioChannels || DEFAULT_AUDIO.CHANNELS,
+		format: stream.format || DEFAULT_AUDIO.FORMAT,
+		language: language.code,
+		languageName: language.name,
+		...extractByteRanges(itagItem)
+	};
+}
 
 /**
  * Adapt video and audio streams into player configuration
@@ -110,55 +183,27 @@ export function adaptPlayerConfig(
 	duration: number,
 	posterUrl: string
 ): VideoPlayerConfig {
-	return {
-		videoStream: videoStreams && videoStreams.length > 0 
-		? videoStreams.map(stream => ({
-			url: stream.url,
-			codec: stream.codec || 'avc1.42E01E',
-			mimeType: 'video/mp4',
-			width: stream.width || 1920,
-			height: stream.height || 1080,
-			bandwidth: stream.bitrate || 1000000,
-			frameRate: stream.fps || 30,
-			format: stream.format || 'MPEG_4',
-			initStart: stream.itagItem?.initStart,
-			initEnd: stream.itagItem?.initEnd,
-			indexStart: stream.itagItem?.indexStart,
-			indexEnd: stream.itagItem?.indexEnd,
-		})) : null,
-		audioStream: audioStreams && audioStreams.length > 0 
-		? audioStreams.map(stream => {
-			const language = stream.itagItem?.audioLocale || 
-			                 stream.itagItem?.audioTrackId || 
-			                 extractLanguageFromUrl(stream.url) || 
-			                 'und';
-			
-			// Try to get friendly name, or map from code
-			const languageName = stream.itagItem?.audioTrackName || 
-			                     getLanguageName(language);
-			
-			// Log what we extracted for debugging
-			console.log(`Adapter: Stream ${stream.id} -> lang: "${language}", name: "${languageName}"`);
-			
-			return {
-				url: stream.url,
-				codec: stream.codec || 'mp4a.40.2',
-				mimeType: 'audio/mp4',
-				bandwidth: stream.bitrate || 128000,
-				sampleRate: stream.itagItem?.sampleRate || 44100,
-				channels: stream.itagItem?.audioChannels || 2,
-				format: stream.format || 'M4A',
-				language: language,
-				languageName: languageName,
-				initStart: stream.itagItem?.initStart,
-				initEnd: stream.itagItem?.initEnd,
-				indexStart: stream.itagItem?.indexStart,
-				indexEnd: stream.itagItem?.indexEnd,
-			};
-		}) : null,
+	return { 
+		videoStream: videoStreams?.length 
+			? videoStreams.map(adaptVideoStream)
+			: null,
+		audioStream: audioStreams?.length 
+			? audioStreams.map(adaptAudioStream)
+			: null,
 		duration,
 		poster: posterUrl
 	};
+}
+
+/**
+ * Selects the best quality avatar from available options
+ * Prefers medium quality (index 2), falls back to first available
+ */
+function selectBestAvatar(avatars: Details['uploaderAvatars'], fallback: string): string {
+	if (!avatars || avatars.length === 0) return fallback;
+	
+	// Prefer medium quality (usually index 2)
+	return avatars[2]?.url || avatars[0]?.url || fallback;
 }
 
 /**
@@ -168,15 +213,11 @@ export function adaptVideoMetadata(
 	details: Details,
 	defaultAvatar: string
 ): VideoMetadata {
-	// Select best quality avatar (usually index 2 for medium quality)
-	const avatars = details.uploaderAvatars || [];
-	const channelAvatar = avatars[2]?.url || avatars[0]?.url || defaultAvatar;
-
-	return {
+		return {
 		title: details.videoTitle || 'Untitled Video',
 		description: details.description?.content || 'No description available',
 		channelName: details.channelName || 'Unknown Channel',
-		channelAvatar,
+		channelAvatar: selectBestAvatar(details.uploaderAvatars, defaultAvatar),
 		viewCount: details.viewCount || 0,
 		uploadDate: details.uploadDate || '',
 		likeCount: details.likeCount || 0,
