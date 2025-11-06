@@ -90,38 +90,83 @@ function selectVideoStreams(streams: Stream[]): Stream[] {
 			if (match) selectedStreams.push(match);
 		}
 	}
-	
+
 	return selectedStreams.filter(s => s.videoOnly);
 }
 
 /**
- * Select best audio stream based on priority and quality 
+ * Group audio streams by language
  */
-function selectBestAudioStream(streams: Stream[]): Stream | undefined {
-	// Try preferred itag
-	const candidate = pickByStreamId(streams, PREFERRED_AUDIO_ITAGS);
-	if (candidate && !candidate.videoOnly) return candidate;
+function groupAudioStreamsByLanguage(streams: Stream[]): Map<string, Stream[]> {
+	const languageMap = new Map<string, Stream[]>();
 
-	// Fallback: Best M4A AAC stream by bitrate
-	const m4aStreams = streams.filter(
-		s => !s.videoOnly &&
-			(s.format === 'M4A' || s.format === 'MP4A') &&
-			(s.codec?.toLowerCase().includes('mp4a') || s.codec?.toLowerCase().includes('aac'))
-	);
+	for (const stream of streams) {
+		if (stream.videoOnly) continue;
 
-	if (m4aStreams.length > 0) {
-		m4aStreams.sort((a, b) => (b.bitrate ?? 0) - (a.bitrate ?? 0));
-		return m4aStreams[0];
+		const language = stream.itagItem.audioLocale ||
+			stream.itagItem.audioTrackId ||
+			'und';
+
+		if (!languageMap.has(language)) {
+			languageMap.set(language, []);
+		}
+		languageMap.get(language)!.push(stream);
 	}
 
-	// Last resort: Highest bitrate audio-only stream
-	const audioOnlyStreams = streams.filter(s => !s.videoOnly);
-	if (audioOnlyStreams.length > 0) {
-		audioOnlyStreams.sort((a, b) => (b.bitrate ?? 0) - (a.bitrate ?? 0));
-		return audioOnlyStreams[0];
+	return languageMap;
+}
+
+/**
+ * Select best audio streams - one per available language
+ * Return array of audio stream with different languages
+ */
+function selectBestAudioStreams(streams: Stream[]): Stream[] {
+	const languageMap = groupAudioStreamsByLanguage(streams);
+	const selectedStreams: Stream[] = [];
+
+	// For each language, select the best stream
+	for (const [language, langStreams] of languageMap.entries()) {
+		let bestStream: Stream | undefined;
+
+		console.log(`  Processing language: ${language} (${langStreams.length} streams available)`);
+
+		const candidate = pickByStreamId(langStreams, PREFERRED_AUDIO_ITAGS);
+		if (candidate) {
+			bestStream = candidate;
+		} else {
+			// Fallback: Best M4A AAC stream by bitrate
+			const m4aStreams = langStreams.filter(
+				s => (s.format === 'M4A' || s.format === 'MP4A') &&
+					(s.codec?.toLowerCase().includes('mp4a') || s.codec?.toLowerCase().includes('aac'))
+			);
+
+			if (m4aStreams.length > 0) {
+				m4aStreams.sort((a, b) => (b.bitrate ?? 0) - (a.bitrate ?? 0));
+				bestStream = m4aStreams[0];
+			} else {
+				const sortedStreams = [...langStreams].toSorted((a, b) => (b.bitrate ?? 0) - (a.bitrate ?? 0));
+				bestStream = sortedStreams[0];
+			}
+		}
+
+		if (bestStream) {
+			selectedStreams.push(bestStream);
+		}
 	}
 
-	return undefined;
+	// Sort by language preference (original/primary first, then alphabetically)
+	selectedStreams.sort((a, b) => {
+		const langA = a.itagItem?.audioLocale || a.itagItem?.audioTrackId || 'und';
+		const langB = b.itagItem?.audioLocale || b.itagItem?.audioTrackId || 'und';
+
+		// Prioritize 'und' or original audio
+		if (langA === 'und' || langA === 'original') return -1;
+		if (langB === 'und' || langB === 'original') return 1;
+
+		return langA.localeCompare(langB);
+	});
+
+	return selectedStreams;
 }
 
 /**
@@ -135,9 +180,16 @@ export const load: PageLoad = async ({ params, fetch }): Promise<PageData> => {
 			getAllStreams(params.id, fetch)
 		]);
 
+		console.log('Raw audio:', audioStreams.slice(0, 3).map(s => ({
+			id: s.id,
+			audioLocale: s.itagItem?.audioLocale,
+			audioTrackId: s.itagItem?.audioTrackId,
+			audioTrackName: s.itagItem?.audioTrackName
+		})));
+
 		// Select best streams
 		const selectedVideoStreams = selectVideoStreams(videoStreams);
-		const audioStream = selectBestAudioStream(audioStreams);
+		const selectedAudioStreams = selectBestAudioStreams(audioStreams);
 
 		// Log selected streams for debugging
 		if (!selectedVideoStreams || selectedVideoStreams.length === 0) {
@@ -149,18 +201,31 @@ export const load: PageLoad = async ({ params, fetch }): Promise<PageData> => {
 			});
 		}
 
-		if (!audioStream) {
-			console.warn('No suitable audio stream found');
+		if (!selectedAudioStreams || selectedAudioStreams.length === 0) {
+			console.warn('No suitable audio streams found');
 		} else {
-			console.log('Selected audio stream:', {
-				id: audioStream.id,
-				codec: audioStream.codec,
-				bitrate: audioStream.bitrate
+			console.log(`Selected ${selectedAudioStreams.length} audio streams`);
+			selectedAudioStreams.forEach((stream, index) => {
+				const language = stream.itagItem?.audioLocale || stream.itagItem?.audioTrackId || 'und';
+				const languageName = stream.itagItem?.audioTrackName || 'Unknown';
+				console.log(`  ${index + 1}. ${languageName} (${language}) - ${stream.codec} - ${stream.bitrate} bps`);
 			});
 		}
 
+		// if (!audioStream) {
+		// 	console.warn('No suitable audio stream found');
+		// } else {
+		// 	console.log('Selected audio stream:', {
+		// 		id: audioStream.id,
+		// 		codec: audioStream.codec,
+		// 		bitrate: audioStream.bitrate
+		// 	});
+		// }
+
+
+
 		// Calculate duration
-		const duration = calculateDuration(selectedVideoStreams, audioStream);
+		const duration = calculateDuration(selectedVideoStreams, selectedAudioStreams);
 
 		if (!duration || duration === 0) {
 			console.warn('Video duration is missing or zero, this may cause playback issues.');
@@ -169,7 +234,7 @@ export const load: PageLoad = async ({ params, fetch }): Promise<PageData> => {
 		// Transform data using adapters
 		const playerConfig = adaptPlayerConfig(
 			selectedVideoStreams,
-			audioStream,
+			selectedAudioStreams,
 			duration,
 			thumbnailPlaceholder
 		);
@@ -183,7 +248,7 @@ export const load: PageLoad = async ({ params, fetch }): Promise<PageData> => {
 			playerConfig,
 			metadata
 		};
-		
+
 	} catch (error) {
 		console.error('Error loading video data:', error);
 
