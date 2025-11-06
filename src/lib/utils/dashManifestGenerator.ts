@@ -3,18 +3,27 @@
  * Generates client-side DASH MPD manifests with proper initialization and index ranges
  */
 
+import { normalizeDashCodec, inferMimeType } from "$lib/utils/codecUtils";
+import { normalizeLanguageCode } from "$lib/utils/languageUtils";
+
+/**
+ * Metadata for a single stream (video or audio)
+ */
 export interface StreamMetadata {
     url: string;
     codec: string;
     mimeType?: string;
     bandwidth?: number;
+    // Video-specific
     width?: number;
     height?: number;
     frameRate?: number;
+    // Audio-specific
     audioSampleRate?: number;
     audioChannels?: number;
     language?: string;
     languageName?: string;
+    // Byte range information
     initStart?: number;
     initEnd?: number;
     indexStart?: number;
@@ -22,6 +31,9 @@ export interface StreamMetadata {
     format?: string;
 }
 
+/**
+ * Configuration for DASH manifest generation
+ */
 export interface DashManifestConfig {
     videoStreams?: StreamMetadata[];
     audioStreams?: StreamMetadata[];
@@ -29,84 +41,23 @@ export interface DashManifestConfig {
 }
 
 /**
- * Normalizes codec strings to DASH-compatible format
+ * Options for byte range information
  */
-function normalizeDashCodec(codec: string): string {
-    const lowerCodec = codec.toLowerCase();
-
-    // Already in correct format
-    if (lowerCodec.match(/^(avc1|vp09|av01|mp4a|opus|vorbis)\./)) {
-        return codec;
-    }
-
-    // Handle common variations
-    if (lowerCodec.includes('h264')) return 'avc1.42E01E';
-    if (lowerCodec.includes('vp9')) return 'vp09.00.10.08';
-    if (lowerCodec.includes('av1')) return 'av01.0.05M.08';
-    if (lowerCodec.includes('aac')) return 'mp4a.40.2';
-    if (lowerCodec.includes('opus')) return 'opus';
-    if (lowerCodec.includes('vorbis')) return 'vorbis';
-
-    return codec;
+interface ByteRangeInfo {
+    initStart?: number;
+    initEnd?: number;
+    indexStart?: number;
+    indexEnd?: number;
 }
 
 /**
- * Infers MIME type from format string and codec
- * Handles backedn format strings like "MPEG_4", "MP4", "WEBM", "M4A", etc.
+ * Checks if byte range information is complete
  */
-function inferMimeType(format?: string, codec?: string, isVideo?: boolean): string {
-    // Check format first - this is most reliable
-    if (format) {
-        const formatUpper = format.toUpperCase();
-
-        // Video formats
-        if (formatUpper === 'MPEG_4' || formatUpper === 'MP4') {
-            return 'video/mp4';
-        }
-        if (formatUpper === 'WEBM') {
-            return 'video/webm';
-        }
-        if (formatUpper === 'V_VP9' || formatUpper === 'VP9') {
-            return 'video/webm';
-        }
-
-        // Audio formats
-        if (formatUpper === 'M4A' || formatUpper === 'MP4A') {
-            return 'audio/mp4';
-        }
-        if (formatUpper === 'WEBMA' || formatUpper === 'OPUS' || formatUpper === 'VORBIS') {
-            return 'audio/webm';
-        }
-    }
-
-    // Fallback based on codec
-    if (codec) {
-        const codecLower = codec.toLowerCase();
-
-        // Video codecs
-        if (codecLower.includes('avc1') || codecLower.includes('h264')) {
-            return 'video/mp4';
-        }
-        if (codecLower.includes('vp09') || codecLower.includes('vp9')) {
-            return 'video/webm';
-        }
-        if (codecLower.includes('av01') || codecLower.includes('av1')) {
-            return 'video/mp4';
-        }
-
-        // Audio codecs
-        if (codecLower.includes('mp4a')) {
-            return 'audio/mp4';
-        }
-        if (codecLower.includes('opus')) {
-            return 'audio/webm';
-        }
-        if (codecLower.includes('vorbis')) {
-            return 'audio/webm';
-        }
-    }
-    // Final fallback
-    return isVideo ? 'video/mp4' : 'audio/mp4';
+function hasByteRanges(info: ByteRangeInfo): boolean {
+    return typeof info.initStart === 'number' &&
+        typeof info.initEnd === 'number' &&
+        typeof info.indexStart === 'number' &&
+        typeof info.indexEnd === 'number';
 }
 
 /**
@@ -122,11 +73,9 @@ function formatDuration(seconds: number): string {
     if (hours > 0) duration += `${hours}H`;
     if (minutes > 0) duration += `${minutes}M`;
     if (secs > 0 || ms > 0) {
-        if (ms > 0) {
-            duration += `${secs}.${ms.toString().padStart(3, '0')}S`;
-        } else {
-            duration += `${secs}S`;
-        }
+        duration += ms > 0
+            ? `${secs}.${ms.toString().padStart(3, '0')}S`
+            : `${secs}S`;
     }
 
     return duration === 'PT' ? 'PT0S' : duration;
@@ -144,169 +93,234 @@ function escapeXml(unsafe: string): string {
         .replace(/'/g, '&apos;');
 }
 
-function normalizeLanguageCode(lang: string): string {
-    if (!lang) return 'und';
+/**
+ * Generates a SegmentBase element with byte ranges
+ */
+function generateSegmentBase(info: ByteRangeInfo, indent: string): string {
+    if (!hasByteRanges(info)) return '';
 
-    const normalized = lang.replace(/_/g, '-');
+    const initRange = `${info.initStart}-${info.initEnd}`;
+    const indexRange = `${info.indexStart}-${info.indexEnd}`;
 
-    const parts = normalized.split('-');
-    if (parts.length > 0) {
-        parts[0] = parts[0].toLowerCase();
+    return `${indent}<SegmentBase indexRange="${indexRange}">
+${indent}  <Initialization range="${initRange}"/>
+${indent}</SegmentBase>\n`;
+}
+
+/**
+ * Generates a video Representation element
+ */
+function generateVideoRepresentation(
+    stream: StreamMetadata,
+    index: number,
+    indent: string
+): string {
+    const codec = normalizeDashCodec(stream.codec);
+    const bandwidth = stream.bandwidth || 1000000;
+    const width = stream.width || 1920;
+    const height = stream.height || 1080;
+    const frameRate = stream.frameRate || 30;
+
+    let xml = `${indent}<Representation 
+${indent}  id="video-${index + 1}" 
+${indent}  bandwidth="${bandwidth}"
+${indent}  codecs="${escapeXml(codec)}"
+${indent}  width="${width}"
+${indent}  height="${height}"
+${indent}  frameRate="${frameRate}">
+${indent}  <BaseURL>${escapeXml(stream.url)}</BaseURL>\n`;
+
+    xml += generateSegmentBase(stream, `${indent}  `);
+    xml += `${indent}</Representation>\n`;
+
+    return xml;
+}
+
+/**
+ * Generates a video AdaptationSet with all video representations
+ */
+function generateVideoAdaptationSet(
+    streams: StreamMetadata[],
+    indent: string
+): string {
+    const firstStream = streams[0];
+    const mimeType = inferMimeType(firstStream.format, firstStream.codec, true);
+
+    let xml = `${indent}<AdaptationSet 
+${indent}  id="0" 
+${indent}  contentType="video" 
+${indent}  mimeType="${escapeXml(mimeType)}"
+${indent}  subsegmentAlignment="true"
+${indent}  startWithSAP="1">\n`;
+
+    streams.forEach((stream, index) => {
+        xml += generateVideoRepresentation(stream, index, `${indent}  `);
+    });
+
+    xml += `${indent}</AdaptationSet>\n`;
+
+    return xml;
+}
+
+/**
+ * Generates an audio Representation element
+ */
+function generateAudioRepresentation(
+    stream: StreamMetadata,
+    adaptationSetId: number,
+    index: number,
+    indent: string
+): string {
+    const codec = normalizeDashCodec(stream.codec);
+    const bandwidth = stream.bandwidth || 128000;
+    const sampleRate = stream.audioSampleRate || 44100;
+    const channels = stream.audioChannels || 2;
+
+    let xml = `${indent}<Representation
+${indent}  id="audio-${adaptationSetId}-${index + 1}"
+${indent}  bandwidth="${bandwidth}"
+${indent}  codecs="${escapeXml(codec)}"
+${indent}  audioSamplingRate="${sampleRate}">
+${indent}  <AudioChannelConfiguration 
+${indent}    schemeIdUri="urn:mpeg:dash:23003:3:audio_channel_configuration:2011"
+${indent}    value="${channels}"/>
+${indent}  <BaseURL>${escapeXml(stream.url)}</BaseURL>\n`;
+
+    xml += generateSegmentBase(stream, `${indent}  `);
+    xml += `${indent}</Representation>\n`;
+
+    return xml;
+}
+
+/**
+ * Generates an audio AdaptationSet for a specific language
+ */
+function generateAudioAdaptationSet(
+    streams: StreamMetadata[],
+    language: string,
+    languageName: string,
+    adaptationSetId: number,
+    indent: string
+): string {
+    const firstStream = streams[0];
+    const mimeType = inferMimeType(firstStream.format, firstStream.codec, false);
+
+    let xml = `${indent}<AdaptationSet 
+${indent}  id="${adaptationSetId}" 
+${indent}  contentType="audio" 
+${indent}  mimeType="${escapeXml(mimeType)}"
+${indent}  lang="${escapeXml(language)}"
+${indent}  label="${escapeXml(languageName)}"
+${indent}  subsegmentAlignment="true"
+${indent}  startWithSAP="1">\n`;
+
+    streams.forEach((stream, index) => {
+        xml += generateAudioRepresentation(stream, adaptationSetId, index, `${indent}  `);
+    });
+
+    xml += `${indent}</AdaptationSet>\n`;
+
+    return xml;
+}
+
+/**
+ * Groups audio streams by language
+ */
+function groupStreamsByLanguage(
+    streams: StreamMetadata[]
+): Map<string, { streams: StreamMetadata[]; name: string }> {
+    const languageMap = new Map<string, { streams: StreamMetadata[]; name: string }>();
+
+    for (const stream of streams) {
+        const language = normalizeLanguageCode(stream.language);
+        const languageName = stream.languageName || language;
+
+        if (!languageMap.has(language)) {
+            languageMap.set(language, { streams: [], name: languageName });
+        }
+
+        languageMap.get(language)!.streams.push(stream);
     }
 
-    return parts.join('-');
+    return languageMap;
 }
+
+/**
+ * Generates all audio AdaptationSets
+ */
+function generateAudioAdaptationSets(
+    streams: StreamMetadata[],
+    indent: string
+): string {
+    const streamsByLanguage = groupStreamsByLanguage(streams);
+    let xml = '';
+    let adaptationSetId = 1;
+
+    streamsByLanguage.forEach(({ streams: langStreams, name: languageName }, language) => {
+        xml += generateAudioAdaptationSet(
+            langStreams,
+            language,
+            languageName,
+            adaptationSetId,
+            indent
+        );
+        adaptationSetId++;
+    });
+
+    return xml;
+}
+
+/**
+ * Validates manifest configuration
+ * @throws {Error} if configuration is invalid
+ */
+function validateConfig(config: DashManifestConfig): void {
+    const hasVideo = config.videoStreams && config.videoStreams.length > 0;
+    const hasAudio = config.audioStreams && config.audioStreams.length > 0;
+
+    if (!hasVideo && !hasAudio) {
+        throw new Error('At least one stream (video or audio) must be provided');
+    }
+
+    if (!config.duration || config.duration === 0) {
+        console.warn('Duration is 0 or undefined, this may cause playback issues');
+    }
+}
+
+
 
 /**
  * Generates a DASH MPD XML manifest with SegmentBase for byte-range requests
  */
 export function generateDashManifest(config: DashManifestConfig): string {
+    validateConfig(config);
+
     const { videoStreams, audioStreams, duration } = config;
-
-    if (!videoStreams || videoStreams.length === 0 && !audioStreams) {
-        throw new Error('At least one stream (video or audio) must be provided');
-    }
-
-    if (!duration || duration === 0) {
-        console.warn('Duration is 0 or undefined, this will likely cause playback issues');
-    }
-
     const durationStr = formatDuration(duration);
+    const indent = '    ';
+
 
     let mpd = `<?xml version="1.0" encoding="UTF-8"?>
-        <MPD xmlns="urn:mpeg:dash:schema:mpd:2011" 
-            type="static"
-            mediaPresentationDuration="${durationStr}"
-            minBufferTime="PT2S"
-            profiles="urn:mpeg:dash:profile:isoff-on-demand:2011">
-        <Period duration="${durationStr}">
-        `;
+    <MPD xmlns="urn:mpeg:dash:schema:mpd:2011" 
+        type="static"
+        mediaPresentationDuration="${durationStr}"
+        minBufferTime="PT2S"
+        profiles="urn:mpeg:dash:profile:isoff-on-demand:2011">
+    <Period duration="${durationStr}">
+    `;
 
     // Add video adaptation set
     if (videoStreams && videoStreams.length > 0) {
-        const firstStream = videoStreams[0];
-        const mimeType = inferMimeType(firstStream.format, firstStream.codec, true);
-        // const videoCodec = normalizeDashCodec(firstStream.codec);
-
-        // Start the AdaptationSet
-        mpd += `    <AdaptationSet 
-        id="0" 
-        contentType="video" 
-        mimeType="${escapeXml(mimeType)}"
-        subsegmentAlignment="true"
-        startWithSAP="1">
-`;
-        videoStreams.forEach((videoStream, index) => {
-            const streamCodec = normalizeDashCodec(videoStream.codec);
-            const bandwidth = videoStream.bandwidth || 1000000;
-            const width = videoStream.width || 1920;
-            const height = videoStream.height || 1080;
-            const frameRate = videoStream.frameRate || 30;
-
-            // Check if we have byte range information
-            const hasInitRange = typeof videoStream.initStart === 'number' && typeof videoStream.initEnd === 'number';
-            const hasIndexRange = typeof videoStream.indexStart === 'number' && typeof videoStream.indexEnd === 'number';
-
-            mpd += `    <Representation 
-          id="video-${index + 1}" 
-          bandwidth="${bandwidth}"
-          codecs="${escapeXml(streamCodec)}"
-          width="${width}"
-          height="${height}"
-          frameRate="${frameRate}">
-        <BaseURL>${escapeXml(videoStream.url)}</BaseURL>
-`;
-
-            if (hasInitRange && hasIndexRange) {
-                const initRange = `${videoStream.initStart}-${videoStream.initEnd}`;
-                const indexRange = `${videoStream.indexStart}-${videoStream.indexEnd}`;
-                mpd += `        <SegmentBase indexRange="${indexRange}">
-          <Initialization range="${initRange}"/>
-        </SegmentBase>
-`;
-            }
-
-            mpd += `      </Representation>
-`;
-        });
-
-        mpd += `      </AdaptationSet> 
-`;
+        mpd += generateVideoAdaptationSet(videoStreams, indent);
     }
 
-    // Add audio adaptation set
+    // Add audio adaptation sets (one per language)
     if (audioStreams && audioStreams.length > 0) {
-        // Group audio streams by language
-        const streamsByLanguage = new Map<string, StreamMetadata[]>();
-
-        audioStreams.forEach(stream => {
-            console.log("Language - ", stream.language);
-            const lang = normalizeLanguageCode(stream.language || 'und');
-            if (!streamsByLanguage.has(lang)) {
-                streamsByLanguage.set(lang, []);
-            }
-            streamsByLanguage.get(lang)!.push(stream);
-        });
-
-        let audioAdaptationSetId = 1;
-        streamsByLanguage.forEach((streams, language) => {
-            const firstAudioStream = streams[0];
-            const audioCodec = normalizeDashCodec(firstAudioStream.codec);
-            const mimeType = inferMimeType(firstAudioStream.format, firstAudioStream.codec, false);
-            const languageName = firstAudioStream.languageName || language;
-
-
-
-            streams.forEach((audioStream, index) => {
-                const bandwidth = audioStream.bandwidth || 128000;
-                const sampleRate = audioStream.audioSampleRate || 44100;
-                const channels = audioStream.audioChannels || 2;
-
-                // Check if we have byte range information
-                const hasInitRange = typeof audioStream.initStart === 'number' && typeof audioStream.initEnd === 'number';
-                const hasIndexRange = typeof audioStream.indexStart === 'number' && typeof audioStream.indexEnd === 'number';
-
-                mpd += `    <AdaptationSet 
-        id="${audioAdaptationSetId}" 
-        contentType="audio" 
-        mimeType="${escapeXml(mimeType)}"
-        lang="${escapeXml(language)}"
-        label="${escapeXml(languageName)}"
-        subsegmentAlignment="true"
-        startWithSAP="1">
-`;
-                mpd += `      <Representation
-            id="audio-${audioAdaptationSetId}-${index + 1}"
-            bandwidth="${bandwidth}"
-            codecs="${escapeXml(audioCodec)}"
-            audioSamplingRate="${sampleRate}">
-        <AudioChannelConfiguration 
-            schemeIdUri="urn:mpeg:dash:23003:3:audio_channel_configuration:2011"
-            value="${channels}"/>
-        <BaseURL>${escapeXml(audioStream.url)}</BaseURL>
-`;
-
-                if (hasInitRange && hasIndexRange) {
-                    const initRange = `${audioStream.initStart}-${audioStream.initEnd}`;
-                    const indexRange = `${audioStream.indexStart}-${audioStream.indexEnd}`;
-                    mpd += `        <SegmentBase indexRange="${indexRange}">
-          <Initialization range="${initRange}"/>
-        </SegmentBase>
-`;
-                }
-
-                mpd += `      </Representation>
-`;
-                mpd += `    </AdaptationSet>
-`;
-            });
-
-
-            audioAdaptationSetId++;
-        });
+        mpd += generateAudioAdaptationSets(audioStreams, indent);
     }
+
     mpd += `  </Period>
-</MPD>`;
+    </MPD>`;
 
     return mpd;
 }
