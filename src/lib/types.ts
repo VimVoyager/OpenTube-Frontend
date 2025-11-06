@@ -49,7 +49,7 @@ export interface ItagItem {
 	contentLength: number;
 	audioTrackId?: string;
 	audioTrackName?: string;
-	aduioLocale?: string;
+	audioLocale?: string;
 	averageBitrate: number;
 }
 

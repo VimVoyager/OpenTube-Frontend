@@ -26,7 +26,7 @@ export interface VideoPlayerConfig {
 		indexStart?: number;
 		indexEnd?: number;
 	}> | null;
-	audioStream: {
+	audioStream: Array<{
 		url: string;
 		codec: string;
 		mimeType: string;
@@ -38,7 +38,7 @@ export interface VideoPlayerConfig {
 		initEnd?: number;
 		indexStart?: number;
 		indexEnd?: number;
-	} | null;
+	}> | null;
 	duration: number;
 	poster: string;
 }
@@ -58,12 +58,55 @@ export interface VideoMetadata {
 	subscriberCount: number;
 }
 
+function extractLanguageFromUrl(url: string): string | null {
+    try {
+        // Look for lang= or lang%3D in the URL
+        const match = url.match(/lang(?:%3D|=)([^&]+)/i);
+        if (match) {
+            return decodeURIComponent(match[1]);
+        }
+        return null;
+    } catch {
+        return null;
+    }
+}
+
+/**
+ * Get friendly language name from code
+ */
+function getLanguageName(code: string): string {
+	const languageNames: Record<string, string> = {
+		'de': 'German',
+		'en': 'English',
+		'es': 'Spanish',
+		'es-419': 'Spanish (Latin America)',
+		'es_419': 'Spanish (Latin America)',
+		'id': 'Indonesian',
+		'pt': 'Portuguese',
+		'pt-BR': 'Portuguese (Brazil)',
+		'ru': 'Russian',
+		'fr': 'French',
+		'it': 'Italian',
+		'ja': 'Japanese',
+		'ko': 'Korean',
+		'zh': 'Chinese',
+		'zh-CN': 'Chinese (Simplified)',
+		'zh-TW': 'Chinese (Traditional)',
+		'ar': 'Arabic',
+		'hi': 'Hindi',
+		'und': 'Unknown'
+	};
+	
+	return languageNames[code] || code.toUpperCase();
+}
+
+
 /**
  * Adapt video and audio streams into player configuration
  */
 export function adaptPlayerConfig(
 	videoStreams: Stream[] | undefined,
-	audioStream: Stream | undefined,
+	audioStreams: Stream[] | undefined,
 	duration: number,
 	posterUrl: string
 ): VideoPlayerConfig {
@@ -83,19 +126,36 @@ export function adaptPlayerConfig(
 			indexStart: stream.itagItem?.indexStart,
 			indexEnd: stream.itagItem?.indexEnd,
 		})) : null,
-		audioStream: audioStream ? {
-			url: audioStream.url,
-			codec: audioStream.codec || 'mp4a.40.2',
-			mimeType: 'audio/mp4',
-			bandwidth: audioStream.bitrate || 128000,
-			sampleRate: audioStream.itagItem?.sampleRate || 44100,
-			channels: audioStream.itagItem?.audioChannels || 2,
-			format: audioStream.format || 'M4A',
-			initStart: audioStream.itagItem?.initStart,
-			initEnd: audioStream.itagItem?.initEnd,
-			indexStart: audioStream.itagItem?.indexStart,
-			indexEnd: audioStream.itagItem?.indexEnd,
-		} : null,
+		audioStream: audioStreams && audioStreams.length > 0 
+		? audioStreams.map(stream => {
+			const language = stream.itagItem?.audioLocale || 
+			                 stream.itagItem?.audioTrackId || 
+			                 extractLanguageFromUrl(stream.url) || 
+			                 'und';
+			
+			// Try to get friendly name, or map from code
+			const languageName = stream.itagItem?.audioTrackName || 
+			                     getLanguageName(language);
+			
+			// Log what we extracted for debugging
+			console.log(`Adapter: Stream ${stream.id} -> lang: "${language}", name: "${languageName}"`);
+			
+			return {
+				url: stream.url,
+				codec: stream.codec || 'mp4a.40.2',
+				mimeType: 'audio/mp4',
+				bandwidth: stream.bitrate || 128000,
+				sampleRate: stream.itagItem?.sampleRate || 44100,
+				channels: stream.itagItem?.audioChannels || 2,
+				format: stream.format || 'M4A',
+				language: language,
+				languageName: languageName,
+				initStart: stream.itagItem?.initStart,
+				initEnd: stream.itagItem?.initEnd,
+				indexStart: stream.itagItem?.indexStart,
+				indexEnd: stream.itagItem?.indexEnd,
+			};
+		}) : null,
 		duration,
 		poster: posterUrl
 	};
@@ -130,12 +190,13 @@ export function adaptVideoMetadata(
  */
 export function calculateDuration(
 	videoStreams: Stream[] | undefined,
-	audioStream: Stream | undefined
+	audioStreams: Stream[] | undefined
 ): number {
 	const durationMs = 
 		videoStreams?.[0]?.itagItem?.approxDurationMs ||
-		audioStream?.itagItem?.approxDurationMs ||
+		audioStreams?.[0]?.itagItem?.approxDurationMs ||
 		0;
 	
 	return durationMs / 1000;
 }
+
