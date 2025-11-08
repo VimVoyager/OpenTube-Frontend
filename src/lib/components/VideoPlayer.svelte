@@ -5,7 +5,8 @@
 		generateDashManifestBlobUrl,
 		revokeDashManifestBlobUrl,
 		type DashManifestConfig,
-		type StreamMetadata
+		type StreamMetadata,
+		type SubtitleMetadata
 	} from '$lib/utils/dashManifestGenerator';
 	import type { VideoPlayerConfig } from '$lib/adapters';
 
@@ -128,7 +129,7 @@
 
 			// Create UI overlay
 			const uiConfig = {
-				overflowMenuButtons: ['quality', 'language', 'playback_rate', ],
+				overflowMenuButtons: ['quality', 'language', 'captions', 'playback_rate', ],
 				seekBarColors: {
 					base: 'rgba(255, 255, 255, 0.3)',
 					buffered: 'rgba(255, 255, 255, 0.54)',
@@ -136,12 +137,13 @@
 				},
 				controlPanelElements: [
 					'play_pause',
-					'time_and_duration',
-					'spacer',
 					'mute',
 					'volume',
-					'fullscreen',
-					'overflow_menu'
+					'time_and_duration',
+					'spacer',
+					'captions',
+					'overflow_menu',
+					'fullscreen'
 				]
 			};
 
@@ -206,10 +208,21 @@
 					}))
 				: undefined;
 
+			const subtitleStreams: SubtitleMetadata[] | undefined = config.subtitleStream
+				? config.subtitleStream.map(subtitle => ({
+						url: subtitle?.url,
+						language: subtitle?.language,
+						languageName: subtitle?.languageName,
+						mimeType: subtitle?.mimeType,
+						kind: subtitle?.kind,
+				}))
+				: undefined;
+
 			// Generate DASH manifest configuration
 			const manifestConfig: DashManifestConfig = {
 				videoStreams,
 				audioStreams,
+				subtitleStreams,
 				duration: config.duration
 			};
 
