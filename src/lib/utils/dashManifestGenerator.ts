@@ -32,11 +32,23 @@ export interface StreamMetadata {
 }
 
 /**
+ * Metadata for subtitle tracks
+ */
+export interface SubtitleMetadata {
+    url: string;
+    language: string;
+    languageName: string;
+    mimeType: string;
+    kind?: 'subtitles' | 'captions';
+}
+
+/**
  * Configuration for DASH manifest generation
  */
 export interface DashManifestConfig {
     videoStreams?: StreamMetadata[];
     audioStreams?: StreamMetadata[];
+    subtitleStreams?: SubtitleMetadata[];
     duration: number;
 }
 
@@ -193,7 +205,7 @@ ${indent}  <BaseURL>${escapeXml(stream.url)}</BaseURL>\n`;
 }
 
 /**
- * Generates an audio AdaptationSet for a specific language
+ * Generate an audio AdaptationSet for a specific language
  */
 function generateAudioAdaptationSet(
     streams: StreamMetadata[],
@@ -224,7 +236,7 @@ ${indent}  startWithSAP="1">\n`;
 }
 
 /**
- * Groups audio streams by language
+ * Group audio streams by language
  */
 function groupStreamsByLanguage(
     streams: StreamMetadata[]
@@ -271,6 +283,50 @@ function generateAudioAdaptationSets(
 }
 
 /**
+ * Generates a subtitle AdaptationSet
+ */
+function generateSubtitleAdaptationSet(
+    subtitle: SubtitleMetadata,
+    adaptationSetId: number,
+    indent: string
+): string {
+    const kind = subtitle.kind || 'subtitles';
+    
+    const xml = `${indent}<AdaptationSet
+${indent}  id="${adaptationSetId}"
+${indent}  contentType="text"
+${indent}  lang="${escapeXml(subtitle.language)}"
+${indent}  mimeType="${escapeXml(subtitle.mimeType)}">
+${indent}  <Role schemeIdUri="urn:mpeg:dash:role:2011" value="${kind}"/>
+${indent}  <Representation id="subtitle-${adaptationSetId}" bandwidth="256">
+${indent}    <BaseURL>${escapeXml(subtitle.url)}</BaseURL>
+${indent}  </Representation>
+${indent}</AdaptationSet>
+`;
+
+    return xml;
+}
+
+/**
+ * Generates all subtitle AdaptationSets
+ */
+function generateSubtitleAdaptationSets(
+    subtitles: SubtitleMetadata[],
+    startingId: number,
+    indent: string
+): string {
+    let xml = '';
+    let adaptationSetId = startingId;
+
+    for (const subtitle of subtitles) {
+        xml += generateSubtitleAdaptationSet(subtitle, adaptationSetId, indent);
+        adaptationSetId++;
+    }
+
+    return xml;
+}
+
+/**
  * Validates manifest configuration
  * @throws {Error} if configuration is invalid
  */
@@ -295,7 +351,7 @@ function validateConfig(config: DashManifestConfig): void {
 export function generateDashManifest(config: DashManifestConfig): string {
     validateConfig(config);
 
-    const { videoStreams, audioStreams, duration } = config;
+    const { videoStreams, audioStreams, subtitleStreams, duration } = config;
     const durationStr = formatDuration(duration);
     const indent = '    ';
 
@@ -315,8 +371,15 @@ export function generateDashManifest(config: DashManifestConfig): string {
     }
 
     // Add audio adaptation sets (one per language)
+    let nextAdaptationSetId = 1;
     if (audioStreams && audioStreams.length > 0) {
         mpd += generateAudioAdaptationSets(audioStreams, indent);
+        nextAdaptationSetId += groupStreamsByLanguage(audioStreams).size;
+    }
+
+    // Add subtitle adaptation sets
+    if (subtitleStreams && subtitleStreams.length > 0) {
+        mpd += generateSubtitleAdaptationSets(subtitleStreams, nextAdaptationSetId, indent);
     }
 
     mpd += `  </Period>
