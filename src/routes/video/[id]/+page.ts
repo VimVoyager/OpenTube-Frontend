@@ -1,6 +1,7 @@
 import type { PageLoad } from './$types';
-import type { Stream } from '$lib/types';
+import type { Stream, Subtitle } from '$lib/types';
 import { getVideoDetails } from '$lib/api/details';
+import { getSubtitles } from '$lib/api/subtitles';
 import { getAllStreams } from '$lib/api/streams';
 import {
 	adaptPlayerConfig,
@@ -14,6 +15,10 @@ import {
 	selectBestAudioStreams,
 	logSelectedStreams
 } from '$lib/utils/streamSelection';
+import { 
+	selectSubtitles,
+	logSelectedSubtitles
+} from '$lib/utils/subtitleSelection';
 import thumbnailPlaceholder from '$lib/assets/thumbnail-placeholder.jpg';
 
 /**
@@ -35,6 +40,7 @@ function createErrorPageData(error: unknown): PageData {
 		playerConfig: {
 			videoStream: null,
 			audioStream: null,
+			subtitleStream: null,
 			duration: 0,
 			poster: thumbnailPlaceholder
 		},
@@ -84,14 +90,16 @@ async function fetchVideoData(
 	details: Awaited<ReturnType<typeof getVideoDetails>>;
 	videoStreams: Stream[];
 	audioStreams: Stream[];
+	subtitles: Subtitle[];
 }> {
 	// Fetch video metadata and streams in parallel
-	const [details, { videoStreams, audioStreams }] = await Promise.all([
+	const [details, { videoStreams, audioStreams }, subtitles] = await Promise.all([
 		getVideoDetails(videoId, fetch),
-		getAllStreams(videoId, fetch)
+		getAllStreams(videoId, fetch),
+		getSubtitles(videoId, fetch)
 	]);
 
-	return { details, videoStreams, audioStreams };
+	return { details, videoStreams, audioStreams, subtitles };
 }
 
 /**
@@ -100,21 +108,25 @@ async function fetchVideoData(
 export const load: PageLoad = async ({ params, fetch }): Promise<PageData> => {
 	try {
 		// Fetch video metadata and streams in parallel
-		const { details, videoStreams, audioStreams } = await fetchVideoData(
+		const { details, videoStreams, audioStreams, subtitles } = await fetchVideoData(
 			params.id,
 			fetch
 		);
 
 		const selectedVideoStreams = selectVideoStreams(videoStreams);
 		const selectedAudioStreams = selectBestAudioStreams(audioStreams);
+		const selectedSubtitles = selectSubtitles(subtitles);
 		const duration = calculateDuration(selectedVideoStreams, selectedAudioStreams);
+
 		validateStreamSelection(selectedVideoStreams, selectedAudioStreams, duration);
 		logSelectedStreams(selectedVideoStreams, selectedAudioStreams);
+		logSelectedSubtitles(selectedSubtitles);
 
 		// Transform data using adapters
 		const playerConfig = adaptPlayerConfig(
 			selectedVideoStreams,
 			selectedAudioStreams,
+			selectedSubtitles,
 			duration,
 			thumbnailPlaceholder
 		);
