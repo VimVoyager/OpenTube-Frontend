@@ -13,8 +13,12 @@
 		"format": "prettier --write .",
 		"lint": "prettier --check . && eslint .",
 		"test:e2e": "playwright test",
-		"test": "npm run test:e2e && npm run test:unit -- --run",
-		"test:unit": "vitest"
+		"test": "vitest",
+		"test:ui": "vitest --ui",
+		"test:coverage": "vitest --coverage",
+		"test:client": "vitest --project=client",
+		"test:server": "vitest --project=server",
+		"test:watch": "vitest --watch"
 	},
 	"devDependencies": {
 		"@eslint/compat": "^1.2.5",
@@ -28,7 +32,9 @@
 		"@tailwindcss/vite": "^4.0.0",
 		"@testing-library/jest-dom": "^6.9.1",
 		"@testing-library/svelte": "^5.2.8",
+		"@types/node": "^24.10.0",
 		"@vitest/browser": "^4.0.8",
+		"@vitest/coverage-v8": "^4.0.8",
 		"@vitest/ui": "^4.0.8",
 		"eslint": "^9.18.0",
 		"eslint-config-prettier": "^10.0.1",
