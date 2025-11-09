@@ -5,7 +5,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { normalizeLanguageCode, getLanguageName, extractLanguageFromUrl } from './languageUtils';
+import { normalizeLanguageCode, getLanguageName, extractLanguageFromUrl, getLanguagePriority } from './languageUtils';
 
 // =============================================================================
 // normalizeLanguageCode() Tests
@@ -229,6 +229,56 @@ describe('extractLanguageFromUrl', () => {
 		it('should handle lang parameter at start of URL', () => {
 			const url = 'https://example.com/audio?lang=ko&format=mp4';
 			expect(extractLanguageFromUrl(url)).toBe('ko');
+		});
+	});
+});
+
+// =============================================================================
+// getLanguagePriority() Tests
+// =============================================================================
+describe('getLanguagePriority', () => {
+    describe('priority levels', () => {
+		it('should give highest priority (0) to "und"', () => {
+			expect(getLanguagePriority('und')).toBe(0);
+		});
+
+		it('should give highest priority (0) to "original"', () => {
+			expect(getLanguagePriority('original')).toBe(0);
+		});
+
+		it('should give second priority (1) to English', () => {
+			expect(getLanguagePriority('en')).toBe(1);
+		});
+
+		it('should give lowest priority (2) to other languages', () => {
+			expect(getLanguagePriority('es')).toBe(2);
+			expect(getLanguagePriority('fr')).toBe(2);
+			expect(getLanguagePriority('de')).toBe(2);
+			expect(getLanguagePriority('ja')).toBe(2);
+		});
+	});
+
+    describe('normalization', () => {
+		it('should normalize before checking priority', () => {
+			expect(getLanguagePriority('EN')).toBe(1);
+			expect(getLanguagePriority('UND')).toBe(0);
+		});
+
+		it('should handle underscore format', () => {
+			expect(getLanguagePriority('es_419')).toBe(2);
+		});
+	});
+
+    describe('region variants', () => {
+		it('should not give English variants special priority', () => {
+			expect(getLanguagePriority('en-US')).toBe(2);
+			expect(getLanguagePriority('en-GB')).toBe(2);
+		});
+
+		it('should treat all regional variants equally', () => {
+			expect(getLanguagePriority('es-419')).toBe(2);
+			expect(getLanguagePriority('pt-BR')).toBe(2);
+			expect(getLanguagePriority('zh-CN')).toBe(2);
 		});
 	});
 });
