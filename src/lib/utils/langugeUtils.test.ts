@@ -153,3 +153,82 @@ describe('getLanguageName', () => {
     });
 });
 
+// =============================================================================
+// extractLanguageFromUrl() Tests
+// =============================================================================
+describe('extractLanguageFromUrl', () => {
+    describe('successful extraction', () => {
+		it('should extract language from simple query parameter', () => {
+			const url = 'https://example.com/audio?lang=en';
+			expect(extractLanguageFromUrl(url)).toBe('en');
+		});
+
+		it('should extract language from URL-encoded parameter', () => {
+			const url = 'https://example.com/audio?lang%3Den';
+			expect(extractLanguageFromUrl(url)).toBe('en');
+		});
+
+		it('should extract language with region code', () => {
+			const url = 'https://example.com/audio?lang=es-419';
+			expect(extractLanguageFromUrl(url)).toBe('es-419');
+		});
+
+		it('should extract language from URL with multiple parameters', () => {
+			const url = 'https://example.com/audio?quality=high&lang=fr&format=mp4';
+			expect(extractLanguageFromUrl(url)).toBe('fr');
+		});
+
+		it('should decode URL-encoded language codes', () => {
+			const url = 'https://example.com/audio?lang=es%2D419';
+			expect(extractLanguageFromUrl(url)).toBe('es-419');
+		});
+
+		it('should handle case-insensitive parameter name', () => {
+			expect(extractLanguageFromUrl('https://example.com?LANG=en')).toBe('en');
+			expect(extractLanguageFromUrl('https://example.com?Lang=en')).toBe('en');
+		});
+	});
+
+    describe('missing or invalid parameters', () => {
+		it('should return null when lang parameter is missing', () => {
+			const url = 'https://example.com/audio?quality=high';
+			expect(extractLanguageFromUrl(url)).toBeNull();
+		});
+
+		it('should return null for empty URL', () => {
+			expect(extractLanguageFromUrl('')).toBeNull();
+		});
+
+		it('should return null for URL without query parameters', () => {
+			const url = 'https://example.com/audio';
+			expect(extractLanguageFromUrl(url)).toBeNull();
+		});
+
+		it('should handle malformed URLs gracefully', () => {
+			expect(extractLanguageFromUrl('not-a-url')).toBeNull();
+			expect(extractLanguageFromUrl('%%invalid%%')).toBeNull();
+		});
+    });
+
+    describe('edge cases', () => {
+		it('should extract from URLs with anchor fragments', () => {
+			const url = 'https://example.com/audio?lang=en#section';
+			expect(extractLanguageFromUrl(url)).toBe('en');
+		});
+
+		it('should handle empty lang value', () => {
+			const url = 'https://example.com/audio?lang=&other=value';
+			expect(extractLanguageFromUrl(url)).toBe(null);
+		});
+
+		it('should handle lang parameter at end of URL', () => {
+			const url = 'https://example.com/audio?format=mp4&lang=ja';
+			expect(extractLanguageFromUrl(url)).toBe('ja');
+		});
+
+		it('should handle lang parameter at start of URL', () => {
+			const url = 'https://example.com/audio?lang=ko&format=mp4';
+			expect(extractLanguageFromUrl(url)).toBe('ko');
+		});
+	});
+});

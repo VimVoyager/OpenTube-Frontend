@@ -75,7 +75,7 @@ export function getLanguageName(languageCode: string): string {
 export function extractLanguageFromUrl(url: string): string | null {
 	try {
 		// Match lang= or lang%3D (URL encoded =)
-		const match = url.match(/lang(?:%3D|=)([^&]+)/i);
+		const match = url.match(/lang(?:%3D|=)([^&#]+)/i);
 		return match ? decodeURIComponent(match[1]) : null;
 	} catch {
 		return null;
