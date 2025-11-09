@@ -5,7 +5,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { normalizeLanguageCode, getLanguageName, extractLanguageFromUrl, getLanguagePriority } from './languageUtils';
+import { normalizeLanguageCode, getLanguageName, extractLanguageFromUrl, getLanguagePriority, compareLanguagePriority } from './languageUtils';
 
 // =============================================================================
 // normalizeLanguageCode() Tests
@@ -279,6 +279,106 @@ describe('getLanguagePriority', () => {
 			expect(getLanguagePriority('es-419')).toBe(2);
 			expect(getLanguagePriority('pt-BR')).toBe(2);
 			expect(getLanguagePriority('zh-CN')).toBe(2);
+		});
+	});
+});
+
+describe('compareLanguagePriority', () => {
+    describe('priority-based sorting', () => {
+		it('should sort "und" before English', () => {
+			expect(compareLanguagePriority('und', 'en')).toBeLessThan(0);
+			expect(compareLanguagePriority('en', 'und')).toBeGreaterThan(0);
+		});
+
+		it('should sort "original" before English', () => {
+			expect(compareLanguagePriority('original', 'en')).toBeLessThan(0);
+			expect(compareLanguagePriority('en', 'original')).toBeGreaterThan(0);
+		});
+
+		it('should sort English before other languages', () => {
+			expect(compareLanguagePriority('en', 'es')).toBeLessThan(0);
+			expect(compareLanguagePriority('en', 'fr')).toBeLessThan(0);
+			expect(compareLanguagePriority('en', 'ja')).toBeLessThan(0);
+		});
+
+		it('should sort other languages after English', () => {
+			expect(compareLanguagePriority('es', 'en')).toBeGreaterThan(0);
+			expect(compareLanguagePriority('fr', 'en')).toBeGreaterThan(0);
+		});
+	});
+
+    describe('alphabetical sorting within same priority', () => {
+		it('should sort non-priority languages alphabetically', () => {
+			expect(compareLanguagePriority('es', 'fr')).toBeLessThan(0); // es < fr
+			expect(compareLanguagePriority('fr', 'es')).toBeGreaterThan(0); // fr > es
+		});
+
+		it('should sort Chinese before Japanese', () => {
+			expect(compareLanguagePriority('zh', 'ja')).toBeGreaterThan(0); // zh > ja alphabetically
+		});
+
+		it('should sort German before Spanish', () => {
+			expect(compareLanguagePriority('de', 'es')).toBeLessThan(0); // de < es
+		});
+	});
+
+    describe('equal comparison', () => {
+		it('should return 0 for identical languages', () => {
+			expect(compareLanguagePriority('en', 'en')).toBe(0);
+			expect(compareLanguagePriority('es', 'es')).toBe(0);
+			expect(compareLanguagePriority('und', 'und')).toBe(0);
+		});
+
+		it('should return 0 for equivalent normalized codes', () => {
+			expect(compareLanguagePriority('es-419', 'es_419')).toBe(0);
+		});
+    });
+
+    describe('use with Array.sort()', () => {
+		it('should correctly sort array of languages', () => {
+			const languages = ['fr', 'en', 'es', 'und', 'de'];
+			const sorted = languages.sort(compareLanguagePriority);
+			
+			expect(sorted).toEqual(['und', 'en', 'de', 'es', 'fr']);
+		});
+
+		it('should sort with "original" first', () => {
+			const languages = ['es', 'original', 'en', 'fr'];
+			const sorted = languages.sort(compareLanguagePriority);
+			
+			expect(sorted[0]).toBe('original');
+			expect(sorted[1]).toBe('en');
+		});
+
+		it('should handle mixed case in sorting', () => {
+			const languages = ['ES', 'en', 'FR', 'UND'];
+			const sorted = languages.sort(compareLanguagePriority);
+			
+			expect(sorted[0]).toBe('UND');
+			expect(sorted[1]).toBe('en');
+		});
+
+		it('should sort regional variants alphabetically', () => {
+			const languages = ['es-419', 'pt-BR', 'en', 'zh-CN'];
+			const sorted = languages.sort(compareLanguagePriority);
+			
+			expect(sorted[0]).toBe('en');
+			// The rest should be alphabetically ordered
+			expect(sorted.slice(1).every((lang, i, arr) => 
+				i === 0 || lang >= arr[i - 1]
+			)).toBe(true);
+		});
+	});
+
+    describe('normalization in comparison', () => {
+		it('should normalize before comparing', () => {
+			expect(compareLanguagePriority('EN', 'es')).toBeLessThan(0);
+			expect(compareLanguagePriority('ES_419', 'FR')).toBeLessThan(0);
+		});
+
+		it('should handle underscore vs hyphen equivalence', () => {
+			expect(compareLanguagePriority('es_419', 'es-419')).toBe(0);
+			expect(compareLanguagePriority('pt_BR', 'pt-BR')).toBe(0);
 		});
 	});
 });
