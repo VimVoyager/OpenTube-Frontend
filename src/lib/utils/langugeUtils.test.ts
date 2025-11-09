@@ -283,6 +283,9 @@ describe('getLanguagePriority', () => {
 	});
 });
 
+// =============================================================================
+// compareLanguagePriority() Tests
+// =============================================================================
 describe('compareLanguagePriority', () => {
     describe('priority-based sorting', () => {
 		it('should sort "und" before English', () => {
@@ -380,5 +383,75 @@ describe('compareLanguagePriority', () => {
 			expect(compareLanguagePriority('es_419', 'es-419')).toBe(0);
 			expect(compareLanguagePriority('pt_BR', 'pt-BR')).toBe(0);
 		});
+	});
+});
+
+// =============================================================================
+// Integration Tests
+// =============================================================================
+describe('Language Utils Integration', () => {
+	it('should extract, normalize, and get name for a language from URL', () => {
+		const url = 'https://example.com/audio?lang=es_419';
+		
+		const extracted = extractLanguageFromUrl(url);
+		expect(extracted).toBe('es_419');
+		
+		const normalized = normalizeLanguageCode(extracted!);
+		expect(normalized).toBe('es-419');
+		
+		const name = getLanguageName(extracted!);
+		expect(name).toBe('Spanish (Latin America)');
+	});
+
+	it('should correctly sort and label audio streams', () => {
+		const audioStreams = [
+			{ language: 'es', label: '' },
+			{ language: 'en', label: '' },
+			{ language: 'fr', label: '' },
+			{ language: 'und', label: '' }
+		];
+		
+		// Sort by priority
+		audioStreams.sort((a, b) => compareLanguagePriority(a.language, b.language));
+		
+		// Add labels
+		audioStreams.forEach(stream => {
+			stream.label = getLanguageName(stream.language);
+		});
+		
+		expect(audioStreams[0].language).toBe('und');
+		expect(audioStreams[0].label).toBe('Unknown');
+		
+		expect(audioStreams[1].language).toBe('en');
+		expect(audioStreams[1].label).toBe('English');
+		
+		expect(audioStreams[2].label).toBe('Spanish');
+		expect(audioStreams[3].label).toBe('French');
+	});
+
+	it('should handle complete workflow with URL extraction and sorting', () => {
+		const urls = [
+			'https://example.com?lang=fr',
+			'https://example.com?lang=en',
+			'https://example.com?lang=es_419',
+			'https://example.com?lang=und'
+		];
+		
+		const languages = urls
+			.map(url => extractLanguageFromUrl(url))
+			.filter(lang => lang !== null) as string[];
+		
+		const sorted = languages.sort(compareLanguagePriority);
+		const withNames = sorted.map(lang => ({
+			code: normalizeLanguageCode(lang),
+			name: getLanguageName(lang)
+		}));
+		
+		expect(withNames).toEqual([
+			{ code: 'und', name: 'Unknown' },
+			{ code: 'en', name: 'English' },
+			{ code: 'es-419', name: 'Spanish (Latin America)' },
+			{ code: 'fr', name: 'French' }
+		]);
 	});
 });
