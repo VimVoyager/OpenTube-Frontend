@@ -636,3 +636,82 @@ describe('logSelectedStreams', () => {
 		});
 	});
 });
+
+// =============================================================================
+// Integration Tests
+// =============================================================================
+
+describe('Stream Selection Integration', () => {
+	it('should select optimal streams from complete stream set', () => {
+		const allStreams = [
+			...createMockVideoStreamSet(),
+			...createMockMultiLanguageAudioStreams()
+		];
+		
+		const videoStreams = selectVideoStreams(allStreams);
+		const audioStreams = selectBestAudioStreams(allStreams);
+		
+		// Should have multiple video qualities
+		expect(videoStreams.length).toBeGreaterThan(3);
+		
+		// Should have one stream per language
+		expect(audioStreams.length).toBe(4); // und, en, es, fr
+		
+		// Should be properly sorted
+		expect(audioStreams[0].itagItem.audioLocale).toBe('und');
+		expect(audioStreams[1].itagItem.audioLocale).toBe('en');
+		
+		// All video streams should be video-only
+		expect(videoStreams.every(s => s.videoOnly)).toBe(true);
+		
+		// All audio streams should not be video-only
+		expect(audioStreams.every(s => !s.videoOnly)).toBe(true);
+	});
+
+	it('should handle real-world stream scenario', () => {
+		const baseStream = createMockAudioStream();
+		// Simulates a typical YouTube video with multiple qualities and languages
+		const streams = [
+			// Video streams
+			createMockVideoStream({ id: '137', itag: 137, resolution: '1080p', quality: '1080p', bitrate: 5000000 }),
+			createMockVideoStream({ id: '136', itag: 136, resolution: '720p', quality: '720p', bitrate: 2500000 }),
+			createMockVideoStream({ id: '135', itag: 135, resolution: '480p', quality: '480p', bitrate: 1000000 }),
+			
+			// English audio (multiple qualities)
+			createMockAudioStream({
+				id: '141',
+				itag: 141,
+				bitrate: 256000,
+				itagItem: { ...baseStream.itagItem, id: 141, audioLocale: 'en', audioTrackId: 'en.0', audioTrackName: 'English', avgBitrate: 256000, bitrate: 256000 }
+			}),
+			createMockAudioStream({
+				id: '140',
+				itag: 140,
+				bitrate: 128000,
+				itagItem: { ...baseStream.itagItem, id: 140, audioLocale: 'en', audioTrackId: 'en.1', audioTrackName: 'English', avgBitrate: 128000, bitrate: 128000 }
+			}),
+			
+			// Spanish audio
+			createMockAudioStream({
+				id: '141',
+				itag: 141,
+				bitrate: 256000,
+				itagItem: { ...baseStream.itagItem, id: 141, audioLocale: 'es', audioTrackId: 'es.0', audioTrackName: 'Spanish', avgBitrate: 256000, bitrate: 256000 }
+			})
+		];
+		
+		const videoStreams = selectVideoStreams(streams);
+		const audioStreams = selectBestAudioStreams(streams);
+		
+		// Should select all 3 video qualities
+		expect(videoStreams.length).toBe(3);
+		expect(videoStreams.map(s => s.resolution)).toEqual(['1080p', '720p', '480p']);
+		
+		// Should select best audio for each language
+		expect(audioStreams.length).toBe(2); // English and Spanish
+		expect(audioStreams.every(s => s.bitrate === 256000)).toBe(true);
+		
+		// English should be first
+		expect(audioStreams[0].itagItem.audioLocale).toBe('en');
+	});
+});
