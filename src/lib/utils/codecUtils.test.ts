@@ -385,3 +385,111 @@ describe('inferMimeType', () => {
 		});
 	});
 });
+
+// =============================================================================
+// Integration Tests
+// =============================================================================
+
+describe('Codec Utils Integration', () => {
+	describe('codec normalization and MIME type inference', () => {
+		it('should work together for video streams', () => {
+			// Normalize codec
+			const codec = normalizeDashCodec('h264');
+			expect(codec).toBe('avc1.42E01E');
+			
+			// Infer MIME type using normalized codec
+			const mimeType = inferMimeType('MP4', codec, true);
+			expect(mimeType).toBe('video/mp4');
+		});
+
+		it('should work together for audio streams', () => {
+			// Normalize codec
+			const codec = normalizeDashCodec('aac');
+			expect(codec).toBe('mp4a.40.2');
+			
+			// Infer MIME type using normalized codec
+			const mimeType = inferMimeType('M4A', codec, false);
+			expect(mimeType).toBe('audio/mp4');
+		});
+
+		it('should handle VP9/WebM workflow', () => {
+			const codec = normalizeDashCodec('vp9');
+			expect(codec).toBe('vp09.00.10.08');
+			
+			const mimeType = inferMimeType('WEBM', codec, true);
+			expect(mimeType).toBe('video/webm');
+		});
+
+		it('should handle Opus/WebM workflow', () => {
+			const codec = normalizeDashCodec('opus');
+			expect(codec).toBe('opus');
+			
+			const mimeType = inferMimeType('WEBMA', codec, false);
+			expect(mimeType).toBe('audio/webm');
+		});
+	});
+
+	describe('typical YouTube stream processing', () => {
+		it('should process 1080p H264 video stream', () => {
+			const format = 'MPEG_4';
+			const rawCodec = 'avc1.640028';
+			
+			const normalizedCodec = normalizeDashCodec(rawCodec);
+			const mimeType = inferMimeType(format, normalizedCodec, true);
+			
+			expect(normalizedCodec).toBe('avc1.640028'); // Already normalized
+			expect(mimeType).toBe('video/mp4');
+		});
+
+		it('should process VP9 WebM video stream', () => {
+			const format = 'WEBM';
+			const rawCodec = 'vp09.00.10.08';
+			
+			const normalizedCodec = normalizeDashCodec(rawCodec);
+			const mimeType = inferMimeType(format, normalizedCodec, true);
+			
+			expect(normalizedCodec).toBe('vp09.00.10.08');
+			expect(mimeType).toBe('video/webm');
+		});
+
+		it('should process M4A audio stream', () => {
+			const format = 'M4A';
+			const rawCodec = 'mp4a.40.2';
+			
+			const normalizedCodec = normalizeDashCodec(rawCodec);
+			const mimeType = inferMimeType(format, normalizedCodec, false);
+			
+			expect(normalizedCodec).toBe('mp4a.40.2');
+			expect(mimeType).toBe('audio/mp4');
+		});
+
+		it('should process Opus audio stream', () => {
+			const format = 'WEBMA';
+			const rawCodec = 'opus';
+			
+			const normalizedCodec = normalizeDashCodec(rawCodec);
+			const mimeType = inferMimeType(format, normalizedCodec, false);
+			
+			expect(normalizedCodec).toBe('opus');
+			expect(mimeType).toBe('audio/webm');
+		});
+	});
+
+	describe('handling malformed input', () => {
+		it('should gracefully handle unknown format and codec', () => {
+			const codec = normalizeDashCodec('unknown-codec');
+			const mimeType = inferMimeType('unknown-format', codec, true);
+			
+			expect(codec).toBe('unknown-codec'); // Returned as-is
+			expect(mimeType).toBe('video/mp4'); // Fallback
+		});
+
+		it('should normalize common names even without format', () => {
+			const codec = normalizeDashCodec('h264');
+			const mimeType = inferMimeType(undefined, codec, true);
+			
+			expect(codec).toBe('avc1.42E01E');
+			expect(mimeType).toBe('video/mp4');
+		});
+	});
+});
