@@ -16,6 +16,7 @@ import {
 	getCallCount
 } from '../../tests/helpers/apiHelpers';
 import {
+    mockEmptySearchResult,
 	mockSearchResult,
 } from '../../tests/fixtures/apiFixtures';
 
@@ -251,6 +252,39 @@ describe('getSearchResults', () => {
 			const callUrl = (mockFetch as Mock).mock.calls[0][0] as string;
 			const params = extractQueryParams(callUrl);
 			expect(params.sortFilter).toBe('asc');
+		});
+	});
+
+    	// =============================================================================
+	// Empty Results Tests
+	// =============================================================================
+
+	describe('empty search results', () => {
+		it('should handle empty result array', async () => {
+			// Arrange
+			const query = 'nonexistent query xyz123';
+			const mockFetch = createSuccessfulFetch(mockEmptySearchResult);
+
+			// Act
+			const result = await getSearchResults(query, mockFetch as unknown as typeof globalThis.fetch);
+
+			// Assert
+			expect(result).toEqual([]);
+			expect(Array.isArray(result)).toBe(true);
+			expect(result).toHaveLength(0);
+		});
+
+		it('should return empty array for no results', async () => {
+			// Arrange
+			const query = 'asdfghjkl123456';
+			const mockFetch = createSuccessfulFetch([]);
+
+			// Act
+			const result = await getSearchResults(query, mockFetch as unknown as typeof globalThis.fetch);
+
+			// Assert
+			expect(result).toEqual([]);
+			expect(result).toHaveLength(0);
 		});
 	});
 });
