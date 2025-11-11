@@ -720,3 +720,81 @@ describe('generateDashManifest - XML Escaping', () => {
 		expect(manifest).toContain('&gt;');
 	});
 });
+
+// =============================================================================
+// Complete Manifest Tests
+// =============================================================================
+
+describe('generateDashManifest - Complete Manifests', () => {
+	it('should generate manifest with video, audio, and subtitles', () => {
+		const config = createMockDashConfig();
+		
+		const manifest = generateDashManifest(config);
+		
+		expect(manifest).toContain('contentType="video"');
+		expect(manifest).toContain('contentType="audio"');
+		expect(manifest).toContain('contentType="text"');
+	});
+
+	it('should generate manifest with video only', () => {
+		const config = createMinimalVideoConfig();
+		
+		const manifest = generateDashManifest(config);
+		
+		expect(manifest).toContain('contentType="video"');
+		expect(manifest).not.toContain('contentType="audio"');
+		expect(manifest).not.toContain('contentType="text"');
+	});
+
+	it('should generate manifest with audio only', () => {
+		const config = createMinimalAudioConfig();
+		
+		const manifest = generateDashManifest(config);
+		
+		expect(manifest).not.toContain('contentType="video"');
+		expect(manifest).toContain('contentType="audio"');
+	});
+
+	it('should generate manifest with video and audio only', () => {
+		const config: DashManifestConfig = {
+			videoStreams: [createMockVideoStream()],
+			audioStreams: [createMockAudioStream()],
+			duration: 120
+		};
+		
+		const manifest = generateDashManifest(config);
+		
+		expect(manifest).toContain('contentType="video"');
+		expect(manifest).toContain('contentType="audio"');
+		expect(manifest).not.toContain('contentType="text"');
+	});
+
+	it('should maintain proper XML structure', () => {
+		const config = createMockDashConfig();
+		
+		const manifest = generateDashManifest(config);
+		
+		// Count opening and closing tags
+		const openMPD = (manifest.match(/<MPD/g) || []).length;
+		const closeMPD = (manifest.match(/<\/MPD>/g) || []).length;
+		expect(openMPD).toBe(closeMPD);
+		
+		const openPeriod = (manifest.match(/<Period/g) || []).length;
+		const closePeriod = (manifest.match(/<\/Period>/g) || []).length;
+		expect(openPeriod).toBe(closePeriod);
+	});
+
+	it('should generate parseable XML', () => {
+		const config = createMockDashConfig();
+		
+		const manifest = generateDashManifest(config);
+		
+		// Should not throw when parsing
+		expect(() => {
+			if (typeof DOMParser !== 'undefined') {
+				const parser = new DOMParser();
+				parser.parseFromString(manifest, 'text/xml');
+			}
+		}).not.toThrow();
+	});
+});
