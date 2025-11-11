@@ -363,3 +363,188 @@ describe('generateDashManifest - Video Streams', () => {
 		});
 	});
 });
+
+// =============================================================================
+// Audio Adaptation Set Tests
+// =============================================================================
+
+describe('generateDashManifest - Audio Streams', () => {
+	describe('audio adaptation sets', () => {
+		it('should generate audio AdaptationSet', () => {
+			const config = createMinimalAudioConfig();
+			
+			const manifest = generateDashManifest(config);
+			
+			expect(manifest).toContain('<AdaptationSet');
+			expect(manifest).toContain('contentType="audio"');
+		});
+
+		it('should set correct MIME type for audio', () => {
+			const config = createMinimalAudioConfig();
+			
+			const manifest = generateDashManifest(config);
+			
+			expect(manifest).toContain('mimeType="audio/mp4"');
+		});
+
+		it('should create separate AdaptationSet per language', () => {
+			const config: DashManifestConfig = {
+				audioStreams: createMockMultiLanguageAudioStreams(),
+				duration: 120
+			};
+			
+			const manifest = generateDashManifest(config);
+			
+			// Should have 3 languages: en, es, fr
+			const adaptationSetMatches = manifest.match(/contentType="audio"/g);
+			expect(adaptationSetMatches?.length).toBe(3);
+		});
+
+		it('should include language attribute', () => {
+			const config = createMinimalAudioConfig();
+			config.audioStreams![0].language = 'en';
+			
+			const manifest = generateDashManifest(config);
+			
+			expect(manifest).toContain('lang="en"');
+		});
+
+		it('should include language label', () => {
+			const config = createMinimalAudioConfig();
+			config.audioStreams![0].languageName = 'English';
+			
+			const manifest = generateDashManifest(config);
+			
+			expect(manifest).toContain('label="English"');
+		});
+
+		it('should normalize language codes', () => {
+			const config: DashManifestConfig = {
+				audioStreams: [{
+					url: 'https://example.com/audio.m4a',
+					codec: 'mp4a.40.2',
+					language: 'es_419', // underscore format
+					languageName: 'Spanish (Latin America)'
+				}],
+				duration: 120
+			};
+			
+			const manifest = generateDashManifest(config);
+			
+			expect(manifest).toContain('lang="es-419"'); // normalized to hyphen
+		});
+
+		it('should handle undefined language', () => {
+			const config: DashManifestConfig = {
+				audioStreams: createAudioStreamsWithUndefinedLanguage(),
+				duration: 120
+			};
+			
+			const manifest = generateDashManifest(config);
+			
+			expect(manifest).toContain('lang="und"');
+			expect(manifest).toContain('lang="en"');
+		});
+	});
+
+	describe('audio representations', () => {
+		it('should generate Representation for each audio stream', () => {
+			const config: DashManifestConfig = {
+				audioStreams: [
+					createMockAudioStream({ language: 'en', bandwidth: 256000 }),
+					createMockAudioStream({ language: 'en', bandwidth: 128000 })
+				],
+				duration: 120
+			};
+			
+			const manifest = generateDashManifest(config);
+			
+			expect(manifest).toContain('bandwidth="256000"');
+			expect(manifest).toContain('bandwidth="128000"');
+		});
+
+		it('should include audio sampling rate', () => {
+			const config = createMinimalAudioConfig();
+			config.audioStreams![0].audioSampleRate = 48000;
+			
+			const manifest = generateDashManifest(config);
+			
+			expect(manifest).toContain('audioSamplingRate="48000"');
+		});
+
+		it('should include audio channel configuration', () => {
+			const config = createMinimalAudioConfig();
+			config.audioStreams![0].audioChannels = 2;
+			
+			const manifest = generateDashManifest(config);
+			
+			expect(manifest).toContain('<AudioChannelConfiguration');
+			expect(manifest).toContain('value="2"');
+		});
+
+		it('should use default values when optional fields missing', () => {
+			const config: DashManifestConfig = {
+				audioStreams: [{
+					url: 'https://example.com/audio.m4a',
+					codec: 'mp4a.40.2',
+					language: 'en'
+				}],
+				duration: 120
+			};
+			
+			const manifest = generateDashManifest(config);
+			
+			expect(manifest).toContain('bandwidth="128000"'); // default
+			expect(manifest).toContain('audioSamplingRate="44100"'); // default
+			expect(manifest).toContain('value="2"'); // default channels
+		});
+
+		it('should normalize audio codecs', () => {
+			const config: DashManifestConfig = {
+				audioStreams: [{
+					url: 'https://example.com/audio.m4a',
+					codec: 'aac', // should normalize to mp4a.40.2
+					language: 'en'
+				}],
+				duration: 120
+			};
+			
+			const manifest = generateDashManifest(config);
+			
+			expect(manifest).toContain('codecs="mp4a.40.2"');
+		});
+	});
+
+	describe('multiple audio languages', () => {
+		it('should group streams by language', () => {
+			const config: DashManifestConfig = {
+				audioStreams: [
+					createMockAudioStream({ language: 'en', bandwidth: 256000 }),
+					createMockAudioStream({ language: 'en', bandwidth: 128000 }),
+					createMockAudioStream({ language: 'es', bandwidth: 128000 })
+				],
+				duration: 120
+			};
+			
+			const manifest = generateDashManifest(config);
+			
+			// Should have 2 audio adaptation sets (en and es)
+			const audioAdaptationSets = manifest.match(/contentType="audio"/g);
+			expect(audioAdaptationSets?.length).toBe(2);
+		});
+
+		it('should assign unique IDs to audio adaptation sets', () => {
+			const config: DashManifestConfig = {
+				audioStreams: createMockMultiLanguageAudioStreams(),
+				duration: 120
+			};
+			
+			const manifest = generateDashManifest(config);
+			
+			// Audio adaptation set IDs start at 1
+			expect(manifest).toMatch(/<AdaptationSet[^>]*id="1"[^>]*contentType="audio"/);
+			expect(manifest).toMatch(/<AdaptationSet[^>]*id="2"[^>]*contentType="audio"/);
+			expect(manifest).toMatch(/<AdaptationSet[^>]*id="3"[^>]*contentType="audio"/);
+		});
+	});
+});
