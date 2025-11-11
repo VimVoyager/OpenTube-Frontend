@@ -20,9 +20,9 @@ export function normalizeDashCodec(codec: string): string {
 	}
 
 	// Map common codec variations to DASH format
-	if (lowerCodec.includes('h264')) return 'avc1.42E01E';
-	if (lowerCodec.includes('vp9')) return 'vp09.00.10.08';
-	if (lowerCodec.includes('av1')) return 'av01.0.05M.08';
+	if (lowerCodec.includes('h264') || lowerCodec.includes('h.264')) return 'avc1.42E01E';
+	if (lowerCodec.includes('vp9') || lowerCodec.includes('vp-9')) return 'vp09.00.10.08';
+	if (lowerCodec.includes('av1') || lowerCodec.includes('av-1')) return 'av01.0.05M.08';
 	if (lowerCodec.includes('aac')) return 'mp4a.40.2';
 	if (lowerCodec.includes('opus')) return 'opus';
 	if (lowerCodec.includes('vorbis')) return 'vorbis';
