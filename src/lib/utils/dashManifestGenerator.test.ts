@@ -894,3 +894,157 @@ describe('Blob URL Functions', () => {
 		});
 	});
 });
+
+// =============================================================================
+// Integration Tests
+// =============================================================================
+
+describe('DASH Manifest Generator Integration', () => {
+	describe('typical YouTube video workflow', () => {
+		it('should generate manifest for multi-quality video with audio', () => {
+			const config: DashManifestConfig = {
+				videoStreams: createMockVideoStreamSet(),
+				audioStreams: createMockMultiLanguageAudioStreams(),
+				duration: 600
+			};
+			
+			const manifest = generateDashManifest(config);
+			
+			// Should have video adaptation set
+			expect(manifest).toContain('contentType="video"');
+			expect(manifest).toContain('id="video-1"');
+			expect(manifest).toContain('id="video-2"');
+			expect(manifest).toContain('id="video-3"');
+			
+			// Should have audio adaptation sets for each language
+			expect(manifest).toContain('contentType="audio"');
+			expect(manifest).toContain('lang="en"');
+			expect(manifest).toContain('lang="es"');
+			expect(manifest).toContain('lang="fr"');
+			
+			// Should have correct duration
+			expect(manifest).toContain('PT10M');
+		});
+
+		it('should generate complete workflow with blob URL', () => {
+			const config = createMockDashConfig();
+			
+			const blobUrl = generateDashManifestBlobUrl(config);
+			
+			expect(blobUrl).toMatch(/^blob:/);
+			
+			// Should be able to revoke
+			revokeDashManifestBlobUrl(blobUrl);
+		});
+
+		it('should handle video-only livestream scenario', () => {
+			const config: DashManifestConfig = {
+				videoStreams: [
+					createMockVideoStream({
+						bandwidth: 2500000,
+						width: 1280,
+						height: 720,
+						frameRate: 30
+					})
+				],
+				duration: 0 // Live content
+			};
+			
+			const manifest = generateDashManifest(config);
+			
+			expect(manifest).toContain('contentType="video"');
+			expect(manifest).toContain('PT0S');
+		});
+	});
+
+	describe('real-world edge cases', () => {
+		it('should handle streams with minimal metadata', () => {
+			const config: DashManifestConfig = {
+				videoStreams: [{
+					url: 'https://example.com/video.mp4',
+					codec: 'avc1.640028'
+				}],
+				audioStreams: [{
+					url: 'https://example.com/audio.m4a',
+					codec: 'mp4a.40.2',
+					language: 'en'
+				}],
+				duration: 120
+			};
+			
+			const manifest = generateDashManifest(config);
+			
+			expect(manifest).toContain('contentType="video"');
+			expect(manifest).toContain('contentType="audio"');
+		});
+
+		it('should handle complex multi-language audio scenario', () => {
+			const config: DashManifestConfig = {
+				videoStreams: [createMockVideoStream()],
+				audioStreams: [
+					// English - multiple bitrates
+					createMockAudioStream({ language: 'en', bandwidth: 256000 }),
+					createMockAudioStream({ language: 'en', bandwidth: 128000 }),
+					// Spanish
+					createMockAudioStream({ language: 'es', bandwidth: 128000 }),
+					// French
+					createMockAudioStream({ language: 'fr', bandwidth: 128000 }),
+					// Original/undefined
+					createMockAudioStream({ language: 'und', languageName: 'Original', bandwidth: 256000 })
+				],
+				duration: 600
+			};
+			
+			const manifest = generateDashManifest(config);
+			
+			// Should have 4 audio adaptation sets (en, es, fr, und)
+			const audioAdaptationSets = manifest.match(/contentType="audio"/g);
+			expect(audioAdaptationSets?.length).toBe(4);
+		});
+
+		it('should handle mixed format streams', () => {
+			const config: DashManifestConfig = {
+				videoStreams: [
+					createMockVideoStream({ format: 'MP4', codec: 'avc1.640028' }),
+					createMockVideoStream({ format: 'WEBM', codec: 'vp09.00.10.08' })
+				],
+				audioStreams: [
+					createMockAudioStream({ format: 'M4A', codec: 'mp4a.40.2', language: 'en' }),
+					createMockAudioStream({ format: 'WEBM', codec: 'opus', language: 'en' })
+				],
+				duration: 120
+			};
+			
+			const manifest = generateDashManifest(config);
+			
+			// First stream determines MIME type for adaptation set
+			expect(manifest).toContain('mimeType="video/mp4"');
+			expect(manifest).toContain('mimeType="audio/mp4"');
+		});
+	});
+
+	describe('error recovery', () => {
+		it('should handle gracefully when byte ranges are incomplete', () => {
+			const config: DashManifestConfig = {
+				videoStreams: createStreamsWithPartialByteRanges(),
+				duration: 120
+			};
+			
+			const manifest = generateDashManifest(config);
+			
+			// Should generate manifest but without SegmentBase
+			expect(manifest).toContain('contentType="video"');
+			expect(manifest).not.toContain('<SegmentBase');
+		});
+
+		it('should validate and throw meaningful errors', () => {
+			const config: DashManifestConfig = {
+				duration: 120
+			};
+			
+			expect(() => generateDashManifest(config)).toThrow(
+				'At least one stream'
+			);
+		});
+	});
+});
