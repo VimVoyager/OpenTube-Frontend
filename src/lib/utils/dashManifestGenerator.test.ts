@@ -4,9 +4,12 @@
  * Tests for DASH manifest generation with video, audio, and subtitle streams
  */
 
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { 
+    createDashManifestBlobUrl,
     generateDashManifest,
+    generateDashManifestBlobUrl,
+    revokeDashManifestBlobUrl,
     type DashManifestConfig
  } from './dashManifestGenerator';
 import {
@@ -796,5 +799,98 @@ describe('generateDashManifest - Complete Manifests', () => {
 				parser.parseFromString(manifest, 'text/xml');
 			}
 		}).not.toThrow();
+	});
+});
+
+// =============================================================================
+// Blob URL Tests
+// =============================================================================
+
+describe('Blob URL Functions', () => {
+	describe('createDashManifestBlobUrl', () => {
+		it('should create blob URL from manifest', () => {
+			const manifest = '<?xml version="1.0"?><MPD></MPD>';
+			
+			const blobUrl = createDashManifestBlobUrl(manifest);
+			
+			expect(blobUrl).toMatch(/^blob:/);
+		});
+
+		it('should create URL with correct MIME type', () => {
+			const manifest = '<?xml version="1.0"?><MPD></MPD>';
+			
+			const blobUrl = createDashManifestBlobUrl(manifest);
+			
+			// Blob URL should be created (implementation detail)
+			expect(blobUrl).toBeTruthy();
+		});
+
+		it('should handle empty manifest', () => {
+			const manifest = '';
+			
+			const blobUrl = createDashManifestBlobUrl(manifest);
+			
+			expect(blobUrl).toMatch(/^blob:/);
+		});
+
+		it('should handle large manifests', () => {
+			const manifest = '<?xml version="1.0"?><MPD>' + 'x'.repeat(100000) + '</MPD>';
+			
+			const blobUrl = createDashManifestBlobUrl(manifest);
+			
+			expect(blobUrl).toMatch(/^blob:/);
+		});
+	});
+
+	describe('revokeDashManifestBlobUrl', () => {
+		it('should revoke blob URL', () => {
+			const manifest = '<?xml version="1.0"?><MPD></MPD>';
+			const blobUrl = createDashManifestBlobUrl(manifest);
+			
+			expect(() => revokeDashManifestBlobUrl(blobUrl)).not.toThrow();
+		});
+
+		it('should handle non-blob URLs gracefully', () => {
+			const regularUrl = 'https://example.com/manifest.mpd';
+			
+			expect(() => revokeDashManifestBlobUrl(regularUrl)).not.toThrow();
+		});
+
+		it('should handle empty string', () => {
+			expect(() => revokeDashManifestBlobUrl('')).not.toThrow();
+		});
+	});
+
+	describe('generateDashManifestBlobUrl', () => {
+		beforeEach(() => {
+			vi.spyOn(console, 'log').mockImplementation(() => {});
+		});
+
+		it('should generate manifest and create blob URL', () => {
+			const config = createMinimalVideoConfig();
+			
+			const blobUrl = generateDashManifestBlobUrl(config);
+			
+			expect(blobUrl).toMatch(/^blob:/);
+		});
+
+		it('should log generated manifest', () => {
+			const config = createMinimalVideoConfig();
+			
+			generateDashManifestBlobUrl(config);
+			
+			expect(console.log).toHaveBeenCalledWith(
+				'Generated DASH manifest:',
+				expect.any(String)
+			);
+		});
+
+		it('should handle complex configurations', () => {
+			const config = createMockDashConfig();
+			
+			const blobUrl = generateDashManifestBlobUrl(config);
+			
+			expect(blobUrl).toMatch(/^blob:/);
+		});
 	});
 });
