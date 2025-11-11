@@ -88,7 +88,7 @@ function sortByLanguagePriority(subtitles: Subtitle[]): Subtitle[] {
  * Select the best subtitles from available options
  * Returns deduplicated, filtered, and sorted subtitles
  */
-export function selectSubtitles(subtitles: Subtitle[]): Subtitle[] {
+export function selectSubtitles(subtitles: Subtitle[] | null | undefined): Subtitle[] {
 	if (!subtitles || subtitles.length === 0) {
 		return [];
 	}
