@@ -255,7 +255,7 @@ describe('getSearchResults', () => {
 		});
 	});
 
-    	// =============================================================================
+    // =============================================================================
 	// Empty Results Tests
 	// =============================================================================
 
@@ -285,6 +285,150 @@ describe('getSearchResults', () => {
 			// Assert
 			expect(result).toEqual([]);
 			expect(result).toHaveLength(0);
+		});
+	});
+
+    // =============================================================================
+	// HTTP Error Tests
+	// =============================================================================
+
+	describe('HTTP error handling', () => {
+		it('should throw error on 404 response', async () => {
+			// Arrange
+			const query = 'test';
+			const mockFetch = createFailedFetch(404, 'Not Found');
+
+			// Act & Assert
+			await expect(getSearchResults(query, mockFetch)).rejects.toThrow(
+				'Could not load search results: 404 Not Found'
+			);
+		});
+
+		it('should throw error on 500 response', async () => {
+			// Arrange
+			const query = 'test';
+			const mockFetch = createFailedFetch(500, 'Internal Server Error');
+
+			// Act & Assert
+			await expect(getSearchResults(query, mockFetch)).rejects.toThrow(
+				'Could not load search results: 500 Internal Server Error'
+			);
+		});
+
+		it('should throw error on 400 response', async () => {
+			// Arrange
+			const query = 'test';
+			const mockFetch = createFailedFetch(400, 'Bad Request');
+
+			// Act & Assert
+			await expect(getSearchResults(query, mockFetch)).rejects.toThrow(
+				'Could not load search results: 400 Bad Request'
+			);
+		});
+
+		it('should throw error on 401 response', async () => {
+			// Arrange
+			const query = 'test';
+			const mockFetch = createFailedFetch(401, 'Unauthorized');
+
+			// Act & Assert
+			await expect(getSearchResults(query, mockFetch)).rejects.toThrow(
+				'Could not load search results: 401 Unauthorized'
+			);
+		});
+
+		it('should throw error on 403 response', async () => {
+			// Arrange
+			const query = 'test';
+			const mockFetch = createFailedFetch(403, 'Forbidden');
+
+			// Act & Assert
+			await expect(getSearchResults(query, mockFetch)).rejects.toThrow(
+				'Could not load search results: 403 Forbidden'
+			);
+		});
+
+		it('should throw error on 503 response', async () => {
+			// Arrange
+			const query = 'test';
+			const mockFetch = createFailedFetch(503, 'Service Unavailable');
+
+			// Act & Assert
+			await expect(getSearchResults(query, mockFetch)).rejects.toThrow(
+				'Could not load search results: 503 Service Unavailable'
+			);
+		});
+
+		it('should include status code in error message', async () => {
+			// Arrange
+			const query = 'test';
+			const mockFetch = createFailedFetch(418, "I'm a teapot");
+
+			// Act & Assert
+			await expect(getSearchResults(query, mockFetch)).rejects.toThrow(
+				/418/
+			);
+		});
+
+		it('should include status text in error message', async () => {
+			// Arrange
+			const query = 'test';
+			const mockFetch = createFailedFetch(429, 'Too Many Requests');
+
+			// Act & Assert
+			await expect(getSearchResults(query, mockFetch)).rejects.toThrow(
+				/Too Many Requests/
+			);
+		});
+	});
+
+	// =============================================================================
+	// Network Error Tests
+	// =============================================================================
+
+	describe('network error handling', () => {
+		it('should throw error on network failure', async () => {
+			// Arrange
+			const query = 'test';
+			const mockFetch = createNetworkErrorFetch('Failed to fetch');
+
+			// Act & Assert
+			await expect(getSearchResults(query, mockFetch)).rejects.toThrow(
+				'Failed to fetch'
+			);
+		});
+
+		it('should throw error on timeout', async () => {
+			// Arrange
+			const query = 'test';
+			const mockFetch = createNetworkErrorFetch('Request timeout');
+
+			// Act & Assert
+			await expect(getSearchResults(query, mockFetch)).rejects.toThrow(
+				'Request timeout'
+			);
+		});
+
+		it('should throw error on connection refused', async () => {
+			// Arrange
+			const query = 'test';
+			const mockFetch = createNetworkErrorFetch('Connection refused');
+
+			// Act & Assert
+			await expect(getSearchResults(query, mockFetch)).rejects.toThrow(
+				'Connection refused'
+			);
+		});
+
+		it('should throw error on DNS failure', async () => {
+			// Arrange
+			const query = 'test';
+			const mockFetch = createNetworkErrorFetch('DNS resolution failed');
+
+			// Act & Assert
+			await expect(getSearchResults(query, mockFetch)).rejects.toThrow(
+				'DNS resolution failed'
+			);
 		});
 	});
 });
