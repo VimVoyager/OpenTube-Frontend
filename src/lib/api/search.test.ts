@@ -431,4 +431,62 @@ describe('getSearchResults', () => {
 			);
 		});
 	});
+
+    // =============================================================================
+	// Response Parsing Tests
+	// =============================================================================
+
+	describe('response parsing', () => {
+		it('should parse JSON response correctly', async () => {
+			// Arrange
+			const query = 'test';
+			const mockFetch = createSuccessfulFetch(mockSearchResult);
+
+			// Act
+			const result = await getSearchResults(query, mockFetch as unknown as typeof globalThis.fetch);
+
+			// Assert
+			expect(result).toEqual(mockSearchResult);
+			expect(result[0]).toHaveProperty('id');
+			expect(result[0]).toHaveProperty('name');
+			expect(result[0]).toHaveProperty('url');
+			expect(result[0]).toHaveProperty('viewCount');
+		});
+
+		it('should handle response with all video properties', async () => {
+			// Arrange
+			const query = 'test';
+			const mockFetch = createSuccessfulFetch(mockSearchResult);
+
+			// Act
+			const result = await getSearchResults(query, mockFetch as unknown as typeof globalThis.fetch);
+
+			// Assert
+			const video = result[0];
+			expect(video).toHaveProperty('id');
+			expect(video).toHaveProperty('url');
+			expect(video).toHaveProperty('name');
+			expect(video).toHaveProperty('thumbnails');
+			expect(video).toHaveProperty('duration');
+			expect(video).toHaveProperty('uploaderName');
+			expect(video).toHaveProperty('viewCount');
+		});
+
+		it('should preserve data types from response', async () => {
+			// Arrange
+			const query = 'test';
+			const mockFetch = createSuccessfulFetch(mockSearchResult);
+
+			// Act
+			const result = await getSearchResults(query, mockFetch as unknown as typeof globalThis.fetch);
+
+			// Assert
+			const video = result[0];
+			expect(typeof video.id).toBe('string');
+			expect(typeof video.name).toBe('string');
+			expect(typeof video.duration).toBe('number');
+			expect(typeof video.viewCount).toBe('number');
+			expect(Array.isArray(video.thumbnails)).toBe(true);
+		});
+	});
 });
