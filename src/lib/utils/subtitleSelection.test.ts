@@ -8,7 +8,6 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import {
     logSelectedSubtitles,
     selectSubtitles,
-    subtitleSelection,
 } from './subtitleSelection';
 import type { Subtitle } from '$lib/types';
 import {
