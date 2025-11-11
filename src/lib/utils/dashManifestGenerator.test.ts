@@ -548,3 +548,108 @@ describe('generateDashManifest - Audio Streams', () => {
 		});
 	});
 });
+
+// =============================================================================
+// Subtitle Adaptation Set Tests
+// =============================================================================
+
+describe('generateDashManifest - Subtitles', () => {
+	describe('subtitle adaptation sets', () => {
+		it('should generate subtitle AdaptationSet', () => {
+			const config: DashManifestConfig = {
+				videoStreams: [createMockVideoStream()],
+				subtitleStreams: [createMockSubtitle()],
+				duration: 120
+			};
+			
+			const manifest = generateDashManifest(config);
+			
+			expect(manifest).toContain('contentType="text"');
+		});
+
+		it('should include subtitle language', () => {
+			const config: DashManifestConfig = {
+				videoStreams: [createMockVideoStream()],
+				subtitleStreams: [createMockSubtitle({ language: 'es' })],
+				duration: 120
+			};
+			
+			const manifest = generateDashManifest(config);
+			
+			expect(manifest).toContain('lang="es"');
+		});
+
+		it('should include subtitle MIME type', () => {
+			const config: DashManifestConfig = {
+				videoStreams: [createMockVideoStream()],
+				subtitleStreams: [createMockSubtitle()],
+				duration: 120
+			};
+			
+			const manifest = generateDashManifest(config);
+			
+			expect(manifest).toContain('mimeType="text/vtt"');
+		});
+
+		it('should include Role element', () => {
+			const config: DashManifestConfig = {
+				videoStreams: [createMockVideoStream()],
+				subtitleStreams: [createMockSubtitle()],
+				duration: 120
+			};
+			
+			const manifest = generateDashManifest(config);
+			
+			expect(manifest).toContain('<Role');
+			expect(manifest).toContain('urn:mpeg:dash:role:2011');
+		});
+
+		it('should set role to subtitles by default', () => {
+			const config: DashManifestConfig = {
+				videoStreams: [createMockVideoStream()],
+				subtitleStreams: [createMockSubtitle({ kind: undefined })],
+				duration: 120
+			};
+			
+			const manifest = generateDashManifest(config);
+			
+			expect(manifest).toContain('value="subtitles"');
+		});
+
+		it('should set role to captions when specified', () => {
+			const config: DashManifestConfig = {
+				videoStreams: [createMockVideoStream()],
+				subtitleStreams: [createMockSubtitle({ kind: 'captions' })],
+				duration: 120
+			};
+			
+			const manifest = generateDashManifest(config);
+			
+			expect(manifest).toContain('value="captions"');
+		});
+
+		it('should generate representation for each subtitle', () => {
+			const config: DashManifestConfig = {
+				videoStreams: [createMockVideoStream()],
+				subtitleStreams: createMockSubtitleSet(),
+				duration: 120
+			};
+			
+			const manifest = generateDashManifest(config);
+			
+			// Should have 3 subtitle representations
+			const subtitleReps = manifest.match(/subtitle-\d+/g);
+			expect(subtitleReps?.length).toBeGreaterThanOrEqual(3);
+		});
+
+		it('should assign IDs after video and audio adaptation sets', () => {
+			const config = createMockDashConfig();
+			
+			const manifest = generateDashManifest(config);
+			
+			// Video is 0, audio starts at 1, subtitles come after
+			// With 3 audio languages, subtitles should start at 4
+			expect(manifest).toContain('id="4"'); // First subtitle
+		});
+	});
+});
