@@ -203,4 +203,54 @@ describe('getSearchResults', () => {
 			expect(params.searchString).toBe(query);
 		});
     });
+
+    	// =============================================================================
+	// URL Construction Tests
+	// =============================================================================
+
+	describe('API URL construction', () => {
+		it('should construct correct API URL with all parameters', async () => {
+			// Arrange
+			const query = 'test';
+			const mockFetch = createSuccessfulFetch(mockSearchResult);
+
+			// Act
+			await getSearchResults(query, mockFetch as unknown as typeof globalThis.fetch);
+
+			// Assert
+			const callUrl = (mockFetch as Mock).mock.calls[0][0] as string;
+			expect(callUrl).toContain('http://localhost:8000/api/v1/search');
+			expect(callUrl).toContain('serviceId=0');
+			expect(callUrl).toContain('sortFilter=asc');
+			expect(callUrl).toContain('searchString=test');
+		});
+
+		it('should include serviceId parameter', async () => {
+			// Arrange
+			const query = 'test';
+			const mockFetch = createSuccessfulFetch(mockSearchResult);
+
+			// Act
+			await getSearchResults(query, mockFetch as unknown as typeof globalThis.fetch);
+
+			// Assert
+			const callUrl = (mockFetch as Mock).mock.calls[0][0] as string;
+			const params = extractQueryParams(callUrl);
+			expect(params.serviceId).toBe('0');
+		});
+
+		it('should include sortFilter parameter', async () => {
+			// Arrange
+			const query = 'test';
+			const mockFetch = createSuccessfulFetch(mockSearchResult);
+
+			// Act
+			await getSearchResults(query, mockFetch as unknown as typeof globalThis.fetch);
+
+			// Assert
+			const callUrl = (mockFetch as Mock).mock.calls[0][0] as string;
+			const params = extractQueryParams(callUrl);
+			expect(params.sortFilter).toBe('asc');
+		});
+	});
 });
