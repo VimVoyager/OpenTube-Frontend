@@ -5,7 +5,7 @@
  * response parsing, and error scenarios
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach, type Mock } from 'vitest';
 import { getSearchResults } from './search';
 import {
 	createSuccessfulFetch,
@@ -98,4 +98,109 @@ describe('getSearchResults', () => {
 			expect(global.fetch).toHaveBeenCalledTimes(1);
 		});
 	});
+
+    // =============================================================================
+	// Query Sanitization Tests
+	// =============================================================================
+
+	describe('query sanitization and encoding', () => {
+		it('should URL encode query with special characters', async () => {
+			// Arrange
+			const query = 'test & query = value';
+			const mockFetch = createSuccessfulFetch(mockSearchResult);
+
+			// Act
+			await getSearchResults(query, mockFetch);
+
+			// Assert
+			const callUrl = (mockFetch as Mock).mock.calls[0][0] as string;
+			const params = extractQueryParams(callUrl);
+			expect(params.searchString).toBe(query);
+		});
+
+		it('should handle queries with spaces', async () => {
+			// Arrange
+			const query = 'test query with spaces';
+			const mockFetch = createSuccessfulFetch(mockSearchResult);
+
+			// Act
+			await getSearchResults(query, mockFetch);
+
+			// Assert
+			const callUrl = (mockFetch as Mock).mock.calls[0][0] as string;
+			expect(callUrl).toContain('searchString=');
+			const params = extractQueryParams(callUrl);
+			expect(params.searchString).toBe(query);
+		});
+
+		it('should handle queries with Unicode characters', async () => {
+			// Arrange
+			const query = 'test 测试 тест';
+			const mockFetch = createSuccessfulFetch(mockSearchResult);
+
+			// Act
+			await getSearchResults(query, mockFetch);
+
+			// Assert
+			const callUrl = (mockFetch as Mock).mock.calls[0][0] as string;
+			const params = extractQueryParams(callUrl);
+			expect(params.searchString).toBe(query);
+		});
+
+		it('should handle queries with emojis', async () => {
+			// Arrange
+			const query = 'test 😀 🎉';
+			const mockFetch = createSuccessfulFetch(mockSearchResult);
+
+			// Act
+			await getSearchResults(query, mockFetch);
+
+			// Assert
+			const callUrl = (mockFetch as Mock).mock.calls[0][0] as string;
+			const params = extractQueryParams(callUrl);
+			expect(params.searchString).toBe(query);
+		});
+
+		it('should handle queries with URL-sensitive characters', async () => {
+			// Arrange
+			const query = 'test?query&param=value#hash';
+			const mockFetch = createSuccessfulFetch(mockSearchResult);
+
+			// Act
+			await getSearchResults(query, mockFetch);
+
+			// Assert
+			const callUrl = (mockFetch as Mock).mock.calls[0][0] as string;
+			const params = extractQueryParams(callUrl);
+			expect(params.searchString).toBe(query);
+		});
+
+		it('should handle queries with quotes', async () => {
+			// Arrange
+			const query = 'test "quoted text" \'single quotes\'';
+			const mockFetch = createSuccessfulFetch(mockSearchResult);
+
+			// Act
+			await getSearchResults(query, mockFetch);
+
+			// Assert
+			const callUrl = (mockFetch as Mock).mock.calls[0][0] as string;
+			const params = extractQueryParams(callUrl);
+			expect(params.searchString).toBe(query);
+		});
+
+		it('should handle queries with forward slashes', async () => {
+			// Arrange
+			const query = 'test/path/to/something';
+			const mockFetch = createSuccessfulFetch(mockSearchResult);
+
+			// Act
+			await getSearchResults(query, mockFetch);
+
+			// Assert
+			const callUrl = (mockFetch as Mock).mock.calls[0][0] as string;
+			const params = extractQueryParams(callUrl);
+			expect(params.searchString).toBe(query);
+		});
+    });
 });

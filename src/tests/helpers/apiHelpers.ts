@@ -7,6 +7,16 @@
 import { vi } from 'vitest';
 
 // =============================================================================
+// Types
+// =============================================================================
+
+/**
+ * Type for a mocked fetch function that can be used in tests
+ * This combines the fetch signature with Vitest mock capabilities
+ */
+export type MockFetch = ReturnType<typeof vi.fn> & ((input: RequestInfo | URL, init?: RequestInit) => Promise<Response>);
+
+// =============================================================================
 // Mock Fetch Helpers
 // =============================================================================
 
