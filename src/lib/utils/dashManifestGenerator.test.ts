@@ -653,3 +653,70 @@ describe('generateDashManifest - Subtitles', () => {
 		});
 	});
 });
+
+// =============================================================================
+// XML Escaping Tests
+// =============================================================================
+
+describe('generateDashManifest - XML Escaping', () => {
+	it('should escape special characters in URLs', () => {
+		const config: DashManifestConfig = {
+			videoStreams: createStreamsWithSpecialCharacters(),
+			duration: 120
+		};
+		
+		const manifest = generateDashManifest(config);
+		
+		expect(manifest).toContain('&lt;');
+		expect(manifest).toContain('&gt;');
+		expect(manifest).toContain('&quot;');
+		expect(manifest).toContain('&apos;');
+	});
+
+	it('should escape ampersands in URLs', () => {
+		const config: DashManifestConfig = {
+			videoStreams: [{
+				url: 'https://example.com/video?a=1&b=2',
+				codec: 'avc1.640028'
+			}],
+			duration: 120
+		};
+		
+		const manifest = generateDashManifest(config);
+		
+		expect(manifest).toContain('&amp;');
+	});
+
+	it('should escape special characters in language names', () => {
+		const config: DashManifestConfig = {
+			audioStreams: [{
+				url: 'https://example.com/audio.m4a',
+				codec: 'mp4a.40.2',
+				language: 'en',
+				languageName: 'English "CC" <HD>'
+			}],
+			duration: 120
+		};
+		
+		const manifest = generateDashManifest(config);
+		
+		expect(manifest).toContain('&quot;');
+		expect(manifest).toContain('&lt;');
+		expect(manifest).toContain('&gt;');
+	});
+
+	it('should escape special characters in codecs', () => {
+		const config: DashManifestConfig = {
+			videoStreams: [{
+				url: 'https://example.com/video.mp4',
+				codec: 'avc1.640028<test>'
+			}],
+			duration: 120
+		};
+		
+		const manifest = generateDashManifest(config);
+		
+		expect(manifest).toContain('&lt;');
+		expect(manifest).toContain('&gt;');
+	});
+});
