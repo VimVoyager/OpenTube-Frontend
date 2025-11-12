@@ -77,4 +77,80 @@ describe('getVideoDetails', () => {
 			expect(global.fetch).toHaveBeenCalledTimes(1);
 		});
 	});
+
+    // =============================================================================
+	// Video Metadata Tests
+	// =============================================================================
+
+	describe('video metadata parsing', () => {
+		it('should correctly parse video title', async () => {
+			// Arrange
+			const videoId = 'test-id';
+			const mockFetch = createSuccessfulFetch(mockVideoDetails);
+
+			// Act
+			const result = await getVideoDetails(videoId, mockFetch as unknown as typeof globalThis.fetch);
+
+			// Assert
+			expect(result.videoTitle).toBe('Test Video Title');
+			expect(typeof result.videoTitle).toBe('string');
+		});
+
+		it('should correctly parse description', async () => {
+			// Arrange
+			const videoId = 'test-id';
+			const mockFetch = createSuccessfulFetch(mockVideoDetails);
+
+			// Act
+			const result = await getVideoDetails(videoId, mockFetch as unknown as typeof globalThis.fetch);
+
+			// Assert
+			expect(result.description).toHaveProperty('content');
+			expect(result.description.content).toBe(
+				'This is a test video description with details about the content.'
+			);
+		});
+
+		it('should correctly parse upload date', async () => {
+			// Arrange
+			const videoId = 'test-id';
+			const mockFetch = createSuccessfulFetch(mockVideoDetails);
+
+			// Act
+			const result = await getVideoDetails(videoId, mockFetch as unknown as typeof globalThis.fetch);
+
+			// Assert
+			expect(result.uploadDate).toBe('2024-01-15');
+			expect(typeof result.uploadDate).toBe('string');
+		});
+
+		it('should correctly parse channel name', async () => {
+			// Arrange
+			const videoId = 'test-id';
+			const mockFetch = createSuccessfulFetch(mockVideoDetails);
+
+			// Act
+			const result = await getVideoDetails(videoId, mockFetch as unknown as typeof globalThis.fetch);
+
+			// Assert
+			expect(result.channelName).toBe('Test Channel');
+			expect(typeof result.channelName).toBe('string');
+		});
+
+		it('should correctly parse uploader avatars', async () => {
+			// Arrange
+			const videoId = 'test-id';
+			const mockFetch = createSuccessfulFetch(mockVideoDetails);
+
+			// Act
+			const result = await getVideoDetails(videoId, mockFetch as unknown as typeof globalThis.fetch);
+
+			// Assert
+			expect(Array.isArray(result.uploaderAvatars)).toBe(true);
+			expect(result.uploaderAvatars).toHaveLength(1);
+			expect(result.uploaderAvatars[0]).toHaveProperty('url');
+			expect(result.uploaderAvatars[0]).toHaveProperty('height');
+			expect(result.uploaderAvatars[0]).toHaveProperty('width');
+		});
+	});
 });
