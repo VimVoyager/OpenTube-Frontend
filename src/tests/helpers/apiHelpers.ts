@@ -78,7 +78,7 @@ export function createErrorResponse(
 /**
  * Creates a mock fetch function that succeeds
  */
-export function createSuccessfulFetch<T>(data: T): typeof globalThis.fetch {
+export function createSuccessfulFetch<T>(data: T): ReturnType<typeof vi.fn> {
     return vi.fn().mockResolvedValue(createMockResponse(data));
 }
 

@@ -32,7 +32,7 @@ describe('getSearchResults', () => {
 			const mockFetch = createSuccessfulFetch(mockSearchResult);
 
 			// Act
-			const result = await getSearchResults(query, mockFetch);
+			const result = await getSearchResults(query, mockFetch as unknown as typeof globalThis.fetch);
 
 			// Assert
 			expect(result).toEqual(mockSearchResult);
@@ -45,7 +45,7 @@ describe('getSearchResults', () => {
 			const mockFetch = createSuccessfulFetch(mockSearchResult);
 
 			// Act
-			const result = await getSearchResults(query, mockFetch);
+			const result = await getSearchResults(query, mockFetch as unknown as typeof globalThis.fetch);
 
 			// Assert
 			expect(Array.isArray(result)).toBe(true);
@@ -61,7 +61,7 @@ describe('getSearchResults', () => {
 			const mockFetch = createSuccessfulFetch(mockSearchResult);
 
 			// Act
-			const result = await getSearchResults(query, mockFetch);
+			const result = await getSearchResults(query, mockFetch as unknown as typeof globalThis.fetch);
 
 			// Assert
 			expect(result).toEqual(mockSearchResult);
@@ -74,7 +74,7 @@ describe('getSearchResults', () => {
 			const mockFetch = createSuccessfulFetch(mockSearchResult);
 
 			// Act
-			const result = await getSearchResults(query, mockFetch);
+			const result = await getSearchResults(query, mockFetch as unknown as typeof globalThis.fetch);
 
 			// Assert
 			expect(result).toEqual(mockSearchResult);
@@ -111,7 +111,7 @@ describe('getSearchResults', () => {
 			const mockFetch = createSuccessfulFetch(mockSearchResult);
 
 			// Act
-			await getSearchResults(query, mockFetch);
+			await getSearchResults(query, mockFetch as unknown as typeof globalThis.fetch);
 
 			// Assert
 			const callUrl = (mockFetch as Mock).mock.calls[0][0] as string;
@@ -125,7 +125,7 @@ describe('getSearchResults', () => {
 			const mockFetch = createSuccessfulFetch(mockSearchResult);
 
 			// Act
-			await getSearchResults(query, mockFetch);
+			await getSearchResults(query, mockFetch as unknown as typeof globalThis.fetch);
 
 			// Assert
 			const callUrl = (mockFetch as Mock).mock.calls[0][0] as string;
@@ -140,7 +140,7 @@ describe('getSearchResults', () => {
 			const mockFetch = createSuccessfulFetch(mockSearchResult);
 
 			// Act
-			await getSearchResults(query, mockFetch);
+			await getSearchResults(query, mockFetch as unknown as typeof globalThis.fetch);
 
 			// Assert
 			const callUrl = (mockFetch as Mock).mock.calls[0][0] as string;
@@ -154,7 +154,7 @@ describe('getSearchResults', () => {
 			const mockFetch = createSuccessfulFetch(mockSearchResult);
 
 			// Act
-			await getSearchResults(query, mockFetch);
+			await getSearchResults(query, mockFetch as unknown as typeof globalThis.fetch);
 
 			// Assert
 			const callUrl = (mockFetch as Mock).mock.calls[0][0] as string;
@@ -168,7 +168,7 @@ describe('getSearchResults', () => {
 			const mockFetch = createSuccessfulFetch(mockSearchResult);
 
 			// Act
-			await getSearchResults(query, mockFetch);
+			await getSearchResults(query, mockFetch as unknown as typeof globalThis.fetch);
 
 			// Assert
 			const callUrl = (mockFetch as Mock).mock.calls[0][0] as string;
@@ -182,7 +182,7 @@ describe('getSearchResults', () => {
 			const mockFetch = createSuccessfulFetch(mockSearchResult);
 
 			// Act
-			await getSearchResults(query, mockFetch);
+			await getSearchResults(query, mockFetch as unknown as typeof globalThis.fetch);
 
 			// Assert
 			const callUrl = (mockFetch as Mock).mock.calls[0][0] as string;
@@ -196,7 +196,7 @@ describe('getSearchResults', () => {
 			const mockFetch = createSuccessfulFetch(mockSearchResult);
 
 			// Act
-			await getSearchResults(query, mockFetch);
+			await getSearchResults(query, mockFetch as unknown as typeof globalThis.fetch);
 
 			// Assert
 			const callUrl = (mockFetch as Mock).mock.calls[0][0] as string;
@@ -487,6 +487,73 @@ describe('getSearchResults', () => {
 			expect(typeof video.duration).toBe('number');
 			expect(typeof video.viewCount).toBe('number');
 			expect(Array.isArray(video.thumbnails)).toBe(true);
+		});
+	});
+
+	// =============================================================================
+	// Edge Cases
+	// =============================================================================
+
+	describe('edge cases', () => {
+		it('should handle empty string query', async () => {
+			// Arrange
+			const query = '';
+			const mockFetch = createSuccessfulFetch(mockSearchResult);
+
+			// Act
+			const result = await getSearchResults(query, mockFetch as unknown as typeof globalThis.fetch);
+
+			// Assert
+			expect(result).toEqual(mockSearchResult);
+			const callUrl = (mockFetch as Mock).mock.calls[0][0] as string;
+			expect(callUrl).toContain('searchString=');
+		});
+
+		it('should handle query with only whitespace', async () => {
+			// Arrange
+			const query = '   ';
+			const mockFetch = createSuccessfulFetch(mockSearchResult);
+
+			// Act
+			const result = await getSearchResults(query, mockFetch as unknown as typeof globalThis.fetch);
+
+			// Assert
+			expect(result).toEqual(mockSearchResult);
+			const callUrl = (mockFetch as Mock).mock.calls[0][0] as string;
+			const params = extractQueryParams(callUrl);
+			expect(params.searchString).toBe(query);
+		});
+
+		it('should only call fetch once per request', async () => {
+			// Arrange
+			const query = 'test';
+			const mockFetch = createSuccessfulFetch(mockSearchResult);
+
+			// Act
+			await getSearchResults(query, mockFetch as unknown as typeof globalThis.fetch);
+
+			// Assert
+			expect(getCallCount(mockFetch)).toBe(1);
+		});
+
+		it('should handle concurrent requests independently', async () => {
+			// Arrange
+			const query1 = 'test1';
+			const query2 = 'test2';
+			const mockFetch1 = createSuccessfulFetch(mockSearchResult);
+			const mockFetch2 = createSuccessfulFetch(mockEmptySearchResult);
+
+			// Act
+			const [result1, result2] = await Promise.all([
+				getSearchResults(query1, mockFetch1 as unknown as typeof globalThis.fetch),
+				getSearchResults(query2, mockFetch2 as unknown as typeof globalThis.fetch)
+			]);
+
+			// Assert
+			expect(result1).toEqual(mockSearchResult);
+			expect(result2).toEqual(mockEmptySearchResult);
+			expect(getCallCount(mockFetch1)).toBe(1);
+			expect(getCallCount(mockFetch2)).toBe(1);
 		});
 	});
 });
