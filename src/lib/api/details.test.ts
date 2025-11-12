@@ -254,4 +254,35 @@ describe('getVideoDetails', () => {
 			expect(result.dislikeCount).toBe(0);
 		});
 	});
+
+    // =============================================================================
+	// Channel Subscriber Count Tests
+	// =============================================================================
+
+	describe('channel subscriber count parsing', () => {
+		it('should correctly parse subscriber count', async () => {
+			// Arrange
+			const videoId = 'test-id';
+			const mockFetch = createSuccessfulFetch(mockVideoDetails);
+
+			// Act
+			const result = await getVideoDetails(videoId, mockFetch as unknown as typeof globalThis.fetch);
+
+			// Assert
+			expect(result.channelSubscriberCount).toBe(1500000);
+			expect(typeof result.channelSubscriberCount).toBe('number');
+		});
+
+		it('should handle zero subscribers', async () => {
+			// Arrange
+			const videoId = 'test-id';
+			const mockFetch = createSuccessfulFetch(mockVideoDetailsMinimal);
+
+			// Act
+			const result = await getVideoDetails(videoId, mockFetch as unknown as typeof globalThis.fetch);
+
+			// Assert
+			expect(result.channelSubscriberCount).toBe(0);
+		});
+	});
 });
