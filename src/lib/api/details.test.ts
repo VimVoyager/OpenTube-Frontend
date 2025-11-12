@@ -587,4 +587,80 @@ describe('getVideoDetails', () => {
 			expect(result.description.content).toBe('');
 		});
 	});
+
+    // =============================================================================
+	// Edge Cases
+	// =============================================================================
+
+	describe('edge cases', () => {
+		it('should handle empty video ID', async () => {
+			// Arrange
+			const videoId = '';
+			const mockFetch = createSuccessfulFetch(mockVideoDetails);
+
+			// Act
+			const result = await getVideoDetails(videoId, mockFetch as unknown as typeof globalThis.fetch);
+
+			// Assert
+			expect(result).toEqual(mockVideoDetails);
+			const callUrl = mockFetch.mock.calls[0][0] as string;
+			expect(callUrl).toContain('id=');
+		});
+
+		it('should handle video ID with special characters', async () => {
+			// Arrange
+			const videoId = 'test-id!@#$%^&*()';
+			const mockFetch = createSuccessfulFetch(mockVideoDetails);
+
+			// Act
+			const result = await getVideoDetails(videoId, mockFetch as unknown as typeof globalThis.fetch);
+
+			// Assert
+			expect(result).toEqual(mockVideoDetails);
+		});
+
+		it('should only call fetch once per request', async () => {
+			// Arrange
+			const videoId = 'test-id';
+			const mockFetch = createSuccessfulFetch(mockVideoDetails);
+
+			// Act
+			await getVideoDetails(videoId, mockFetch as unknown as typeof globalThis.fetch);
+
+			// Assert
+			expect(getCallCount(mockFetch)).toBe(1);
+		});
+
+		it('should handle concurrent requests independently', async () => {
+			// Arrange
+			const videoId1 = 'video-1';
+			const videoId2 = 'video-2';
+			const mockFetch1 = createSuccessfulFetch(mockVideoDetails);
+			const mockFetch2 = createSuccessfulFetch(mockVideoDetailsMinimal);
+
+			// Act
+			const [result1, result2] = await Promise.all([
+				getVideoDetails(videoId1, mockFetch1 as unknown as typeof globalThis.fetch),
+				getVideoDetails(videoId2, mockFetch2 as unknown as typeof globalThis.fetch)
+			]);
+
+			// Assert
+			expect(result1).toEqual(mockVideoDetails);
+			expect(result2).toEqual(mockVideoDetailsMinimal);
+			expect(getCallCount(mockFetch1)).toBe(1);
+			expect(getCallCount(mockFetch2)).toBe(1);
+		});
+
+		it('should handle very long video IDs', async () => {
+			// Arrange
+			const videoId = 'a'.repeat(1000);
+			const mockFetch = createSuccessfulFetch(mockVideoDetails);
+
+			// Act
+			const result = await getVideoDetails(videoId, mockFetch as unknown as typeof globalThis.fetch);
+
+			// Assert
+			expect(result).toEqual(mockVideoDetails);
+		});
+	});
 });
