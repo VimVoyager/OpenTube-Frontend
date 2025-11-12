@@ -475,4 +475,66 @@ describe('getVideoDetails', () => {
 			);
 		});
 	});
+
+    // =============================================================================
+	// Network Error Tests
+	// =============================================================================
+
+	describe('network error handling', () => {
+		it('should throw error on network failure', async () => {
+			// Arrange
+			const videoId = 'test-id';
+			const mockFetch = createNetworkErrorFetch('Failed to fetch');
+			consoleErrorMock = createMockConsoleError();
+
+			// Act & Assert
+			await expect(getVideoDetails(videoId, mockFetch)).rejects.toThrow(
+				'Failed to fetch'
+			);
+		});
+
+		it('should log network errors to console', async () => {
+			// Arrange
+			const videoId = 'test-id';
+			const mockFetch = createNetworkErrorFetch('Network error');
+			consoleErrorMock = createMockConsoleError();
+
+			// Act
+			try {
+				await getVideoDetails(videoId, mockFetch as unknown as typeof globalThis.fetch);
+			} catch (error) {
+				// Expected to throw
+			}
+
+			// Assert
+			expect(consoleErrorMock.mock).toHaveBeenCalledWith(
+				'Error fetching video details:',
+				expect.any(Error)
+			);
+		});
+
+		it('should throw error on timeout', async () => {
+			// Arrange
+			const videoId = 'test-id';
+			const mockFetch = createNetworkErrorFetch('Request timeout');
+			consoleErrorMock = createMockConsoleError();
+
+			// Act & Assert
+			await expect(getVideoDetails(videoId, mockFetch)).rejects.toThrow(
+				'Request timeout'
+			);
+		});
+
+		it('should throw error on connection refused', async () => {
+			// Arrange
+			const videoId = 'test-id';
+			const mockFetch = createNetworkErrorFetch('Connection refused');
+			consoleErrorMock = createMockConsoleError();
+
+			// Act & Assert
+			await expect(getVideoDetails(videoId, mockFetch)).rejects.toThrow(
+				'Connection refused'
+			);
+		});
+	});
 });
