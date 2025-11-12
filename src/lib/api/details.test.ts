@@ -285,4 +285,52 @@ describe('getVideoDetails', () => {
 			expect(result.channelSubscriberCount).toBe(0);
 		});
 	});
+
+    // =============================================================================
+	// URL Construction Tests
+	// =============================================================================
+
+	describe('API URL construction', () => {
+		it('should construct correct API URL', async () => {
+			// Arrange
+			const videoId = 'test-id';
+			const mockFetch = createSuccessfulFetch(mockVideoDetails);
+
+			// Act
+			await getVideoDetails(videoId, mockFetch as unknown as typeof globalThis.fetch);
+
+			// Assert
+			const callUrl = mockFetch.mock.calls[0][0] as string;
+			expect(callUrl).toContain('http://localhost:8080/api/v1/streams/details');
+			expect(callUrl).toContain(`id=${videoId}`);
+		});
+
+		it('should URL encode video ID', async () => {
+			// Arrange
+			const videoId = 'test-id-with-special-chars&=?';
+			const mockFetch = createSuccessfulFetch(mockVideoDetails);
+
+			// Act
+			await getVideoDetails(videoId, mockFetch as unknown as typeof globalThis.fetch);
+
+			// Assert
+			const callUrl = mockFetch.mock.calls[0][0] as string;
+			const params = extractQueryParams(callUrl);
+			expect(params.id).toBe(videoId);
+		});
+
+		it('should handle video IDs with spaces', async () => {
+			// Arrange
+			const videoId = 'test id with spaces';
+			const mockFetch = createSuccessfulFetch(mockVideoDetails);
+
+			// Act
+			await getVideoDetails(videoId, mockFetch as unknown as typeof globalThis.fetch);
+
+			// Assert
+			const callUrl = mockFetch.mock.calls[0][0] as string;
+			const params = extractQueryParams(callUrl);
+			expect(params.id).toBe(videoId);
+		});
+	});
 });
