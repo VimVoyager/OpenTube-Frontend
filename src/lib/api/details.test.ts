@@ -204,4 +204,54 @@ describe('getVideoDetails', () => {
 			expect(result.viewCount).toBe(999999999);
 		});
 	});
+
+    // =============================================================================
+	// Like/Dislike Count Tests
+	// =============================================================================
+
+	describe('like and dislike count parsing', () => {
+		it('should correctly parse like count', async () => {
+			// Arrange
+			const videoId = 'test-id';
+			const mockFetch = createSuccessfulFetch(mockVideoDetails);
+
+			// Act
+			const result = await getVideoDetails(videoId, mockFetch as unknown as typeof globalThis.fetch);
+
+			// Assert
+			expect(result.likeCount).toBe(50000);
+			expect(typeof result.likeCount).toBe('number');
+		});
+
+		it('should correctly parse dislike count', async () => {
+			// Arrange
+			const videoId = 'test-id';
+			const mockFetch = createSuccessfulFetch(mockVideoDetails);
+
+			// Act
+			const result = await getVideoDetails(videoId, mockFetch as unknown as typeof globalThis.fetch);
+
+			// Assert
+			expect(result.dislikeCount).toBe(100);
+			expect(typeof result.dislikeCount).toBe('number');
+		});
+
+		it('should handle zero likes and dislikes', async () => {
+			// Arrange
+			const videoId = 'test-id';
+			const detailsWithZeroEngagement = {
+				...mockVideoDetails,
+				likeCount: 0,
+				dislikeCount: 0
+			};
+			const mockFetch = createSuccessfulFetch(detailsWithZeroEngagement);
+
+			// Act
+			const result = await getVideoDetails(videoId, mockFetch as unknown as typeof globalThis.fetch);
+
+			// Assert
+			expect(result.likeCount).toBe(0);
+			expect(result.dislikeCount).toBe(0);
+		});
+	});
 });
