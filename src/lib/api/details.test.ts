@@ -21,6 +21,19 @@ import {
 } from '../../tests/fixtures/apiFixtures';
 
 // =============================================================================
+// Setup and Teardown
+// =============================================================================
+
+let consoleErrorMock: ReturnType<typeof createMockConsoleError> | undefined;
+
+afterEach(() => {
+	if (consoleErrorMock) {
+		consoleErrorMock.restore();
+		consoleErrorMock = undefined;
+	}
+});
+
+// =============================================================================
 // Successful Details Fetching Tests
 // =============================================================================
 
@@ -333,4 +346,43 @@ describe('getVideoDetails', () => {
 			expect(params.id).toBe(videoId);
 		});
 	});
+
+    // =============================================================================
+	// Missing Video Handling Tests
+	// =============================================================================
+
+	describe('missing video handling', () => {
+		it('should throw error for non-existent video (404)', async () => {
+			// Arrange
+			const videoId = 'non-existent-id';
+			const mockFetch = createFailedFetch(404, 'Not Found');
+			consoleErrorMock = createMockConsoleError();
+
+			// Act & Assert
+			await expect(getVideoDetails(videoId, mockFetch)).rejects.toThrow(
+				`Failed to fetch video details for ${videoId}: 404 Not Found`
+			);
+			expect(consoleErrorMock.mock).toHaveBeenCalled();
+		});
+
+		it('should log error to console for missing video', async () => {
+			// Arrange
+			const videoId = 'missing-video';
+			const mockFetch = createFailedFetch(404, 'Not Found');
+			consoleErrorMock = createMockConsoleError();
+
+			// Act
+			try {
+				await getVideoDetails(videoId, mockFetch as unknown as typeof globalThis.fetch);
+			} catch (error) {
+				// Expected to throw
+			}
+
+			// Assert
+			expect(consoleErrorMock.mock).toHaveBeenCalledWith(
+				'Error fetching video details:',
+				expect.any(Error)
+			);
+		});
+    });
 });
