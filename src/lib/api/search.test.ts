@@ -5,14 +5,13 @@
  * response parsing, and error scenarios
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach, type Mock } from 'vitest';
+import { describe, it, expect, vi, type Mock } from 'vitest';
 import { getSearchResults } from './search';
 import {
 	createSuccessfulFetch,
 	createFailedFetch,
 	createNetworkErrorFetch,
 	extractQueryParams,
-	suppressConsoleError,
 	getCallCount
 } from '../../tests/helpers/apiHelpers';
 import {
