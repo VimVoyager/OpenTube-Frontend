@@ -537,4 +537,54 @@ describe('getVideoDetails', () => {
 			);
 		});
 	});
+
+    // =============================================================================
+	// Response Parsing Tests
+	// =============================================================================
+
+	describe('response parsing', () => {
+		it('should parse complete Details object', async () => {
+			// Arrange
+			const videoId = 'test-id';
+			const mockFetch = createSuccessfulFetch(mockVideoDetails);
+
+			// Act
+			const result = await getVideoDetails(videoId, mockFetch as unknown as typeof globalThis.fetch);
+
+			// Assert
+			expect(result).toEqual(mockVideoDetails);
+		});
+
+		it('should preserve all data types', async () => {
+			// Arrange
+			const videoId = 'test-id';
+			const mockFetch = createSuccessfulFetch(mockVideoDetails);
+
+			// Act
+			const result = await getVideoDetails(videoId, mockFetch as unknown as typeof globalThis.fetch);
+
+			// Assert
+			expect(typeof result.videoTitle).toBe('string');
+			expect(typeof result.channelName).toBe('string');
+			expect(typeof result.viewCount).toBe('number');
+			expect(typeof result.likeCount).toBe('number');
+			expect(typeof result.dislikeCount).toBe('number');
+			expect(typeof result.channelSubscriberCount).toBe('number');
+			expect(Array.isArray(result.uploaderAvatars)).toBe(true);
+		});
+
+		it('should handle minimal details response', async () => {
+			// Arrange
+			const videoId = 'test-id';
+			const mockFetch = createSuccessfulFetch(mockVideoDetailsMinimal);
+
+			// Act
+			const result = await getVideoDetails(videoId, mockFetch as unknown as typeof globalThis.fetch);
+
+			// Assert
+			expect(result).toEqual(mockVideoDetailsMinimal);
+			expect(result.uploaderAvatars).toHaveLength(0);
+			expect(result.description.content).toBe('');
+		});
+	});
 });
