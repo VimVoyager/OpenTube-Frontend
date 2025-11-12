@@ -385,4 +385,94 @@ describe('getVideoDetails', () => {
 			);
 		});
     });
+
+    // =============================================================================
+	// HTTP Error Tests
+	// =============================================================================
+
+	describe('HTTP error handling', () => {
+		it('should throw error on 500 response', async () => {
+			// Arrange
+			const videoId = 'test-id';
+			const mockFetch = createFailedFetch(500, 'Internal Server Error');
+			consoleErrorMock = createMockConsoleError();
+
+			// Act & Assert
+			await expect(getVideoDetails(videoId, mockFetch)).rejects.toThrow(
+				`Failed to fetch video details for ${videoId}: 500 Internal Server Error`
+			);
+		});
+
+		it('should throw error on 400 response', async () => {
+			// Arrange
+			const videoId = 'invalid-id';
+			const mockFetch = createFailedFetch(400, 'Bad Request');
+			consoleErrorMock = createMockConsoleError();
+
+			// Act & Assert
+			await expect(getVideoDetails(videoId, mockFetch)).rejects.toThrow(
+				`Failed to fetch video details for ${videoId}: 400 Bad Request`
+			);
+		});
+
+		it('should throw error on 401 response', async () => {
+			// Arrange
+			const videoId = 'test-id';
+			const mockFetch = createFailedFetch(401, 'Unauthorized');
+			consoleErrorMock = createMockConsoleError();
+
+			// Act & Assert
+			await expect(getVideoDetails(videoId, mockFetch)).rejects.toThrow(
+				/401 Unauthorized/
+			);
+		});
+
+		it('should throw error on 403 response', async () => {
+			// Arrange
+			const videoId = 'forbidden-id';
+			const mockFetch = createFailedFetch(403, 'Forbidden');
+			consoleErrorMock = createMockConsoleError();
+
+			// Act & Assert
+			await expect(getVideoDetails(videoId, mockFetch)).rejects.toThrow(
+				/403 Forbidden/
+			);
+		});
+
+		it('should include video ID in error message', async () => {
+			// Arrange
+			const videoId = 'specific-video-id';
+			const mockFetch = createFailedFetch(500, 'Internal Server Error');
+			consoleErrorMock = createMockConsoleError();
+
+			// Act & Assert
+			await expect(getVideoDetails(videoId, mockFetch)).rejects.toThrow(
+				new RegExp(videoId)
+			);
+		});
+
+		it('should include status code in error message', async () => {
+			// Arrange
+			const videoId = 'test-id';
+			const mockFetch = createFailedFetch(503, 'Service Unavailable');
+			consoleErrorMock = createMockConsoleError();
+
+			// Act & Assert
+			await expect(getVideoDetails(videoId, mockFetch)).rejects.toThrow(
+				/503/
+			);
+		});
+
+		it('should include status text in error message', async () => {
+			// Arrange
+			const videoId = 'test-id';
+			const mockFetch = createFailedFetch(429, 'Too Many Requests');
+			consoleErrorMock = createMockConsoleError();
+
+			// Act & Assert
+			await expect(getVideoDetails(videoId, mockFetch)).rejects.toThrow(
+				/Too Many Requests/
+			);
+		});
+	});
 });
