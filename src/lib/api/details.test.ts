@@ -153,4 +153,55 @@ describe('getVideoDetails', () => {
 			expect(result.uploaderAvatars[0]).toHaveProperty('width');
 		});
 	});
+
+    // =============================================================================
+	// View Count Formatting Tests
+	// =============================================================================
+
+	describe('view count parsing', () => {
+		it('should correctly parse view count', async () => {
+			// Arrange
+			const videoId = 'test-id';
+			const mockFetch = createSuccessfulFetch(mockVideoDetails);
+
+			// Act
+			const result = await getVideoDetails(videoId, mockFetch as unknown as typeof globalThis.fetch);
+
+			// Assert
+			expect(result.viewCount).toBe(1000000);
+			expect(typeof result.viewCount).toBe('number');
+		});
+
+		it('should handle zero view count', async () => {
+			// Arrange
+			const videoId = 'test-id';
+			const detailsWithZeroViews = {
+				...mockVideoDetails,
+				viewCount: 0
+			};
+			const mockFetch = createSuccessfulFetch(detailsWithZeroViews);
+
+			// Act
+			const result = await getVideoDetails(videoId, mockFetch as unknown as typeof globalThis.fetch);
+
+			// Assert
+			expect(result.viewCount).toBe(0);
+		});
+
+		it('should handle large view counts', async () => {
+			// Arrange
+			const videoId = 'test-id';
+			const detailsWithLargeViews = {
+				...mockVideoDetails,
+				viewCount: 999999999
+			};
+			const mockFetch = createSuccessfulFetch(detailsWithLargeViews);
+
+			// Act
+			const result = await getVideoDetails(videoId, mockFetch as unknown as typeof globalThis.fetch);
+
+			// Assert
+			expect(result.viewCount).toBe(999999999);
+		});
+	});
 });
