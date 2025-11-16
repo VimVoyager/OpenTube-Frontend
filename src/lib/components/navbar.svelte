@@ -1,8 +1,19 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
+
+	let query = '';
+
+	function executeSearch() {
+		if (!query.trim()) return;
+
+		goto(`/results?query=${encodeURIComponent(query.trim())}`);
+	}
+
+	function handleKey(event: KeyboardEvent) {
+		if (event.key === 'Enter') executeSearch();
+	}
 </script>
 
-<!-- Include this script tag or install `@tailwindplus/elements` via npm: -->
-<!-- <script src="https://cdn.jsdelivr.net/npm/@tailwindplus/elements@1" type="module"></script> -->
 <nav
 	class="relative bg-white shadow-sm dark:bg-black dark:shadow-none dark:after:pointer-events-none dark:after:absolute dark:after:inset-x-0 dark:after:bottom-0 dark:after:h-px dark:after:bg-white/10"
 >
@@ -27,6 +38,8 @@
 					<input
 						type="search"
 						name="search"
+						bind:value={query}
+						on:keydown={handleKey}
 						placeholder="Search"
 						class="col-start-1 row-start-1 block w-full rounded-md bg-white py-1.5 pr-3 pl-10 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-red-600 sm:text-sm/6 dark:bg-white/5 dark:text-white dark:outline-white/10 dark:placeholder:text-gray-500 dark:focus:outline-red-500"
 					/>

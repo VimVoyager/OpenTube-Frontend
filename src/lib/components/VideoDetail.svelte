@@ -1,12 +1,14 @@
 <script lang="ts">
+	import type { VideoMetadata } from '$lib/adapters';
 	import roundLogo from '$lib/assets/logo-placeholder.svg';
 
-	export let videoTitle = 'Video Title';
-	export let channelName = 'Channel Name';
-	export let viewCount = 147977;
-	export let videoDescription =
-		'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.';
+	export let metadata: VideoMetadata;
 
+	$: displayAvatar = metadata.channelAvatar || roundLogo;
+	
+	/**
+	 * Format view count with locale specific number formatting
+	 */
 	const formatViewCount = (viewCount: number): string => {
 		const formatter = Intl.NumberFormat('en-US');
 		return formatter.format(viewCount);
@@ -15,12 +17,12 @@
 
 <div>
 	<div>
-		<h2 class="mt-3 mb-3 text-2xl font-bold text-white">{videoTitle}</h2>
+		<h2 class="mt-3 mb-3 text-2xl font-bold text-white">{metadata.title}</h2>
 	</div>
 	<div class="grid grid-cols-2 gap-3">
 		<div class="col-spacn-2 flex items-center space-x-3">
-			<img src={roundLogo} alt={channelName} class="h-8 w-8 rounded-full object-cover" />
-			<h3 class="text-md font-semibold text-white">{channelName}</h3>
+			<img src={displayAvatar} alt={metadata.channelName} class="h-8 w-8 rounded-full object-cover" />
+			<h3 class="text-md font-semibold text-white">{metadata.channelName}</h3>
 			<button
 				type="button"
 				class="focus-visible:outline-offset rounded-full bg-white px-3.5 py-2 text-sm font-semibold text-black shadow-xs hover:bg-gray-100 focus-visible:outline-2"
@@ -34,10 +36,10 @@
 		>
 			<div class="px-4 py-5 sm:p-6">
 				<h3 class="text-base font-semibold text-gray-900 dark:text-white">
-					{formatViewCount(viewCount)} views
+					{formatViewCount(metadata.viewCount)} views
 				</h3>
 				<div class="mt-2 text-sm text-gray-500 dark:text-gray-400">
-					<p>{videoDescription}</p>
+					<p>{@html metadata.description}</p>
 				</div>
 			</div>
 		</div>

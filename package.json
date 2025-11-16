@@ -13,8 +13,12 @@
 		"format": "prettier --write .",
 		"lint": "prettier --check . && eslint .",
 		"test:e2e": "playwright test",
-		"test": "npm run test:e2e && npm run test:unit -- --run",
-		"test:unit": "vitest"
+		"test": "vitest",
+		"test:ui": "vitest --ui",
+		"test:coverage": "vitest --coverage",
+		"test:client": "vitest --project=client",
+		"test:server": "vitest --project=server",
+		"test:watch": "vitest --watch"
 	},
 	"devDependencies": {
 		"@eslint/compat": "^1.2.5",
@@ -26,11 +30,19 @@
 		"@tailwindcss/forms": "^0.5.9",
 		"@tailwindcss/typography": "^0.5.15",
 		"@tailwindcss/vite": "^4.0.0",
-		"@vitest/browser": "^3.2.3",
+		"@testing-library/jest-dom": "^6.9.1",
+		"@testing-library/svelte": "^5.2.8",
+		"@testing-library/user-event": "^14.6.1",
+		"@types/node": "^24.10.0",
+		"@vitest/browser": "^4.0.8",
+		"@vitest/browser-playwright": "^4.0.8",
+		"@vitest/coverage-v8": "^4.0.8",
+		"@vitest/ui": "^4.0.8",
 		"eslint": "^9.18.0",
 		"eslint-config-prettier": "^10.0.1",
 		"eslint-plugin-svelte": "^3.0.0",
 		"globals": "^16.0.0",
+		"jsdom": "^27.1.0",
 		"playwright": "^1.53.0",
 		"prettier": "^3.4.2",
 		"prettier-plugin-svelte": "^3.3.3",
@@ -41,11 +53,13 @@
 		"typescript": "^5.0.0",
 		"typescript-eslint": "^8.20.0",
 		"vite": "^7.0.4",
-		"vitest": "^3.2.3",
-		"vitest-browser-svelte": "^0.1.0"
+		"vitest": "^4.0.8",
+		"vitest-browser-svelte": "^2.0.1"
 	},
 	"dependencies": {
 		"plyr": "^3.7.8",
+		"shaka-player": "^4.16.3",
+		"shaka-player-ui-controls": "^1.0.11",
 		"svelte-icons-pack": "^3.1.3"
 	}
 }

@@ -4,7 +4,7 @@
 
 	export let poster: string = thumbnailPlaceholder;
 	export let title: string = 'Video Title';
-	export let viewCount: string = '356,910';
+	export let viewCount: number = 356910;
 	export let uploadedAt: string = '2023-05-15T12:00:00Z';
 	export let channelName: string = 'Glitch';
 	export let description: string =
@@ -15,6 +15,11 @@
 		month: 'short',
 		year: 'numeric'
 	});
+
+	const formatViewCount = (viewCount: number): string => {
+		const formatter = Intl.NumberFormat('en-US');
+		return formatter.format(viewCount);
+	};
 </script>
 
 <div class="grid grid-cols-3 gap-4 rounded-lg p-4 shadow-sm transition-colors hover:bg-gray-900">
@@ -31,7 +36,7 @@
 	<div class="col-span-2 flex flex-col">
 		<h3 class="mb-1 text-lg font-semibold text-white">{title}</h3>
 		<p class="mb-2 text-sm text-gray-400">
-			<span>{viewCount} views</span>
+			<span>{formatViewCount(viewCount)} views</span>
 			<span class="mx-1 inline-block align-middle">•</span>
 			<span>{formattedDate}</span>
 		</p>

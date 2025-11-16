@@ -1,26 +1,40 @@
 <script lang="ts">
+	import type { PageData } from './$types';
 	import VideoResult from '$lib/components/VideoResult.svelte';
+	import Loading from '$lib/components/Loading.svelte';
+	import { goto } from '$app/navigation';
 
-	const fakeResults = Array.from({ length: 8 }, (_, i) => ({
-		id: `${i}`,
-		poster: `https://picsum.photos/seed/${i + 1}/300/200`,
-		title: `Sample video ${i + 1}`,
-		uploadedAt: new Date(Date.now() - i * 86400000).toISOString(),
-		channelName: 'Channel Name',
-		description:
-			'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
-	}));
+	export let data: PageData;
+
+	$: loading = !data?.result;
+	const videos = data.result ?? [];
 </script>
 
 <div class="container mx-auto w-3/4 px-4 py-8">
-	{#each fakeResults as result (result.id)}
-		<div class="mb-6 flex justify-center">
-			<VideoResult
-				poster={result.poster}
-				title={result.title}
-				uploadedAt={result.uploadedAt}
-				description={result.description}
-			/>
-		</div>
-	{/each}
+	{#if loading}
+		<Loading />
+	{:else}
+		{#each videos as video (video.id)}
+			<div
+				class="mb-6 flex cursor-pointer justify-center"
+				role="button"
+				tabindex="0"
+				on:click={() => goto(`/video/${video.id}`)}
+				on:keydown={(e) => {
+					if (e.key === 'Enter' || e.key === ' ') {
+						e.preventDefault();
+						goto(`/video/${video.id}`);
+					}
+				}}
+			>
+				<VideoResult
+					poster={video.thumbnail}
+					title={video.title}
+					uploadedAt={new Date(Date.now()).toISOString()}
+					viewCount={video.view_count}
+					description="Lorem ipsum"
+				/>
+			</div>
+		{/each}
+	{/if}
 </div>
