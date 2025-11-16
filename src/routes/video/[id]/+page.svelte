@@ -10,8 +10,24 @@
 	export let data: PageData;
 
 	// Destructure for clarity (use safe casts if PageData doesn't include these fields)
-	const playerConfig = (data as any)?.playerConfig ?? {};
-	const metadata = (data as any)?.metadata ?? null;
+	const playerConfig = (data as any)?.playerConfig ?? {
+		videoStream: null,
+		audioStream: null,
+		subtitles: [],
+		duration: 0,
+		poster: ''
+	};
+	const metadata = (data as any)?.metadata ?? {
+		title: '',
+		description: '',
+		channelName: '',
+		channelAvatar: '',
+		viewCount: 0,
+		uploadDate: '',
+		likeCount: 0,
+		dislikeCount: 0,
+		subscriberCount: 0
+	};
 	const error = (data as any)?.error ?? null;
 
 	// Computed states
