@@ -54,10 +54,12 @@ vi.mock('shaka-player/dist/shaka-player.ui', () => {
 		destroy: vi.fn(() => Promise.resolve())
 	};
 
-	const PlayerConstructor = vi.fn(() => mockPlayer);
+	const PlayerConstructor = vi.fn(function () {
+		return mockPlayer;
+	});
 	PlayerConstructor.isBrowserSupported = vi.fn(() => true);
 
-	const UIOverlayConstructor = vi.fn(() => mockUIOverlay);
+	const UIOverlayConstructor = vi.fn(function () { return mockUIOverlay });
 
 	return {
 		default: {
@@ -88,7 +90,7 @@ const triggerShakaError = async (errorCode: number, errorMessage: string): Promi
 	const shaka = await import('shaka-player/dist/shaka-player.ui');
 	const PlayerConstructor = shaka.default.Player as any;
 	const mockPlayer = PlayerConstructor.mock.results[0]?.value;
-	
+
 	if (!mockPlayer) return;
 
 	const errorEvent = {
@@ -103,7 +105,7 @@ const triggerShakaError = async (errorCode: number, errorMessage: string): Promi
 
 	const addEventListenerCalls = mockPlayer.addEventListener.mock.calls;
 	const errorListener = addEventListenerCalls.find((call: any[]) => call[0] === 'error');
-	
+
 	if (errorListener && errorListener[1]) {
 		errorListener[1](errorEvent);
 	}
@@ -263,7 +265,7 @@ describe('VideoPlayer', () => {
 
 			const playerInstance = shakaModule.Player.mock.results[shakaModule.Player.mock.results.length - 1]?.value;
 			expect(playerInstance.configure).toHaveBeenCalled();
-			
+
 			const configCall = playerInstance.configure.mock.calls[0][0];
 			expect(configCall).toHaveProperty('streaming');
 			expect(configCall).toHaveProperty('manifest');
@@ -322,7 +324,7 @@ describe('VideoPlayer', () => {
 
 		it('should hide loading state after initialization', async () => {
 			render(VideoPlayer, { props: { config: mockPlayerConfig } });
-			
+
 			expect(screen.getByText(/loading video/i)).toBeInTheDocument();
 
 			await waitForPlayerInitialization();
@@ -362,7 +364,7 @@ describe('VideoPlayer', () => {
 
 		it('should hide loading state on successful initialization', async () => {
 			render(VideoPlayer, { props: { config: mockPlayerConfig } });
-			
+
 			expect(screen.getByText(/loading video/i)).toBeInTheDocument();
 
 			await waitForPlayerInitialization();
@@ -384,7 +386,7 @@ describe('VideoPlayer', () => {
 
 			const wrapper = document.querySelector('.player-wrapper') as HTMLElement;
 			const aspectRatio = wrapper.style.aspectRatio;
-			
+
 			const expectedRatio = `${mockPlayerConfig.videoStream![0].width}/${mockPlayerConfig.videoStream![0].height}`;
 			expect(aspectRatio).toBe(expectedRatio);
 		});
@@ -420,7 +422,7 @@ describe('VideoPlayer', () => {
 
 			const wrapper = document.querySelector('.player-wrapper') as HTMLElement;
 			const aspectRatio = wrapper.style.aspectRatio;
-			
+
 			const expectedRatio = `${mockPlayerConfigMultipleQualities.videoStream![0].width}/${mockPlayerConfigMultipleQualities.videoStream![0].height}`;
 			expect(aspectRatio).toBe(expectedRatio);
 		});
@@ -588,7 +590,7 @@ describe('VideoPlayer', () => {
 					registerRequestFilter: vi.fn()
 				}))
 			};
-			
+
 			shakaModule.Player.mockReturnValueOnce(playerInstance);
 
 			render(VideoPlayer, { props: { config: mockPlayerConfig } });
@@ -611,7 +613,7 @@ describe('VideoPlayer', () => {
 					registerRequestFilter: vi.fn()
 				}))
 			};
-			
+
 			shakaModule.Player.mockReturnValueOnce(playerInstance);
 
 			render(VideoPlayer, { props: { config: mockPlayerConfig } });
@@ -634,7 +636,7 @@ describe('VideoPlayer', () => {
 		it('should throw error when player not initialized before load', async () => {
 			render(VideoPlayer, { props: { config: mockPlayerConfig } });
 			await tick();
-			
+
 			expect(shakaModule.Player).toHaveBeenCalled();
 		});
 
@@ -650,7 +652,7 @@ describe('VideoPlayer', () => {
 					registerRequestFilter: vi.fn()
 				}))
 			};
-			
+
 			shakaModule.Player.mockReturnValueOnce(playerInstance);
 
 			const { unmount } = render(VideoPlayer, { props: { config: mockPlayerConfig } });
@@ -719,7 +721,7 @@ describe('VideoPlayer', () => {
 
 			const uiInstance = shakaModule.ui.Overlay.mock.results[shakaModule.ui.Overlay.mock.results.length - 1]?.value;
 			const uiConfig = uiInstance.configure.mock.calls[0][0];
-			
+
 			expect(uiConfig.overflowMenuButtons).toContain('quality');
 			expect(uiConfig.overflowMenuButtons).toContain('language');
 			expect(uiConfig.overflowMenuButtons).toContain('captions');
@@ -731,7 +733,7 @@ describe('VideoPlayer', () => {
 
 			const uiInstance = shakaModule.ui.Overlay.mock.results[shakaModule.ui.Overlay.mock.results.length - 1]?.value;
 			const uiConfig = uiInstance.configure.mock.calls[0][0];
-			
+
 			expect(uiConfig.seekBarColors).toHaveProperty('base');
 			expect(uiConfig.seekBarColors).toHaveProperty('buffered');
 			expect(uiConfig.seekBarColors).toHaveProperty('played');
@@ -743,7 +745,7 @@ describe('VideoPlayer', () => {
 
 			const uiInstance = shakaModule.ui.Overlay.mock.results[shakaModule.ui.Overlay.mock.results.length - 1]?.value;
 			const uiConfig = uiInstance.configure.mock.calls[0][0];
-			
+
 			expect(uiConfig.controlPanelElements).toContain('play_pause');
 			expect(uiConfig.controlPanelElements).toContain('fullscreen');
 		});
@@ -850,7 +852,7 @@ describe('VideoPlayer', () => {
 			const networkingEngine = playerInstance.getNetworkingEngine();
 			const filterFn = networkingEngine.registerRequestFilter.mock.calls[0][0];
 
-			const consoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+			const consoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => { });
 
 			filterFn(null, null);
 			expect(consoleWarn).toHaveBeenCalled();
@@ -931,12 +933,12 @@ describe('VideoPlayer', () => {
 			await waitForPlayerInitialization();
 
 			expect(shakaModule.Player).toHaveBeenCalled();
-			
+
 			const playerInstance = shakaModule.Player.mock.results[shakaModule.Player.mock.results.length - 1]?.value;
 			expect(playerInstance.attach).toHaveBeenCalled();
 			expect(playerInstance.configure).toHaveBeenCalled();
 			expect(playerInstance.load).toHaveBeenCalled();
-			
+
 			expect(shakaModule.ui.Overlay).toHaveBeenCalled();
 
 			await waitFor(() => {
@@ -991,15 +993,16 @@ describe('VideoPlayer', () => {
 		it('should handle empty video stream array', async () => {
 			const emptyVideoConfig = {
 				...mockPlayerConfig,
-				videoStream: []
+				videoStream: [],
+				audioStream: null
 			};
 
 			render(VideoPlayer, { props: { config: emptyVideoConfig } });
 			await waitForPlayerInitialization();
 
-			await waitFor(() => {
-				expect(screen.getByText(/no video or audio stream/i)).toBeInTheDocument();
-			});
+			expect(screen.getByText(/retry/i)).toBeInTheDocument();
+			const errorMessages = screen.getAllByText(/no video or audio stream/i);
+			expect(errorMessages.length).toBeGreaterThan(0);
 		});
 
 		it('should handle empty audio stream array', async () => {
@@ -1013,7 +1016,9 @@ describe('VideoPlayer', () => {
 			await waitForPlayerInitialization();
 
 			await waitFor(() => {
-				expect(screen.getByText(/no video or audio stream/i)).toBeInTheDocument();
+				expect(screen.getByText(/retry/i)).toBeInTheDocument();
+				const errorMessages = screen.getAllByText(/no video or audio stream/i);
+				expect(errorMessages.length).toBeGreaterThan(0);
 			});
 		});
 
@@ -1051,6 +1056,9 @@ describe('VideoPlayer', () => {
 
 			render(VideoPlayer, { props: { config: longDurationConfig } });
 			await waitForPlayerInitialization();
+
+			console.log('shakaModule.Player.mock:', shakaModule.Player.mock);
+			console.log('mock.results:', shakaModule.Player.mock.results);
 
 			const playerInstance = shakaModule.Player.mock.results[shakaModule.Player.mock.results.length - 1]?.value;
 			expect(playerInstance.load).toHaveBeenCalled();
