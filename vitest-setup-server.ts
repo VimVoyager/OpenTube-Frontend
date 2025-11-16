@@ -44,7 +44,7 @@ expect.extend({
 
         return {
             pass,
-            message: () => 
+            message: () =>
                 pass
                     ? `expected ${received} not to be a valid URL`
                     : `expected ${received} to be a valid URL`

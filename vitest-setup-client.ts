@@ -6,6 +6,28 @@
  */
 
 import { expect, afterEach, vi } from 'vitest';
+import '@testing-library/jest-dom/vitest'
+
+// Mock SvelteKit's $app/environment
+vi.mock('$app/environment', () => ({
+	browser: true,
+	building: false,
+	dev: false,
+	version: 'test'
+}));
+
+// Mock $app/stores if needed
+vi.mock('$app/stores', () => ({
+	page: {
+		subscribe: vi.fn()
+	},
+	navigating: {
+		subscribe: vi.fn()
+	},
+	updated: {
+		subscribe: vi.fn()
+	}
+}));
 
 // Cleanup after each test
 afterEach(() => {
