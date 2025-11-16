@@ -167,7 +167,7 @@
 			throw new Error('Player not initialized');
 		}
 
-		if (!config.videoStream && (!config.audioStream ||config.audioStream.length === 0)) {
+		if ((!config.videoStream || config.videoStream.length === 0) && (!config.audioStream ||config.audioStream.length === 0)) {
 			throw new Error('No video or audio stream provided');
 		}
 
@@ -312,9 +312,6 @@
 	{/if}
 
 	{#if errorMessage}
-		<div class="error-message">
-			<p>{errorMessage}</p>
-		</div>
 		<div class="error-message">
 			<div class="error-icon">⚠️</div>
 			<p class="error-text">{errorMessage}</p>
