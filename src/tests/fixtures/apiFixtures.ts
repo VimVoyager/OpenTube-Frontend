@@ -4,7 +4,7 @@
  * Contains reusable mock data for API responses across all API test files
  */
 
-import type { Details, Stream, Subtitle, SearchResult } from '$lib/types';
+import type { Details, Stream, Subtitle, SearchResult, RelatedItem } from '$lib/types';
 
 // =============================================================================
 // Video Details Fixtures
@@ -121,6 +121,8 @@ export const mockAudioStream: Stream = {
 	url: 'https://example.com/audio/stream1'
 };
 
+
+
 export const mockAudioStreamWithLanguage: Stream = {
 	...mockAudioStream,
 	id: 'audio-stream-2',
@@ -212,6 +214,116 @@ export const mockSubtitles: Subtitle[] = [
         formatId: 0
     }
 ];
+
+// =============================================================================
+// Related Stream Fixtures
+// =============================================================================
+
+export const mockRelatedStream: RelatedItem = {
+	id: 'related-stream-1',
+    infoType: 'STREAM',
+    url: 'https://example.com/watch?v=related1',
+    name: 'Related Video 1',
+    thumbnails: [
+        {
+            url: 'https://example.com/thumbs/related1_low.jpg',
+            height: 94,
+            width: 168,
+            estimatedResolutionLevel: 'LOW'
+        },
+        {
+            url: 'https://example.com/thumbs/related1_medium.jpg',
+            height: 188,
+            width: 336,
+            estimatedResolutionLevel: 'MEDIUM'
+        }
+    ],
+    streamType: 'VIDEO_STREAM',
+    uploaderName: 'Related Channel 1',
+    textualUploadDate: '4 years ago',
+    viewCount: 64000000,
+    duration: 973,
+    uploaderUrl: 'https://example.com/channel/related1',
+    uploaderAvatars: [
+        {
+            url: 'https://example.com/avatars/related1.jpg',
+            height: 68,
+            width: 68,
+            estimatedResolutionLevel: 'LOW'
+        }
+    ],
+    uploaderSubscriberCount: 0,
+    shortFormContent: false	
+};
+
+export const mockRelatedStreams: RelatedItem[] = [
+	mockRelatedStream,
+	{
+		...mockRelatedStream,
+		id: 'related-stream-2',
+		url: 'https://example.com/watch?v=related2',
+		name: 'Related Video 2',
+		thumbnails: [
+			{
+				url: 'https://example.com/thumbs/related2_low.jpg',
+				height: 94,
+				width: 168,
+				estimatedResolutionLevel: 'LOW'
+			},
+			{
+				url: 'https://example.com/thumbs/related2_medium.jpg',
+				height: 188,
+				width: 336,
+				estimatedResolutionLevel: 'MEDIUM'
+			}
+		],
+		streamType: 'VIDEO_STREAM',
+		uploaderName: 'Related Channel 2',
+		textualUploadDate: '2 years ago',
+		viewCount: 32000000,
+		duration: 850,
+		uploaderUrl: 'https://example.com/channel/related2',
+		uploaderAvatars: [],
+		uploaderSubscriberCount: 0,
+		shortFormContent: false	
+	},	
+	{
+		...mockRelatedStream,
+		id: 'related-stream-3',
+		url: 'https://example.com/watch?v=related3',
+		name: 'Related Video 3',
+		thumbnails: [
+			{
+				url: 'https://example.com/thumbs/related3_low.jpg',
+				height: 94,
+				width: 168,
+				estimatedResolutionLevel: 'LOW'
+			},
+			{
+				url: 'https://example.com/thumbs/related3_medium.jpg',
+				height: 188,
+				width: 336,
+				estimatedResolutionLevel: 'MEDIUM'
+			}
+		],
+		streamType: 'VIDEO_STREAM',
+		uploaderName: 'Related Channel 3',
+		textualUploadDate: '1 year ago',
+		viewCount: 16000000,
+		duration: 720,
+		uploaderUrl: 'https://example.com/channel/related3',
+		uploaderAvatars: [],
+		uploaderSubscriberCount: 0,
+		shortFormContent: false
+	}
+];
+
+export const mockRelatedVideoStreamArrayResponse = mockRelatedStreams;
+
+export const mockRelatedStreamObjectResponse = {
+	streams: mockRelatedStreams,
+	videoId: 'test-video-id'
+};
 
 // =============================================================================
 // Search Result Fixtures
