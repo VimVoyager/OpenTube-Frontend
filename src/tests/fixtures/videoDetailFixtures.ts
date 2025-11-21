@@ -4,7 +4,7 @@
  * Mock data for testing VideoDetail component functionality
  */
 
-import type { VideoMetadata } from '$lib/adapters';
+import type { VideoMetadata } from '$lib/adapters/types';
 
 export const mockMetadata: VideoMetadata = {
 	title: 'Test Video Title',

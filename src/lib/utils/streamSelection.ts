@@ -5,7 +5,7 @@
  * Handles quality selection, language grouping, and priority-based selection.
  */
 
-import type { Stream } from '$lib/types';
+import type { ItagItem, Stream } from '$lib/types';
 import { compareLanguagePriority } from '$lib/utils/languageUtils';
 
 /**
@@ -209,3 +209,54 @@ export function logSelectedStreams(
 		});
 	}
 }
+/**
+ * Calculate video duration from stream metadata
+ */
+
+export function calculateDuration(
+	videoStreams: Stream[] | undefined,
+	audioStreams: Stream[] | undefined
+): number {
+	const durationMs = videoStreams?.[0]?.itagItem?.approxDurationMs ||
+		audioStreams?.[0]?.itagItem?.approxDurationMs ||
+		0;
+
+	return durationMs / 1000;
+}/**
+ * Extracts byte range information from itagItem
+ */
+export function extractByteRanges(itagItem: ItagItem | undefined): {
+	initStart?: number;
+	initEnd?: number;
+	indexStart?: number;
+	indexEnd?: number;
+} {
+	if (!itagItem) return {};
+
+	return {
+		initStart: itagItem.initStart,
+		initEnd: itagItem.initEnd,
+		indexStart: itagItem.indexStart,
+		indexEnd: itagItem.indexEnd
+	};
+}
+
+/**
+ * Extracts video ID from YouTube URL
+ * Handles variou YouTube URL formats
+ */
+export function extractVideoIdFromUrl(url: string): string {
+	try {
+		const urlObj = new URL(url);
+
+		if (urlObj.hostname.includes('v')) {
+			return urlObj.searchParams.get('v') || '';
+		}
+
+		const pathParts = urlObj.pathname.split('/').filter(Boolean);
+		return pathParts[pathParts.length - 1] || '';
+	} catch {
+		return '';
+	}
+}
+

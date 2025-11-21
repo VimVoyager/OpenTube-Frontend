@@ -8,7 +8,7 @@
 		type StreamMetadata,
 		type SubtitleMetadata
 	} from '$lib/utils/dashManifestGenerator';
-	import type { VideoPlayerConfig } from '$lib/adapters';
+		import type { VideoPlayerConfig } from '$lib/adapters/types';
 
 	export let config: VideoPlayerConfig;
 

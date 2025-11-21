@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { VideoMetadata } from '$lib/adapters';
+		import type { VideoMetadata } from '$lib/adapters/types';
 	import roundLogo from '$lib/assets/logo-placeholder.svg';
 
 	export let metadata: VideoMetadata;

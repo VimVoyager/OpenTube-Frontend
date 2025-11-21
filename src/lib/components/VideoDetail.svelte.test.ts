@@ -7,7 +7,7 @@
 import { render, screen } from '@testing-library/svelte';
 import { describe, it, expect } from 'vitest';
 import VideoDetail from './VideoDetail.svelte';
-import type { VideoMetadata } from '$lib/adapters';
+import type { VideoMetadata } from '$lib/adapters/types';
 import {
 	mockMetadata,
 	mockMetadataNoAvatar,

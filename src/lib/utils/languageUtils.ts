@@ -5,6 +5,8 @@
  * across the application.
  */
 
+import type { Stream } from '$lib/types';
+
 /**
  * Mapping of language codes to friendly display names
  */
@@ -120,4 +122,28 @@ export function compareLanguagePriority(langA: string, langB: string): number {
 	
 	// Same priority level - sort alphabetically
 	return normalizeLanguageCode(langA).localeCompare(normalizeLanguageCode(langB));
+}
+/**
+ * Extracts language information from a stream
+ * Tries multiple sources in order of reliability
+ */
+
+export function extractLanguageInfo(stream: Stream): { code: string; name: string; } {
+	const audioLocale = stream.itagItem?.audioLocale;
+	const audioTrackId = stream.itagItem?.audioTrackId;
+	const audioTrackName = stream.itagItem?.audioTrackName;
+
+	let languageCode = audioLocale || audioTrackId;
+
+	if (!languageCode) {
+		languageCode = extractLanguageFromUrl(stream.url) || 'und';
+	}
+
+	const normalizedCode = normalizeLanguageCode(languageCode);
+	const languageName = audioTrackName || getLanguageName(normalizedCode);
+
+	return {
+		code: normalizedCode,
+		name: languageName
+	};
 }

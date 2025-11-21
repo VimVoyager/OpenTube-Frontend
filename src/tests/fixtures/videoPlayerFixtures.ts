@@ -4,7 +4,7 @@
  * Mock data for testing VideoPlayer component functionality
  */
 
-import type { VideoPlayerConfig } from '$lib/adapters';
+import type { VideoPlayerConfig } from '$lib/adapters/types';
 
 export const mockVideoStream = {
 	url: 'https://example.com/video.mp4',

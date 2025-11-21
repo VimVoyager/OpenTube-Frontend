@@ -5,11 +5,9 @@ import type { Stream } from '$lib/types';
 import { getVideoDetails } from '$lib/api/details';
 import { getSubtitles } from '$lib/api/subtitles';
 import { getAllStreams } from '$lib/api/streams';
-import {
-    adaptPlayerConfig,
-    adaptVideoMetadata,
-    calculateDuration
-} from '$lib/adapters';
+import { adaptPlayerConfig } from '$lib/adapters/player';
+import { adaptVideoMetadata } from '$lib/adapters/metadata';
+import { calculateDuration } from '$lib/utils/streamSelection';
 import {
     selectVideoStreams,
     selectBestAudioStreams,
@@ -31,7 +29,10 @@ import { mockMetadata } from '../../../tests/fixtures/videoDetailFixtures';
 vi.mock('$lib/api/details');
 vi.mock('$lib/api/subtitles');
 vi.mock('$lib/api/streams');
-vi.mock('$lib/adapters');
+vi.mock('$lib/adapters/constants');
+vi.mock('$lib/adapters/metadata');
+vi.mock('$lib/adapters/player');
+vi.mock('$lib/adapters/relatedVideo');
 vi.mock('$lib/utils/streamSelection');
 vi.mock('$lib/utils/subtitleSelection');
 

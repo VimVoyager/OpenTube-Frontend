@@ -3,13 +3,13 @@ import type { Stream, Subtitle } from '$lib/types';
 import { getVideoDetails } from '$lib/api/details';
 import { getSubtitles } from '$lib/api/subtitles';
 import { getAllStreams } from '$lib/api/streams';
+import { adaptPlayerConfig } from '$lib/adapters/player';
+import { adaptVideoMetadata } from '$lib/adapters/metadata';
 import {
-	adaptPlayerConfig,
-	adaptVideoMetadata,
-	calculateDuration,
 	type VideoPlayerConfig,
 	type VideoMetadata
-} from '$lib/adapters';
+} from '$lib/adapters/types';
+import { calculateDuration } from '$lib/utils/streamSelection';
 import {
 	selectVideoStreams,
 	selectBestAudioStreams,
