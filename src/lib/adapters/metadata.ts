@@ -15,10 +15,14 @@ export function adaptVideoMetadata(
 		description: details.description?.content || 'No description available',
 		channelName: details.channelName || 'Unknown Channel',
 		channelAvatar: selectBestAvatar(details.uploaderAvatars, defaultAvatar),
-		viewCount: details.viewCount || 0,
+		viewCount: handleNegativeCount(details.viewCount)  || 0,
 		uploadDate: details.uploadDate || '',
-		likeCount: details.likeCount || 0,
-		dislikeCount: details.dislikeCount || 0,
-		subscriberCount: details.channelSubscriberCount || 0,
+		likeCount: handleNegativeCount(details.likeCount) || 0,
+		dislikeCount: handleNegativeCount(details.dislikeCount) || 0,
+		subscriberCount: handleNegativeCount(details.channelSubscriberCount) || 0,
 	};
+}
+
+function handleNegativeCount(count: number) {
+    return count < 0 ? 0 : count;
 }
