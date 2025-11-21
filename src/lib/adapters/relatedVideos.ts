@@ -15,8 +15,8 @@ function adaptRelatedVideo(item: RelatedItem, defaultThumbnail: string, defaultA
 		thumbnail: selectBestThumbnail(item.thumbnails, defaultThumbnail),
 		channelName: item.uploaderName || 'Unknown Channel',
 		channelAvatar: selectBestUploaderAvatar(item.uploaderAvatars, defaultAvatar),
-		viewCount: item.viewCount || 0,
-		duration: item.duration || 0,
+		viewCount: handleNegativeCount(item.viewCount) || 0,
+		duration: handleNegativeCount(item.duration) || 0,
 		uploadDate: item.textualUploadDate || '',
 	};
 }
@@ -37,4 +37,8 @@ export function adaptRelatedVideos(
 	return items
 		.filter(item => item && item.url && item.name) // Filter out invalid items
 		.map(item => adaptRelatedVideo(item, defaultThumbnail, defaultAvatar));
+}
+
+function handleNegativeCount(count: number) {
+    return count < 0 ? 0 : count;
 }
