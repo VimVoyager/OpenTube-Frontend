@@ -3,11 +3,14 @@ import type { Stream, Subtitle } from '$lib/types';
 import { getVideoDetails } from '$lib/api/details';
 import { getSubtitles } from '$lib/api/subtitles';
 import { getAllStreams } from '$lib/api/streams';
+import { getRelatedStreams } from '$lib/api/related';
 import { adaptPlayerConfig } from '$lib/adapters/player';
 import { adaptVideoMetadata } from '$lib/adapters/metadata';
+import { adaptRelatedVideos } from '$lib/adapters/relatedVideos';
 import {
 	type VideoPlayerConfig,
-	type VideoMetadata
+	type VideoMetadata,
+	type RelatedVideoConfig
 } from '$lib/adapters/types';
 import { calculateDuration } from '$lib/utils/streamSelection';
 import {
@@ -27,6 +30,7 @@ import thumbnailPlaceholder from '$lib/assets/thumbnail-placeholder.jpg';
 export interface PageData {
 	playerConfig: VideoPlayerConfig;
 	metadata: VideoMetadata;
+	relatedVideos: RelatedVideoConfig[];
 	error?: string;
 }
 
@@ -55,6 +59,7 @@ function createErrorPageData(error: unknown): PageData {
 			dislikeCount: 0,
 			subscriberCount: 0
 		},
+		relatedVideos: [],
 		error: errorMessage
 	};
 }
@@ -91,15 +96,20 @@ async function fetchVideoData(
 	videoStreams: Stream[];
 	audioStreams: Stream[];
 	subtitles: Subtitle[];
+	relatedStreams: Awaited<ReturnType<typeof getRelatedStreams>>;
 }> {
 	// Fetch video metadata and streams in parallel
-	const [details, { videoStreams, audioStreams }, subtitles] = await Promise.all([
+	const [details, { videoStreams, audioStreams }, subtitles, relatedStreams] = await Promise.all([
 		getVideoDetails(videoId, fetch),
 		getAllStreams(videoId, fetch),
-		getSubtitles(videoId, fetch)
+		getSubtitles(videoId, fetch),
+		getRelatedStreams(videoId, fetch).catch((error) => {
+			console.warn('Failed to fetch related videos:', error);
+			return [];
+		})
 	]);
 
-	return { details, videoStreams, audioStreams, subtitles };
+	return { details, videoStreams, audioStreams, subtitles, relatedStreams };
 }
 
 /**
@@ -108,7 +118,7 @@ async function fetchVideoData(
 export const load: PageLoad = async ({ params, fetch }): Promise<PageData> => {
 	try {
 		// Fetch video metadata and streams in parallel
-		const { details, videoStreams, audioStreams, subtitles } = await fetchVideoData(
+		const { details, videoStreams, audioStreams, subtitles, relatedStreams } = await fetchVideoData(
 			params.id,
 			fetch
 		);
@@ -136,9 +146,16 @@ export const load: PageLoad = async ({ params, fetch }): Promise<PageData> => {
 			thumbnailPlaceholder // fallback avatar
 		);
 
+		const relatedVideos = adaptRelatedVideos(
+			relatedStreams,
+			thumbnailPlaceholder,
+			thumbnailPlaceholder
+		)
+
 		return {
 			playerConfig,
-			metadata
+			metadata,
+			relatedVideos
 		};
 
 	} catch (error) {

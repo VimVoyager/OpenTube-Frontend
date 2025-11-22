@@ -1,5 +1,5 @@
-import type Stream from "stream";
 import { env } from '$env/dynamic/public';
+import type { RelatedItem } from "$lib/types";
 
 const API_BASE_URL = env.PUBLIC_API_URL + '/api/v1';
 
@@ -9,7 +9,7 @@ const API_BASE_URL = env.PUBLIC_API_URL + '/api/v1';
 export async function getRelatedStreams(
     id: string,
     fetchFn?: typeof globalThis.fetch
-): Promise<Stream[]> {
+): Promise<RelatedItem[]> {
     const fetcher = fetchFn ?? globalThis.fetch;
 
     try {
@@ -32,9 +32,9 @@ export async function getRelatedStreams(
 
         // Handle different response formats
         if (Array.isArray(data)) {
-            return data as Stream[];
+            return data as RelatedItem[];
         } else if (data.streams && Array.isArray(data.streams)) {
-            return data.streams as Stream[];
+            return data.streams as RelatedItem[];
         } else {
             throw new Error('Unexpected response format for related streams');
         }

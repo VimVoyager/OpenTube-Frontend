@@ -21,9 +21,11 @@ import {
     mockVideoStream, 
     mockAudioStream, 
     mockSubtitleStream, 
-    mockPlayerConfig 
+    mockPlayerConfig, 
+    mockRelatedVideos
 } from '../../../tests/fixtures/videoPlayerFixtures';
 import { mockMetadata } from '../../../tests/fixtures/videoDetailFixtures';
+import { adaptRelatedVideos } from '$lib/adapters/relatedVideos';
 
 // Mock all dependencies
 vi.mock('$lib/api/details');
@@ -32,7 +34,7 @@ vi.mock('$lib/api/streams');
 vi.mock('$lib/adapters/constants');
 vi.mock('$lib/adapters/metadata');
 vi.mock('$lib/adapters/player');
-vi.mock('$lib/adapters/relatedVideo');
+vi.mock('$lib/adapters/relatedVideos');
 vi.mock('$lib/utils/streamSelection');
 vi.mock('$lib/utils/subtitleSelection');
 
@@ -69,6 +71,7 @@ describe('+page.ts', () => {
         (selectSubtitles as Mock).mockReturnValue([mockSubtitleStream]);
         (calculateDuration as Mock).mockReturnValue(300);
         (adaptPlayerConfig as Mock).mockReturnValue(mockPlayerConfig);
+        (adaptRelatedVideos as Mock).mockReturnValue(mockRelatedVideos);
         (adaptVideoMetadata as Mock).mockReturnValue(mockMetadata);
         (logSelectedStreams as Mock).mockImplementation(() => { });
         (logSelectedSubtitles as Mock).mockImplementation(() => { });
@@ -85,6 +88,7 @@ describe('+page.ts', () => {
             // Assert
             expect(result).toEqual({
                 playerConfig: mockPlayerConfig,
+                relatedVideos: mockRelatedVideos,
                 metadata: mockMetadata
             });
             expect(result!.error).toBeUndefined();
@@ -487,7 +491,7 @@ describe('+page.ts', () => {
         it('should handle error PageData type', async () => {
             // Arrange
             const params = { id: mockVideoId };
-            const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
+            vi.spyOn(console, 'error').mockImplementation(() => { });
             (getVideoDetails as Mock).mockRejectedValue(new Error('Test error'));
 
             // Act

@@ -172,6 +172,20 @@ export const mockPlayerConfig4K: VideoPlayerConfig = {
 	poster: 'https://example.com/poster-4k.jpg'
 };
 
+export const mockRelatedVideos = [
+	{
+        id: 'related-1',
+        url: 'https://www.youtube.com/watch?v=related-1',
+        title: 'Related Video 1',
+        thumbnail: 'https://example.com/thumb1.jpg',
+        channelName: 'Related Channel 1',
+        channelAvatar: 'https://example.com/avatar1.jpg',
+        viewCount: 50000,
+        duration: 300,
+        uploadDate: '1 day ago'
+    }
+];
+
 // Shaka Player error codes
 export const SHAKA_ERROR_CODES = {
 	NETWORK_ERROR: 1001,
