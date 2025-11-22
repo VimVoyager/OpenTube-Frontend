@@ -1,35 +1,107 @@
 <script lang="ts">
-	import type { RelatedItem } from '$lib/types';
+	import { goto } from '$app/navigation';
+	import type { RelatedVideoConfig } from '$lib/adapters/types';
+	import type { Writable } from 'svelte/store';
 
-	export let videos: RelatedItem[] = [];
+	export let videos: RelatedVideoConfig[] = [];
+	export let isLoadingStore: Writable<boolean> | undefined = undefined;
 
 	const formatViewCount = (viewCount: number): string => {
 		const formatter = Intl.NumberFormat('en-US');
 		return formatter.format(viewCount);
 	};
+
+	const formatDuration = (seconds: number): string => {
+		const hours = Math.floor(seconds / 3600);
+		const minutes = Math.floor((seconds % 3600) / 60);
+		const secs = seconds % 60;
+
+		if (hours > 0) {
+			return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+		}
+		return `${minutes}:${secs.toString().padStart(2, '0')}`;
+	}
+
+	const handleVideoClick = (videoId: string) => {
+		if (isLoadingStore) {
+			isLoadingStore.set(true);
+		}
+		goto(`/video/${videoId}`);
+	};
 </script>
 
-<div class="flex w-full flex-col gap-0.25 px-6">
-	{#each videos as video (video.id)}
-		<div>
-			<div class="flex items-center sm:flex-row sm:gap-4" style="aspect-ratio: 16/9;">
-				<img src={video.thumbnails[video.thumbnails.length - 1].url} alt="Thumbnail" class="rounded-md object-cover" />
-			</div>
-			<div class="mb-1 flex flex-col">
-				<h3 class="text-lg font-semibold text-gray-900 dark:text-white">{video.name}</h3>
-				
-			</div>
+<div class="flex w-full flex-col gap-4 px-6">
+	{#if videos.length === 0}
+		<!-- Empty state -->
+		<div class="flex flex-col items-center justify-center py-8 text-center">
+			<div class="text-4xl mb-4">📹</div>
+			<p class="text-sm text-gray-500 dark:text-gray-400">No related Videos available</p>
 		</div>
-		<div class="mb-4">
-			<div class="grid grid-cols-7">
-				<div class="col-span-1 flex items-center justify-start">
-					<img src={video.uploaderAvatars[video.uploaderAvatars.length - 1].url} alt={video.uploaderName} class="h-8 w-8 rounded-full object-cover" />
+	{:else}
+		{#each videos as video (video.id)}
+			<div 
+				role="button" 
+				tabindex="0"
+				on:click={() => handleVideoClick(video.id)}
+				on:keydown={(e) => e.key === 'Enter' && handleVideoClick(video.id)} 
+				class="group flex gap-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors p-2 mx-2 cursor-pointer">
+				<!-- Thumbnail -->
+				<div class="relative flex-shrink-0 w-40">
+					<div class="relative" style="aspect-ratio: 16/9;">
+						<img 
+							src={video.thumbnail} 
+							alt={video.title}
+							class="w-full h-full rounded-md object-cover"
+						/>
+						<!-- Duration badge -->
+						{#if video.duration > 0}
+							<span class="absolute bottom-1 right-1 bg-black bg-opacity-80 text-white text-xs px-1 py-0.5 rounded">
+								{formatDuration(video.duration)}
+							</span>
+						{/if}
+					</div>
 				</div>
-				<div class="col-span-3 flex flex-col">
-					<p class="text-sm text-gray-500 dark:text-gray-400">{video.uploaderName}</p>
-					<p class="text-sm text-gray-500 dark:text-gray-400">{formatViewCount(video.viewCount)} views</p>
+
+				<!-- Video Info -->
+				<div class="flex flex-col flex-1 min-w-0">
+					<!-- Title -->
+					<h3 class="text-sm font-semibold text-gray-900 dark:text-white line-clamp-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+						{video.title}
+					</h3>
+
+					<!-- Channel Info -->
+					<div class="mt-1 flex items-center gap-2">
+						{#if video.channelAvatar}
+							<img 
+								src={video.channelAvatar} 
+								alt={video.channelName}
+								class="h-6 w-6 rounded-full object-cover flex-shrink-0"
+							/>
+						{/if}
+						<p class="text-xs text-gray-600 dark:text-gray-400 truncate">
+							{video.channelName}
+						</p>
+					</div>
+
+					<!-- Video Stats -->
+					<div class="mt-1 flex flex-row text-xs text-gray-500 dark:text-gray-400">
+						<span>{formatViewCount(video.viewCount)} views</span>
+						{#if video.uploadDate}
+							<span class="mx-2">•</span>
+							<span>{video.uploadDate}</span>
+						{/if}
+					</div>
 				</div>
 			</div>
-		</div>
-	{/each}
+		{/each}
+	{/if}
 </div>
+
+<style>
+	.line-clamp-2 {
+		display: -webkit-box;
+		-webkit-line-clamp: 2;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+	}
+</style>
