@@ -312,7 +312,7 @@
 	{/if}
 
 	{#if errorMessage}
-		<div class="error-message">
+		<div class="error-message" data-testid="error-text">
 			<div class="error-icon">⚠️</div>
 			<p class="error-text">{errorMessage}</p>
 			<button class="retry-button" on:click={() => window.location.reload()}> Retry </button>

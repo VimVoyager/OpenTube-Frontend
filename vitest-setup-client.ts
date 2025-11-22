@@ -29,6 +29,10 @@ vi.mock('$app/stores', () => ({
 	}
 }));
 
+vi.mock('$app/navigation', () => ({
+	goto: vi.fn()
+}));
+
 // Cleanup after each test
 afterEach(() => {
 	vi.clearAllMocks();

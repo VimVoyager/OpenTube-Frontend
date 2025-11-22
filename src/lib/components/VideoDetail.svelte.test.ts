@@ -4,7 +4,7 @@
  * Tests for video metadata display component
  */
 
-import { render, screen } from '@testing-library/svelte';
+import { render, screen, waitFor } from '@testing-library/svelte';
 import { describe, it, expect } from 'vitest';
 import VideoDetail from './VideoDetail.svelte';
 import type { VideoMetadata } from '$lib/adapters/types';
@@ -327,7 +327,7 @@ describe('VideoDetail', () => {
 			expect(screen.getByText(/This is a test video description/)).toBeInTheDocument();
 		});
 
-		it('should handle metadata updates', () => {
+		it('should handle metadata updates', async () => {
 			const { rerender } = render(VideoDetail, { props: { metadata: mockMetadata } });
 			
 			expect(screen.getByText(mockMetadata.title)).toBeInTheDocument();
@@ -335,8 +335,12 @@ describe('VideoDetail', () => {
 			// Update with new metadata
 			rerender({ metadata: mockMetadataLargeNumbers });
 			
-			expect(screen.getByText(mockMetadataLargeNumbers.title)).toBeInTheDocument();
-			expect(screen.getByText(/999,999,999 views/)).toBeInTheDocument();
+			await waitFor(() => {
+				expect(screen.getByText(mockMetadataLargeNumbers.title)).toBeInTheDocument();
+			});
+			await waitFor(() => {
+				expect(screen.getByText(/999,999,999 views/)).toBeInTheDocument();
+			});
 		});
 
 		it('should render with minimal required props', () => {

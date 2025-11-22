@@ -11,7 +11,7 @@
 	 */
 	const formatViewCount = (viewCount: number): string => {
 		const formatter = Intl.NumberFormat('en-US');
-		return formatter.format(viewCount);
+		return formatter.format(Math.floor(viewCount));
 	};
 </script>
 
