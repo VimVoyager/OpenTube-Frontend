@@ -1,6 +1,6 @@
 /**
  * Test Suite: search.ts
- * 
+ *
  * Tests for video search functionality including query handling,
  * response parsing, and error scenarios
  */
@@ -15,8 +15,8 @@ import {
 	getCallCount
 } from '../../tests/helpers/apiHelpers';
 import {
-    mockEmptySearchResult,
-	mockSearchResult,
+	mockEmptySearchResult,
+	mockSearchResult
 } from '../../tests/fixtures/apiFixtures';
 
 // =============================================================================
@@ -32,28 +32,36 @@ describe('getSearchResults', () => {
 			const mockFetch = createSuccessfulFetch(mockSearchResult);
 
 			// Act
-			const result = await getSearchResults(query, sortFilter, mockFetch as unknown as typeof globalThis.fetch);
+			const result = await getSearchResults(
+				query,
+				sortFilter,
+				mockFetch as unknown as typeof globalThis.fetch
+			);
 
 			// Assert
 			expect(result).toEqual(mockSearchResult);
 			expect(mockFetch).toHaveBeenCalledTimes(1);
 		});
 
-		it('should return array of video results', async () => {
+		it('should return search result with items array', async () => {
 			// Arrange
 			const query = 'javascript tutorial';
 			const sortFilter = 'asc';
 			const mockFetch = createSuccessfulFetch(mockSearchResult);
 
 			// Act
-			const result = await getSearchResults(query, sortFilter, mockFetch as unknown as typeof globalThis.fetch);
+			const result = await getSearchResults(
+				query,
+				sortFilter,
+				mockFetch as unknown as typeof globalThis.fetch
+			);
 
 			// Assert
-			expect(Array.isArray(result)).toBe(true);
-			expect(result).toHaveLength(mockSearchResult.length);
-			expect(result[0]).toHaveProperty('id');
-			expect(result[0]).toHaveProperty('name');
-			expect(result[0]).toHaveProperty('url');
+			expect(result).toHaveProperty('items');
+			expect(Array.isArray(result.items)).toBe(true);
+			expect(result.items).toHaveLength(mockSearchResult.items.length);
+			expect(result.items[0]).toHaveProperty('name');
+			expect(result.items[0]).toHaveProperty('url');
 		});
 
 		it('should handle single character queries', async () => {
@@ -63,7 +71,11 @@ describe('getSearchResults', () => {
 			const mockFetch = createSuccessfulFetch(mockSearchResult);
 
 			// Act
-			const result = await getSearchResults(query, sortFilter, mockFetch as unknown as typeof globalThis.fetch);
+			const result = await getSearchResults(
+				query,
+				sortFilter,
+				mockFetch as unknown as typeof globalThis.fetch
+			);
 
 			// Assert
 			expect(result).toEqual(mockSearchResult);
@@ -77,7 +89,11 @@ describe('getSearchResults', () => {
 			const mockFetch = createSuccessfulFetch(mockSearchResult);
 
 			// Act
-			const result = await getSearchResults(query, sortFilter, mockFetch as unknown as typeof globalThis.fetch);
+			const result = await getSearchResults(
+				query,
+				sortFilter,
+				mockFetch as unknown as typeof globalThis.fetch
+			);
 
 			// Assert
 			expect(result).toEqual(mockSearchResult);
@@ -104,7 +120,7 @@ describe('getSearchResults', () => {
 		});
 	});
 
-    // =============================================================================
+	// =============================================================================
 	// Query Sanitization Tests
 	// =============================================================================
 
@@ -214,9 +230,9 @@ describe('getSearchResults', () => {
 			const params = extractQueryParams(callUrl);
 			expect(params.searchString).toBe(query);
 		});
-    });
+	});
 
-    	// =============================================================================
+	// =============================================================================
 	// URL Construction Tests
 	// =============================================================================
 
@@ -249,53 +265,18 @@ describe('getSearchResults', () => {
 			// Assert
 			const callUrl = (mockFetch as Mock).mock.calls[0][0] as string;
 			const params = extractQueryParams(callUrl);
-			expect(params.sortFilter).toBe('asc');
+			expect(params.sortFilter).toBe(sortFilter);
 		});
 	});
 
-    // =============================================================================
-	// Empty Results Tests
 	// =============================================================================
-
-	describe('empty search results', () => {
-		it('should handle empty result array', async () => {
-			// Arrange
-			const query = 'nonexistent query xyz123';
-			const sortFilter = 'asc';
-			const mockFetch = createSuccessfulFetch(mockEmptySearchResult);
-
-			// Act
-			const result = await getSearchResults(query, sortFilter, mockFetch as unknown as typeof globalThis.fetch);
-
-			// Assert
-			expect(result).toEqual([]);
-			expect(Array.isArray(result)).toBe(true);
-			expect(result).toHaveLength(0);
-		});
-
-		it('should return empty array for no results', async () => {
-			// Arrange
-			const query = 'asdfghjkl123456';
-			const sortFilter = 'asc';
-			const mockFetch = createSuccessfulFetch([]);
-
-			// Act
-			const result = await getSearchResults(query, sortFilter, mockFetch as unknown as typeof globalThis.fetch);
-
-			// Assert
-			expect(result).toEqual([]);
-			expect(result).toHaveLength(0);
-		});
-	});
-
-    // =============================================================================
 	// HTTP Error Tests
 	// =============================================================================
 
 	describe('HTTP error handling', () => {
 		it('should throw error on 404 response', async () => {
 			// Arrange
-			const query = 'test';
+			const query = 'nonexistent';
 			const sortFilter = 'asc';
 			const mockFetch = createFailedFetch(404, 'Not Found');
 
@@ -372,9 +353,7 @@ describe('getSearchResults', () => {
 			const mockFetch = createFailedFetch(418, "I'm a teapot");
 
 			// Act & Assert
-			await expect(getSearchResults(query, sortFilter, mockFetch)).rejects.toThrow(
-				/418/
-			);
+			await expect(getSearchResults(query, sortFilter, mockFetch)).rejects.toThrow(/418/);
 		});
 
 		it('should include status text in error message', async () => {
@@ -444,7 +423,7 @@ describe('getSearchResults', () => {
 		});
 	});
 
-    // =============================================================================
+	// =============================================================================
 	// Response Parsing Tests
 	// =============================================================================
 
@@ -456,14 +435,17 @@ describe('getSearchResults', () => {
 			const mockFetch = createSuccessfulFetch(mockSearchResult);
 
 			// Act
-			const result = await getSearchResults(query, sortFilter, mockFetch as unknown as typeof globalThis.fetch);
+			const result = await getSearchResults(
+				query,
+				sortFilter,
+				mockFetch as unknown as typeof globalThis.fetch
+			);
 
 			// Assert
 			expect(result).toEqual(mockSearchResult);
-			expect(result[0]).toHaveProperty('id');
-			expect(result[0]).toHaveProperty('name');
-			expect(result[0]).toHaveProperty('url');
-			expect(result[0]).toHaveProperty('viewCount');
+			expect(result.items[0]).toHaveProperty('name');
+			expect(result.items[0]).toHaveProperty('url');
+			expect(result.items[0]).toHaveProperty('viewCount');
 		});
 
 		it('should handle response with all video properties', async () => {
@@ -473,14 +455,17 @@ describe('getSearchResults', () => {
 			const mockFetch = createSuccessfulFetch(mockSearchResult);
 
 			// Act
-			const result = await getSearchResults(query, sortFilter, mockFetch as unknown as typeof globalThis.fetch);
+			const result = await getSearchResults(
+				query,
+				sortFilter,
+				mockFetch as unknown as typeof globalThis.fetch
+			);
 
 			// Assert
-			const video = result[0];
-			expect(video).toHaveProperty('id');
+			const video = result.items[0];
 			expect(video).toHaveProperty('url');
 			expect(video).toHaveProperty('name');
-			expect(video).toHaveProperty('thumbnails');
+			expect(video).toHaveProperty('thumbnailUrl');
 			expect(video).toHaveProperty('duration');
 			expect(video).toHaveProperty('uploaderName');
 			expect(video).toHaveProperty('viewCount');
@@ -493,15 +478,37 @@ describe('getSearchResults', () => {
 			const mockFetch = createSuccessfulFetch(mockSearchResult);
 
 			// Act
-			const result = await getSearchResults(query, sortFilter, mockFetch as unknown as typeof globalThis.fetch);
+			const result = await getSearchResults(
+				query,
+				sortFilter,
+				mockFetch as unknown as typeof globalThis.fetch
+			);
 
 			// Assert
-			const video = result[0];
-			expect(typeof video.id).toBe('string');
+			const video = result.items[0];
 			expect(typeof video.name).toBe('string');
 			expect(typeof video.duration).toBe('number');
 			expect(typeof video.viewCount).toBe('number');
-			expect(Array.isArray(video.thumbnails)).toBe(true);
+			expect(typeof video.thumbnailUrl).toBe('string');
+		});
+
+		it('should include search metadata in response', async () => {
+			// Arrange
+			const query = 'test';
+			const sortFilter = 'asc';
+			const mockFetch = createSuccessfulFetch(mockSearchResult);
+
+			// Act
+			const result = await getSearchResults(
+				query,
+				sortFilter,
+				mockFetch as unknown as typeof globalThis.fetch
+			);
+
+			// Assert
+			expect(result).toHaveProperty('searchString');
+			expect(result).toHaveProperty('url');
+			expect(result).toHaveProperty('items');
 		});
 	});
 
@@ -517,7 +524,11 @@ describe('getSearchResults', () => {
 			const mockFetch = createSuccessfulFetch(mockSearchResult);
 
 			// Act
-			const result = await getSearchResults(query, sortFilter, mockFetch as unknown as typeof globalThis.fetch);
+			const result = await getSearchResults(
+				query,
+				sortFilter,
+				mockFetch as unknown as typeof globalThis.fetch
+			);
 
 			// Assert
 			expect(result).toEqual(mockSearchResult);
@@ -532,7 +543,11 @@ describe('getSearchResults', () => {
 			const mockFetch = createSuccessfulFetch(mockSearchResult);
 
 			// Act
-			const result = await getSearchResults(query, sortFilter, mockFetch as unknown as typeof globalThis.fetch);
+			const result = await getSearchResults(
+				query,
+				sortFilter,
+				mockFetch as unknown as typeof globalThis.fetch
+			);
 
 			// Assert
 			expect(result).toEqual(mockSearchResult);
@@ -573,6 +588,24 @@ describe('getSearchResults', () => {
 			expect(result2).toEqual(mockEmptySearchResult);
 			expect(getCallCount(mockFetch1)).toBe(1);
 			expect(getCallCount(mockFetch2)).toBe(1);
+		});
+
+		it('should handle empty items array', async () => {
+			// Arrange
+			const query = 'no results query';
+			const sortFilter = 'asc';
+			const mockFetch = createSuccessfulFetch(mockEmptySearchResult);
+
+			// Act
+			const result = await getSearchResults(
+				query,
+				sortFilter,
+				mockFetch as unknown as typeof globalThis.fetch
+			);
+
+			// Assert
+			expect(result.items).toEqual([]);
+			expect(result.items).toHaveLength(0);
 		});
 	});
 });

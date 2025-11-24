@@ -4,7 +4,7 @@
  * Contains reusable mock data for API responses across all API test files
  */
 
-import type { Details, Stream, Subtitle, SearchResult, RelatedItem } from '$lib/types';
+import type { Details, Stream, Subtitle, SearchResult, RelatedItem, SearchItem } from '$lib/types';
 
 // =============================================================================
 // Video Details Fixtures
@@ -325,89 +325,80 @@ export const mockRelatedStreamObjectResponse = {
 	videoId: 'test-video-id'
 };
 
+export const mockSearchItemStream: SearchItem = {
+	type: 'stream',
+	name: 'Test Video Title',
+	url: 'https://www.youtube.com/watch?v=test-video-id',
+	thumbnailUrl: 'https://i.ytimg.com/vi/test-video-id/hq720.jpg',
+	uploaderName: 'Test Channel',
+	uploaderUrl: 'https://www.youtube.com/channel/test-channel-id',
+	uploaderAvatarUrl: 'https://yt3.ggpht.com/test-avatar.jpg',
+	uploaderVerified: true,
+	duration: 692,
+	viewCount: 863620,
+	uploadDate: '2025-11-22T21:00Z',
+	streamType: 'VIDEO_STREAM',
+	isShortFormContent: false,
+	shortFormContent: false
+};
+
+export const mockSearchItemChannel: SearchItem = {
+	type: 'channel',
+	name: 'Test Channel Name',
+	url: 'https://www.youtube.com/channel/test-channel-id',
+	thumbnailUrl: 'https://yt3.ggpht.com/channel-thumbnail.jpg',
+	uploaderVerified: true,
+	subscriberCount: 16600000,
+	streamCount: -1,
+	description: 'This is a test channel description...'
+};
+
 // =============================================================================
 // Search Result Fixtures
 // =============================================================================
 
-export const mockSearchResult: SearchResult = [
-	{
-		id: 'video-1',
-		url: 'https://youtube.com/watch?v=video-1',
-		name: 'Test Video 1',
-		streamDate: '2024-01-15T10:00:00Z',
-		thumbnails: [
-			{
-				url: 'https://example.com/thumb1.jpg',
-				height: 720,
-				width: 1280,
-				estimatedResolutionLevel: 'HIGH'
-			}
-		],
-		textualUploadDate: '1 week ago',
-		duration: 300,
-		description: {
-			content: 'Test description 1',
-			type: 0
+export const mockSearchResult: SearchResult = {
+	correctedSearch: false,
+	url: 'https://www.youtube.com/results?search_query=test',
+	originalUrl: 'https://www.youtube.com/results?search_query=test',
+	name: 'Search',
+	searchString: 'test',
+	searchSuggestion: '',
+	isCorrectedSearch: false,
+	items: [
+		mockSearchItemStream,
+		{
+			...mockSearchItemStream,
+			name: 'Second Test Video',
+			url: 'https://www.youtube.com/watch?v=second-video-id',
+			viewCount: 1035636,
+			duration: 1154
 		},
-		viewCount: 100000,
-		likeCount: 5000,
-		dislikeCount: 100,
-		uploaderName: 'Test Channel 1',
-		uploaderAvatars: [
-			{
-				url: 'https://example.com/avatar1.jpg',
-				height: 48,
-				width: 48,
-				estimatedResolutionLevel: 'LOW'
-			}
-		],
-		uploaderSubscriberCount: 500000,
-		videoStreams: [],
-		audioStreams: [],
-		videoOnlyStreams: [],
-		relatedItems: [],
-		subtitles: [],
-		category: 'Entertainment',
-		streamSegments: [],
-		shortFormContent: false
-	},
-	{
-		id: 'video-2',
-		url: 'https://youtube.com/watch?v=video-2',
-		name: 'Test Video 2',
-		streamDate: '2024-01-14T15:30:00Z',
-		thumbnails: [
-			{
-				url: 'https://example.com/thumb2.jpg',
-				height: 360,
-				width: 640,
-				estimatedResolutionLevel: 'MEDIUM'
-			}
-		],
-		textualUploadDate: '2 weeks ago',
-		duration: 600,
-		description: {
-			content: 'Test description 2',
-			type: 0
-		},
-		viewCount: 50000,
-		likeCount: 2000,
-		dislikeCount: 50,
-		uploaderName: 'Test Channel 2',
-		uploaderAvatars: [],
-		uploaderSubscriberCount: 100000,
-		videoStreams: [],
-		audioStreams: [],
-		videoOnlyStreams: [],
-		relatedItems: [],
-		subtitles: [],
-		category: 'Education',
-		streamSegments: [],
-		shortFormContent: false
-	}
-];
+		mockSearchItemChannel
+	]
+};
 
-export const mockEmptySearchResult: SearchResult = [];
+export const mockEmptySearchResult: SearchResult = {
+	correctedSearch: false,
+	url: 'https://www.youtube.com/results?search_query=noresults',
+	originalUrl: 'https://www.youtube.com/results?search_query=noresults',
+	name: 'Search',
+	searchString: 'noresults',
+	searchSuggestion: '',
+	isCorrectedSearch: false,
+	items: []
+};
+
+export const mockSearchResultWithSuggestion: SearchResult = {
+	correctedSearch: true,
+	url: 'https://www.youtube.com/results?search_query=tset',
+	originalUrl: 'https://www.youtube.com/results?search_query=tset',
+	name: 'Search',
+	searchString: 'tset',
+	searchSuggestion: 'test',
+	isCorrectedSearch: true,
+	items: [mockSearchItemStream]
+};
 
 // =============================================================================
 // Response Wrappers (for different API response formats)
