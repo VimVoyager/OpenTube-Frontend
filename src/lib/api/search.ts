@@ -1,19 +1,20 @@
 import type { SearchResult } from "$lib/types";
 import { env } from '$env/dynamic/public';
 
-const API_BASE_URL = env.PUBLIC_API_URL + 'api/v1';
+const API_BASE_URL = env.PUBLIC_API_URL + '/api/v1';
 
 /**
  * Fetch search results for a given search query
  */
 export async function getSearchResults(
 	query: string,
+	sortFilter:string,
 	fetchFn?: typeof globalThis.fetch
 ): Promise<SearchResult> {
 	const fetcher = fetchFn ?? globalThis.fetch;
 
 	try {
-		const res = await fetcher(`${API_BASE_URL}/search/?searchString=${encodeURIComponent(query)}`);
+		const res = await fetcher(`${API_BASE_URL}/search/?searchString=${encodeURIComponent(query)}&sortFilter=${encodeURIComponent(sortFilter)}`);
 
 		if (!res.ok) {
 			throw new Error(`Could not load search results for ${query}: ${res.status} ${res.statusText}`);
