@@ -2,7 +2,6 @@
 /**
  * Video stream configuration for the player
  */
-
 export interface VideoStreamConfig {
 	url: string;
 	codec: string;
@@ -17,10 +16,10 @@ export interface VideoStreamConfig {
 	indexStart?: number;
 	indexEnd?: number;
 }
+
 /**
  * Audio stream configuration for the player
  */
-
 export interface AudioStreamConfig {
 	url: string;
 	codec: string;
@@ -36,10 +35,10 @@ export interface AudioStreamConfig {
 	indexStart?: number;
 	indexEnd?: number;
 }
+
 /**
  * Subtitle stream configuration for the player
  */
-
 export interface SubtitleStreamConfig {
 	url: string;
 	language: string;
@@ -52,7 +51,6 @@ export interface SubtitleStreamConfig {
 /**
  * Video player configuration derived from selected streams
  */
-
 export interface VideoPlayerConfig {
 	videoStream: VideoStreamConfig[] | null;
 	audioStream: AudioStreamConfig[] | null;
@@ -60,10 +58,10 @@ export interface VideoPlayerConfig {
 	duration: number;
 	poster: string;
 }
+
 /**
  * Video metadata adapted for display components
  */
-
 export interface VideoMetadata {
 	title: string;
 	description: string;
@@ -75,10 +73,10 @@ export interface VideoMetadata {
 	dislikeCount: number;
 	subscriberCount: number;
 }
+
 /**
  * Related video configuration for listings display
  */
-
 export interface RelatedVideoConfig {
 	id: string;
 	url: string;
@@ -90,3 +88,24 @@ export interface RelatedVideoConfig {
 	uploadDate: string;
 	duration: number;
 }
+
+/**
+ * Search result configuration for VideoResult component display
+ * Add this to your existing adapters/types.ts file
+ */
+export interface SearchResultConfig {
+	id: string;
+	url: string;
+	title: string;
+	thumbnail: string;
+	channelName: string;
+	channelUrl: string;
+	channelAvatar: string;
+	verified: boolean;
+	viewCount: number;
+	duration: number;
+	uploadDate: string;
+	description: string;
+	type: string;
+}
+

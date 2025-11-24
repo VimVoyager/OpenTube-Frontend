@@ -174,7 +174,39 @@ export interface Video {
 
 };
 
-export type SearchResult = Video[];
+export interface SearchResult {
+	url?: string;
+	originalUrl?: string;
+	name?: string;
+	searchString: string;
+	searchSuggestion?: string | null;
+	isCorrectedSearch?: boolean;
+	items: SearchItem[];
+	nextPageUrl?: string;
+	hasNextPage?: boolean;
+}
+
+
+export interface SearchItem {
+	type: string;
+	name: string;
+	url: string;
+	thumbnailUrl: string;
+	uploaderName?: string;
+	uploaderUrl?: string;
+	uploaderAvatarUrl?: string;
+	uploaderVerified?: boolean;
+	duration?: number;
+	viewCount?: number;
+	uploadDate?: string;
+	streamType?: string;
+	isShortFormContent?: boolean;
+	subscriberCount?: number;
+	streamCount?: number;
+	description?: string;
+	playlistType?: string;
+	videoCount?: number;
+}
 
 export interface PlayerConfiguration {
 	streaming?: {
