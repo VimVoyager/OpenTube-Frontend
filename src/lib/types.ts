@@ -175,17 +175,17 @@ export interface Video {
 };
 
 export interface SearchResult {
+	correctedSearch?: boolean;
 	url?: string;
 	originalUrl?: string;
 	name?: string;
 	searchString: string;
-	searchSuggestion?: string | null;
+	searchSuggestion?: string;
 	isCorrectedSearch?: boolean;
 	items: SearchItem[];
 	nextPageUrl?: string;
 	hasNextPage?: boolean;
 }
-
 
 export interface SearchItem {
 	type: string;
@@ -201,6 +201,7 @@ export interface SearchItem {
 	uploadDate?: string;
 	streamType?: string;
 	isShortFormContent?: boolean;
+	shortFormContent?: boolean;
 	subscriberCount?: number;
 	streamCount?: number;
 	description?: string;
