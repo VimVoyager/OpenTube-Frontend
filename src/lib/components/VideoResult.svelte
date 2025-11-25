@@ -1,58 +1,58 @@
 <script lang="ts">
+	import type { SearchResultConfig } from '$lib/adapters/types';
+	import { formatCount, formatDate } from '$lib/utils/formatters';
 	import thumbnailPlaceholder from '$lib/assets/thumbnail-placeholder.jpg';
-	import roundLogo from '$lib/assets/logo-placeholder.svg';
+	import avatarPlaceholder from '$lib/assets/logo-placeholder.svg';
 
-	export let poster: string = thumbnailPlaceholder;
-	export let title: string = 'Video Title';
-	export let viewCount: number = 356910;
-	export let uploadedAt: string = '2023-05-15T12:00:00Z';
-	export let channelName: string = 'Glitch';
-	export let description: string =
-		'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.';
+	export let result: SearchResultConfig;
 
-	const formattedDate = new Date(uploadedAt).toLocaleString(undefined, {
-		day: 'numeric',
-		month: 'short',
-		year: 'numeric'
-	});
-
-	const formatViewCount = (viewCount: number): string => {
-		const formatter = Intl.NumberFormat('en-US');
-		return formatter.format(viewCount);
-	};
+	// Use placeholder only as fallbacks
+	$: thumbnail = result.thumbnail || thumbnailPlaceholder;
+	$: avatar = result.channelAvatar || avatarPlaceholder;
 </script>
 
 <div class="grid grid-cols-3 gap-4 rounded-lg p-4 shadow-sm transition-colors hover:bg-gray-900">
 	<!-- Left side – thumbnail -->
 	<div class="col-span-1 flex items-start justify-center">
-		<img
-			src={poster}
-			alt={`Thumbnail for ${title}`}
-			class="h-auto w-full rounded-md object-cover"
-		/>
+		<a href={result.url}>
+			<img
+				src={thumbnail}
+				alt={`Thumbnail for ${result.title}`}
+				class="h-auto w-full rounded-md object-cover"
+			/>
+		</a>
 	</div>
 
 	<!-- Right side – text (2/3 of the width) -->
 	<div class="col-span-2 flex flex-col">
-		<h3 class="mb-1 text-lg font-semibold text-white">{title}</h3>
+		<a href={result.url} class="hover:underline">
+			<h3 class="mb-1 text-lg font-semibold text-white">{result.title}</h3>
+		</a>
 		<p class="mb-2 text-sm text-gray-400">
-			<span>{formatViewCount(viewCount)} views</span>
+			<span>{formatCount(result.viewCount)} views</span>
 			<span class="mx-1 inline-block align-middle">•</span>
-			<span>{formattedDate}</span>
+			<span>{formatDate(result.uploadDate)}</span>
 		</p>
-		<div class="col-space-2 my-3 flex items-center space-x-3">
-			<img src={roundLogo} alt={channelName} class="h-8 w-8 rounded-full object-cover" />
-			<p class="text-md font-semibold text-white">{channelName}</p>
-		</div>
-
+		<a
+			href={result.channelUrl}
+			class="col-space-2 my-3 flex items-center space-x-3 hover:opacity-80"
+		>
+			<img src={avatar} alt={result.channelName} class="h-8 w-8 rounded-full object-cover" />
+			<p class="text-md font-semibold text-white">
+				{result.channelName}
+				{#if result.verified}
+					<span class="ml-1 text-gray-400" title="Verified">✓</span>
+				{/if}
+			</p>
+		</a>
 		<p
 			class="
-        line-clamp-3 overflow-hidden
-        text-sm
-        text-gray-400
-      "
+					line-clamp-3 overflow-hidden
+					text-sm
+					text-gray-400
+				"
 		>
-			{description}
+			{result.description}
 		</p>
 	</div>
 </div>
