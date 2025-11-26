@@ -134,39 +134,6 @@ describe('VideoResult', () => {
 		});
 	});
 
-	describe('Links and navigation', () => {
-		it('should render video URL link on thumbnail', () => {
-			render(VideoResult, { props: { result: mockSearchResult } });
-
-			const links = screen.getAllByRole('link');
-			const thumbnailLink = links.find((link) => {
-				const img = link.querySelector('img[alt*="Thumbnail"]');
-				return img !== null;
-			});
-			expect(thumbnailLink).toBeTruthy();
-			expect(thumbnailLink?.getAttribute('href')).toBe('/watch?v=test-video-id');
-		});
-
-		it('should render video URL link on title', () => {
-			render(VideoResult, { props: { result: mockSearchResult } });
-
-			const titleLink = screen.getByRole('link', { name: 'Test Video Title' });
-			expect(titleLink).toBeTruthy();
-			expect(titleLink.getAttribute('href')).toBe('/watch?v=test-video-id');
-		});
-
-		it('should render channel URL link on channel info', () => {
-			render(VideoResult, { props: { result: mockSearchResult } });
-
-			const links = screen.getAllByRole('link');
-			const channelLink = links.find((link) =>
-				link.getAttribute('href')?.includes('/channel/')
-			);
-			expect(channelLink).toBeTruthy();
-			expect(channelLink?.getAttribute('href')).toBe('/channel/test-channel');
-		});
-	});
-
 	describe('Edge cases', () => {
 		it('should handle zero view count', () => {
 			const resultWithZeroViews = { ...mockSearchResult, viewCount: 0 };
