@@ -1,14 +1,50 @@
 import { getSearchResults } from '$lib/api/search';
+import { adaptSearchResults } from '$lib/adapters/search';
+import thumbnailPlaceholder from '$lib/assets/thumbnail-placeholder.jpg'
+import avatarPlaceholder from '$lib/assets/logo-placeholder.svg';
 import type { PageLoad } from './$types';
-import type { SearchResult } from '$lib/types';
+import type { SearchResultConfig } from '$lib/adapters/types';
 
-export const load: PageLoad = async ({ url }) => {
+
+
+export const load: PageLoad = async ({ url, fetch }) => {
 	try {
+		// Extract search parameter
 		const query = url.searchParams.get('query') ?? '';
-		const result: SearchResult = await getSearchResults(query);
+		const sortFilter = url.searchParams.get('sort') ?? 'asc';
 
-		return { result };
+		// Validate query
+		if (!query.trim()) {
+			return {
+				results: [],
+				query: '',
+				error: null
+			};
+		}
+
+		// Fetch raw search data from API
+		const searchData = await getSearchResults(query, sortFilter, fetch);
+
+		// Transform data using adapter
+		const results: SearchResultConfig[] = adaptSearchResults(
+			searchData,
+			thumbnailPlaceholder,
+			avatarPlaceholder
+		);
+
+		return { 
+			results,
+			query,
+			sortFilter,
+			error: null
+		};
 	} catch (error) {
-		return { error: error instanceof Error ? error.message : 'Unknown error' };
-	};
+		console.error('Error loading search results:', error);
+		return { 
+			results: [],
+			query: url.searchParams.get('query') ?? '',
+			sortFilter: url.searchParams.get('sort') ?? 'asc',
+			error: error instanceof Error ? error.message : 'Failed to load search results'
+		};
+	}
 };
