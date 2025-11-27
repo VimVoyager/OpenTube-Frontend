@@ -19,7 +19,7 @@
 	});
 
 	afterNavigate(() => {
-		isNavigating = false;
+		// isNavigating = false;
 		targetRouteId = null;
 	});
 
@@ -45,9 +45,9 @@
 	{:else if isNavigatingToVideo}
 		<div class="mt-4 flex h-screen w-full">
 			<section class="flex w-2/3 flex-col items-start justify-start">
-				<div class="p-4 sm:p-6 lg:p-8">
+				<div class="w-full p-4 sm:p-6 lg:p-8">
 					<!-- Show loading state during navigation -->
-					<VideoLoading message="Loading video..." />
+					<VideoLoading />
 				</div>
 			</section>
 			<aside class="mt-7.75 flex w-1/3 flex-col gap-5">

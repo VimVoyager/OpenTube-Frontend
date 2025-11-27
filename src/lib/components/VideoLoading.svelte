@@ -1,6 +1,4 @@
 <script lang="ts">
-	// Optional: can accept a message prop
-	export let message: string = 'Loading video...';
 </script>
 
 <div class="loading-container">
@@ -32,11 +30,6 @@
 			<div class="h-3 bg-gray-700 rounded w-5/6 animate-pulse"></div>
 			<div class="h-3 bg-gray-700 rounded w-4/6 animate-pulse"></div>
 		</div>
-	</div>
-
-	<!-- Loading message -->
-	<div class="text-center mt-8">
-		<p class="text-gray-400 text-sm">{message}</p>
 	</div>
 </div>
 
