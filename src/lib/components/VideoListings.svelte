@@ -1,10 +1,8 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import type { RelatedVideoConfig } from '$lib/adapters/types';
-	import type { Writable } from 'svelte/store';
 
 	export let videos: RelatedVideoConfig[] = [];
-	export let isLoadingStore: Writable<boolean> | undefined = undefined;
 
 	const formatViewCount = (viewCount: number): string => {
 		const formatter = Intl.NumberFormat('en-US');
@@ -23,9 +21,6 @@
 	}
 
 	const handleVideoClick = (videoId: string) => {
-		if (isLoadingStore) {
-			isLoadingStore.set(true);
-		}
 		goto(`/video/${videoId}`);
 	};
 </script>

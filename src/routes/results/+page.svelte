@@ -1,8 +1,6 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import VideoResult from '$lib/components/VideoResult.svelte';
-	import Loading from '$lib/components/Loading.svelte';
-	import { goto } from '$app/navigation';
 
 	export let data: PageData;
 
@@ -10,6 +8,7 @@
 	$: hasResults = results && results.length > 0;
 </script>
 
+<!-- Content States -->
 <div class="container mx-auto w-3/4 px-4 py-8">
 	<!-- Search Query Header -->
 	{#if query}
