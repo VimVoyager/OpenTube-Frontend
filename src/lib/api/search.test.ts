@@ -248,7 +248,7 @@ describe('getSearchResults', () => {
 
 			// Assert
 			const callUrl = (mockFetch as Mock).mock.calls[0][0] as string;
-			expect(callUrl).toContain('http://localhost:8080/api/v1/search/');
+			expect(callUrl).toContain('http://localhost:8080/api/v1/search');
 			expect(callUrl).toContain('sortFilter=asc');
 			expect(callUrl).toContain('searchString=test');
 		});

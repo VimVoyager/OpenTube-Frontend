@@ -109,7 +109,6 @@ export function createNetworkErrorFetch(
  * Extracts query parameters from a URL string
  */
 export function extractQueryParams(url: string): Record<string, string> {
-    console.log("URL is this: ", url);
     const urlObj = new URL(url);
     const params: Record<string, string> = {};
 

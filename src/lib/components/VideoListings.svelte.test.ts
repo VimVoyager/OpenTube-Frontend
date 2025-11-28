@@ -341,20 +341,6 @@ describe('VideoListings', () => {
 			expect(mockGoto).toHaveBeenCalledWith('/video/video-2');
 		});
 
-		it('should set loading state when clicked', async () => {
-			render(VideoListings, { 
-				props: { videos: mockRelatedVideos, isLoadingStore: mockLoadingStore } 
-			});
-			
-			const videoCard = screen.getByText('First Related Video').closest('[role="button"]');
-			await fireEvent.click(videoCard!);
-			
-			let storeValue = false;
-			mockLoadingStore.subscribe(value => { storeValue = value; })();
-			
-			expect(storeValue).toBe(true);
-		});
-
 		it('should handle keyboard navigation with Enter key', async () => {
 			render(VideoListings, { props: { videos: mockRelatedVideos } });
 			

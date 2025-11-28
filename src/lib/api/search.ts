@@ -14,7 +14,7 @@ export async function getSearchResults(
 	const fetcher = fetchFn ?? globalThis.fetch;
 
 	try {
-		const res = await fetcher(`${API_BASE_URL}/search/?searchString=${encodeURIComponent(query)}&sortFilter=${encodeURIComponent(sortFilter)}`);
+		const res = await fetcher(`${API_BASE_URL}/search?searchString=${encodeURIComponent(query)}&sortFilter=${encodeURIComponent(sortFilter)}`);
 
 		if (!res.ok) {
 			throw new Error(`Could not load search results for ${query}: ${res.status} ${res.statusText}`);
