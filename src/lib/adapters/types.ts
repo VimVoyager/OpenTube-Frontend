@@ -52,9 +52,7 @@ export interface SubtitleStreamConfig {
  * Video player configuration derived from selected streams
  */
 export interface VideoPlayerConfig {
-	videoStream: VideoStreamConfig[] | null;
-	audioStream: AudioStreamConfig[] | null;
-	subtitleStream: SubtitleStreamConfig[] | null;
+	manifestUrl: string;
 	duration: number;
 	poster: string;
 }
