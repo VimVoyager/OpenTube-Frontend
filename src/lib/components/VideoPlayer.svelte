@@ -1,14 +1,7 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import { browser } from '$app/environment';
-	import {
-		generateDashManifestBlobUrl,
-		revokeDashManifestBlobUrl,
-		type DashManifestConfig,
-		type StreamMetadata,
-		type SubtitleMetadata
-	} from '$lib/utils/dashManifestGenerator';
-		import type { VideoPlayerConfig } from '$lib/adapters/types';
+	import type { VideoPlayerConfig } from '$lib/adapters/types';
 
 	export let config: VideoPlayerConfig;
 
@@ -19,7 +12,6 @@
 	let ui: any = null;
 	let errorMessage: string = '';
 	let isLoading: boolean = true;
-	let manifestBlobUrl: string = '';
 
 	onMount(async () => {
 		if (!browser) return;
@@ -152,7 +144,7 @@
 
 			player.addEventListener('error', onErrorEvent);
 
-			// Generate and load DASH manifest
+			// Load DASH manifest from backend
 			await loadDashManifest();
 
 			isLoading = false;
@@ -167,74 +159,16 @@
 			throw new Error('Player not initialized');
 		}
 
-		if ((!config.videoStream || config.videoStream.length === 0) && (!config.audioStream ||config.audioStream.length === 0)) {
-			throw new Error('No video or audio stream provided');
+		if (!config.manifestUrl) {
+			throw new Error('No manifest URL provided');
 		}
 
 		try {
-			// Prepare stream metadata
-			const videoStreams: StreamMetadata[] | undefined = config.videoStream
-				? config.videoStream.map(stream => ({
-						url: stream?.url,
-						codec: stream?.codec,
-						mimeType: stream?.mimeType,
-						bandwidth: stream?.bandwidth,
-						width: stream?.width,
-						height: stream?.height,
-						frameRate: stream?.frameRate,
-						format: stream?.format,
-						initStart: stream?.initStart,
-						initEnd: stream?.initEnd,
-						indexStart: stream?.indexStart,
-						indexEnd: stream?.indexEnd
-					}))
-				: undefined;
+			console.log('Loading DASH manifest from backend:', config.manifestUrl);
 
-			const audioStreams: StreamMetadata[] | undefined = config.audioStream
-				? config.audioStream.map(stream => ({
-						url: stream?.url,
-						codec: stream?.codec,
-						mimeType: stream?.mimeType,
-						bandwidth: stream?.bandwidth,
-						audioSampleRate: stream?.sampleRate,
-						audioChannels: stream?.channels,
-						format: stream?.format,
-						language: stream?.language,
-						languageName: stream?.languageName,
-						initStart: stream?.initStart,
-						initEnd: stream?.initEnd,
-						indexStart: stream?.indexStart,
-						indexEnd: stream?.indexEnd
-					}))
-				: undefined;
-
-			const subtitleStreams: SubtitleMetadata[] | undefined = config.subtitleStream
-				? config.subtitleStream.map(subtitle => ({
-						url: subtitle?.url,
-						language: subtitle?.language,
-						languageName: subtitle?.languageName,
-						mimeType: subtitle?.mimeType,
-						kind: subtitle?.kind,
-				}))
-				: undefined;
-
-			// Generate DASH manifest configuration
-			const manifestConfig: DashManifestConfig = {
-				videoStreams,
-				audioStreams,
-				subtitleStreams,
-				duration: config.duration
-			};
-
-			console.log('Generating DASH manifest with config:', manifestConfig);
-
-			// Generate blob URL from manifest
-			manifestBlobUrl = generateDashManifestBlobUrl(manifestConfig);
-
-			console.log('Loading DASH manifest from blob URL:', manifestBlobUrl);
-
-			// Load the manifest into Shaka Player
-			await player.load(manifestBlobUrl);
+			// Load the manifest directly into Shaka Player
+			// Backend has already handled all stream selection and manifest generation
+			await player.load(config.manifestUrl);
 
 			console.log('DASH manifest loaded successfully');
 		} catch (error) {
@@ -291,19 +225,13 @@
 		}
 
 		// Revoke blob URL to free memory
-		if (manifestBlobUrl) {
-			revokeDashManifestBlobUrl(manifestBlobUrl);
-			manifestBlobUrl = '';
+		if (config.manifestUrl && config.manifestUrl.startsWith('blob:')) {
+			URL.revokeObjectURL(config.manifestUrl);
 		}
 	});
-
-	// Compute aspect ratio from video stream or 16:9 default
-	$: aspectRatio = config.videoStream && config.videoStream.length > 0
-		? `${config.videoStream[0].width}/${config.videoStream[0].height}`
-		: '16/9';
 </script>
 
-<div class="player-wrapper" style="aspect-ratio: {aspectRatio};">
+<div class="player-wrapper">
 	{#if isLoading}
 		<div class="loading-overlay">
 			<div class="loading-spinner"></div>
@@ -331,6 +259,7 @@
 		position: relative;
 		width: 100%;
 		max-width: 100%;
+		aspect-ratio: 16/9;
 		background: #000;
 		border-radius: 8px;
 		overflow: hidden;

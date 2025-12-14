@@ -33,12 +33,18 @@
 	$: error = (data as any)?.error ?? null;
 
 	// Extract video ID for keying components
-	$: videoId = playerConfig.videoStream?.[0]?.url || playerConfig.poster || Date.now().toString();
+	$: videoId = playerConfig.manifestUrl || playerConfig.poster || Date.now().toString();
 
 	// Computed states
 	$: hasError = !!error;
-	$: hasValidStreams = !!(playerConfig.videoStream || playerConfig.audioStream);
+	$: hasValidManifest = !!(playerConfig.manifestUrl);
 
+	$: console.log('Video Page Data:', {
+		playerConfig,
+		metadata,
+		relatedVideos,
+		error
+	});
 	// Delay player initialisation until mounted (for Shaka Player)
 	let showPlayer = false;
 	onMount(() => {
@@ -56,12 +62,12 @@
 					<p class="error-message">{error}</p>
 					<button class="retry-btn" on:click={() => window.location.reload()}> Retry </button>
 				</div>
-			{:else if !hasValidStreams}
+			{:else if !hasValidManifest}
 				<div class="error-container">
 					<div class="error-icon">📹</div>
 					<h2 class="error-title">No Streams Available</h2>
 					<p class="error-message">
-						Unable to find playable video or audio streams for this video.
+						Unable to load DASH manifest for this video. The video may be unavailable or restricted.
 					</p>
 					<button class="retry-btn" on:click={() => window.location.reload()}> Retry </button>
 				</div>

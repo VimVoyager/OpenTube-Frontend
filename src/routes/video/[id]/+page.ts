@@ -1,8 +1,5 @@
 import type { PageLoad } from './$types';
-import type { Stream, Subtitle } from '$lib/types';
 import { getVideoDetails } from '$lib/api/details';
-import { getSubtitles } from '$lib/api/subtitles';
-import { getAllStreams } from '$lib/api/streams';
 import { getRelatedStreams } from '$lib/api/related';
 import { adaptPlayerConfig } from '$lib/adapters/player';
 import { adaptVideoMetadata } from '$lib/adapters/metadata';
@@ -12,17 +9,8 @@ import {
 	type VideoMetadata,
 	type RelatedVideoConfig
 } from '$lib/adapters/types';
-import { calculateDuration } from '$lib/utils/streamSelection';
-import {
-	selectVideoStreams,
-	selectBestAudioStreams,
-	logSelectedStreams
-} from '$lib/utils/streamSelection';
-import { 
-	selectSubtitles,
-	logSelectedSubtitles
-} from '$lib/utils/subtitleSelection';
 import thumbnailPlaceholder from '$lib/assets/thumbnail-placeholder.jpg';
+import { getManifest } from '$lib/api/manifest';
 
 /**
  * Page data structure
@@ -42,9 +30,7 @@ function createErrorPageData(error: unknown): PageData {
 
 	return {
 		playerConfig: {
-			videoStream: null,
-			audioStream: null,
-			subtitleStream: null,
+			manifestUrl: '',
 			duration: 0,
 			poster: thumbnailPlaceholder
 		},
@@ -65,27 +51,6 @@ function createErrorPageData(error: unknown): PageData {
 }
 
 /**
- * Validates that stream selection was successful
- */
-function validateStreamSelection(
-	videoStreams: Stream[],
-	audioStreams: Stream[],
-	duration: number
-): void {
-	if (videoStreams.length === 0) {
-		console.warn('No suitable video stream found');
-	}
-
-	if (audioStreams.length === 0) {
-		console.warn('No suitable audio streams found');
-	}
-
-	if (!duration || duration === 0) {
-		console.warn('Video duration is missing or zero, this may cause playback issues.');
-	}
-}
-
-/**
  * Fetches and processes video data
  */
 async function fetchVideoData(
@@ -93,23 +58,20 @@ async function fetchVideoData(
 	fetch: typeof globalThis.fetch
 ): Promise<{
 	details: Awaited<ReturnType<typeof getVideoDetails>>;
-	videoStreams: Stream[];
-	audioStreams: Stream[];
-	subtitles: Subtitle[];
+	manifestUrl: string;
 	relatedStreams: Awaited<ReturnType<typeof getRelatedStreams>>;
 }> {
-	// Fetch video metadata and streams in parallel
-	const [details, { videoStreams, audioStreams }, subtitles, relatedStreams] = await Promise.all([
+	// Fetch video metadata, manifest, and related videos in parallel
+	const [details, manifestUrl, relatedStreams] = await Promise.all([
 		getVideoDetails(videoId, fetch),
-		getAllStreams(videoId, fetch),
-		getSubtitles(videoId, fetch),
+		getManifest(videoId, fetch),
 		getRelatedStreams(videoId, fetch).catch((error) => {
 			console.warn('Failed to fetch related videos:', error);
 			return [];
 		})
 	]);
 
-	return { details, videoStreams, audioStreams, subtitles, relatedStreams };
+	return { details, manifestUrl, relatedStreams };
 }
 
 /**
@@ -117,40 +79,36 @@ async function fetchVideoData(
  */
 export const load: PageLoad = async ({ params, fetch }): Promise<PageData> => {
 	try {
-		// Fetch video metadata and streams in parallel
-		const { details, videoStreams, audioStreams, subtitles, relatedStreams } = await fetchVideoData(
+		// Fetch all data in parallel
+		const { details, manifestUrl, relatedStreams } = await fetchVideoData(
 			params.id,
 			fetch
 		);
 
-		const selectedVideoStreams = selectVideoStreams(videoStreams);
-		const selectedAudioStreams = selectBestAudioStreams(audioStreams);
-		const selectedSubtitles = selectSubtitles(subtitles);
-		const duration = calculateDuration(selectedVideoStreams, selectedAudioStreams);
+		// Extract duration from video details (approxDurationMs from backend)
+		const duration = details.duration || 0;
 
-		validateStreamSelection(selectedVideoStreams, selectedAudioStreams, duration);
-		logSelectedStreams(selectedVideoStreams, selectedAudioStreams);
-		logSelectedSubtitles(selectedSubtitles);
+		console.log(`Loaded manifest URL for video ${params.id}, duration: ${duration}s`);
 
 		// Transform data using adapters
 		const playerConfig = adaptPlayerConfig(
-			selectedVideoStreams,
-			selectedAudioStreams,
-			selectedSubtitles,
+			manifestUrl,
 			duration,
 			thumbnailPlaceholder
 		);
 
 		const metadata = adaptVideoMetadata(
 			details,
-			thumbnailPlaceholder // fallback avatar
+			thumbnailPlaceholder
 		);
 
 		const relatedVideos = adaptRelatedVideos(
 			relatedStreams,
 			thumbnailPlaceholder,
 			thumbnailPlaceholder
-		)
+		);
+
+		console.log("playerConfig:", playerConfig);
 
 		return {
 			playerConfig,
@@ -160,7 +118,6 @@ export const load: PageLoad = async ({ params, fetch }): Promise<PageData> => {
 
 	} catch (error) {
 		console.error('Error loading video data:', error);
-
 		return createErrorPageData(error); 
-	}
+	}	
 };
