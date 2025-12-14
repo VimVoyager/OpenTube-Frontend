@@ -2,10 +2,37 @@ import { env } from '$env/dynamic/public';
 
 const API_BASE_URL = env.PUBLIC_API_URL + '/api/v1';
 
+/**
+ * Manifest response containing both blob URL and parsed metadata
+ */
+export interface ManifestResponse {
+	url: string;
+	duration: number;
+	videoId?: string;
+}
+
+/**
+ * Parse ISO 8601 duration format (PT2M56S) to seconds
+ */
+function parseDuration(duration: string): number {
+	const match = duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:([\d.]+)S)?/);
+	if (!match) return 0;
+	
+	const hours = parseInt(match[1] || '0');
+	const minutes = parseInt(match[2] || '0');
+	const seconds = parseFloat(match[3] || '0');
+	
+	return hours * 3600 + minutes * 60 + seconds;
+}
+
+/**
+ * Fetch DASH manifest and extract metadata
+ * Returns blob URL for player and parsed duration
+ */
 export async function getManifest(
     id: string,
     fetchFn?: typeof globalThis.fetch
-): Promise<string> {
+): Promise<ManifestResponse> {
     const fetcher = fetchFn ?? globalThis.fetch;
 
     try {
@@ -20,12 +47,41 @@ export async function getManifest(
         }
 
         const manifestXml = await res.text();
-        // console.log('Fetched DASH manifest:', manifestXml);
+        
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(manifestXml, 'application/xml');
+        const mpdElement = xmlDoc.querySelector('MPD');
+        
+        const durationStr = mpdElement?.getAttribute('mediaPresentationDuration');
+        const duration = durationStr ? parseDuration(durationStr) : 0;
+        
+        const videoId = mpdElement?.getAttribute('id');
+        
         const blob = new Blob([manifestXml], { type: 'application/dash+xml' });
-        return URL.createObjectURL(blob);
+        const url = URL.createObjectURL(blob);
+        
+        console.log(`Manifest loaded for ${id}: duration=${duration}s, videoId=${videoId || 'not set'}`);
+        
+        return {
+            url,
+            duration,
+            videoId: videoId || undefined
+        };
         
     } catch (error) {
         console.error('Error fetching DASH manifest:', error);
         throw error;
     }
+}
+
+/**
+ * Legacy function for backward compatibility
+ * Returns just the URL (for code that hasn't been updated yet)
+ */
+export async function getManifestUrl(
+    id: string,
+    fetchFn?: typeof globalThis.fetch
+): Promise<string> {
+    const manifest = await getManifest(id, fetchFn);
+    return manifest.url;
 }
