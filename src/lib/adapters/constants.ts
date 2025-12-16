@@ -19,6 +19,7 @@ export const DEFAULT_AUDIO = {
 	CHANNELS: 2,
 	FORMAT: 'M4A'
 } as const;
+
 /**
  * Subtitle format to MIME type mapping
  */
