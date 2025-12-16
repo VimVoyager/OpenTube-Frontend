@@ -39,12 +39,6 @@
 	$: hasError = !!error;
 	$: hasValidManifest = !!(playerConfig.manifestUrl);
 
-	$: console.log('Video Page Data:', {
-		playerConfig,
-		metadata,
-		relatedVideos,
-		error
-	});
 	// Delay player initialisation until mounted (for Shaka Player)
 	let showPlayer = false;
 	onMount(() => {

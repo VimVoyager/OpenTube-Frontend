@@ -58,11 +58,11 @@ async function fetchVideoData(
 	fetch: typeof globalThis.fetch
 ): Promise<{
 	details: Awaited<ReturnType<typeof getVideoDetails>>;
-	manifestUrl: string;
+	manifest: Awaited<ReturnType<typeof getManifest>>;
 	relatedStreams: Awaited<ReturnType<typeof getRelatedStreams>>;
 }> {
 	// Fetch video metadata, manifest, and related videos in parallel
-	const [details, manifestUrl, relatedStreams] = await Promise.all([
+	const [details, manifest, relatedStreams] = await Promise.all([
 		getVideoDetails(videoId, fetch),
 		getManifest(videoId, fetch),
 		getRelatedStreams(videoId, fetch).catch((error) => {
@@ -71,7 +71,7 @@ async function fetchVideoData(
 		})
 	]);
 
-	return { details, manifestUrl, relatedStreams };
+	return { details, manifest, relatedStreams };
 }
 
 /**
@@ -80,20 +80,17 @@ async function fetchVideoData(
 export const load: PageLoad = async ({ params, fetch }): Promise<PageData> => {
 	try {
 		// Fetch all data in parallel
-		const { details, manifestUrl, relatedStreams } = await fetchVideoData(
+		const { details, manifest, relatedStreams } = await fetchVideoData(
 			params.id,
 			fetch
 		);
 
-		// Extract duration from video details (approxDurationMs from backend)
-		const duration = details.duration || 0;
-
-		console.log(`Loaded manifest URL for video ${params.id}, duration: ${duration}s`);
+		console.log(`Loaded manifest URL for video ${params.id} :`, manifest.url);
 
 		// Transform data using adapters
 		const playerConfig = adaptPlayerConfig(
-			manifestUrl,
-			duration,
+			manifest.url,
+			manifest.duration,
 			thumbnailPlaceholder
 		);
 
@@ -107,8 +104,6 @@ export const load: PageLoad = async ({ params, fetch }): Promise<PageData> => {
 			thumbnailPlaceholder,
 			thumbnailPlaceholder
 		);
-
-		console.log("playerConfig:", playerConfig);
 
 		return {
 			playerConfig,

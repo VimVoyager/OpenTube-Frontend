@@ -1,42 +1,20 @@
 import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { load } from './+page';
 import type { PageLoad } from './$types';
-import type { Stream } from '$lib/types';
 import { getVideoDetails } from '$lib/api/details';
-import { getSubtitles } from '$lib/api/subtitles';
-import { getAllStreams } from '$lib/api/streams';
+import { getManifest } from '$lib/api/manifest';
+import { getRelatedStreams } from '$lib/api/related';
 import { adaptPlayerConfig } from '$lib/adapters/player';
 import { adaptVideoMetadata } from '$lib/adapters/metadata';
-import { calculateDuration } from '$lib/utils/streamSelection';
-import {
-    selectVideoStreams,
-    selectBestAudioStreams,
-    logSelectedStreams
-} from '$lib/utils/streamSelection';
-import {
-    selectSubtitles,
-    logSelectedSubtitles
-} from '$lib/utils/subtitleSelection';
-import { 
-    mockVideoStream, 
-    mockAudioStream, 
-    mockSubtitleStream, 
-    mockPlayerConfig, 
-    mockRelatedVideos
-} from '../../../tests/fixtures/videoPlayerFixtures';
-import { mockMetadata } from '../../../tests/fixtures/videoDetailFixtures';
 import { adaptRelatedVideos } from '$lib/adapters/relatedVideos';
 
 // Mock all dependencies
 vi.mock('$lib/api/details');
-vi.mock('$lib/api/subtitles');
-vi.mock('$lib/api/streams');
-vi.mock('$lib/adapters/constants');
+vi.mock('$lib/api/manifest');
+vi.mock('$lib/api/related');
 vi.mock('$lib/adapters/metadata');
 vi.mock('$lib/adapters/player');
 vi.mock('$lib/adapters/relatedVideos');
-vi.mock('$lib/utils/streamSelection');
-vi.mock('$lib/utils/subtitleSelection');
 
 describe('+page.ts', () => {
     // Mock data fixtures
@@ -45,233 +23,199 @@ describe('+page.ts', () => {
 
     const mockVideoDetails = {
         id: mockVideoId,
-        title: 'Test Video',
-        description: 'Test Description',
-        uploaderName: 'Test Channel',
-        uploaderAvatar: 'https://example.com/avatar.jpg',
-        viewCount: 1000000,
-        uploadDate: '2024-01-01',
+        videoTitle: 'Test Video Title',
+        description: { content: 'This is a test video description with <strong>HTML</strong> content.' },
+        channelName: 'Test Channel',
+        uploaderAvatars: [
+            { url: 'https://example.com/avatar.jpg', width: 48, height: 48 }
+        ],
+        viewCount: 1234567,
+        uploadDate: '2024-01-15',
         likeCount: 50000,
         dislikeCount: 500,
-        subscriberCount: 100000
+        channelSubscriberCount: 1000000
     };
+
+    const mockManifestResponse = {
+        url: 'blob:http://localhost:5173/abc-123',
+        duration: 180,
+        videoId: 'video-test-video-123'
+    };
+
+    const mockRelatedStreams = [
+        {
+            id: 'related-1',
+            url: 'https://www.youtube.com/watch?v=related-1',
+            name: 'Related Video 1',
+            thumbnails: [{ url: 'https://example.com/thumb1.jpg' }],
+            uploaderName: 'Related Channel 1',
+            uploaderAvatars: [{ url: 'https://example.com/avatar1.jpg' }],
+            viewCount: 50000,
+            duration: 300,
+            textualUploadDate: '1 day ago'
+        }
+    ];
+
+    const mockPlayerConfig = {
+        manifestUrl: 'blob:http://localhost:5173/abc-123',
+        duration: 180,
+        poster: 'https://example.com/poster.jpg'
+    };
+
+    const mockMetadata = {
+        title: 'Test Video Title',
+        description: 'This is a test video description with <strong>HTML</strong> content.',
+        channelName: 'Test Channel',
+        channelAvatar: 'https://example.com/avatar.jpg',
+        viewCount: 1234567,
+        uploadDate: '2024-01-15',
+        likeCount: 50000,
+        dislikeCount: 500,
+        subscriberCount: 1000000
+    };
+
+    const mockRelatedVideos = [
+        {
+            id: 'related-1',
+            url: 'https://www.youtube.com/watch?v=related-1',
+            title: 'Related Video 1',
+            thumbnail: 'https://example.com/thumb1.jpg',
+            channelName: 'Related Channel 1',
+            channelAvatar: 'https://example.com/avatar1.jpg',
+            viewCount: 50000,
+            uploadDate: '1 day ago',
+            duration: 300
+        }
+    ];
 
     beforeEach(() => {
         vi.clearAllMocks();
 
         // Setup default mock implementations
         (getVideoDetails as Mock).mockResolvedValue(mockVideoDetails);
-        (getAllStreams as Mock).mockResolvedValue({
-            videoStreams: [mockVideoStream],
-            audioStreams: [mockAudioStream]
-        });
-        (getSubtitles as Mock).mockResolvedValue([mockSubtitleStream]);
-        (selectVideoStreams as Mock).mockReturnValue([mockVideoStream]);
-        (selectBestAudioStreams as Mock).mockReturnValue([mockAudioStream]);
-        (selectSubtitles as Mock).mockReturnValue([mockSubtitleStream]);
-        (calculateDuration as Mock).mockReturnValue(300);
+        (getManifest as Mock).mockResolvedValue(mockManifestResponse);
+        (getRelatedStreams as Mock).mockResolvedValue(mockRelatedStreams);
         (adaptPlayerConfig as Mock).mockReturnValue(mockPlayerConfig);
-        (adaptRelatedVideos as Mock).mockReturnValue(mockRelatedVideos);
         (adaptVideoMetadata as Mock).mockReturnValue(mockMetadata);
-        (logSelectedStreams as Mock).mockImplementation(() => { });
-        (logSelectedSubtitles as Mock).mockImplementation(() => { });
+        (adaptRelatedVideos as Mock).mockReturnValue(mockRelatedVideos);
     });
 
     describe('load function - success path', () => {
         it('should fetch video data and return page data successfully', async () => {
-            // Arrange
             const params = { id: mockVideoId };
-
-            // Act
             const result = await load({ params, fetch: mockFetch } as Parameters<PageLoad>[0]);
 
-            // Assert
             expect(result).toEqual({
                 playerConfig: mockPlayerConfig,
-                relatedVideos: mockRelatedVideos,
-                metadata: mockMetadata
+                metadata: mockMetadata,
+                relatedVideos: mockRelatedVideos
             });
             expect(result!.error).toBeUndefined();
         });
 
         it('should call all API functions with correct parameters', async () => {
-            // Arrange
             const params = { id: mockVideoId };
 
-            // Act
             await load({ params, fetch: mockFetch } as Parameters<PageLoad>[0]);
 
-            // Assert
             expect(getVideoDetails).toHaveBeenCalledWith(mockVideoId, mockFetch);
-            expect(getAllStreams).toHaveBeenCalledWith(mockVideoId, mockFetch);
-            expect(getSubtitles).toHaveBeenCalledWith(mockVideoId, mockFetch);
+            expect(getManifest).toHaveBeenCalledWith(mockVideoId, mockFetch);
+            expect(getRelatedStreams).toHaveBeenCalledWith(mockVideoId, mockFetch);
         });
 
         it('should call API functions in parallel using Promise.all', async () => {
-            // Arrange
             const params = { id: mockVideoId };
             const promiseAllSpy = vi.spyOn(Promise, 'all');
 
-            // Act
             await load({ params, fetch: mockFetch } as Parameters<PageLoad>[0]);
 
-            // Assert
             expect(promiseAllSpy).toHaveBeenCalled();
         });
 
-        it('should call stream selection functions with fetched data', async () => {
-            // Arrange
-            const params = { id: mockVideoId };
-
-            // Act
-            await load({ params, fetch: mockFetch } as Parameters<PageLoad>[0]);
-
-            // Assert
-            expect(selectVideoStreams).toHaveBeenCalledWith([mockVideoStream]);
-            expect(selectBestAudioStreams).toHaveBeenCalledWith([mockAudioStream]);
-            expect(selectSubtitles).toHaveBeenCalledWith([mockSubtitleStream]);
-        });
-
-        it('should calculate duration with selected streams', async () => {
-            // Arrange
-            const params = { id: mockVideoId };
-
-            // Act
-            await load({ params, fetch: mockFetch } as Parameters<PageLoad>[0]);
-
-            // Assert
-            expect(calculateDuration).toHaveBeenCalledWith(
-                [mockVideoStream],
-                [mockAudioStream]
-            );
-        });
-
-        it('should call logging functions for selected streams and subtitles', async () => {
-            // Arrange
-            const params = { id: mockVideoId };
-
-            // Act
-            await load({ params, fetch: mockFetch } as Parameters<PageLoad>[0]);
-
-            // Assert
-            expect(logSelectedStreams).toHaveBeenCalledWith(
-                [mockVideoStream],
-                [mockAudioStream]
-            );
-            expect(logSelectedSubtitles).toHaveBeenCalledWith([mockSubtitleStream]);
-        });
-
         it('should call adapters with correct parameters', async () => {
-            // Arrange
             const params = { id: mockVideoId };
-
-            // Act
             await load({ params, fetch: mockFetch } as Parameters<PageLoad>[0]);
 
-            // Assert
             expect(adaptPlayerConfig).toHaveBeenCalledWith(
-                [mockVideoStream],
-                [mockAudioStream],
-                [mockSubtitleStream],
-                300,
+                mockManifestResponse.url,
+                mockManifestResponse.duration,
                 expect.any(String) // thumbnail placeholder
             );
             expect(adaptVideoMetadata).toHaveBeenCalledWith(
                 mockVideoDetails,
                 expect.any(String) // thumbnail placeholder
             );
+            expect(adaptRelatedVideos).toHaveBeenCalledWith(
+                mockRelatedStreams,
+                expect.any(String), // thumbnail placeholder
+                expect.any(String)  // avatar placeholder
+            );
         });
     });
 
     describe('load function - edge cases', () => {
-        it('should handle empty video streams', async () => {
-            // Arrange
+        it('should handle missing manifest URL', async () => {
             const params = { id: mockVideoId };
-            const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => { });
-            (selectVideoStreams as Mock).mockReturnValue([]);
+            (getManifest as Mock).mockResolvedValue({
+                url: '',
+                duration: 0
+            });
 
-            // Act
-            await load({ params, fetch: mockFetch } as Parameters<PageLoad>[0]);
-
-            // Assert
-            expect(consoleWarnSpy).toHaveBeenCalledWith('No suitable video stream found');
-        });
-
-        it('should handle empty audio streams', async () => {
-            // Arrange
-            const params = { id: mockVideoId };
-            const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => { });
-            (selectBestAudioStreams as Mock).mockReturnValue([]);
-
-            // Act
-            await load({ params, fetch: mockFetch } as Parameters<PageLoad>[0]);
-
-            // Assert
-            expect(consoleWarnSpy).toHaveBeenCalledWith('No suitable audio streams found');
-        });
-
-        it('should handle zero duration', async () => {
-            // Arrange
-            const params = { id: mockVideoId };
-            const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => { });
-            (calculateDuration as Mock).mockReturnValue(0);
-
-            // Act
-            await load({ params, fetch: mockFetch } as Parameters<PageLoad>[0]);
-
-            // Assert
-            expect(consoleWarnSpy).toHaveBeenCalledWith(
-                'Video duration is missing or zero, this may cause playback issues.'
-            );
-        });
-
-        it('should handle missing duration', async () => {
-            // Arrange
-            const params = { id: mockVideoId };
-            const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => { });
-            (calculateDuration as Mock).mockReturnValue(null);
-
-            // Act
-            await load({ params, fetch: mockFetch } as Parameters<PageLoad>[0]);
-
-            // Assert
-            expect(consoleWarnSpy).toHaveBeenCalledWith(
-                'Video duration is missing or zero, this may cause playback issues.'
-            );
-        });
-
-        it('should handle empty subtitles array', async () => {
-            // Arrange
-            const params = { id: mockVideoId };
-            (getSubtitles as Mock).mockResolvedValue([]);
-            (selectSubtitles as Mock).mockReturnValue([]);
-
-            // Act
             const result = await load({ params, fetch: mockFetch } as Parameters<PageLoad>[0]);
 
-            // Assert
-            expect(result!.playerConfig.subtitleStream).toBeDefined();
-            expect(selectSubtitles).toHaveBeenCalledWith([]);
+            // Should still return page data, player will handle empty manifest
+            expect(result).toHaveProperty('playerConfig');
+            expect(result).toHaveProperty('metadata');
+        });
+
+        it('should handle zero duration from manifest', async () => {
+            const params = { id: mockVideoId };
+            (getManifest as Mock).mockResolvedValue({
+                url: 'blob:http://localhost:5173/abc-123',
+                duration: 0
+            });
+            // adaptPlayerConfig will use the duration from manifest response
+            (adaptPlayerConfig as Mock).mockReturnValue({
+                manifestUrl: 'blob:http://localhost:5173/abc-123',
+                duration: 0,
+                poster: 'https://example.com/poster.jpg'
+            });
+
+            const result = await load({ params, fetch: mockFetch } as Parameters<PageLoad>[0]);
+
+            expect(result!.playerConfig.duration).toBe(0);
+        });
+
+        it('should handle failed related videos fetch gracefully', async () => {
+            const params = { id: mockVideoId };
+            const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+            (getRelatedStreams as Mock).mockRejectedValue(new Error('Failed to fetch related'));
+            // When related videos fail, adaptRelatedVideos is called with empty array
+            (adaptRelatedVideos as Mock).mockReturnValue([]);
+
+            const result = await load({ params, fetch: mockFetch } as Parameters<PageLoad>[0]);
+
+            expect(result!.relatedVideos).toEqual([]);
+            expect(result!.error).toBeUndefined();
+            expect(consoleWarnSpy).toHaveBeenCalledWith(
+                'Failed to fetch related videos:',
+                expect.any(Error)
+            );
         });
     });
 
     describe('load function - error handling', () => {
         it('should return error page data when getVideoDetails fails', async () => {
-            // Arrange
             const params = { id: mockVideoId };
             const error = new Error('Failed to fetch video details');
-            const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
+            const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
             (getVideoDetails as Mock).mockRejectedValue(error);
 
-            // Act
             const result = await load({ params, fetch: mockFetch } as Parameters<PageLoad>[0]);
 
-            // Assert
             expect(result!.error).toBe('Failed to fetch video details');
             expect(result!.playerConfig).toEqual({
-                videoStream: null,
-                audioStream: null,
-                subtitleStream: null,
+                manifestUrl: '',
                 duration: 0,
                 poster: expect.any(String)
             });
@@ -289,94 +233,50 @@ describe('+page.ts', () => {
             expect(consoleErrorSpy).toHaveBeenCalledWith('Error loading video data:', error);
         });
 
-        it('should return error page data when getAllStreams fails', async () => {
-            // Arrange
+        it('should return error page data when getManifest fails', async () => {
             const params = { id: mockVideoId };
-            const error = new Error('Failed to fetch streams');
-            const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
-            (getAllStreams as Mock).mockRejectedValue(error);
+            const error = new Error('Failed to fetch manifest');
+            const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+            (getManifest as Mock).mockRejectedValue(error);
 
-            // Act
             const result = await load({ params, fetch: mockFetch } as Parameters<PageLoad>[0]);
 
-            // Assert
-            expect(result!.error).toBe('Failed to fetch streams');
-            expect(consoleErrorSpy).toHaveBeenCalledWith('Error loading video data:', error);
-        });
-
-        it('should return error page data when getSubtitles fails', async () => {
-            // Arrange
-            const params = { id: mockVideoId };
-            const error = new Error('Failed to fetch subtitles');
-            const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
-            (getSubtitles as Mock).mockRejectedValue(error);
-
-            // Act
-            const result = await load({ params, fetch: mockFetch } as Parameters<PageLoad>[0]);
-
-            // Assert
-            expect(result!.error).toBe('Failed to fetch subtitles');
+            expect(result!.error).toBe('Failed to fetch manifest');
             expect(consoleErrorSpy).toHaveBeenCalledWith('Error loading video data:', error);
         });
 
         it('should handle non-Error exceptions with default message', async () => {
-            // Arrange
             const params = { id: mockVideoId };
-            const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
+            const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
             (getVideoDetails as Mock).mockRejectedValue('String error');
 
-            // Act
             const result = await load({ params, fetch: mockFetch } as Parameters<PageLoad>[0]);
 
-            // Assert
             expect(result!.error).toBe('Unknown error loading video');
             expect(consoleErrorSpy).toHaveBeenCalledWith('Error loading video data:', 'String error');
         });
 
         it('should handle undefined error with default message', async () => {
-            // Arrange
             const params = { id: mockVideoId };
-            const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
+            const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
             (getVideoDetails as Mock).mockRejectedValue(undefined);
 
-            // Act
             const result = await load({ params, fetch: mockFetch } as Parameters<PageLoad>[0]);
 
-            // Assert
             expect(result!.error).toBe('Unknown error loading video');
             expect(consoleErrorSpy).toHaveBeenCalledWith('Error loading video data:', undefined);
         });
 
-        it('should handle errors during stream selection', async () => {
-            // Arrange
-            const params = { id: mockVideoId };
-            const error = new Error('Stream selection failed');
-            const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
-            (selectVideoStreams as Mock).mockImplementation(() => {
-                throw error;
-            });
-
-            // Act
-            const result = await load({ params, fetch: mockFetch } as Parameters<PageLoad>[0]);
-
-            // Assert
-            expect(result!.error).toBe('Stream selection failed');
-            expect(consoleErrorSpy).toHaveBeenCalledWith('Error loading video data:', error);
-        });
-
         it('should handle errors during adaptation', async () => {
-            // Arrange
             const params = { id: mockVideoId };
             const error = new Error('Adaptation failed');
-            const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
+            const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
             (adaptPlayerConfig as Mock).mockImplementation(() => {
                 throw error;
             });
 
-            // Act
             const result = await load({ params, fetch: mockFetch } as Parameters<PageLoad>[0]);
 
-            // Assert
             expect(result!.error).toBe('Adaptation failed');
             expect(consoleErrorSpy).toHaveBeenCalledWith('Error loading video data:', error);
         });
@@ -384,103 +284,69 @@ describe('+page.ts', () => {
 
     describe('load function - data flow', () => {
         it('should pass through video ID from params', async () => {
-            // Arrange
             const customVideoId = 'custom-video-789';
             const params = { id: customVideoId };
 
-            // Act
             await load({ params, fetch: mockFetch } as Parameters<PageLoad>[0]);
 
-            // Assert
-            expect(getVideoDetails).toHaveBeenCalledWith(customVideoId, expect.any(Function));
-            expect(getAllStreams).toHaveBeenCalledWith(customVideoId, expect.any(Function));
-            expect(getSubtitles).toHaveBeenCalledWith(customVideoId, expect.any(Function));
+            expect(getVideoDetails).toHaveBeenCalledWith(customVideoId, mockFetch);
+            expect(getManifest).toHaveBeenCalledWith(customVideoId, mockFetch);
         });
 
         it('should use provided fetch function', async () => {
-            // Arrange
             const params = { id: mockVideoId };
             const customFetch = vi.fn() as unknown as typeof globalThis.fetch;
 
-            // Act
             await load({ params, fetch: customFetch } as Parameters<PageLoad>[0]);
 
-            // Assert
-            expect(getVideoDetails).toHaveBeenCalledWith(expect.any(String), customFetch);
-            expect(getAllStreams).toHaveBeenCalledWith(expect.any(String), customFetch);
-            expect(getSubtitles).toHaveBeenCalledWith(expect.any(String), customFetch);
+            expect(getVideoDetails).toHaveBeenCalledWith(mockVideoId, customFetch);
+            expect(getManifest).toHaveBeenCalledWith(mockVideoId, customFetch);
         });
 
-        it('should maintain data integrity through the pipeline', async () => {
-            // Arrange
+        it('should extract duration from manifest response', async () => {
             const params = { id: mockVideoId };
-            const customVideoStream = { ...mockVideoStream, quality: '4K' };
-            const customAudioStream = { ...mockAudioStream, quality: 'ultra' };
-            const customSubtitle = { ...mockSubtitleStream, code: 'es' };
-
-            (getAllStreams as Mock).mockResolvedValue({
-                videoStreams: [customVideoStream],
-                audioStreams: [customAudioStream]
+            const customDuration = 240;
+            (getManifest as Mock).mockResolvedValue({
+                url: 'blob:http://localhost:5173/xyz-456',
+                duration: customDuration
             });
-            (getSubtitles as Mock).mockResolvedValue([customSubtitle]);
-            (selectVideoStreams as Mock).mockReturnValue([customVideoStream]);
-            (selectBestAudioStreams as Mock).mockReturnValue([customAudioStream]);
-            (selectSubtitles as Mock).mockReturnValue([customSubtitle]);
 
-            // Act
             await load({ params, fetch: mockFetch } as Parameters<PageLoad>[0]);
 
-            // Assert
-            expect(selectVideoStreams).toHaveBeenCalledWith([customVideoStream]);
-            expect(selectBestAudioStreams).toHaveBeenCalledWith([customAudioStream]);
-            expect(selectSubtitles).toHaveBeenCalledWith([customSubtitle]);
+            expect(adaptPlayerConfig).toHaveBeenCalledWith(
+                expect.any(String),
+                customDuration,
+                expect.any(String)
+            );
         });
     });
 
     describe('load function - performance', () => {
-        it('should not await stream selection operations unnecessarily', async () => {
-            // Arrange
+        it('should fetch all data in parallel', async () => {
             const params = { id: mockVideoId };
-            let apiCallsComplete = false;
-            let selectionStarted = false;
+            const promiseAllSpy = vi.spyOn(Promise, 'all');
 
-            (getAllStreams as Mock).mockImplementation(async () => {
-                await new Promise((resolve) => setTimeout(resolve, 10));
-                apiCallsComplete = true;
-                return {
-                    videoStreams: [mockVideoStream],
-                    audioStreams: [mockAudioStream]
-                };
-            });
-
-            (selectVideoStreams as Mock).mockImplementation((streams: Stream[]) => {
-                selectionStarted = true;
-                return streams;
-            });
-
-            // Act
             await load({ params, fetch: mockFetch } as Parameters<PageLoad>[0]);
 
-            // Assert
-            expect(apiCallsComplete).toBe(true);
-            expect(selectionStarted).toBe(true);
+            expect(promiseAllSpy).toHaveBeenCalledTimes(1);
+            expect(promiseAllSpy).toHaveBeenCalledWith([
+                expect.any(Promise), // getVideoDetails
+                expect.any(Promise), // getManifest
+                expect.any(Promise)  // getRelatedStreams
+            ]);
         });
     });
 
     describe('TypeScript type safety', () => {
-        it('should return PageData type', async () => {
-            // Arrange
+        it('should return PageData type with new structure', async () => {
             const params = { id: mockVideoId };
 
-            // Act
             const result = await load({ params, fetch: mockFetch } as Parameters<PageLoad>[0]);
 
-            // Assert
             expect(result).toHaveProperty('playerConfig');
             expect(result).toHaveProperty('metadata');
-            expect(result!.playerConfig).toHaveProperty('videoStream');
-            expect(result!.playerConfig).toHaveProperty('audioStream');
-            expect(result!.playerConfig).toHaveProperty('subtitleStream');
+            expect(result).toHaveProperty('relatedVideos');
+            expect(result!.playerConfig).toHaveProperty('manifestUrl');
             expect(result!.playerConfig).toHaveProperty('duration');
             expect(result!.playerConfig).toHaveProperty('poster');
             expect(result!.metadata).toHaveProperty('title');
@@ -488,22 +354,65 @@ describe('+page.ts', () => {
             expect(result!.metadata).toHaveProperty('channelName');
         });
 
-        it('should handle error PageData type', async () => {
-            // Arrange
+        it('should handle error PageData type with new structure', async () => {
             const params = { id: mockVideoId };
-            vi.spyOn(console, 'error').mockImplementation(() => { });
+            vi.spyOn(console, 'error').mockImplementation(() => {});
             (getVideoDetails as Mock).mockRejectedValue(new Error('Test error'));
 
-            // Act
             const result = await load({ params, fetch: mockFetch } as Parameters<PageLoad>[0]);
 
-            // Assert
             expect(result).toHaveProperty('playerConfig');
             expect(result).toHaveProperty('metadata');
             expect(result).toHaveProperty('error');
-            expect(result!.playerConfig.videoStream).toBeNull();
-            expect(result!.playerConfig.audioStream).toBeNull();
-            expect(result!.playerConfig.subtitleStream).toBeNull();
+            expect(result!.playerConfig.manifestUrl).toBe('');
+            expect(result!.playerConfig.duration).toBe(0);
+            expect(result!.playerConfig).toHaveProperty('poster');
+        });
+
+        it('should have manifestUrl as string type', async () => {
+            const params = { id: mockVideoId };
+
+            const result = await load({ params, fetch: mockFetch } as Parameters<PageLoad>[0]);
+
+            expect(typeof result!.playerConfig.manifestUrl).toBe('string');
+        });
+
+        it('should have duration as number type', async () => {
+            const params = { id: mockVideoId };
+
+            const result = await load({ params, fetch: mockFetch } as Parameters<PageLoad>[0]);
+
+            expect(typeof result!.playerConfig.duration).toBe('number');
+        });
+    });
+
+    describe('Manifest response structure', () => {
+        it('should handle manifest response with videoId', async () => {
+            const params = { id: mockVideoId };
+            const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+            
+            await load({ params, fetch: mockFetch } as Parameters<PageLoad>[0]);
+
+            // Check the actual console.log format from your +page.ts
+            // Based on the error, it logs: "Loaded manifest URL for video {id} :", {url}
+            expect(consoleLogSpy).toHaveBeenCalledWith(
+                `Loaded manifest URL for video ${mockVideoId} :`,
+                mockManifestResponse.url
+            );
+        });
+
+        it('should handle manifest response without videoId', async () => {
+            const params = { id: mockVideoId };
+            (getManifest as Mock).mockResolvedValue({
+                url: 'blob:http://localhost:5173/abc-123',
+                duration: 180
+                // no videoId
+            });
+
+            const result = await load({ params, fetch: mockFetch } as Parameters<PageLoad>[0]);
+
+            expect(result).toHaveProperty('playerConfig');
+            expect(result!.error).toBeUndefined();
         });
     });
 });
