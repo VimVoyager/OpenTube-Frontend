@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
+	import { env } from '$env/dynamic/public';
 	import { browser } from '$app/environment';
 	import type { VideoPlayerConfig } from '$lib/adapters/types';
 
@@ -12,6 +13,8 @@
 	let ui: any = null;
 	let errorMessage: string = '';
 	let isLoading: boolean = true;
+
+	const PROXY_URL = env.PUBLIC_PROXY_URL || 'http://localhost:8081';
 
 	onMount(async () => {
 		if (!browser) return;
@@ -70,8 +73,13 @@
 								const headers = request.headers;
 								url.searchParams.set('host', url.host);
 
-								url.protocol = 'http:';
-								url.host = 'localhost:8081';
+								const proxyBase = PROXY_URL.startsWith('/')
+									? window.location.origin + PROXY_URL
+									: PROXY_URL;
+
+								const proxyUrl = new URL(proxyBase);
+								url.protocol = proxyUrl.protocol;
+								url.host = proxyUrl.host;
 
 								// Convert Range header to query parameter 
 								if (headers.Range) {

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import logo from '../assets/streaming-logo.png';
 
 	let query = '';
 
@@ -22,12 +23,12 @@
 			<div class="flex px-2 lg:px-0">
 				<div class="flex shrink-0 items-center">
 					<img
-						src="src/lib/assets/streaming-logo.png"
+						src={logo}
 						alt="Your Company"
 						class="h-11 w-auto dark:hidden"
 					/>
 					<img
-						src="src/lib/assets/streaming-logo.png"
+						src={logo}
 						alt="Your Company"
 						class="h-11 w-auto not-dark:hidden"
 					/>
