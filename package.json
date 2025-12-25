@@ -5,7 +5,9 @@
 	"type": "module",
 	"scripts": {
 		"dev": "vite dev",
+		"dev:local": "dotenv -e ../deployment/.env.local -- vite dev",
 		"build": "vite build",
+		"build:production": "dotenv -e ../deployment/.env.production -- vite build",
 		"preview": "vite preview",
 		"prepare": "svelte-kit sync || echo ''",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
@@ -38,6 +40,7 @@
 		"@vitest/browser-playwright": "^4.0.8",
 		"@vitest/coverage-v8": "^4.0.8",
 		"@vitest/ui": "^4.0.8",
+		"dotenv-cli": "^11.0.0",
 		"eslint": "^9.18.0",
 		"eslint-config-prettier": "^10.0.1",
 		"eslint-plugin-svelte": "^3.0.0",
