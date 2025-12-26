@@ -5,9 +5,10 @@
 	"type": "module",
 	"scripts": {
 		"dev": "vite dev",
-		"dev:local": "dotenv -e ../deployment/.env.local -- vite dev",
-		"build": "dotenv -e ../deployment/.env.local -- vite build",
-		"build:production": "dotenv -e ../deployment/.env.production -- vite build",
+		"dev:local": "dotenv -e .env.local -- vite dev",
+		"build": "dotenv -e .env.local -- vite build",
+		"build:dev": "dotenv -e .env.dev -- vite build",
+		"build:prod": "dotenv -e .env.production -- vite build",
 		"preview": "vite preview",
 		"prepare": "svelte-kit sync || echo ''",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
