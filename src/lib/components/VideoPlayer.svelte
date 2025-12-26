@@ -1,367 +1,177 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
-	import { env } from '$env/dynamic/public';
-	import { browser } from '$app/environment';
+	import { PUBLIC_PROXY_URL } from '$env/static/public';
+	import shaka from 'shaka-player/dist/shaka-player.ui';
+	import 'shaka-player/dist/controls.css';
 	import type { VideoPlayerConfig } from '$lib/adapters/types';
 
 	export let config: VideoPlayerConfig;
 
-	// Component state
+	let videoElement: HTMLVideoElement;
 	let videoContainer: HTMLDivElement;
-	let video: HTMLVideoElement;
-	let player: any | null = null;
-	let ui: any = null;
-	let errorMessage: string = '';
-	let isLoading: boolean = true;
+	let player: shaka.Player | null = null;
+	let ui: shaka.ui.Overlay | null = null;
 
-	const PROXY_URL = env.PUBLIC_PROXY_URL || 'http://localhost:8081';
+	const PROXY_URL = PUBLIC_PROXY_URL || '/proxy';
+
+	console.log('VideoPlayer initialized');
+	console.log('Config:', config);
+	console.log('PROXY_URL:', PROXY_URL);
 
 	onMount(async () => {
-		if (!browser) return;
+		shaka.polyfill.installAll();
+
+		if (!shaka.Player.isBrowserSupported()) {
+			console.error('Browser not supported!');
+			return;
+		}
+
+		// Create the player
+		player = new shaka.Player();
+
+		// Attach to video element
+		await player.attach(videoElement);
+
+		// Create UI overlay with controls
+		ui = new shaka.ui.Overlay(
+			player,
+			videoContainer,
+			videoElement
+		);
+
+		// Configure UI
+		const config_ui = {
+			addSeekBar: true,
+			addBigPlayButton: true,
+			controlPanelElements: [
+				'play_pause',
+				'time_and_duration',
+				'spacer',
+				'mute',
+				'volume',
+				'quality',  // Resolution selector
+				'captions',
+				'fullscreen',
+				'overflow_menu'
+			],
+			overflowMenuButtons: [
+				'captions',
+				'quality',
+				'playback_rate'
+			]
+		};
+
+		ui.configure(config_ui);
+
+		// Get the controls from UI
+		const controls = ui.getControls();
+
+		// Error event listener
+		player.addEventListener('error', (event: any) => {
+			console.error('Shaka Player error event:', event);
+		});
+
+		// Request filter to proxy googlevideo.com URLs
+		player.getNetworkingEngine()?.registerRequestFilter((type, request) => {
+			console.log('Request filter - Type:', type, 'URL:', request.uris[0]);
+
+			// Type 1 is SEGMENT in Shaka Player
+			if (type === 1) {
+				const originalUrl = new URL(request.uris[0]);
+
+				if (originalUrl.host.endsWith('.googlevideo.com')) {
+					console.log('Intercepting googlevideo.com request:', originalUrl.host);
+
+					// Store the original host as a query parameter
+					originalUrl.searchParams.set('host', originalUrl.host);
+
+					// Parse proxy URL
+					const proxyBase = PROXY_URL.startsWith('/') 
+						? `${window.location.origin}${PROXY_URL}`
+						: PROXY_URL;
+
+					console.log('Proxy base URL:', proxyBase);
+
+					// Build the new proxied URL
+					const proxyUrl = new URL(proxyBase);
+					const newPath = proxyUrl.pathname + originalUrl.pathname;
+					
+					const proxiedUrl = new URL(proxyBase);
+					proxiedUrl.pathname = newPath;
+					proxiedUrl.search = originalUrl.search;
+
+					// Handle Range header
+					if (request.headers.Range) {
+						const rangeValue = request.headers.Range.split('=')[1];
+						proxiedUrl.searchParams.set('range', rangeValue);
+						console.log('Converted Range header to query param:', rangeValue);
+						request.headers = {};
+					}
+
+					request.uris[0] = proxiedUrl.toString();
+					console.log('Proxied request URL:', request.uris[0].substring(0, 150) + '...');
+				}
+			}
+		});
 
 		try {
-			// Dynamically import Shaka Player only in the browser
-			const shakaModule = await import('shaka-player/dist/shaka-player.ui');
-			const shaka = shakaModule.default;
-			await import('shaka-player/dist/controls.css');
-
-			// Check if browser supports Shaka Player
-			if (!shaka.Player.isBrowserSupported()) {
-				errorMessage = 'Browser not supported. Please use a modern browser.';
-				console.error(errorMessage);
-				isLoading = false;
-				return;
+			console.log('Attempting to load manifest URL:', config.manifestUrl);
+			
+			if (!config.manifestUrl || config.manifestUrl === '') {
+				throw new Error('Manifest URL is empty or undefined');
 			}
 
-			// Initialize the player
-			await initializePlayer(shaka);
+			await player.load(config.manifestUrl);
+			console.log('Video loaded successfully!');
 		} catch (error) {
-			console.error('Error initializing video player:', error);
-			errorMessage = error instanceof Error ? error.message : 'Error initializing video player.';
-			isLoading = false;
+			console.error('Error loading video:', error);
 		}
 	});
 
-	async function initializePlayer(shaka: any) {
-		try {
-			player = new shaka.Player();
-			await player.attach(video);
-
-			// Register request filter to proxy googlevideo.com requests
-			player
-				.getNetworkingEngine()
-				.registerRequestFilter(
-					(_type: shaka.net.NetworkingEngine.RequestType, request: shaka.extern.Request) => {
-						if (
-							!request ||
-							!request.uris ||
-							!Array.isArray(request.uris) ||
-							request.uris.length === 0
-						) {
-							console.warn('Invalid request object in filter:', request);
-							return;
-						}
-						const uri = request.uris[0];
-
-						try {
-							const url = new URL(uri);
-
-							//Proxy requests to googlevideo.com through local proxy
-							if (url.host.endsWith('.googlevideo.com')) {
-								console.log('Intercepting googlevideo.com request:', url.host);
-
-								const headers = request.headers;
-								url.searchParams.set('host', url.host);
-
-								const proxyBase = PROXY_URL.startsWith('/')
-									? window.location.origin + PROXY_URL
-									: PROXY_URL;
-
-								const proxyUrl = new URL(proxyBase);
-								url.protocol = proxyUrl.protocol;
-								url.host = proxyUrl.host;
-
-								// Convert Range header to query parameter 
-								if (headers.Range) {
-									const rangeValue = headers.Range.split('=')[1]; // "bytes=0-1000" -> "0-1000"
-									url.searchParams.set('range', rangeValue);
-									console.log('Converted Range header to query param:', rangeValue);
-									request.headers = {}; // Remove ALL headers to avoid CORS preflight
-								}
-
-								request.uris[0] = url.toString();
-								console.log('Proxied request URL:', request.uris[0].substring(0, 100) + '...');
-							}
-						} catch (error) {
-							console.error('Error in request filter:', error);
-						}
-					}
-				);
-
-			// Configure player settings
-			player.configure({
-				streaming: {
-					bufferingGoal: 30,
-					rebufferingGoal: 2,
-					bufferBehind: 30,
-					retryParameters: {
-						timeout: 30000,
-						maxAttempts: 3,
-						baseDelay: 1000,
-						backoffFactor: 2,
-						fuzzFactor: 0.5
-					}
-				},
-				manifest: {
-					retryParameters: {
-						timeout: 30000,
-						maxAttempts: 3,
-						baseDelay: 1000,
-						backoffFactor: 2,
-						fuzzFactor: 0.5
-					},
-					dash: {
-						ignoreSuggestedPresentationDelay: true,
-						autoCorrectDrift: false
-					}
-				}
-			});
-
-			// Create UI overlay
-			const uiConfig = {
-				overflowMenuButtons: ['quality', 'language', 'captions', 'playback_rate', ],
-				seekBarColors: {
-					base: 'rgba(255, 255, 255, 0.3)',
-					buffered: 'rgba(255, 255, 255, 0.54)',
-					played: 'rgb(255, 0, 0)'
-				},
-				controlPanelElements: [
-					'play_pause',
-					'mute',
-					'volume',
-					'time_and_duration',
-					'spacer',
-					'captions',
-					'overflow_menu',
-					'fullscreen'
-				]
-			};
-
-			ui = new shaka.ui.Overlay(player, videoContainer, video);
-			ui.configure(uiConfig);
-
-			player.addEventListener('error', onErrorEvent);
-
-			// Load DASH manifest from backend
-			await loadDashManifest();
-
-			isLoading = false;
-		} catch (error) {
-			console.error('Error in initializePlayer:', error);
-			throw error;
-		}
-	}
-
-	async function loadDashManifest() {
-		if (!player) {
-			throw new Error('Player not initialized');
-		}
-
-		if (!config.manifestUrl) {
-			throw new Error('No manifest URL provided');
-		}
-
-		try {
-			console.log('Loading DASH manifest from backend:', config.manifestUrl);
-
-			// Load the manifest directly into Shaka Player
-			// Backend has already handled all stream selection and manifest generation
-			await player.load(config.manifestUrl);
-
-			console.log('DASH manifest loaded successfully');
-		} catch (error) {
-			console.error('Error loading DASH manifest:', error);
-			errorMessage = error instanceof Error ? error.message : 'Failed to load video streams.';
-			throw error;
-		}
-	}
-
-	function onErrorEvent(event: any) {
-		onError(event.detail);
-	}
-
-	function onError(error: any) {
-		console.error('Error code', error.code, 'object', error);
-
-		// Provide user-friendly error messages
-		let message = 'An error occurred while playing the video.';
-
-		switch (error.code) {
-			case 1001: 
-				message = 'Network error. Please check your connection.';
-				break;
-			case 3016:
-				message = 'Video format not supported by your browser.';
-				break;
-			case 4012: 
-				message = 'Unable to load video. The stream may have expired.';
-				break;
-			case 4006: 
-				message = 'Unable to load video manifest. The stream format may not be supported.';
-				break;
-			default:
-				message = error.message;
-				break
-		}	
-		
-		errorMessage = message;
-		isLoading = false;
-	}
-
 	onDestroy(() => {
-		// Clean up player
-		if (player) {
-			player.destroy().catch((error: any) => {
-				console.error('Error destroying player:', error);
-			});
-			player = null;
-		}
-
-		// Clean up UI
 		if (ui) {
-			ui = null;
+			ui.destroy();
 		}
-
-		// Revoke blob URL to free memory
-		if (config.manifestUrl && config.manifestUrl.startsWith('blob:')) {
-			URL.revokeObjectURL(config.manifestUrl);
+		if (player) {
+			console.log('Destroying player');
+			player.destroy();
 		}
 	});
 </script>
 
-<div class="player-wrapper">
-	{#if isLoading}
-		<div class="loading-overlay">
-			<div class="loading-spinner"></div>
-			<p>Loading video...</p>
-		</div>
-	{/if}
-
-	{#if errorMessage}
-		<div class="error-message" data-testid="error-text">
-			<div class="error-icon">⚠️</div>
-			<p class="error-text">{errorMessage}</p>
-			<button class="retry-button" on:click={() => window.location.reload()}> Retry </button>
-		</div>
-	{/if}
-
-	<div bind:this={videoContainer} class="video-container">
-		<video bind:this={video} class="shaka-video" poster={config.poster} playsinline crossorigin="anonymous" >
-			<track kind="captions" />
-		</video>
-	</div>
+<div bind:this={videoContainer} class="video-container" data-shaka-player-container>
+	<video
+		bind:this={videoElement}
+		class="video-player"
+		poster={config.poster}
+		data-shaka-player
+		playsinline
+	>
+		<track kind="captions" label="English captions" />
+	</video>
 </div>
 
 <style>
-	.player-wrapper {
-		position: relative;
-		width: 100%;
-		max-width: 100%;
-		aspect-ratio: 16/9;
-		background: #000;
-		border-radius: 8px;
-		overflow: hidden;
-	}
-
 	.video-container {
 		position: relative;
 		width: 100%;
-		height: 100%;
+		max-width: 1280px;
+		margin: 0 auto;
+		background: black;
 	}
 
-	.shaka-video {
+	.video-player {
 		width: 100%;
-		height: 100%;
-		display: block;
+		height: auto;
 	}
 
-	.loading-overlay {
-		position: absolute;
-		top: 0;
-		left: 0;
-		right: 0;
-		bottom: 0;
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-		background: rgba(0, 0, 0, 0.9);
-		color: white;
-		z-index: 10;
-	}
-
-	.loading-spinner {
-		width: 50px;
-		height: 50px;
-		border: 4px solid rgba(255, 255, 255, 0.3);
-		border-top-color: #fff;
-		border-radius: 50%;
-		animation: spin 1s linear infinite;
-		margin-bottom: 16px;
-	}
-	@keyframes spin {
-		to {
-			transform: rotate(360deg);
-		}
-	}
-
-	.error-message {
-		position: absolute;
-		top: 50%;
-		left: 50%;
-		transform: translate(-50%, -50%);
-		background: rgba(0, 0, 0, 0.95);
-		color: white;
-		padding: 32px;
-		border-radius: 12px;
-		z-index: 10;
-		text-align: center;
-		max-width: 400px;
-		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-	}
-
-	.error-icon {
-		font-size: 48px;
-		margin-bottom: 16px;
-	}
-
-	.error-text {
-		margin: 0 0 20px 0;
-		font-size: 16px;
-		line-height: 1.5;
-	}
-
-	.retry-button {
-		background: #ff0000;
-		color: white;
-		border: none;
-		padding: 10px 24px;
-		border-radius: 6px;
-		font-size: 14px;
-		font-weight: 500;
-		cursor: pointer;
-		transition: background 0.2s;
-	}
-
-	.retry-button:hover {
-		background: #cc0000;
-	}
-
-	.retry-button:active {
-		transform: scale(0.98);
-	}
-
+	/* Ensure Shaka controls are visible */
 	:global(.shaka-controls-container) {
-		font-family: inherit;
+		background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%);
+	}
+
+	:global(.shaka-overflow-menu) {
+		background: rgba(35, 35, 35, 0.95);
+		border: 1px solid rgba(255, 255, 255, 0.1);
 	}
 </style>

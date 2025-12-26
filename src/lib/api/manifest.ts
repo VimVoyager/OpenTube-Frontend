@@ -1,6 +1,7 @@
-import { env } from '$env/dynamic/public';
+import { PUBLIC_API_URL } from '$env/static/public';
 
-const API_BASE_URL = env.PUBLIC_API_URL + '/api/v1';
+const API_BASE_URL = PUBLIC_API_URL;
+
 
 /**
  * Manifest response containing both blob URL and parsed metadata

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import '../app.css';
+	import 'shaka-player/dist/controls.css';
 	import { beforeNavigate, afterNavigate } from '$app/navigation';
 	import favicon from '$lib/assets/favicon.svg';
 	import Navbar from '$lib/components/navbar.svelte';
