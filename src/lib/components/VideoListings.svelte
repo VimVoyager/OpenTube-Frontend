@@ -41,7 +41,7 @@
 				on:keydown={(e) => e.key === 'Enter' && handleVideoClick(video.id)} 
 				class="group flex gap-2 hover:bg-secondary rounded-lg transition-colors p-2 mx-2 cursor-pointer">
 				<!-- Thumbnail -->
-				<div class="relative flex-shrink-0 w-40">
+				<div class="relative shrink-0 w-40">
 					<div class="relative" style="aspect-ratio: 16/9;">
 						<img 
 							src={video.thumbnail} 
@@ -70,7 +70,7 @@
 							<img 
 								src={video.channelAvatar} 
 								alt={video.channelName}
-								class="h-6 w-6 rounded-full object-cover flex-shrink-0"
+								class="h-6 w-6 rounded-full object-cover shrink-0"
 							/>
 						{/if}
 						<p class="text-xs text-secondary truncate">
@@ -91,12 +91,3 @@
 		{/each}
 	{/if}
 </div>
-
-<style>
-	.line-clamp-2 {
-		display: -webkit-box;
-		-webkit-line-clamp: 2;
-		-webkit-box-orient: vertical;
-		overflow: hidden;
-	}
-</style>
