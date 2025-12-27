@@ -9,8 +9,8 @@
 
 	let videoElement: HTMLVideoElement;
 	let videoContainer: HTMLDivElement;
-	let player: shaka.Player | null = null;
-	let ui: shaka.ui.Overlay | null = null;
+	let player: any = null;
+	let ui: any = null;
 
 	const PROXY_URL = PUBLIC_PROXY_URL || '/proxy';
 
@@ -37,7 +37,7 @@
 			player,
 			videoContainer,
 			videoElement
-		);
+		) as shaka.ui.Overlay;
 
 		// Configure UI
 		const config_ui = {
@@ -72,47 +72,50 @@
 		});
 
 		// Request filter to proxy googlevideo.com URLs
-		player.getNetworkingEngine()?.registerRequestFilter((type, request) => {
-			console.log('Request filter - Type:', type, 'URL:', request.uris[0]);
+		const networkingEngine = player.getNetworkingEngine();
+		if (networkingEngine) {
+			networkingEngine.registerRequestFilter((type: number, request: { uris: string[]; headers: { Range?: any; }; }) => {
+				console.log('Request filter - Type:', type, 'URL:', request.uris[0]);
 
-			// Type 1 is SEGMENT in Shaka Player
-			if (type === 1) {
-				const originalUrl = new URL(request.uris[0]);
+				// Type 1 is SEGMENT in Shaka Player
+				if (type === 1) {
+					const originalUrl = new URL(request.uris[0]);
 
-				if (originalUrl.host.endsWith('.googlevideo.com')) {
-					console.log('Intercepting googlevideo.com request:', originalUrl.host);
+					if (originalUrl.host.endsWith('.googlevideo.com')) {
+						console.log('Intercepting googlevideo.com request:', originalUrl.host);
 
-					// Store the original host as a query parameter
-					originalUrl.searchParams.set('host', originalUrl.host);
+						// Store the original host as a query parameter
+						originalUrl.searchParams.set('host', originalUrl.host);
 
-					// Parse proxy URL
-					const proxyBase = PROXY_URL.startsWith('/') 
-						? `${window.location.origin}${PROXY_URL}`
-						: PROXY_URL;
+						// Parse proxy URL
+						const proxyBase = PROXY_URL.startsWith('/') 
+							? `${window.location.origin}${PROXY_URL}`
+							: PROXY_URL;
 
-					console.log('Proxy base URL:', proxyBase);
+						console.log('Proxy base URL:', proxyBase);
 
-					// Build the new proxied URL
-					const proxyUrl = new URL(proxyBase);
-					const newPath = proxyUrl.pathname + originalUrl.pathname;
-					
-					const proxiedUrl = new URL(proxyBase);
-					proxiedUrl.pathname = newPath;
-					proxiedUrl.search = originalUrl.search;
+						// Build the new proxied URL
+						const proxyUrl = new URL(proxyBase);
+						const newPath = proxyUrl.pathname + originalUrl.pathname;
+						
+						const proxiedUrl = new URL(proxyBase);
+						proxiedUrl.pathname = newPath;
+						proxiedUrl.search = originalUrl.search;
 
-					// Handle Range header
-					if (request.headers.Range) {
-						const rangeValue = request.headers.Range.split('=')[1];
-						proxiedUrl.searchParams.set('range', rangeValue);
-						console.log('Converted Range header to query param:', rangeValue);
-						request.headers = {};
+						// Handle Range header
+						if (request.headers.Range) {
+							const rangeValue = request.headers.Range.split('=')[1];
+							proxiedUrl.searchParams.set('range', rangeValue);
+							console.log('Converted Range header to query param:', rangeValue);
+							request.headers = {};
+						}
+
+						request.uris[0] = proxiedUrl.toString();
+						console.log('Proxied request URL:', request.uris[0].substring(0, 150) + '...');
 					}
-
-					request.uris[0] = proxiedUrl.toString();
-					console.log('Proxied request URL:', request.uris[0].substring(0, 150) + '...');
 				}
-			}
-		});
+			});
+		}
 
 		try {
 			console.log('Attempting to load manifest URL:', config.manifestUrl);
