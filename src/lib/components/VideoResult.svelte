@@ -21,7 +21,7 @@
 </script>
 
 <div>
-	<div class="grid grid-cols-3 gap-4 rounded-lg p-4 shadow-sm transition-colors hover:bg-gray-900">
+	<div class="grid grid-cols-3 gap-4 rounded-lg p-4 shadow-sm transition-colors hover:bg-secondary">
 		<!-- Left side – thumbnail -->
 		<div class="col-span-1 flex items-start justify-center">
 			<div
@@ -48,9 +48,9 @@
 				on:keydown={handleKey}
 				class="cursor-pointer hover:underline"
 			>
-				<h3 class="mb-1 text-lg font-semibold text-white">{result.title}</h3>
+				<h3 class="mb-1 text-lg font-semibold text-primary">{result.title}</h3>
 			</div>
-			<p class="mb-2 text-sm text-gray-400">
+			<p class="mb-2 text-sm text-muted">
 				<span>{formatCount(result.viewCount)} views</span>
 				<span class="mx-1 inline-block align-middle">•</span>
 				<span>{formatDate(result.uploadDate)}</span>
@@ -60,10 +60,10 @@
 				class="col-space-2 my-3 flex items-center space-x-3 hover:opacity-80"
 			>
 				<img src={avatar} alt={result.channelName} class="h-8 w-8 rounded-full object-cover" />
-				<p class="text-md font-semibold text-white">
+				<p class="text-md font-semibold text-primary">
 					{result.channelName}
 					{#if result.verified}
-						<span class="ml-1 text-gray-400" title="Verified">✓</span>
+						<span class="ml-1 text-muted" title="Verified">✓</span>
 					{/if}
 				</p>
 			</a>
@@ -71,7 +71,7 @@
 				class="
 					line-clamp-3 overflow-hidden
 					text-sm
-					text-gray-400
+					text-secondary
 				"
 			>
 				{result.description}
