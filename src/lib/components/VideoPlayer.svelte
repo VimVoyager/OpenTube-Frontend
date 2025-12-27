@@ -1,8 +1,7 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
+	import { browser } from '$app/environment';
 	import { PUBLIC_PROXY_URL } from '$env/static/public';
-	import shaka from 'shaka-player/dist/shaka-player.ui';
-	import 'shaka-player/dist/controls.css';
 	import type { VideoPlayerConfig } from '$lib/adapters/types';
 
 	export let config: VideoPlayerConfig;
@@ -19,6 +18,14 @@
 	console.log('PROXY_URL:', PROXY_URL);
 
 	onMount(async () => {
+		// Only run in browser
+		if (!browser) return;
+
+		// Dynamically import Shaka Player only in the browser (no SSR)
+		const shakaModule = await import('shaka-player/dist/shaka-player.ui');
+		await import('shaka-player/dist/controls.css');
+		const shaka = shakaModule.default;
+
 		shaka.polyfill.installAll();
 
 		if (!shaka.Player.isBrowserSupported()) {
@@ -26,20 +33,16 @@
 			return;
 		}
 
-		// Create the player
 		player = new shaka.Player();
 
-		// Attach to video element
 		await player.attach(videoElement);
 
-		// Create UI overlay with controls
 		ui = new shaka.ui.Overlay(
 			player,
 			videoContainer,
 			videoElement
-		) as shaka.ui.Overlay;
+		);
 
-		// Configure UI
 		const config_ui = {
 			addSeekBar: true,
 			addBigPlayButton: true,
@@ -66,7 +69,6 @@
 		// Get the controls from UI
 		const controls = ui.getControls();
 
-		// Error event listener
 		player.addEventListener('error', (event: any) => {
 			console.error('Shaka Player error event:', event);
 		});
@@ -84,7 +86,6 @@
 					if (originalUrl.host.endsWith('.googlevideo.com')) {
 						console.log('Intercepting googlevideo.com request:', originalUrl.host);
 
-						// Store the original host as a query parameter
 						originalUrl.searchParams.set('host', originalUrl.host);
 
 						// Parse proxy URL
@@ -102,7 +103,7 @@
 						proxiedUrl.pathname = newPath;
 						proxiedUrl.search = originalUrl.search;
 
-						// Handle Range header
+						// Handle Range header conversion to query parameter
 						if (request.headers.Range) {
 							const rangeValue = request.headers.Range.split('=')[1];
 							proxiedUrl.searchParams.set('range', rangeValue);
