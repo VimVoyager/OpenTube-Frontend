@@ -32,9 +32,3 @@ export const variants = {
         opacity: ['disabled'],
     }
 }
-  1 Change shaka player imports from to dynamic imports in VideoPlayer
-  2 
-  3 - Remove static shaka player imports
-  4 - Create dynamic shaka player imports in onMount so it only works in the
-  5 with no SSR
-  6 - Add browser check as an extra safety guide
