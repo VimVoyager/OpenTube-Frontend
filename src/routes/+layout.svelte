@@ -40,7 +40,7 @@
 <svelte:head>
 	<link rel="icon" href={favicon} />
 </svelte:head>
-<div class="min-h-screen bg-black text-white">
+<div class="min-h-screen bg-primary">
 	{#if isNavigatingToSearch}
 		<SearchResultsLoading count={10} />
 	{:else if isNavigatingToVideo}
