@@ -39,8 +39,13 @@
 
 <svelte:head>
 	<link rel="icon" href={favicon} />
+	<title>OpenTube</title>
+	<meta name="description" content="Free video on demand service for YouTube content">
 </svelte:head>
-<div class="min-h-screen bg-primary">
+<div class="bg-primary min-h-screen">
+	<div class="fixed inset-x-0 top-0 z-40">
+		<Navbar />
+	</div>
 	{#if isNavigatingToSearch}
 		<SearchResultsLoading count={10} />
 	{:else if isNavigatingToVideo}
@@ -56,10 +61,6 @@
 			</aside>
 		</div>
 	{:else}
-		<div class="fixed inset-x-0 top-0 z-40">
-			<Navbar />
-		</div>
-
 		<div class="pt-16">
 			{@render children?.()}
 		</div>
