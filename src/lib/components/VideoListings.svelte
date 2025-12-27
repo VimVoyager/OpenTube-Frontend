@@ -30,7 +30,7 @@
 		<!-- Empty state -->
 		<div class="flex flex-col items-center justify-center py-8 text-center">
 			<div class="text-4xl mb-4">📹</div>
-			<p class="text-sm text-gray-500 dark:text-gray-400">No related Videos available</p>
+			<p class="text-sm text-secondary">No related Videos available</p>
 		</div>
 	{:else}
 		{#each videos as video (video.id)}
@@ -39,7 +39,7 @@
 				tabindex="0"
 				on:click={() => handleVideoClick(video.id)}
 				on:keydown={(e) => e.key === 'Enter' && handleVideoClick(video.id)} 
-				class="group flex gap-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors p-2 mx-2 cursor-pointer">
+				class="group flex gap-2 hover:bg-secondary rounded-lg transition-colors p-2 mx-2 cursor-pointer">
 				<!-- Thumbnail -->
 				<div class="relative flex-shrink-0 w-40">
 					<div class="relative" style="aspect-ratio: 16/9;">
@@ -60,7 +60,7 @@
 				<!-- Video Info -->
 				<div class="flex flex-col flex-1 min-w-0">
 					<!-- Title -->
-					<h3 class="text-sm font-semibold text-gray-900 dark:text-white line-clamp-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+					<h3 class="text-sm font-semibold text-primary line-clamp-2 group-hover:text-accent transition-colors">
 						{video.title}
 					</h3>
 
@@ -73,13 +73,13 @@
 								class="h-6 w-6 rounded-full object-cover flex-shrink-0"
 							/>
 						{/if}
-						<p class="text-xs text-gray-600 dark:text-gray-400 truncate">
+						<p class="text-xs text-secondary truncate">
 							{video.channelName}
 						</p>
 					</div>
 
 					<!-- Video Stats -->
-					<div class="mt-1 flex flex-row text-xs text-gray-500 dark:text-gray-400">
+					<div class="mt-1 flex flex-row text-xs text-muted">
 						<span>{formatViewCount(video.viewCount)} views</span>
 						{#if video.uploadDate}
 							<span class="mx-2">•</span>
