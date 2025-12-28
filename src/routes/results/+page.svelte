@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import VideoResult from '$lib/components/VideoResult.svelte';
+	import ErrorCard from '$lib/components/ErrorCard.svelte';
 
 	export let data: PageData;
 
@@ -12,31 +13,41 @@
 <div class="container mx-auto w-3/4 px-4 py-8">
 	<!-- Search Query Header -->
 	{#if query}
-		<h1 class="mb-6 text-2xl font-bold text-white">
+		<h1 class="mb-6 text-2xl font-bold text-primary">
 			Search Results for "{query}"
 		</h1>
 	{/if}
+	
 	<!-- Error State -->
 	{#if error}
-		<div class="rounded-lg bg-red-900/20 p-6 text-center">
-			<p class="text-lg text-red-400">Error: {error}</p>
-			<p class="mt-2 text-sm text-gray-400">Please try again later.</p>
-		</div>
+		<ErrorCard
+			variant="error"
+			title="Search Error"
+			message={error}
+		>
+			<p class="mt-4 text-sm text-secondary">Please try again later.</p>
+		</ErrorCard>
 
-		<!-- Empty Query State -->
+	<!-- Empty Query State -->
 	{:else if !query}
-		<div class="text-center text-gray-400">
-			<p class="text-lg">Enter a search query to find videos</p>
-		</div>
+		<ErrorCard
+			variant="empty"
+			title="No Search Query"
+			message="Enter a search query to find videos"
+			icon="🔍"
+		/>
 
-		<!-- No Results State -->
+	<!-- No Results State -->
 	{:else if !hasResults}
-		<div class="text-center text-gray-400">
-			<p class="text-lg">No results found for "{query}"</p>
-			<p class="mt-2 text-sm">Try different keywords or check your spelling</p>
-		</div>
+		<ErrorCard
+			variant="info"
+			title="No Results Found"
+			message='No results found for "{query}"'
+		>
+			<p class="mt-4 text-sm text-muted">Try different keywords or check your spelling</p>
+		</ErrorCard>
 
-		<!-- Results List -->
+	<!-- Results List -->
 	{:else}
 		<div class="space-y-4">
 			{#each results as result (result.id)}
@@ -46,7 +57,7 @@
 
 		<!-- Results Count -->
 		<div class="mt-8 text-center">
-			<p class="text-sm text-gray-400">
+			<p class="text-sm text-secondary">
 				Showing {results.length} result{results.length !== 1 ? 's' : ''}
 			</p>
 		</div>

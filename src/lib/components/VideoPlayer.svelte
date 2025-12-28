@@ -45,23 +45,18 @@
 
 		const config_ui = {
 			addSeekBar: true,
-			addBigPlayButton: true,
+			addAddPlayButton: true,
 			controlPanelElements: [
 				'play_pause',
 				'time_and_duration',
-				'spacer',
 				'mute',
 				'volume',
+				'spacer',
 				'quality',  // Resolution selector
 				'captions',
-				'fullscreen',
-				'overflow_menu'
+				'overflow_menu',
+				'fullscreen'
 			],
-			overflowMenuButtons: [
-				'captions',
-				'quality',
-				'playback_rate'
-			]
 		};
 
 		ui.configure(config_ui);

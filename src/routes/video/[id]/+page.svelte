@@ -5,6 +5,7 @@
 	import VideoPlayer from '$lib/components/VideoPlayer.svelte';
 	import VideoDetail from '$lib/components/VideoDetail.svelte';
 	import VideoListings from '$lib/components/VideoListings.svelte';
+	import ErrorCard from '$lib/components/ErrorCard.svelte';
 
 	export let data: PageData;
 
@@ -46,94 +47,47 @@
 	});
 </script>
 
-<div class="mt-4 flex h-screen w-full">
-	<section class="flex w-2/3 flex-col items-start justify-start">
-		<div class="p-4 sm:p-6 lg:p-8">
+<div class="mt-4 w-full bg-primary">
+	{#if hasError || !hasValidManifest}
+		<!-- Full-width centered error states -->
+		<div class="flex min-h-screen items-center justify-center px-4">
 			{#if hasError}
-				<div class="error-container">
-					<div class="error-icon">⚠️</div>
-					<h2 class="error-title">Failed to Load Video</h2>
-					<p class="error-message">{error}</p>
-					<button class="retry-btn" on:click={() => window.location.reload()}> Retry </button>
-				</div>
-			{:else if !hasValidManifest}
-				<div class="error-container">
-					<div class="error-icon">📹</div>
-					<h2 class="error-title">No Streams Available</h2>
-					<p class="error-message">
-						Unable to load DASH manifest for this video. The video may be unavailable or restricted.
-					</p>
-					<button class="retry-btn" on:click={() => window.location.reload()}> Retry </button>
-				</div>
-			{:else if showPlayer}
-				{#key videoId}
-					<VideoPlayer config={playerConfig} />
-				{/key}
-			{/if}
-
-			{#if !hasError}
-				{#key videoId}
-					<VideoDetail {metadata} />
-				{/key}
+				<ErrorCard
+					variant="error"
+					title="Failed to Load Video"
+					message={error}
+					showRetry={true}
+					onRetry={() => window.location.reload()}
+				/>
+			{:else}
+				<ErrorCard
+					variant="warning"
+					title="No Streams Available"
+					message="Unable to load DASH manifest for this video. The video may be unavailable or restricted."
+					showRetry={true}
+					onRetry={() => window.location.reload()}
+				/>
 			{/if}
 		</div>
-	</section>
-	<aside class="mt-7.75 flex w-1/3 flex-col gap-5">
-		{#if !hasError}
-			<VideoListings videos={relatedVideos}/>
-		{/if}
-	</aside>
+	{:else}
+		<!-- Normal two-column layout for video content -->
+		<div class="flex min-h-screen">
+			<section class="flex w-2/3 flex-col items-start justify-start">
+				<div class="p-4 sm:p-6 lg:p-8 w-full">
+					{#if showPlayer}
+						{#key videoId}
+							<VideoPlayer config={playerConfig} />
+						{/key}
+					{/if}
+
+					{#key videoId}
+						<VideoDetail {metadata} />
+					{/key}
+				</div>
+			</section>
+			<aside class="mt-7.75 flex w-1/3 flex-col gap-5">
+				<VideoListings videos={relatedVideos}/>
+			</aside>
+		</div>
+	{/if}
 </div>
-
-<style>
-  .error-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 64px 32px;
-    background: #1a1a1a;
-    border-radius: 12px;
-    text-align: center;
-  }
-
-  .error-icon {
-    font-size: 64px;
-    margin-bottom: 24px;
-  }
-
-  .error-title {
-    font-size: 24px;
-    font-weight: 600;
-    color: #fff;
-    margin: 0 0 16px 0;
-  }
-
-  .error-message {
-    font-size: 16px;
-    color: #aaa;
-    margin: 0 0 32px 0;
-    max-width: 500px;
-    line-height: 1.6;
-  }
-
-  .retry-btn {
-    background: #ff0000;
-    color: white;
-    border: none;
-    padding: 12px 32px;
-    border-radius: 6px;
-    font-size: 16px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background 0.2s;
-  }
-
-  .retry-btn:hover {
-    background: #cc0000;
-  }
-
-  .retry-btn:active {
-    transform: scale(0.98);
-  }
-</style>
