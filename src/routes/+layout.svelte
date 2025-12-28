@@ -40,29 +40,32 @@
 <svelte:head>
 	<link rel="icon" href={favicon} />
 	<title>OpenTube</title>
-	<meta name="description" content="Free video on demand service for YouTube content">
+	<meta name="description" content="Free video on demand service for YouTube content" />
 </svelte:head>
+
 <div class="bg-primary min-h-screen">
 	<div class="fixed inset-x-0 top-0 z-40">
 		<Navbar />
 	</div>
-	{#if isNavigatingToSearch}
-		<SearchResultsLoading count={10} />
-	{:else if isNavigatingToVideo}
-		<div class="mt-4 flex h-screen w-full">
-			<section class="flex w-2/3 flex-col items-start justify-start">
-				<div class="w-full p-4 sm:p-6 lg:p-8">
-					<!-- Show loading state during navigation -->
-					<VideoLoading />
-				</div>
-			</section>
-			<aside class="mt-7.75 flex w-1/3 flex-col gap-5">
-				<VideoListingsLoading />
-			</aside>
-		</div>
-	{:else}
-		<div class="pt-16">
-			{@render children?.()}
-		</div>
-	{/if}
+	<div class="max-w-480 mx-auto">
+		{#if isNavigatingToSearch}
+			<SearchResultsLoading count={10} />
+		{:else if isNavigatingToVideo}
+			<div class="mt-4 flex h-screen w-full">
+				<section class="flex w-2/3 flex-col items-start justify-start">
+					<div class="w-full p-4 sm:p-6 lg:p-8">
+						<!-- Show loading state during navigation -->
+						<VideoLoading />
+					</div>
+				</section>
+				<aside class="mt-7.75 flex w-1/3 flex-col gap-5">
+					<VideoListingsLoading />
+				</aside>
+			</div>
+		{:else}
+			<div class="pt-16">
+				{@render children?.()}
+			</div>
+		{/if}
+	</div>
 </div>
