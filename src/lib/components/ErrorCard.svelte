@@ -1,12 +1,23 @@
 <script lang="ts">
 	type Variant = 'error' | 'warning' | 'info' | 'empty';
 	
-	export let variant: Variant = 'error';
-	export let title: string;
-	export let message: string;
-	export let icon: string | null = null;
-	export let showRetry: boolean = false;
-	export let onRetry: (() => void) | null = null;
+	let {
+		variant = 'error',
+		title,
+		message,
+		icon = null,
+		showRetry = false,
+		onRetry = null,
+		children
+	}: {
+		variant?: Variant;
+		title: string;
+		message: string;
+		icon?: string | null;
+		showRetry?: boolean;
+		onRetry?: (() => void) | null;
+		children?: any;
+	} = $props();
 
 	// Default icons for each variant
 	const defaultIcons = {
@@ -16,7 +27,7 @@
 		empty: '🔍'
 	};
 
-	$: displayIcon = icon ?? defaultIcons[variant];
+	let displayIcon = $derived(icon ?? defaultIcons[variant]);
 
 	// Variant styles
 	const variantStyles = {
@@ -33,11 +44,11 @@
 		empty: 'text-muted'
 	};
 
-	$: containerClasses = variantStyles[variant];
-	$: iconColorClasses = iconStyles[variant];
+	let containerClasses = $derived(variantStyles[variant]);
+	let iconColorClasses = $derived(iconStyles[variant]);
 </script>
 
-<div class="rounded-lg {containerClasses} bg-card p-8 text-center mx-auto">
+<div class="rounded-lg border {containerClasses} p-8 text-center mx-auto max-w-2xl">
 	{#if displayIcon}
 		<div class="text-5xl mb-4 {iconColorClasses}">
 			{displayIcon}
@@ -55,12 +66,12 @@
 	{#if showRetry && onRetry}
 		<button 
 			class="mt-6 bg-accent hover:bg-accent-hover text-white font-medium px-6 py-2 rounded-md transition-colors"
-			on:click={onRetry}
+			onclick={onRetry}
 		>
 			Retry
 		</button>
 	{/if}
 
 	<!-- Optional slot for custom actions -->
-	<slot />
+	{@render children?.()}
 </div>

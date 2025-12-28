@@ -2,9 +2,9 @@
 	import type { VideoMetadata } from '$lib/adapters/types';
 	import roundLogo from '$lib/assets/logo-placeholder.svg';
 
-	export let metadata: VideoMetadata;
+	let { metadata }: { metadata: VideoMetadata } = $props();
 
-	$: displayAvatar = metadata.channelAvatar || roundLogo;
+	let displayAvatar = $derived(metadata.channelAvatar || roundLogo);
 	
 	/**
 	 * Format view count with locale specific number formatting

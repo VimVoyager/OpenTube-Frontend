@@ -2,7 +2,7 @@
 	import { goto } from '$app/navigation';
 	import type { RelatedVideoConfig } from '$lib/adapters/types';
 
-	export let videos: RelatedVideoConfig[] = [];
+	let { videos = [] }: { videos?: RelatedVideoConfig[] } = $props();
 
 	const formatViewCount = (viewCount: number): string => {
 		const formatter = Intl.NumberFormat('en-US');
@@ -37,8 +37,8 @@
 			<div 
 				role="button" 
 				tabindex="0"
-				on:click={() => handleVideoClick(video.id)}
-				on:keydown={(e) => e.key === 'Enter' && handleVideoClick(video.id)} 
+				onclick={() => handleVideoClick(video.id)}
+				onkeydown={(e) => e.key === 'Enter' && handleVideoClick(video.id)} 
 				class="group flex gap-2 hover:bg-secondary rounded-lg transition-colors p-2 mx-2 cursor-pointer">
 				<!-- Thumbnail -->
 				<div class="relative shrink-0 w-40">

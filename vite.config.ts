@@ -79,7 +79,6 @@ export default defineConfig({
 				resolve: {
 					alias: {
 						'$lib': path.resolve('./src/lib'),
-						'$env/dynamic/public': path.resolve('./src/tests/helpers/env-dynamic-public.ts')
 					}
 				},
 				test: {
