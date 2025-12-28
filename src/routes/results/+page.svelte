@@ -3,17 +3,19 @@
 	import VideoResult from '$lib/components/VideoResult.svelte';
 	import ErrorCard from '$lib/components/ErrorCard.svelte';
 
-	export let data: PageData;
+	let { data }: { data: PageData } = $props();
 
-	$: ({ results, query, error } = data);
-	$: hasResults = results && results.length > 0;
+	let results = $derived(data.results);
+	let query = $derived(data.query);
+	let error = $derived(data.error);
+	let hasResults = $derived(results && results.length > 0);
 </script>
 
 <!-- Content States -->
-<div class="container mx-auto w-3/4 px-4 py-8">
+<div class="container mx-auto w-full max-w-7xl px-4 py-8">
 	<!-- Search Query Header -->
 	{#if query}
-		<h1 class="mb-6 text-2xl font-bold text-primary">
+		<h1 class="mb-6 text-xl sm:text-2xl font-bold text-primary">
 			Search Results for "{query}"
 		</h1>
 	{/if}

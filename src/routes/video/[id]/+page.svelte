@@ -7,18 +7,18 @@
 	import VideoListings from '$lib/components/VideoListings.svelte';
 	import ErrorCard from '$lib/components/ErrorCard.svelte';
 
-	export let data: PageData;
+	let { data }: { data: PageData } = $props();
 
 	// Reactive destructure - updates when data changes
-	$: playerConfig = (data as any)?.playerConfig ?? {
+	let playerConfig = $derived((data as any)?.playerConfig ?? {
 		videoStream: null,
 		audioStream: null,
 		subtitles: [],
 		duration: 0,
 		poster: ''
-	};
+	});
 
-	$: metadata = (data as any)?.metadata ?? {
+	let metadata = $derived((data as any)?.metadata ?? {
 		title: '',
 		description: '',
 		channelName: '',
@@ -28,26 +28,29 @@
 		likeCount: 0,
 		dislikeCount: 0,
 		subscriberCount: 0
-	};
+	});
 
-	$: relatedVideos = data.relatedVideos ?? [];
-	$: error = (data as any)?.error ?? null;
+	let relatedVideos = $derived(data.relatedVideos ?? []);
+	let error = $derived((data as any)?.error ?? null);
 
 	// Extract video ID for keying components
-	$: videoId = playerConfig.manifestUrl || playerConfig.poster || Date.now().toString();
+	let videoId = $derived(playerConfig.manifestUrl || playerConfig.poster || Date.now().toString());
 
 	// Computed states
-	$: hasError = !!error;
-	$: hasValidManifest = !!(playerConfig.manifestUrl);
+	let hasError = $derived(!!error);
+	let hasValidManifest = $derived(!!(playerConfig.manifestUrl));
 
 	// Delay player initialisation until mounted (for Shaka Player)
-	let showPlayer = false;
+	let showPlayer = $state(false);
 	onMount(() => {
 		showPlayer = true;
 	});
+
+	// Mobile tab state - 'details' or 'related'
+	let activeTab = $state<'details' | 'related'>('details');
 </script>
 
-<div class="mt-4 w-full bg-primary">
+<div class="w-full bg-primary">
 	{#if hasError || !hasValidManifest}
 		<!-- Full-width centered error states -->
 		<div class="flex min-h-screen items-center justify-center px-4">
@@ -70,8 +73,8 @@
 			{/if}
 		</div>
 	{:else}
-		<!-- Normal two-column layout for video content -->
-		<div class="flex min-h-screen">
+		<!-- Desktop Layout (lg and above) - Two columns -->
+		<div class="hidden lg:flex min-h-screen mt-4">
 			<section class="flex w-2/3 flex-col items-start justify-start">
 				<div class="p-4 sm:p-6 lg:p-8 w-full">
 					{#if showPlayer}
@@ -88,6 +91,59 @@
 			<aside class="mt-7.75 flex w-1/3 flex-col gap-5">
 				<VideoListings videos={relatedVideos}/>
 			</aside>
+		</div>
+
+		<!-- Mobile/Tablet Layout (below lg) - Full width with tabs -->
+		<div class="lg:hidden min-h-screen">
+			<!-- Video Player - Full Width -->
+			<div class="w-full">
+				{#if showPlayer}
+					{#key videoId}
+						<VideoPlayer config={playerConfig} />
+					{/key}
+				{/if}
+			</div>
+
+			<!-- Tab Navigation -->
+			<div class="sticky top-14 z-30 bg-navbar border-b border-default">
+				<div class="flex">
+					<button
+						class="flex-1 py-3 text-sm font-medium transition-colors relative
+							{activeTab === 'details' 
+								? 'text-primary' 
+								: 'text-secondary hover:text-primary'}"
+						onclick={() => activeTab = 'details'}
+					>
+						Details
+						{#if activeTab === 'details'}
+							<div class="absolute bottom-0 left-0 right-0 h-0.5 bg-accent"></div>
+						{/if}
+					</button>
+					<button
+						class="flex-1 py-3 text-sm font-medium transition-colors relative
+							{activeTab === 'related' 
+								? 'text-primary' 
+								: 'text-secondary hover:text-primary'}"
+						onclick={() => activeTab = 'related'}
+					>
+						Related Videos
+						{#if activeTab === 'related'}
+							<div class="absolute bottom-0 left-0 right-0 h-0.5 bg-accent"></div>
+						{/if}
+					</button>
+				</div>
+			</div>
+
+			<!-- Tab Content -->
+			<div class="p-4">
+				{#if activeTab === 'details'}
+					{#key videoId}
+						<VideoDetail {metadata} />
+					{/key}
+				{:else}
+					<VideoListings videos={relatedVideos}/>
+				{/if}
+			</div>
 		</div>
 	{/if}
 </div>
