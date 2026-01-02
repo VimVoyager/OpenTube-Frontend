@@ -3,32 +3,30 @@
  * 
  * Tests for related video streams fetching
  */
-import { describe, it, expect, vi, afterEach } from 'vitest';
-import { getRelatedStreams } from './related';
+import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
 import {
     createSuccessfulFetch,
     createFailedFetch,
     createNetworkErrorFetch,
-    createMockConsoleError
+    createMockConsoleError,
+    mockStaticEnv
 } from '../../tests/helpers/apiHelpers';
 import { 
     mockRelatedVideoStreamArrayResponse,
     mockRelatedStream,
     mockRelatedStreamObjectResponse
 } from '../../tests/fixtures/apiFixtures';
-
-// Mock environment variables
-vi.mock('$env/dynamic/public', () => ({
-    env: {
-        PUBLIC_API_URL: 'http://localhost:8000'
-    }
-}));
+import { getRelatedStreams } from './related';
 
 // =============================================================================
 // Setup and Teardown
 // =============================================================================
 
 let consoleErrorSpy: ReturnType<typeof createMockConsoleError> | undefined;
+
+beforeEach(() =>{
+    mockStaticEnv();
+})
 
 afterEach(() => {
     if (consoleErrorSpy) {

@@ -5,19 +5,28 @@
  * response parsing, and error scenarios
  */
 
-import { describe, it, expect, vi, type Mock } from 'vitest';
-import { getSearchResults } from './search';
+import { describe, it, expect, vi, type Mock, beforeEach } from 'vitest';
 import {
 	createSuccessfulFetch,
 	createFailedFetch,
 	createNetworkErrorFetch,
 	extractQueryParams,
-	getCallCount
+	getCallCount,
+	mockStaticEnv
 } from '../../tests/helpers/apiHelpers';
 import {
 	mockEmptySearchResult,
 	mockSearchResult
 } from '../../tests/fixtures/apiFixtures';
+import { getSearchResults } from './search';
+
+// =============================================================================
+// Setup and Teardown
+// =============================================================================
+
+beforeEach(() =>{
+    mockStaticEnv();
+})
 
 // =============================================================================
 // Successful Search Tests
@@ -248,7 +257,7 @@ describe('getSearchResults', () => {
 
 			// Assert
 			const callUrl = (mockFetch as Mock).mock.calls[0][0] as string;
-			expect(callUrl).toContain('http://localhost:8080/api/v1/search');
+			expect(callUrl).toContain('http://localhost:8000/api/v1/search');
 			expect(callUrl).toContain('sortFilter=asc');
 			expect(callUrl).toContain('searchString=test');
 		});

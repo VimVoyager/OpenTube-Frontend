@@ -17,6 +17,24 @@ import { vi } from 'vitest';
 export type MockFetch = ReturnType<typeof vi.fn> & ((input: RequestInfo | URL, init?: RequestInit) => Promise<Response>);
 
 // =============================================================================
+// Mock Environment Variables
+// =============================================================================
+
+// Mock SvelteKit environment module
+export function mockStaticEnv() {
+    vi.mock('$env/static/public', () => ({
+        PUBLIC_API_URL: 'http://localhost:8000/api/v1'
+    }));
+}
+
+export function mockDynamicEnv() {
+    vi.mock('$env/dynamic/public', () => ({
+        PUBLIC_API_URL: 'http://localhost:8000'
+    }));
+}
+
+
+// =============================================================================
 // Mock Fetch Helpers
 // =============================================================================
 

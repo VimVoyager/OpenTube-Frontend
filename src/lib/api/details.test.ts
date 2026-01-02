@@ -5,26 +5,31 @@
  * error handling, and data validation
  */
 
-import { describe, it, expect, vi, afterEach } from 'vitest';
-import { getVideoDetails } from './details';
+import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
 import {
     createSuccessfulFetch,
     createFailedFetch,
     createNetworkErrorFetch,
     extractQueryParams,
     createMockConsoleError,
-    getCallCount
+    getCallCount,
+    mockStaticEnv
 } from '../../tests/helpers/apiHelpers';
 import {
     mockVideoDetails,
     mockVideoDetailsMinimal
 } from '../../tests/fixtures/apiFixtures';
+import { getVideoDetails } from './details';
 
 // =============================================================================
 // Setup and Teardown
 // =============================================================================
 
 let consoleErrorMock: ReturnType<typeof createMockConsoleError> | undefined;
+
+beforeEach(() =>{
+    mockStaticEnv();
+})
 
 afterEach(() => {
     if (consoleErrorMock) {
@@ -314,7 +319,7 @@ describe('getVideoDetails', () => {
 
             // Assert
             const callUrl = mockFetch.mock.calls[0][0] as string;
-            expect(callUrl).toContain('http://localhost:8080/api/v1/streams/details');
+            expect(callUrl).toContain('http://localhost:8000/api/v1/streams/details');
             expect(callUrl).toContain(`id=${videoId}`);
         });
 

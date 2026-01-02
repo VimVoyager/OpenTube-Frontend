@@ -7,19 +7,15 @@
 
 import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
 
-// Mock SvelteKit environment module
-vi.mock('$env/static/public', () => ({
-    PUBLIC_API_URL: 'http://localhost:8080'
-}));
-
-import { getManifest, getManifestUrl } from './manifest';
 import {
     createFailedFetch,
     createNetworkErrorFetch,
     extractQueryParams,
     createMockConsoleError,
-    getCallCount
+    getCallCount,
+    mockStaticEnv
 } from '../../tests/helpers/apiHelpers';
+import { getManifest, getManifestUrl } from './manifest';
 
 // Mock DOMParser for XML parsing in Node.js
 class MockDOMParser {
@@ -112,6 +108,7 @@ let consoleErrorMock: ReturnType<typeof createMockConsoleError> | undefined;
 const createdBlobUrls: string[] = [];
 
 beforeEach(() => {
+    mockStaticEnv();
     // Mock URL.createObjectURL and URL.revokeObjectURL
     global.URL.createObjectURL = vi.fn(() => {
         const url = `blob:http://localhost/${Math.random()}`;
