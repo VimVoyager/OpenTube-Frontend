@@ -6,7 +6,6 @@
 
 import { render, screen, fireEvent, waitFor } from '@testing-library/svelte';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { writable } from 'svelte/store';
 import { goto } from '$app/navigation';
 import VideoListings from './VideoListings.svelte';
 import type { RelatedVideoConfig } from '$lib/adapters/types';
@@ -57,15 +56,12 @@ const mockSingleVideo: RelatedVideoConfig[] = [mockRelatedVideos[0]];
 
 const mockEmptyVideos: RelatedVideoConfig[] = [];
 
-const mockLoadingStore = writable(false);
-
 // =============================================================================
 // Setup and Teardown
 // =============================================================================
 
 beforeEach(() => {
 	vi.clearAllMocks();
-	mockLoadingStore.set(false);
 });
 
 // =============================================================================
@@ -102,14 +98,6 @@ describe('VideoListings', () => {
 			render(VideoListings, { props: { videos: mockSingleVideo } });
 			
 			expect(screen.getByText('First Related Video')).toBeInTheDocument();
-		});
-
-		it('should render with loading store prop', () => {
-			const { container } = render(VideoListings, { 
-				props: { videos: mockRelatedVideos, isLoadingStore: mockLoadingStore } 
-			});
-			
-			expect(container).toBeInTheDocument();
 		});
 	});
 
@@ -426,7 +414,7 @@ describe('VideoListings', () => {
 			const { container } = render(VideoListings, { props: { videos: mockRelatedVideos } });
 			
 			const videoCard = container.querySelector('[role="button"]');
-			expect(videoCard).toHaveClass('hover:bg-gray-100', 'dark:hover:bg-gray-800');
+			expect(videoCard).toHaveClass('hover:bg-secondary');
 		});
 
 		it('should apply transition classes', () => {
@@ -507,17 +495,18 @@ describe('VideoListings', () => {
 		});
 
 		it('should handle missing channel name', () => {
-			const noChannelVideo = [{
+			const noChannelVideo = {
 				...mockRelatedVideos[0],
 				channelName: ''
-			}];
-			const { container } = render(VideoListings, { props: { videos: noChannelVideo } });
+			};
+			const { container } = render(VideoListings, { props: { videos: [noChannelVideo] } });
 			
 			// Should still render without crashing
 			expect(container).toBeTruthy();
 			// Check that the paragraph exists but is empty
-			const channelParagraph = container.querySelector('p.text-xs.text-gray-600');
+			const channelParagraph = container.querySelector('p.text-xs.text-secondary');
 			expect(channelParagraph).toBeInTheDocument();
+			expect(channelParagraph?.textContent?.trim()).toBe('');
 		});
 	});
 
