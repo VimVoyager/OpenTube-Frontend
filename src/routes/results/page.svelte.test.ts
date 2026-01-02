@@ -108,8 +108,9 @@ describe('+page.svelte - Search Results', () => {
 			const { container } = render(Page, { props: { data } });
 
 			// Assert
-			const mainContainer = container.querySelector('div.container.mx-auto.w-3\\/4');
+			const mainContainer = container.querySelector('div.container.mx-auto');
 			expect(mainContainer).toBeTruthy();
+			expect(mainContainer).toHaveClass('w-full', 'max-w-7xl', 'px-4', 'py-8');
 		});
 
 		it('should apply correct padding classes', () => {
@@ -142,12 +143,12 @@ describe('+page.svelte - Search Results', () => {
 			const data = createMockPageData();
 
 			// Act
-			const { container } = render(Page, { props: { data } });
+			render(Page, { props: { data } });
 
 			// Assert
 			const header = screen.getByText(/Search Results for/);
 			expect(header.tagName).toBe('H1');
-			expect(header).toHaveClass('mb-6', 'text-2xl', 'font-bold', 'text-white');
+			expect(header).toHaveClass('mb-6', 'text-xl', 'sm:text-2xl', 'font-bold', 'text-primary');
 		});
 
 		it('should not display header when query is empty', () => {
@@ -182,7 +183,8 @@ describe('+page.svelte - Search Results', () => {
 			render(Page, { props: { data } });
 
 			// Assert
-			expect(screen.getByText(/Error: Network error occurred/)).toBeTruthy();
+			expect(screen.getByText('Network error occurred')).toBeTruthy();
+			expect(screen.getByText('Search Error')).toBeTruthy();
 		});
 
 		it('should apply error styling classes', () => {
@@ -193,9 +195,9 @@ describe('+page.svelte - Search Results', () => {
 			const { container } = render(Page, { props: { data } });
 
 			// Assert
-			const errorContainer = container.querySelector('div.bg-red-900\\/20');
+			const errorContainer = container.querySelector('div.bg-accent\\/10');
 			expect(errorContainer).toBeTruthy();
-			expect(errorContainer).toHaveClass('rounded-lg', 'p-6', 'text-center');
+			expect(errorContainer).toHaveClass('rounded-lg', 'border', 'border-accent/20', 'p-8', 'text-center');
 		});
 
 		it('should display error message with correct styling', () => {
@@ -206,8 +208,8 @@ describe('+page.svelte - Search Results', () => {
 			render(Page, { props: { data } });
 
 			// Assert
-			const errorMessage = screen.getByText(/Error: API failure/);
-			expect(errorMessage).toHaveClass('text-lg', 'text-red-400');
+			const errorMessage = screen.getByText(/API failure/);
+			expect(errorMessage).toHaveClass('text-sm', 'text-secondary');
 		});
 
 		it('should display "try again later" message', () => {
@@ -223,23 +225,23 @@ describe('+page.svelte - Search Results', () => {
 
 		it('should not display results when error exists', () => {
 			// Arrange
-			const data = createMockPageData({ 
+			const data = createMockPageData({
 				error: 'Test error',
-				results: mockSearchResults 
+				results: mockSearchResults
 			});
 
 			// Act
 			const { container } = render(Page, { props: { data } });
 
 			// Assert
-			expect(screen.getByText(/Error: Test error/)).toBeTruthy();
+			expect(screen.getByText(/Test error/)).toBeTruthy();
 			const resultsContainer = container.querySelector('.space-y-4');
 			expect(resultsContainer).toBeNull();
 		});
 
 		it('should still show query header when error exists', () => {
 			// Arrange
-			const data = createMockPageData({ 
+			const data = createMockPageData({
 				error: 'Test error',
 				query: 'test query'
 			});
@@ -273,7 +275,7 @@ describe('+page.svelte - Search Results', () => {
 
 			// Assert
 			const message = screen.getByText('Enter a search query to find videos');
-			expect(message).toHaveClass('text-lg');
+			expect(message).toHaveClass('text-sm', 'text-secondary');
 		});
 
 		it('should not display results when query is empty', () => {
@@ -292,9 +294,9 @@ describe('+page.svelte - Search Results', () => {
 	describe('No results state', () => {
 		it('should display no results message when results array is empty', () => {
 			// Arrange
-			const data = createMockPageData({ 
+			const data = createMockPageData({
 				query: 'nonexistent query',
-				results: [] 
+				results: []
 			});
 
 			// Act
@@ -317,14 +319,17 @@ describe('+page.svelte - Search Results', () => {
 
 		it('should apply correct styling to no results container', () => {
 			// Arrange
-			const data = createMockPageData({ results: [] });
+			const data = createMockPageData({ query: 'no results query', results: [] });
 
 			// Act
 			const { container } = render(Page, { props: { data } });
 
 			// Assert
-			const noResultsContainer = container.querySelector('div.text-center.text-gray-400');
+			// Check for the ErrorCard container by looking for multiple classes
+			const noResultsContainer = container.querySelector('div.rounded-lg.border.text-center');
 			expect(noResultsContainer).toBeTruthy();
+			// Verify it has the accent background class
+			expect(noResultsContainer?.className).toContain('bg-secondary');
 		});
 
 		it('should not display results container when no results', () => {
@@ -404,14 +409,14 @@ describe('+page.svelte - Search Results', () => {
 
 		it('should apply correct styling to results count', () => {
 			// Arrange
-			const data = createMockPageData();
+			const data = createMockPageData({ results: mockSearchResults.slice(0, 3) });
 
 			// Act
 			render(Page, { props: { data } });
 
 			// Assert
 			const resultsCount = screen.getByText('Showing 3 results');
-			expect(resultsCount).toHaveClass('text-sm', 'text-gray-400');
+			expect(resultsCount).toHaveClass('text-sm', 'text-secondary');
 		});
 
 		it('should position results count correctly', () => {
@@ -518,7 +523,7 @@ describe('+page.svelte - Search Results', () => {
 			expect(screen.getByText(new RegExp(`Search Results for "${longQuery}"`))).toBeTruthy();
 		});
 
-		it('should handle very long error messages', () => {
+		it('should handle very long error messages', async () => {
 			// Arrange
 			const longError = 'Error message '.repeat(50);
 			const data = createMockPageData({ error: longError });
@@ -527,8 +532,10 @@ describe('+page.svelte - Search Results', () => {
 			render(Page, { props: { data } });
 
 			// Assert
-			// Use regex to match part of the error since Testing Library normalizes whitespace
-			expect(screen.getByText(/Error: Error message/)).toBeTruthy();
+			const errorText = screen.getAllByText((content, element) => {
+				return element?.textContent?.includes('Error message Error message') ?? false;
+			});
+			expect(errorText).toBeTruthy();
 		});
 
 		it('should handle large results array', () => {
@@ -613,16 +620,17 @@ describe('+page.svelte - Search Results', () => {
 	describe('State priority', () => {
 		it('should show error over results', () => {
 			// Arrange
-			const data = createMockPageData({ 
+			const data = createMockPageData({
 				error: 'Test error',
-				results: mockSearchResults 
+				results: mockSearchResults.slice(0, 3)
 			});
 
 			// Act
 			render(Page, { props: { data } });
 
 			// Assert
-			expect(screen.getByText(/Error: Test error/)).toBeTruthy();
+			// Error message is displayed without "Error:" prefix
+			expect(screen.getByText('Test error')).toBeTruthy();
 			expect(screen.queryByText('Showing 3 results')).toBeNull();
 		});
 
