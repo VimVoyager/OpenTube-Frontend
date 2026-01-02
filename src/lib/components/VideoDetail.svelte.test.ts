@@ -213,7 +213,7 @@ describe('VideoDetail', () => {
 			render(VideoDetail, { props: { metadata: mockMetadata } });
 			
 			const subscribeButton = screen.getByRole('button', { name: /subscribe/i });
-			expect(subscribeButton).toHaveClass('bg-white', 'text-black', 'rounded-full');
+			expect(subscribeButton).toHaveClass('bg-accent', 'hover:bg-accent-hover', 'text-white', 'rounded-full');
 		});
 	});
 
@@ -226,14 +226,14 @@ describe('VideoDetail', () => {
 			render(VideoDetail, { props: { metadata: mockMetadata } });
 			
 			const title = screen.getByText(mockMetadata.title);
-			expect(title).toHaveClass('text-2xl', 'font-bold', 'text-white');
+			expect(title).toHaveClass('text-2xl', 'font-bold', 'text-primary');
 		});
 
 		it('should render channel name with correct styling', () => {
 			render(VideoDetail, { props: { metadata: mockMetadata } });
 			
 			const channelName = screen.getByText(mockMetadata.channelName);
-			expect(channelName).toHaveClass('text-md', 'font-semibold', 'text-white');
+			expect(channelName).toHaveClass('text-md', 'font-semibold', 'text-primary');
 		});
 
 		it('should render view count heading', () => {
