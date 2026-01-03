@@ -13,10 +13,6 @@
 
 	const PROXY_URL = PUBLIC_PROXY_URL || '/proxy';
 
-	console.log('VideoPlayer initialized');
-	console.log('Config:', config);
-	console.log('PROXY_URL:', PROXY_URL);
-
 	onMount(async () => {
 		// Only run in browser
 		if (!browser) return;
@@ -45,14 +41,14 @@
 
 		const config_ui = {
 			addSeekBar: true,
-			addAddPlayButton: true,
+			addBigPlayButton: true,
 			controlPanelElements: [
 				'play_pause',
 				'time_and_duration',
 				'mute',
 				'volume',
 				'spacer',
-				'quality',  // Resolution selector
+				'quality',  
 				'captions',
 				'overflow_menu',
 				'fullscreen'
@@ -115,6 +111,7 @@
 
 		try {
 			console.log('Attempting to load manifest URL:', config.manifestUrl);
+			console.log('thumbnail: ', config.poster);
 			
 			if (!config.manifestUrl || config.manifestUrl === '') {
 				throw new Error('Manifest URL is empty or undefined');

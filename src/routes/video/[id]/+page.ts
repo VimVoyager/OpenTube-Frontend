@@ -10,7 +10,9 @@ import {
 	type RelatedVideoConfig
 } from '$lib/adapters/types';
 import thumbnailPlaceholder from '$lib/assets/thumbnail-placeholder.jpg';
+import logoPlaceholder from '$lib/assets/logo-placeholder.svg';
 import { getManifest } from '$lib/api/manifest';
+import { getVideoThumbnails } from '$lib/api/thumbnails';
 
 /**
  * Page data structure
@@ -57,12 +59,14 @@ async function fetchVideoData(
 	videoId: string,
 	fetch: typeof globalThis.fetch
 ): Promise<{
+	thumbnails: Awaited<ReturnType<typeof getVideoThumbnails>>;
 	details: Awaited<ReturnType<typeof getVideoDetails>>;
 	manifest: Awaited<ReturnType<typeof getManifest>>;
 	relatedStreams: Awaited<ReturnType<typeof getRelatedStreams>>;
 }> {
 	// Fetch video metadata, manifest, and related videos in parallel
-	const [details, manifest, relatedStreams] = await Promise.all([
+	const [thumbnails, details, manifest, relatedStreams] = await Promise.all([
+		getVideoThumbnails(videoId, fetch),
 		getVideoDetails(videoId, fetch),
 		getManifest(videoId, fetch),
 		getRelatedStreams(videoId, fetch).catch((error) => {
@@ -71,7 +75,7 @@ async function fetchVideoData(
 		})
 	]);
 
-	return { details, manifest, relatedStreams };
+	return { thumbnails, details, manifest, relatedStreams };
 }
 
 /**
@@ -80,7 +84,7 @@ async function fetchVideoData(
 export const load: PageLoad = async ({ params, fetch }): Promise<PageData> => {
 	try {
 		// Fetch all data in parallel
-		const { details, manifest, relatedStreams } = await fetchVideoData(
+		const { thumbnails, details, manifest, relatedStreams } = await fetchVideoData(
 			params.id,
 			fetch
 		);
@@ -91,18 +95,18 @@ export const load: PageLoad = async ({ params, fetch }): Promise<PageData> => {
 		const playerConfig = adaptPlayerConfig(
 			manifest.url,
 			manifest.duration,
-			thumbnailPlaceholder
+			thumbnails.url
 		);
 
 		const metadata = adaptVideoMetadata(
 			details,
-			thumbnailPlaceholder
+			thumbnails.url
 		);
 
 		const relatedVideos = adaptRelatedVideos(
 			relatedStreams,
-			thumbnailPlaceholder,
-			thumbnailPlaceholder
+			logoPlaceholder,
+			logoPlaceholder
 		);
 
 		return {
