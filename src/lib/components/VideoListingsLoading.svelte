@@ -3,7 +3,7 @@
 	{#each Array(5) as _, i}
 		<div class="flex gap-2 p-2">
 			<!-- Thumbnail skeleton -->
-			<div class="relative flex-shrink-0 w-40">
+			<div class="relative shrink-0 w-40">
 				<div class="bg-gray-700 rounded-md animate-pulse" style="aspect-ratio: 16/9;"></div>
 			</div>
 

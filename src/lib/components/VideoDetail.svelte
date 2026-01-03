@@ -7,7 +7,7 @@
 	let displayAvatar = $derived(metadata.channelAvatar || roundLogo);
 	let isExpanded = $state(false);
 	
-	const COLLAPSED_HEIGHT = 100; // pixels - adjust this to your preference
+	const COLLAPSED_HEIGHT = 100;
 	
 	/**
 	 * Format view count with locale specific number formatting
