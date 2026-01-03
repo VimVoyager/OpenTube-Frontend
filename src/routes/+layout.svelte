@@ -2,7 +2,7 @@
 	import '../app.css';
 	import 'shaka-player/dist/controls.css';
 	import { beforeNavigate, afterNavigate } from '$app/navigation';
-	import favicon from '$lib/assets/favicon.svg';
+	import favicon from '$lib/assets/streaming-logo.png';
 	import Navbar from '$lib/components/navbar.svelte';
 	import SearchResultsLoading from '$lib/components/SearchResultsLoading.svelte';
 	import VideoLoading from '$lib/components/VideoLoading.svelte';
@@ -44,21 +44,23 @@
 </svelte:head>
 
 <div class="bg-primary min-h-screen">
-	<div class="fixed inset-x-0 top-0 z-40">
-		<Navbar />
-	</div>
 	<div class="max-w-480 mx-auto">
+		<div class="fixed inset-x-0 top-0 z-40">
+			<Navbar />
+		</div>
 		{#if isNavigatingToSearch}
-			<SearchResultsLoading count={10} />
+			<div class='pt-16'>
+				<SearchResultsLoading count={10} />
+			</div>
 		{:else if isNavigatingToVideo}
-			<div class="mt-4 flex h-screen w-full">
+			<div class="pt-16 mt-4 flex h-screen w-full">
 				<section class="flex w-2/3 flex-col items-start justify-start">
 					<div class="w-full p-4 sm:p-6 lg:p-8">
 						<!-- Show loading state during navigation -->
 						<VideoLoading />
 					</div>
 				</section>
-				<aside class="mt-7.75 flex w-1/3 flex-col gap-5">
+				<aside class="pt-16 mt-4 flex w-1/3 flex-col gap-5">
 					<VideoListingsLoading />
 				</aside>
 			</div>
