@@ -11,7 +11,7 @@ export default defineConfig({
 			conditions: ['browser', 'import'],
 			alias: {
 				'$lib': path.resolve('./src/lib'),
-				'$env': path.resolve('./src/env')
+				// '$env/static/public': path.resolve(__dirname, './src/env.ts')
 			}
 		},
 
@@ -57,7 +57,9 @@ export default defineConfig({
 					conditions: ['browser'],
 					alias: {
 						'$lib': path.resolve('./src/lib'),
-						'$app': path.resolve('./node_modules/@sveltejs/kit/src/runtime/app')
+						'$app': path.resolve('./node_modules/@sveltejs/kit/src/runtime/app'),
+						// '$env/static/public': path.resolve('./src/env/static/public'),
+						// '$env/dynamic/public': path.resolve('./src/env/dynamic/public')
 					}
 				},
 				test: {
@@ -79,6 +81,8 @@ export default defineConfig({
 				resolve: {
 					alias: {
 						'$lib': path.resolve('./src/lib'),
+						// '$env/static/public': path.resolve('./src/env/static/public'),
+						// '$env/dynamic/public': path.resolve('./src/env/dynamic/public')
 					}
 				},
 				test: {

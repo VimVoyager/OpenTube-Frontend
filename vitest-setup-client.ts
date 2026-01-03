@@ -16,6 +16,15 @@ vi.mock('$app/environment', () => ({
 	version: 'test'
 }));
 
+// Mock SvelteKit's environment variables
+vi.mock('$env/static/public', () => {
+	return Promise.resolve({
+		PUBLIC_API_URL: 'http://localhost:8000/api/v1',
+		PUBLIC_PROXY_URL: 'http://localhost:8888'
+	});
+});
+
+
 // Mock $app/stores if needed
 vi.mock('$app/stores', () => ({
 	page: {
@@ -43,23 +52,23 @@ if (typeof window !== 'undefined') {
 	// Mock IntersectionObserver (may not be available in test env)
 	if (!window.IntersectionObserver) {
 		window.IntersectionObserver = class IntersectionObserver {
-			constructor() {}
-			disconnect() {}
-			observe() {}
+			constructor() { }
+			disconnect() { }
+			observe() { }
 			takeRecords() {
 				return [];
 			}
-			unobserve() {}
+			unobserve() { }
 		} as unknown as typeof IntersectionObserver;
 	}
 
 	// Mock ResizeObserver (may not be available in test env)
 	if (!window.ResizeObserver) {
 		window.ResizeObserver = class ResizeObserver {
-			constructor() {}
-			disconnect() {}
-			observe() {}
-			unobserve() {}
+			constructor() { }
+			disconnect() { }
+			observe() { }
+			unobserve() { }
 		} as unknown as typeof ResizeObserver;
 	}
 
@@ -69,10 +78,10 @@ if (typeof window !== 'undefined') {
 			matches: false,
 			media: query,
 			onchange: null,
-			addListener: () => {},
-			removeListener: () => {},
-			addEventListener: () => {},
-			removeEventListener: () => {},
+			addListener: () => { },
+			removeListener: () => { },
+			addEventListener: () => { },
+			removeEventListener: () => { },
 			dispatchEvent: () => true
 		}) as MediaQueryList;
 	}
@@ -90,7 +99,7 @@ expect.extend({
 					: `expected ${received} to be a valid language code (e.g., 'en', 'es-419')`
 		};
 	},
-	
+
 	toBeValidUrl(received: string) {
 		let pass = false;
 		try {
@@ -99,7 +108,7 @@ expect.extend({
 		} catch {
 			// URL is invalid
 		}
-		
+
 		return {
 			pass,
 			message: () =>
