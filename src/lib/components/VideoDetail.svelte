@@ -5,6 +5,9 @@
 	let { metadata }: { metadata: VideoMetadata } = $props();
 
 	let displayAvatar = $derived(metadata.channelAvatar || roundLogo);
+	let isExpanded = $state(false);
+	
+	const COLLAPSED_HEIGHT = 100; // pixels - adjust this to your preference
 	
 	/**
 	 * Format view count with locale specific number formatting
@@ -12,6 +15,10 @@
 	const formatViewCount = (viewCount: number): string => {
 		const formatter = Intl.NumberFormat('en-US');
 		return formatter.format(Math.floor(viewCount));
+	};
+
+	const toggleExpanded = () => {
+		isExpanded = !isExpanded;
 	};
 </script>
 
@@ -36,9 +43,24 @@
 				<h3 class="text-base font-semibold text-primary">
 					{formatViewCount(metadata.viewCount)} views
 				</h3>
-				<div class="mt-2 text-sm text-secondary">
-					<p>{@html metadata.description}</p>
+				<div class="mt-2 text-sm text-secondary relative">
+					<div 
+						class="overflow-hidden transition-all duration-300 ease-in-out"
+						style={isExpanded ? '' : `max-height: ${COLLAPSED_HEIGHT}px;`}
+					>
+						<p>{@html metadata.description}</p>
+					</div>
+					{#if !isExpanded}
+						<div class="absolute bottom-0 left-0 right-0 h-12 bg-linear-to-t from-card to-transparent pointer-events-none"></div>
+					{/if}
 				</div>
+				<button
+					type="button"
+					onclick={toggleExpanded}
+					class="mt-3 text-sm font-semibold text-accent hover:text-accent-hover transition-colors focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2"
+				>
+					{isExpanded ? 'Show less' : 'Show more'}
+				</button>
 			</div>
 		</div>
 	</div>

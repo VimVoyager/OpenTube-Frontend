@@ -1,10 +1,11 @@
 /**
  * Test Suite: VideoDetail.svelte
  * 
- * Tests for video metadata display component
+ * Tests for video metadata display component with collapsible description
  */
 
 import { render, screen, waitFor } from '@testing-library/svelte';
+import userEvent from '@testing-library/user-event';
 import { describe, it, expect } from 'vitest';
 import VideoDetail from './VideoDetail.svelte';
 import type { VideoMetadata } from '$lib/adapters/types';
@@ -191,6 +192,178 @@ describe('VideoDetail', () => {
 	});
 
 	// =============================================================================
+	// Collapsible Description Tests
+	// =============================================================================
+
+	describe('collapsible description', () => {
+		it('should default to collapsed state', () => {
+			render(VideoDetail, { props: { metadata: mockMetadata } });
+			
+			const showMoreButton = screen.getByRole('button', { name: /show more/i });
+			expect(showMoreButton).toBeInTheDocument();
+		});
+
+		it('should display "Show more" button when collapsed', () => {
+			render(VideoDetail, { props: { metadata: mockMetadata } });
+			
+			const button = screen.getByRole('button', { name: /show more/i });
+			expect(button).toBeInTheDocument();
+			expect(button.textContent).toBe('Show more');
+		});
+
+		it('should expand description when "Show more" is clicked', async () => {
+			const user = userEvent.setup();
+			render(VideoDetail, { props: { metadata: mockMetadata } });
+			
+			const showMoreButton = screen.getByRole('button', { name: /show more/i });
+			await user.click(showMoreButton);
+			
+			const showLessButton = screen.getByRole('button', { name: /show less/i });
+			expect(showLessButton).toBeInTheDocument();
+		});
+
+		it('should display "Show less" button when expanded', async () => {
+			const user = userEvent.setup();
+			render(VideoDetail, { props: { metadata: mockMetadata } });
+			
+			const showMoreButton = screen.getByRole('button', { name: /show more/i });
+			await user.click(showMoreButton);
+			
+			const showLessButton = screen.getByRole('button', { name: /show less/i });
+			expect(showLessButton.textContent).toBe('Show less');
+		});
+
+		it('should collapse description when "Show less" is clicked', async () => {
+			const user = userEvent.setup();
+			render(VideoDetail, { props: { metadata: mockMetadata } });
+			
+			// Expand first
+			const showMoreButton = screen.getByRole('button', { name: /show more/i });
+			await user.click(showMoreButton);
+			
+			// Then collapse
+			const showLessButton = screen.getByRole('button', { name: /show less/i });
+			await user.click(showLessButton);
+			
+			// Should show "Show more" again
+			expect(screen.getByRole('button', { name: /show more/i })).toBeInTheDocument();
+		});
+
+		it('should toggle between expanded and collapsed states multiple times', async () => {
+			const user = userEvent.setup();
+			render(VideoDetail, { props: { metadata: mockMetadata } });
+			
+			// First expansion
+			await user.click(screen.getByRole('button', { name: /show more/i }));
+			expect(screen.getByRole('button', { name: /show less/i })).toBeInTheDocument();
+			
+			// First collapse
+			await user.click(screen.getByRole('button', { name: /show less/i }));
+			expect(screen.getByRole('button', { name: /show more/i })).toBeInTheDocument();
+			
+			// Second expansion
+			await user.click(screen.getByRole('button', { name: /show more/i }));
+			expect(screen.getByRole('button', { name: /show less/i })).toBeInTheDocument();
+			
+			// Second collapse
+			await user.click(screen.getByRole('button', { name: /show less/i }));
+			expect(screen.getByRole('button', { name: /show more/i })).toBeInTheDocument();
+		});
+
+		it('should apply collapsed height when in collapsed state', () => {
+			const { container } = render(VideoDetail, { props: { metadata: mockMetadata } });
+			
+			const descriptionContainer = container.querySelector('.overflow-hidden');
+			expect(descriptionContainer).toBeInTheDocument();
+			expect(descriptionContainer).toHaveStyle({ maxHeight: '100px' });
+		});
+
+		it('should remove max-height when expanded', async () => {
+			const user = userEvent.setup();
+			const { container } = render(VideoDetail, { props: { metadata: mockMetadata } });
+			
+			await user.click(screen.getByRole('button', { name: /show more/i }));
+			
+			const descriptionContainer = container.querySelector('.overflow-hidden');
+			expect(descriptionContainer).not.toHaveStyle({ maxHeight: '100px' });
+		});
+
+		it('should display gradient overlay when collapsed', () => {
+			const { container } = render(VideoDetail, { props: { metadata: mockMetadata } });
+			
+			const gradient = container.querySelector('.bg-linear-to-t');
+			expect(gradient).toBeInTheDocument();
+			expect(gradient).toHaveClass('from-card', 'to-transparent');
+		});
+
+		it('should hide gradient overlay when expanded', async () => {
+			const user = userEvent.setup();
+			const { container } = render(VideoDetail, { props: { metadata: mockMetadata } });
+			
+			// Gradient should be visible when collapsed
+			expect(container.querySelector('.bg-linear-to-t')).toBeInTheDocument();
+			
+			await user.click(screen.getByRole('button', { name: /show more/i }));
+			
+			// Gradient should not be visible when expanded
+			expect(container.querySelector('.bg-linear-to-t')).not.toBeInTheDocument();
+		});
+
+		it('should apply transition classes to description container', () => {
+			const { container } = render(VideoDetail, { props: { metadata: mockMetadata } });
+			
+			const descriptionContainer = container.querySelector('.overflow-hidden');
+			expect(descriptionContainer).toHaveClass('transition-all', 'duration-300', 'ease-in-out');
+		});
+
+		it('should apply correct styling to toggle button', () => {
+			render(VideoDetail, { props: { metadata: mockMetadata } });
+			
+			const button = screen.getByRole('button', { name: /show more/i });
+			expect(button).toHaveClass('text-accent', 'hover:text-accent-hover', 'font-semibold');
+		});
+
+		it('should have button type="button" for toggle button', () => {
+			render(VideoDetail, { props: { metadata: mockMetadata } });
+			
+			const button = screen.getByRole('button', { name: /show more/i });
+			expect(button).toHaveAttribute('type', 'button');
+		});
+
+		it('should work with long descriptions', async () => {
+			const user = userEvent.setup();
+			render(VideoDetail, { props: { metadata: mockMetadataLongDescription } });
+			
+			const showMoreButton = screen.getByRole('button', { name: /show more/i });
+			await user.click(showMoreButton);
+			
+			expect(screen.getByRole('button', { name: /show less/i })).toBeInTheDocument();
+			expect(screen.getByText(/Lorem ipsum/)).toBeInTheDocument();
+		});
+
+		it('should work with HTML descriptions', async () => {
+			const user = userEvent.setup();
+			render(VideoDetail, { props: { metadata: mockMetadataHtmlDescription } });
+			
+			await user.click(screen.getByRole('button', { name: /show more/i }));
+			
+			expect(screen.getByRole('button', { name: /show less/i })).toBeInTheDocument();
+			expect(screen.getByRole('link')).toBeInTheDocument();
+		});
+
+		it('should work with empty descriptions', async () => {
+			const user = userEvent.setup();
+			const emptyDescMetadata = { ...mockMetadata, description: '' };
+			render(VideoDetail, { props: { metadata: emptyDescMetadata } });
+			
+			const showMoreButton = screen.getByRole('button', { name: /show more/i });
+			await user.click(showMoreButton);
+			
+			expect(screen.getByRole('button', { name: /show less/i })).toBeInTheDocument();
+		});
+	});
+
+	// =============================================================================
 	// Subscribe Button Tests
 	// =============================================================================
 
@@ -214,6 +387,22 @@ describe('VideoDetail', () => {
 			
 			const subscribeButton = screen.getByRole('button', { name: /subscribe/i });
 			expect(subscribeButton).toHaveClass('bg-accent', 'hover:bg-accent-hover', 'text-white', 'rounded-full');
+		});
+
+		it('should not interfere with toggle button', async () => {
+			const user = userEvent.setup();
+			render(VideoDetail, { props: { metadata: mockMetadata } });
+			
+			// Get both buttons
+			const subscribeButton = screen.getByRole('button', { name: /subscribe/i });
+			const toggleButton = screen.getByRole('button', { name: /show more/i });
+			
+			// Click subscribe button
+			await user.click(subscribeButton);
+			
+			// Toggle button should still work
+			await user.click(toggleButton);
+			expect(screen.getByRole('button', { name: /show less/i })).toBeInTheDocument();
 		});
 	});
 
@@ -247,6 +436,20 @@ describe('VideoDetail', () => {
 			const { container } = render(VideoDetail, { props: { metadata: mockMetadata } });
 			
 			expect(container.querySelector('div')).toBeInTheDocument();
+		});
+
+		it('should position gradient overlay absolutely', () => {
+			const { container } = render(VideoDetail, { props: { metadata: mockMetadata } });
+			
+			const gradient = container.querySelector('.bg-linear-to-t');
+			expect(gradient).toHaveClass('absolute', 'bottom-0', 'left-0', 'right-0');
+		});
+
+		it('should make gradient non-interactive', () => {
+			const { container } = render(VideoDetail, { props: { metadata: mockMetadata } });
+			
+			const gradient = container.querySelector('.bg-linear-to-t');
+			expect(gradient).toHaveClass('pointer-events-none');
 		});
 	});
 
@@ -300,6 +503,36 @@ describe('VideoDetail', () => {
 			// Should format without decimal places
 			expect(screen.getByText(/1,234 views/)).toBeInTheDocument();
 		});
+
+		it('should maintain collapsed state when metadata updates', async () => {
+			const { rerender } = render(VideoDetail, { props: { metadata: mockMetadata } });
+			
+			// Component should start collapsed
+			expect(screen.getByRole('button', { name: /show more/i })).toBeInTheDocument();
+			
+			// Update metadata
+			rerender({ metadata: mockMetadataLargeNumbers });
+			
+			// Should still be collapsed
+			await waitFor(() => {
+				expect(screen.getByRole('button', { name: /show more/i })).toBeInTheDocument();
+			});
+		});
+
+		it('should maintain expanded state during rapid clicks', async () => {
+			const user = userEvent.setup();
+			render(VideoDetail, { props: { metadata: mockMetadata } });
+			
+			const button = screen.getByRole('button', { name: /show more/i });
+			
+			// Rapidly click the button
+			await user.click(button);
+			await user.click(screen.getByRole('button', { name: /show less/i }));
+			await user.click(screen.getByRole('button', { name: /show more/i }));
+			
+			// Should end up expanded
+			expect(screen.getByRole('button', { name: /show less/i })).toBeInTheDocument();
+		});
 	});
 
 	// =============================================================================
@@ -325,6 +558,9 @@ describe('VideoDetail', () => {
 			
 			// Description
 			expect(screen.getByText(/This is a test video description/)).toBeInTheDocument();
+			
+			// Toggle button
+			expect(screen.getByRole('button', { name: /show more/i })).toBeInTheDocument();
 		});
 
 		it('should handle metadata updates', async () => {
@@ -361,6 +597,27 @@ describe('VideoDetail', () => {
 			expect(container).toBeInTheDocument();
 			expect(screen.getByText('Minimal Video')).toBeInTheDocument();
 			expect(screen.getByText('Minimal Channel')).toBeInTheDocument();
+			expect(screen.getByRole('button', { name: /show more/i })).toBeInTheDocument();
+		});
+
+		it('should handle complete user workflow', async () => {
+			const user = userEvent.setup();
+			render(VideoDetail, { props: { metadata: mockMetadata } });
+			
+			// User sees the component
+			expect(screen.getByText(mockMetadata.title)).toBeInTheDocument();
+			
+			// User expands description
+			await user.click(screen.getByRole('button', { name: /show more/i }));
+			expect(screen.getByRole('button', { name: /show less/i })).toBeInTheDocument();
+			
+			// User could click subscribe
+			const subscribeButton = screen.getByRole('button', { name: /subscribe/i });
+			expect(subscribeButton).toBeInTheDocument();
+			
+			// User collapses description
+			await user.click(screen.getByRole('button', { name: /show less/i }));
+			expect(screen.getByRole('button', { name: /show more/i })).toBeInTheDocument();
 		});
 	});
 });
