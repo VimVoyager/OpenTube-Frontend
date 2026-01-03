@@ -4,14 +4,24 @@ import type { PageLoad } from './$types';
 import { getVideoDetails } from '$lib/api/details';
 import { getManifest } from '$lib/api/manifest';
 import { getRelatedStreams } from '$lib/api/related';
+import { getVideoThumbnails } from '$lib/api/thumbnails';
 import { adaptPlayerConfig } from '$lib/adapters/player';
 import { adaptVideoMetadata } from '$lib/adapters/metadata';
 import { adaptRelatedVideos } from '$lib/adapters/relatedVideos';
+// import { mockStaticEnv } from '../../../tests/helpers/apiHelpers';
+
+vi.mock('$env/static/public', () => {
+    return Promise.resolve({
+        PUBLIC_API_URL: 'http://localhost:8000/api/v1',
+        PUBLIC_PROXY_URL: 'http://localhost:8888'
+    });
+});
 
 // Mock all dependencies
 vi.mock('$lib/api/details');
 vi.mock('$lib/api/manifest');
 vi.mock('$lib/api/related');
+vi.mock('$lib/api/thumbnails');
 vi.mock('$lib/adapters/metadata');
 vi.mock('$lib/adapters/player');
 vi.mock('$lib/adapters/relatedVideos');
@@ -20,6 +30,11 @@ describe('+page.ts', () => {
     // Mock data fixtures
     const mockVideoId = 'test-video-123';
     const mockFetch = vi.fn() as unknown as typeof globalThis.fetch;
+
+    const mockThumbnail = {
+        url: 'https://example.com/poster.jpg',
+        estimatedResolutionLevel: 'HIGH' as const
+    };
 
     const mockVideoDetails = {
         id: mockVideoId,
@@ -90,8 +105,10 @@ describe('+page.ts', () => {
 
     beforeEach(() => {
         vi.clearAllMocks();
+        // mockStaticEnv();
 
         // Setup default mock implementations
+        (getVideoThumbnails as Mock).mockResolvedValue(mockThumbnail);
         (getVideoDetails as Mock).mockResolvedValue(mockVideoDetails);
         (getManifest as Mock).mockResolvedValue(mockManifestResponse);
         (getRelatedStreams as Mock).mockResolvedValue(mockRelatedStreams);
@@ -118,6 +135,7 @@ describe('+page.ts', () => {
 
             await load({ params, fetch: mockFetch } as Parameters<PageLoad>[0]);
 
+            expect(getVideoThumbnails).toHaveBeenCalledWith(mockVideoId, mockFetch);
             expect(getVideoDetails).toHaveBeenCalledWith(mockVideoId, mockFetch);
             expect(getManifest).toHaveBeenCalledWith(mockVideoId, mockFetch);
             expect(getRelatedStreams).toHaveBeenCalledWith(mockVideoId, mockFetch);
@@ -139,11 +157,11 @@ describe('+page.ts', () => {
             expect(adaptPlayerConfig).toHaveBeenCalledWith(
                 mockManifestResponse.url,
                 mockManifestResponse.duration,
-                expect.any(String) // thumbnail placeholder
+                mockThumbnail.url // Now using actual thumbnail URL from API
             );
             expect(adaptVideoMetadata).toHaveBeenCalledWith(
                 mockVideoDetails,
-                expect.any(String) // thumbnail placeholder
+                mockThumbnail.url // Now using actual thumbnail URL from API
             );
             expect(adaptRelatedVideos).toHaveBeenCalledWith(
                 mockRelatedStreams,
@@ -188,7 +206,7 @@ describe('+page.ts', () => {
 
         it('should handle failed related videos fetch gracefully', async () => {
             const params = { id: mockVideoId };
-            const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+            const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => { });
             (getRelatedStreams as Mock).mockRejectedValue(new Error('Failed to fetch related'));
             // When related videos fail, adaptRelatedVideos is called with empty array
             (adaptRelatedVideos as Mock).mockReturnValue([]);
@@ -208,7 +226,7 @@ describe('+page.ts', () => {
         it('should return error page data when getVideoDetails fails', async () => {
             const params = { id: mockVideoId };
             const error = new Error('Failed to fetch video details');
-            const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+            const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
             (getVideoDetails as Mock).mockRejectedValue(error);
 
             const result = await load({ params, fetch: mockFetch } as Parameters<PageLoad>[0]);
@@ -236,7 +254,7 @@ describe('+page.ts', () => {
         it('should return error page data when getManifest fails', async () => {
             const params = { id: mockVideoId };
             const error = new Error('Failed to fetch manifest');
-            const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+            const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
             (getManifest as Mock).mockRejectedValue(error);
 
             const result = await load({ params, fetch: mockFetch } as Parameters<PageLoad>[0]);
@@ -247,7 +265,7 @@ describe('+page.ts', () => {
 
         it('should handle non-Error exceptions with default message', async () => {
             const params = { id: mockVideoId };
-            const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+            const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
             (getVideoDetails as Mock).mockRejectedValue('String error');
 
             const result = await load({ params, fetch: mockFetch } as Parameters<PageLoad>[0]);
@@ -258,7 +276,7 @@ describe('+page.ts', () => {
 
         it('should handle undefined error with default message', async () => {
             const params = { id: mockVideoId };
-            const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+            const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
             (getVideoDetails as Mock).mockRejectedValue(undefined);
 
             const result = await load({ params, fetch: mockFetch } as Parameters<PageLoad>[0]);
@@ -270,7 +288,7 @@ describe('+page.ts', () => {
         it('should handle errors during adaptation', async () => {
             const params = { id: mockVideoId };
             const error = new Error('Adaptation failed');
-            const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+            const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
             (adaptPlayerConfig as Mock).mockImplementation(() => {
                 throw error;
             });
@@ -330,6 +348,7 @@ describe('+page.ts', () => {
 
             expect(promiseAllSpy).toHaveBeenCalledTimes(1);
             expect(promiseAllSpy).toHaveBeenCalledWith([
+                expect.any(Promise), // getVideoThumbnails
                 expect.any(Promise), // getVideoDetails
                 expect.any(Promise), // getManifest
                 expect.any(Promise)  // getRelatedStreams
@@ -356,7 +375,7 @@ describe('+page.ts', () => {
 
         it('should handle error PageData type with new structure', async () => {
             const params = { id: mockVideoId };
-            vi.spyOn(console, 'error').mockImplementation(() => {});
+            vi.spyOn(console, 'error').mockImplementation(() => { });
             (getVideoDetails as Mock).mockRejectedValue(new Error('Test error'));
 
             const result = await load({ params, fetch: mockFetch } as Parameters<PageLoad>[0]);
@@ -389,8 +408,8 @@ describe('+page.ts', () => {
     describe('Manifest response structure', () => {
         it('should handle manifest response with videoId', async () => {
             const params = { id: mockVideoId };
-            const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
-            
+            const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => { });
+
             await load({ params, fetch: mockFetch } as Parameters<PageLoad>[0]);
 
             // Check the actual console.log format from your +page.ts
