@@ -22,9 +22,12 @@ export type MockFetch = ReturnType<typeof vi.fn> & ((input: RequestInfo | URL, i
 
 // Mock SvelteKit environment module
 export function mockStaticEnv() {
-    vi.mock('$env/static/public', () => ({
-        PUBLIC_API_URL: 'http://localhost:8000/api/v1'
-    }));
+    vi.mock('$env/static/public', () => {
+        return Promise.resolve({
+            PUBLIC_API_URL: 'http://localhost:8000/api/v1',
+            PUBLIC_PROXY_URL: 'http://localhost:8888'
+        });
+    });
 }
 
 export function mockDynamicEnv() {
