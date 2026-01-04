@@ -12,8 +12,7 @@ import {
     createNetworkErrorFetch,
     extractQueryParams,
     createMockConsoleError,
-    getCallCount,
-    mockStaticEnv
+    getCallCount
 } from '../../tests/helpers/apiHelpers';
 import { getManifest, getManifestUrl } from './manifest';
 
@@ -108,7 +107,6 @@ let consoleErrorMock: ReturnType<typeof createMockConsoleError> | undefined;
 const createdBlobUrls: string[] = [];
 
 beforeEach(() => {
-    mockStaticEnv();
     // Mock URL.createObjectURL and URL.revokeObjectURL
     global.URL.createObjectURL = vi.fn(() => {
         const url = `blob:http://localhost/${Math.random()}`;

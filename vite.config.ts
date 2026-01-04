@@ -11,7 +11,7 @@ export default defineConfig({
 			conditions: ['browser', 'import'],
 			alias: {
 				'$lib': path.resolve('./src/lib'),
-				// '$env/static/public': path.resolve(__dirname, './src/env.ts')
+				'$env/static/public': path.resolve(__dirname, './src/tests/env')
 			}
 		},
 
@@ -50,7 +50,7 @@ export default defineConfig({
 
 		// Projects for different test types
 		projects: [
-			// Client tests (Svelte components) - NO extends!
+			// Client tests (Svelte components)
 			{
 				plugins: [svelte()],
 				resolve: {
@@ -58,8 +58,7 @@ export default defineConfig({
 					alias: {
 						'$lib': path.resolve('./src/lib'),
 						'$app': path.resolve('./node_modules/@sveltejs/kit/src/runtime/app'),
-						// '$env/static/public': path.resolve('./src/env/static/public'),
-						// '$env/dynamic/public': path.resolve('./src/env/dynamic/public')
+						'$env/static/public': path.resolve('./src/tests/env')
 					}
 				},
 				test: {
@@ -81,8 +80,7 @@ export default defineConfig({
 				resolve: {
 					alias: {
 						'$lib': path.resolve('./src/lib'),
-						// '$env/static/public': path.resolve('./src/env/static/public'),
-						// '$env/dynamic/public': path.resolve('./src/env/dynamic/public')
+						'$env/static/public': path.resolve('./src/tests/env')
 					}
 				},
 				test: {

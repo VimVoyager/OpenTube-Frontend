@@ -3,13 +3,12 @@
  * 
  * Tests for related video streams fetching
  */
-import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
+import { describe, it, expect, vi, afterEach, } from 'vitest';
 import {
     createSuccessfulFetch,
     createFailedFetch,
     createNetworkErrorFetch,
-    createMockConsoleError,
-    mockStaticEnv
+    createMockConsoleError
 } from '../../tests/helpers/apiHelpers';
 import { 
     mockRelatedVideoStreamArrayResponse,
@@ -23,10 +22,6 @@ import { getRelatedStreams } from './related';
 // =============================================================================
 
 let consoleErrorSpy: ReturnType<typeof createMockConsoleError> | undefined;
-
-beforeEach(() =>{
-    mockStaticEnv();
-})
 
 afterEach(() => {
     if (consoleErrorSpy) {

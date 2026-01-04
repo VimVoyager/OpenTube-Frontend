@@ -213,7 +213,9 @@ describe('+page.svelte', () => {
             render(PageComponent, { data });
 
             // Use getByRole to target the main title specifically
-            expect(screen.getByRole('heading', { name: mockMetadata.title })).toBeInTheDocument();
+            const titleArray = screen.getAllByRole('heading', { name: mockMetadata.title });
+            expect(titleArray[0]).toBeInTheDocument();
+            expect(titleArray.length).toBe(2);
             // Check for channel name with more specific query
             const channelHeadings = screen.getAllByText(mockMetadata.channelName);
             expect(channelHeadings.length).toBeGreaterThan(0);
@@ -338,7 +340,9 @@ describe('+page.svelte', () => {
 
             const { unmount } = render(PageComponent, { data: initialData });
 
-            expect(screen.getByText('Test Video Title')).toBeInTheDocument();
+            const videoTitleArray = screen.getAllByText('Test Video Title');
+            expect(videoTitleArray[0]).toBeInTheDocument();
+            expect(videoTitleArray.length).toBe(2);
 
             const newMetadata = {
                 ...mockMetadata,
@@ -357,7 +361,9 @@ describe('+page.svelte', () => {
             });
 
             await waitFor(() => {
-                expect(screen.getByText('Updated Video Title')).toBeInTheDocument();
+                const videoTitleArray = screen.getAllByText('Updated Video Title');
+                expect(videoTitleArray[0]).toBeInTheDocument();
+                expect(videoTitleArray.length).toBe(2);
             });
         });
 
@@ -443,7 +449,8 @@ describe('+page.svelte', () => {
             // Player should eventually mount after onMount is called
             await waitFor(() => {
                 // Component should be fully mounted
-                expect(screen.getByText(mockMetadata.title)).toBeInTheDocument();
+                screen.getAllByText(mockMetadata.title);
+                expect(screen.getAllByText(mockMetadata.title).length).toBe(2);
             });
         });
     });

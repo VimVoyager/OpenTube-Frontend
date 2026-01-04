@@ -4,25 +4,6 @@ import Page from './+page.svelte';
 import type { PageData } from './$types';
 import type { SearchResultConfig } from '$lib/adapters/types';
 
-// Mock VideoResult component properly
-vi.mock('$lib/components/VideoResult.svelte', () => ({
-	default: vi.fn(() => ({
-		render: () => ({ html: '<div>VideoResult Mock</div>' })
-	}))
-}));
-
-// Mock Loading component
-vi.mock('$lib/components/Loading.svelte', () => ({
-	default: vi.fn(() => ({
-		render: () => ({ html: '<div>Loading Mock</div>' })
-	}))
-}));
-
-// Mock goto
-vi.mock('$app/navigation', () => ({
-	goto: vi.fn()
-}));
-
 describe('+page.svelte - Search Results', () => {
 	const mockSearchResults: SearchResultConfig[] = [
 		{

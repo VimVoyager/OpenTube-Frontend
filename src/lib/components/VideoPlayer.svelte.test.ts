@@ -1,10 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, waitFor } from '@testing-library/svelte';
 import '@testing-library/jest-dom';
-import VideoPlayer from './VideoPlayer.svelte';
 import type { VideoPlayerConfig } from '$lib/adapters/types';
 
-// Create mocks BEFORE vi.mock calls (hoisting requirement)
+// Create mocks for Shaka Player
 const mockPlayerInstance = {
 	attach: vi.fn().mockResolvedValue(undefined),
 	load: vi.fn().mockResolvedValue(undefined),
@@ -14,12 +13,13 @@ const mockPlayerInstance = {
 	configure: vi.fn(),
 	addEventListener: vi.fn(),
 	removeEventListener: vi.fn(),
-	destroy: vi.fn().mockImplementation(() => Promise.resolve()) // Return actual Promise
+	destroy: vi.fn().mockImplementation(() => Promise.resolve())
 };
 
 const mockUIInstance = {
 	configure: vi.fn(),
-	destroy: vi.fn()
+	destroy: vi.fn(),
+	getControls: vi.fn(() => ({}))
 };
 
 // Create a proper constructor function
@@ -38,6 +38,7 @@ class MockShakaPlayer {
 class MockShakaUIOverlay {
 	configure = mockUIInstance.configure;
 	destroy = mockUIInstance.destroy;
+	getControls = mockUIInstance.getControls;
 }
 
 // Mock Shaka Player module
@@ -46,14 +47,20 @@ vi.mock('shaka-player/dist/shaka-player.ui', () => ({
 		Player: MockShakaPlayer,
 		ui: {
 			Overlay: MockShakaUIOverlay
+		},
+		polyfill: {
+			installAll: vi.fn()
 		}
 	}
 }));
 
 vi.mock('shaka-player/dist/controls.css', () => ({}));
 
+import VideoPlayer from './VideoPlayer.svelte';
+
 describe('VideoPlayer.svelte', () => {
 	let consoleErrorSpy: ReturnType<typeof vi.spyOn>;
+	let consoleLogSpy: ReturnType<typeof vi.spyOn>;
 
 	const mockConfig: VideoPlayerConfig = {
 		manifestUrl: 'blob:http://localhost:5173/test-manifest',
@@ -63,7 +70,8 @@ describe('VideoPlayer.svelte', () => {
 
 	beforeEach(() => {
 		vi.clearAllMocks();
-		consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+		consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
+		consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => { });
 
 		// Reset to success state
 		MockShakaPlayer.isBrowserSupported = vi.fn(() => true);
@@ -74,6 +82,7 @@ describe('VideoPlayer.svelte', () => {
 
 	afterEach(() => {
 		consoleErrorSpy.mockRestore();
+		consoleLogSpy.mockRestore();
 	});
 
 	describe('Component rendering', () => {
@@ -91,7 +100,6 @@ describe('VideoPlayer.svelte', () => {
 		it('should set required video attributes', () => {
 			const { container } = render(VideoPlayer, { config: mockConfig });
 			const video = container.querySelector('video');
-			expect(video).toHaveAttribute('crossorigin', 'anonymous');
 			expect(video).toHaveAttribute('playsinline');
 		});
 	});

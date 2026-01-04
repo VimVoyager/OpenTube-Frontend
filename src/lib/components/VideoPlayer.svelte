@@ -29,90 +29,85 @@
 			return;
 		}
 
-		player = new shaka.Player();
-
-		await player.attach(videoElement);
-
-		ui = new shaka.ui.Overlay(
-			player,
-			videoContainer,
-			videoElement
-		);
-
-		const config_ui = {
-			addSeekBar: true,
-			addBigPlayButton: true,
-			controlPanelElements: [
-				'play_pause',
-				'time_and_duration',
-				'mute',
-				'volume',
-				'spacer',
-				'quality',  
-				'captions',
-				'overflow_menu',
-				'fullscreen'
-			],
-		};
-
-		ui.configure(config_ui);
-
-		// Get the controls from UI
-		const controls = ui.getControls();
-
-		player.addEventListener('error', (event: any) => {
-			console.error('Shaka Player error event:', event);
-		});
-
-		// Request filter to proxy googlevideo.com URLs
-		const networkingEngine = player.getNetworkingEngine();
-		if (networkingEngine) {
-			networkingEngine.registerRequestFilter((type: number, request: { uris: string[]; headers: { Range?: any; }; }) => {
-				console.log('Request filter - Type:', type, 'URL:', request.uris[0]);
-
-				// Type 1 is SEGMENT in Shaka Player
-				if (type === 1) {
-					const originalUrl = new URL(request.uris[0]);
-
-					if (originalUrl.host.endsWith('.googlevideo.com')) {
-						console.log('Intercepting googlevideo.com request:', originalUrl.host);
-
-						originalUrl.searchParams.set('host', originalUrl.host);
-
-						// Parse proxy URL
-						const proxyBase = PROXY_URL.startsWith('/') 
-							? `${window.location.origin}${PROXY_URL}`
-							: PROXY_URL;
-
-						console.log('Proxy base URL:', proxyBase);
-
-						// Build the new proxied URL
-						const proxyUrl = new URL(proxyBase);
-						const newPath = proxyUrl.pathname + originalUrl.pathname;
-						
-						const proxiedUrl = new URL(proxyBase);
-						proxiedUrl.pathname = newPath;
-						proxiedUrl.search = originalUrl.search;
-
-						// Handle Range header conversion to query parameter
-						if (request.headers.Range) {
-							const rangeValue = request.headers.Range.split('=')[1];
-							proxiedUrl.searchParams.set('range', rangeValue);
-							console.log('Converted Range header to query param:', rangeValue);
-							request.headers = {};
-						}
-
-						request.uris[0] = proxiedUrl.toString();
-						console.log('Proxied request URL:', request.uris[0].substring(0, 150) + '...');
-					}
-				}
-			});
-		}
-
 		try {
-			console.log('Attempting to load manifest URL:', config.manifestUrl);
-			console.log('thumbnail: ', config.poster);
-			
+			player = new shaka.Player();
+
+			await player.attach(videoElement);
+
+			ui = new shaka.ui.Overlay(
+				player,
+				videoContainer,
+				videoElement
+			);
+
+			const config_ui = {
+				addSeekBar: true,
+				addBigPlayButton: true,
+				controlPanelElements: [
+					'play_pause',
+					'time_and_duration',
+					'mute',
+					'volume',
+					'spacer',
+					'quality',  
+					'captions',
+					'overflow_menu',
+					'fullscreen'
+				],
+			};
+
+			ui.configure(config_ui);
+
+			// Get the controls from UI
+			const controls = ui.getControls();
+
+			player.addEventListener('error', (event: any) => {
+				console.error('Shaka Player error event:', event);
+			});
+
+			// Request filter to proxy googlevideo.com URLs
+			const networkingEngine = player.getNetworkingEngine();
+			if (networkingEngine) {
+				networkingEngine.registerRequestFilter((type: number, request: { uris: string[]; headers: { Range?: any; }; }) => {
+					console.log('Request filter - Type:', type, 'URL:', request.uris[0]);
+
+					// Type 1 is SEGMENT in Shaka Player
+					if (type === 1) {
+						const originalUrl = new URL(request.uris[0]);
+
+						if (originalUrl.host.endsWith('.googlevideo.com')) {
+
+							originalUrl.searchParams.set('host', originalUrl.host);
+
+							// Parse proxy URL
+							const proxyBase = PROXY_URL.startsWith('/') 
+								? `${window.location.origin}${PROXY_URL}`
+								: PROXY_URL;
+
+							console.log('Proxy base URL:', proxyBase);
+
+							// Build the new proxied URL
+							const proxyUrl = new URL(proxyBase);
+							const newPath = proxyUrl.pathname + originalUrl.pathname;
+							
+							const proxiedUrl = new URL(proxyBase);
+							proxiedUrl.pathname = newPath;
+							proxiedUrl.search = originalUrl.search;
+
+							// Handle Range header conversion to query parameter
+							if (request.headers.Range) {
+								const rangeValue = request.headers.Range.split('=')[1];
+								proxiedUrl.searchParams.set('range', rangeValue);
+								request.headers = {};
+							}
+
+							request.uris[0] = proxiedUrl.toString();
+							console.log('Proxied request URL:', request.uris[0].substring(0, 150) + '...');
+						}
+					}
+				});
+			}
+
 			if (!config.manifestUrl || config.manifestUrl === '') {
 				throw new Error('Manifest URL is empty or undefined');
 			}
@@ -120,7 +115,7 @@
 			await player.load(config.manifestUrl);
 			console.log('Video loaded successfully!');
 		} catch (error) {
-			console.error('Error loading video:', error);
+			console.error('Error initializing or loading video player:', error);
 		}
 	});
 
@@ -129,7 +124,6 @@
 			ui.destroy();
 		}
 		if (player) {
-			console.log('Destroying player');
 			player.destroy();
 		}
 	});

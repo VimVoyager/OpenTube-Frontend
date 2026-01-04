@@ -5,28 +5,19 @@
  * response parsing, and error scenarios
  */
 
-import { describe, it, expect, vi, type Mock, beforeEach } from 'vitest';
+import { describe, it, expect, vi, type Mock, } from 'vitest';
 import {
 	createSuccessfulFetch,
 	createFailedFetch,
 	createNetworkErrorFetch,
 	extractQueryParams,
-	getCallCount,
-	mockStaticEnv
+	getCallCount
 } from '../../tests/helpers/apiHelpers';
 import {
 	mockEmptySearchResult,
 	mockSearchResult
 } from '../../tests/fixtures/apiFixtures';
 import { getSearchResults } from './search';
-
-// =============================================================================
-// Setup and Teardown
-// =============================================================================
-
-beforeEach(() =>{
-    mockStaticEnv();
-})
 
 // =============================================================================
 // Successful Search Tests

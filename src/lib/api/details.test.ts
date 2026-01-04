@@ -5,15 +5,14 @@
  * error handling, and data validation
  */
 
-import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
+import { describe, it, expect, vi, afterEach, } from 'vitest';
 import {
     createSuccessfulFetch,
     createFailedFetch,
     createNetworkErrorFetch,
     extractQueryParams,
     createMockConsoleError,
-    getCallCount,
-    mockStaticEnv
+    getCallCount
 } from '../../tests/helpers/apiHelpers';
 import {
     mockVideoDetails,
@@ -26,10 +25,6 @@ import { getVideoDetails } from './details';
 // =============================================================================
 
 let consoleErrorMock: ReturnType<typeof createMockConsoleError> | undefined;
-
-beforeEach(() =>{
-    mockStaticEnv();
-})
 
 afterEach(() => {
     if (consoleErrorMock) {
