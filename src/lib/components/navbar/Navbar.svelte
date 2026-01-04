@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import logo from '../assets/streaming-logo.png';
+	import logo from '../../assets/streaming-logo.png';
 	import ThemeToggle from './ThemeToggle.svelte';
 
-	let query = '';
+	let query = $state('');
 	let showMobileSearch = $state(false);
 
 	function executeSearch() {
@@ -48,7 +48,7 @@
 						type="search"
 						name="search"
 						bind:value={query}
-						on:keydown={handleKey}
+						onkeydown={handleKey}
 						placeholder="Search"
 						class="col-start-1 row-start-1 block w-full rounded-md bg-card py-1.5 pr-3 pl-10 text-base text-primary border border-default placeholder:text-muted focus:outline-2 focus:-outline-offset-2 focus:border-accent sm:text-sm/6"
 					/>
@@ -74,7 +74,7 @@
 				<button
 					type="button"
 					class="md:hidden relative inline-flex items-center justify-center rounded-md p-2 text-secondary hover:bg-secondary hover:text-primary focus:outline-2 focus:-outline-offset-1 focus:border-accent"
-					on:click={toggleMobileSearch}
+					onclick={toggleMobileSearch}
 					aria-label="Search"
 				>
 					<svg
@@ -103,10 +103,9 @@
 						type="search"
 						name="mobile-search"
 						bind:value={query}
-						on:keydown={handleKey}
+						onkeydown={handleKey}
 						placeholder="Search"
 						class="col-start-1 row-start-1 block w-full rounded-md bg-card py-1.5 pr-3 pl-10 text-base text-primary border border-default placeholder:text-muted focus:outline-2 focus:-outline-offset-2 focus:border-accent"
-						autofocus
 					/>
 					<svg
 						viewBox="0 0 20 20"

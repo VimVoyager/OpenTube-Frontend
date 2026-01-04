@@ -2,9 +2,9 @@
 	import type { PageData } from './$types';
 
 	import { onMount } from 'svelte';
-	import VideoPlayer from '$lib/components/VideoPlayer.svelte';
-	import VideoDetail from '$lib/components/VideoDetail.svelte';
-	import VideoListings from '$lib/components/VideoListings.svelte';
+	import VideoPlayer from '$lib/components/video/VideoPlayer.svelte';
+	import VideoDetail from '$lib/components/video/VideoDetail.svelte';
+	import VideoListings from '$lib/components/video/VideoListings.svelte';
 	import ErrorCard from '$lib/components/ErrorCard.svelte';
 
 	let { data }: { data: PageData } = $props();

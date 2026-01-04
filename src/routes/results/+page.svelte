@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import VideoResult from '$lib/components/VideoResult.svelte';
+	import VideoResult from '$lib/components/search/VideoResult.svelte';
 	import ErrorCard from '$lib/components/ErrorCard.svelte';
 
 	let { data }: { data: PageData } = $props();

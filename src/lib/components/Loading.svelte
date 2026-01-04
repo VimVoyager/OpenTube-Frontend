@@ -12,5 +12,4 @@
 		></circle>
 		<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l5-5-5-5v4a8 8 0 00-8 8z" />
 	</svg>
-	<span>Loading…</span>
 </div>

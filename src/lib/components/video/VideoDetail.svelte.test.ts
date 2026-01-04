@@ -17,7 +17,7 @@ import {
 	mockMetadataHtmlDescription,
 	mockMetadataZeroViews,
 	mockMetadataSpecialChars
-} from '../../tests/fixtures/videoDetailFixtures';
+} from '../../../tests/fixtures/videoDetailFixtures';
 
 // =============================================================================
 // Metadata Display Tests
