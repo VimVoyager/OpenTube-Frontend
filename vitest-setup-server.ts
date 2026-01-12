@@ -7,6 +7,11 @@
 
 import { expect, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
+vi.mock('$env/static/public', () => ({
+	PUBLIC_API_URL: 'http://localhost:8000/api/v1',
+	PUBLIC_PROXY_URL: 'http://localhost:8888'
+}));
+
 // Cleanup after each test
 afterEach(() => {
     vi.clearAllMocks();
