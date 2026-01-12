@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { getSearchResults } from '$lib/api/search';
 import { adaptSearchResults } from '$lib/adapters/search';
-// import { load } from './+page';
+import { load } from './+page';
 import type { SearchResult } from '$lib/types';
 
 describe('Search Integration Tests', () => {
@@ -183,6 +183,166 @@ describe('Search Integration Tests', () => {
 			expect(getSearchResults('network fail', 'asc', mockFetch)).rejects.toThrow(
 				'Network error'
 			);
+		});
+	});
+
+	describe('Route Load Function Integration', () => {
+		it('should load search results through complete pipeline', async () => {
+			const mockApiResponse: SearchResult = {
+				searchString: 'test',
+				items: [
+					{
+						url: 'https://youtube.com/watch?v=test123',
+						name: 'Integration Test Video',
+						thumbnailUrl: 'https://example.com/thumb.jpg',
+						uploaderName: 'Test Channel',
+						uploaderUrl: 'https://youtube.com/channel/test',
+						uploaderAvatarUrl: 'https://example.com/avatar.jpg',
+						uploaderVerified: true,
+						viewCount: 5000,
+						duration: 300,
+						uploadDate: '2024-01-15',
+						description: 'Test video description',
+						type: 'stream'
+					}
+				]
+			};
+
+			const mockFetch = vi.fn().mockResolvedValue({
+				ok: true,
+				json: async () => mockApiResponse
+			});
+
+			// Mock URL with search params
+			const mockUrl = new URL('https://example.com/search?query=integration%20test&sort=desc');
+
+			const result = await load({
+				url: mockUrl,
+				fetch: mockFetch,
+				params: {},
+				route: { id: '/search' },
+				data: {}
+			} as any);
+
+			expect(mockFetch).toHaveBeenCalledWith(
+				expect.stringContaining('/search?searchString=integration%20test&sortFilter=desc')
+			);
+			expect(result.results).toHaveLength(1);
+			expect(result.query).toBe('integration test');
+			expect(result.sortFilter).toBe('desc');
+			expect(result.error).toBeNull();
+			expect(result.results[0].title).toBe('Integration Test Video');
+		});
+
+		it('should return empty results for empty query', async () => {
+			const mockUrl = new URL('https://example.com/search?query=');
+
+			const result = await load({
+				url: mockUrl,
+				fetch: vi.fn(),
+				params: {},
+				route: { id: '/search' },
+				data: {}
+			} as any);
+
+			expect(result.results).toEqual([]);
+			expect(result.query).toBe('');
+			expect(result.error).toBeNull();
+		});
+
+		it('should return empty results for whitespace-only query', async () => {
+			const mockUrl = new URL('https://example.com/search?query=%20%20%20');
+
+			const result = await load({
+				url: mockUrl,
+				fetch: vi.fn(),
+				params: {},
+				route: { id: '/search' },
+				data: {}
+			} as any);
+
+			expect(result.results).toEqual([]);
+			expect(result.query).toBe('');
+			expect(result.error).toBeNull();
+		});
+
+		it('should handle missing query parameter', async () => {
+			const mockUrl = new URL('https://example.com/search');
+
+			const result = await load({
+				url: mockUrl,
+				fetch: vi.fn(),
+				params: {},
+				route: { id: '/search' },
+				data: {}
+			} as any);
+
+			expect(result.results).toEqual([]);
+			expect(result.query).toBe('');
+			expect(result.error).toBeNull();
+		});
+
+		it('should use default sort filter when not provided', async () => {
+			const mockApiResponse: SearchResult = { searchString: 'test', items: [] };
+
+			const mockFetch = vi.fn().mockResolvedValue({
+				ok: true,
+				json: async () => mockApiResponse
+			});
+
+			const mockUrl = new URL('https://example.com/search?query=test');
+
+			const result = await load({
+				url: mockUrl,
+				fetch: mockFetch,
+				params: {},
+				route: { id: '/search' },
+				data: {}
+			} as any);
+
+			expect(mockFetch).toHaveBeenCalledWith(expect.stringContaining('sortFilter=asc'));
+			expect(result.sortFilter).toBe('asc');
+		});
+
+		it('should handle API errors gracefully', async () => {
+			const mockFetch = vi.fn().mockResolvedValue({
+				ok: false,
+				status: 404,
+				statusText: 'Not Found'
+			});
+
+			const mockUrl = new URL('https://example.com/search?query=error%20test&sort=asc');
+
+			const result = await load({
+				url: mockUrl,
+				fetch: mockFetch,
+				params: {},
+				route: { id: '/search' },
+				data: {}
+			} as any);
+
+			expect(result.results).toEqual([]);
+			expect(result.query).toBe('error test');
+			expect(result.sortFilter).toBe('asc');
+			expect(result.error).toContain('Could not load search results');
+		});
+
+		it('should handle network errors gracefully', async () => {
+			const mockFetch = vi.fn().mockRejectedValue(new Error('Failed to fetch'));
+
+			const mockUrl = new URL('https://example.com/search?query=network%20error');
+
+			const result = await load({
+				url: mockUrl,
+				fetch: mockFetch,
+				params: {},
+				route: { id: '/search' },
+				data: {}
+			} as any);
+
+			expect(result.results).toEqual([]);
+			expect(result.query).toBe('network error');
+			expect(result.error).toBe('Failed to fetch');
 		});
 	});
 });
