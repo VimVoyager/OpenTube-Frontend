@@ -21,7 +21,6 @@ export async function getSearchResults(
 		}
 
 		const data = await res.json();
-		console.log("Search API results: %o", data);
 		return data;
 
 	} catch (error) {
