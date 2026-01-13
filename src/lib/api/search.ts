@@ -1,5 +1,5 @@
-import type { SearchResult } from "$lib/types";
 import { PUBLIC_API_URL } from '$env/static/public';
+import type { SearchResponse } from '$lib/api/types';
 
 const API_BASE_URL = PUBLIC_API_URL;
 
@@ -10,7 +10,7 @@ export async function getSearchResults(
 	query: string,
 	sortFilter:string,
 	fetchFn?: typeof globalThis.fetch
-): Promise<SearchResult> {
+): Promise<SearchResponse> {
 	const fetcher = fetchFn ?? globalThis.fetch;
 
 	try {
@@ -21,6 +21,7 @@ export async function getSearchResults(
 		}
 
 		const data = await res.json();
+		console.log("Search API results: %o", data);
 		return data;
 
 	} catch (error) {
