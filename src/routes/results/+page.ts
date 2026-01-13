@@ -4,10 +4,11 @@ import thumbnailPlaceholder from '$lib/assets/thumbnail-placeholder.jpg'
 import avatarPlaceholder from '$lib/assets/logo-placeholder.svg';
 import type { PageLoad } from './$types';
 import type { SearchResultConfig } from '$lib/adapters/types';
+import type { LoadResponse } from '../types';
 
 
 
-export const load: PageLoad = async ({ url, fetch }) => {
+export const load: PageLoad = async ({ url, fetch }): Promise<LoadResponse> => {
 	try {
 		// Extract search parameter
 		const query = url.searchParams.get('query') ?? '';

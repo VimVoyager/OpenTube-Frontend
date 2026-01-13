@@ -1,0 +1,61 @@
+{
+	"correctedSearch": false,
+	"url": "https://www.youtube.com/search?q=murder drones",
+	"originalUrl": "https://www.youtube.com/search?q=murder drones",
+	"name": "Search",
+	"searchString": "murder drones",
+	"searchSuggestion": "",
+	"isCorrectedSearch": false,
+	"items": [
+		{
+			"shortFormContent": false,
+			"type": "stream",
+			"name": "MURDER DRONES - Pilot",
+			"url": "https://www.youtube.com/watch?v=pilot-id",
+			"thumbnailUrl": "https://i.ytimg.com/vi/pilot-id/hq720.jpg",
+			"uploaderName": "GLITCH",
+			"uploaderUrl": "https://www.youtube.com/channel/channel-id",
+			"uploaderAvatarUrl": "https://yt3.ggpht.com/random-unicode-characters",
+			"uploaderVerified": true,
+			"duration": 86,
+			"viewCount": 10717139,
+			"uploadDate": "2025-11-13T16:00Z",
+			"streamType": "VIDEO_STREAM",
+			"isShortFormContent": false
+		},
+		{
+			"shortFormContent": false,
+			"type": "",
+			"name": "",
+			"url": "",
+			"thumbnailUrl": "",
+			"uploaderName": "",
+			"uploaderUrl": "",
+			"uploaderAvatarUrl": "",
+			"uploaderVerified": false,
+			"duration": 0,
+			"viewCount": 0,
+			"uploadDate": "",
+			"streamType": "VIDEO_STREAM",
+			"isShortFormContent": false
+		},
+		{
+			"shortFormContent": false,
+			"type": "stream",
+			"name": "MURDER DRONES - Absolute End",
+			"url": "https://www.youtube.com/watch?v=absolute-end-id",
+			"thumbnailUrl": "",
+			"uploaderName": "",
+			"uploaderUrl": "https://www.youtube.com/channel/channel-id",
+			"uploaderAvatarUrl": "",
+			"uploaderVerified": false,
+			"duration": -1,
+			"viewCount": -1,
+			"uploadDate": "",
+			"streamType": "VIDEO_STREAM",
+			"isShortFormContent": false
+		}
+	],
+	"nextPageUrl": "https://www.youtube.com/search?prettyPrint=false",
+	"hasNextPage": true
+}

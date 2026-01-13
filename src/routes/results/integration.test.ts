@@ -4,6 +4,8 @@ import { adaptSearchResults } from '$lib/adapters/search';
 import { load } from './+page';
 import type { SearchResult } from '$lib/types';
 import type { SearchResponse } from '$lib/api/types';
+import searchResponseFixture from '../../tests/fixtures/api/searchResponseFixture.json';
+import type { LoadResponse } from '../types';
 
 describe('Search Integration Tests', () => {
 	beforeEach(() => {
@@ -17,60 +19,35 @@ describe('Search Integration Tests', () => {
 	describe('API + Adapter Integration', () => {
 		it('should fetch and transform search results correctly', async () => {
 			// Mock API response
-			const mockApiResponse: SearchResponse = {
-				correctedSearch: false,
-				url: 'https://www.youtube.com/search?q=murder drones',
-				originalUrl: 'https://www.youtube.com/search?q=murder drones',
-				name: 'Search',
-				searchString: 'murder drones',
-				searchSuggestion: '',
-				isCorrectedSearch: false,
-				items: [
-					{
-						shortFormContent: false,
-						type: 'stream',
-						name: 'MURDER DRONES - Pilot',
-						url: 'https://www.youtube.com/watch?v=video-test-id',
-						thumbnailUrl:
-							'https://i.ytimg.com/vi/video-test-id/hq720.jpg',
-						uploaderName: 'GLITCH',
-						uploaderUrl: 'https://www.youtube.com/channel/channel-id',
-						uploaderAvatarUrl:
-							'https://yt3.ggpht.com/random-unicode-characters',
-						uploaderVerified: true,
-						duration: 86,
-						viewCount: 10717139,
-						uploadDate: '2025-11-13T16:00Z',
-						streamType: 'VIDEO_STREAM',
-						isShortFormContent: false
-					}
-				],
-				nextPageUrl: 'https://www.youtube.com/search?prettyPrint=false',
-				hasNextPage: true
+			const mockApiResponse: SearchResponse = searchResponseFixture;
+			const singleResponse: SearchResponse = {
+				...searchResponseFixture,
+				items: [mockApiResponse.items[0]],
 			};
+
 
 			// Mock fetch
 			const mockFetch = vi.fn().mockResolvedValue({
 				ok: true,
-				json: async () => mockApiResponse
+				json: async () => singleResponse
 			});
 
 			// Call API
-			const searchData = await getSearchResults('test query', 'asc', mockFetch);
+			const searchData = await getSearchResults('murder drones', 'asc', mockFetch);
 
 			// Transform with adapter
 			const results = adaptSearchResults(searchData, 'default-thumb.jpg', 'default-avatar.svg');
 
 			// Assertions
 			expect(mockFetch).toHaveBeenCalledWith(
-				expect.stringContaining('/search?searchString=test%20query&sortFilter=asc')
+				expect.stringContaining('/search?searchString=murder%20drones&sortFilter=asc')
 			);
 			expect(results).toHaveLength(1);
 			expect(results[0]).toEqual({
-				id: 'video-test-id',
-				url: 'https://www.youtube.com/watch?v=video-test-id',
+				id: 'pilot-id',
+				url: 'https://www.youtube.com/watch?v=pilot-id',
 				title: 'MURDER DRONES - Pilot',
-				thumbnail: 'https://i.ytimg.com/vi/video-test-id/hq720.jpg',
+				thumbnail: 'https://i.ytimg.com/vi/pilot-id/hq720.jpg',
 				channelName: 'GLITCH',
 				channelUrl: 'https://www.youtube.com/channel/channel-id',
 				channelAvatar: 'https://yt3.ggpht.com/random-unicode-characters',
@@ -101,70 +78,7 @@ describe('Search Integration Tests', () => {
 		});
 
 		it('should filter out invalid items and use defaults for missing fields', async () => {
-			const mockApiResponse: SearchResponse = {
-				correctedSearch: false,
-				url: 'https://www.youtube.com/search?q=murder drones',
-				originalUrl: 'https://www.youtube.com/search?q=murder drones',
-				name: 'Search',
-				searchString: 'murder drones',
-				searchSuggestion: '',
-				isCorrectedSearch: false,
-				items: [
-					// Valid item with all fields
-					{
-						shortFormContent: false,
-						type: 'stream',
-						name: 'MURDER DRONES - Pilot',
-						url: 'https://www.youtube.com/watch?v=video-test-id',
-						thumbnailUrl: 'https://i.ytimg.com/vi/video-test-id/hq720.jpg',
-						uploaderName: 'GLITCH',
-						uploaderUrl: 'https://www.youtube.com/channel/channel-id',
-						uploaderAvatarUrl: 'https://yt3.ggpht.com/random-unicode-characters',
-						uploaderVerified: false,
-						duration: 86,
-						viewCount: 10717139,
-						uploadDate: '2025-11-13T16:00Z',
-						streamType: 'VIDEO_STREAM',
-						isShortFormContent: false
-					},
-					// Invalid item - missing required fields
-					{
-						shortFormContent: false,
-						type: '',
-						name: '',
-						url: '',
-						thumbnailUrl: '',
-						uploaderName: '',
-						uploaderUrl: '',
-						uploaderAvatarUrl: '',
-						uploaderVerified: false,
-						duration: 0,
-						viewCount: 0,
-						uploadDate: '',
-						streamType: 'VIDEO_STREAM',
-						isShortFormContent: false
-					},
-					// Valid item with negative counts (should be converted to 0)
-					{
-						shortFormContent: false,
-						type: 'stream',
-						name: 'MURDER DRONES - Absolute End',
-						url: 'https://www.youtube.com/watch?v=negative-video-id',
-						thumbnailUrl: '',
-						uploaderName: '',
-						uploaderUrl: 'https://www.youtube.com/channel/channel-id',
-						uploaderAvatarUrl: '',
-						uploaderVerified: false,
-						duration: -1,
-						viewCount: -1,
-						uploadDate: '',
-						streamType: 'VIDEO_STREAM',
-						isShortFormContent: false
-					}
-				],
-				nextPageUrl: 'https://www.youtube.com/search?prettyPrint=false',
-				hasNextPage: true
-			};
+			const mockApiResponse: SearchResponse = searchResponseFixture;
 
 			const mockFetch = vi.fn().mockResolvedValue({
 				ok: true,
@@ -176,8 +90,8 @@ describe('Search Integration Tests', () => {
 
 			expect(results).toHaveLength(2); // Invalid item filtered out
 			expect(results[1]).toEqual({
-				id: 'negative-video-id',
-				url: 'https://www.youtube.com/watch?v=negative-video-id',
+				id: 'absolute-end-id',
+				url: 'https://www.youtube.com/watch?v=absolute-end-id',
 				title: 'MURDER DRONES - Absolute End',
 				thumbnail: 'default-thumb.jpg', // Uses default
 				channelName: 'Unknown Channel', // Uses default
@@ -215,37 +129,7 @@ describe('Search Integration Tests', () => {
 
 	describe('Route Load Function Integration', () => {
 		it('should load search results through complete pipeline', async () => {
-			const mockApiResponse: SearchResponse = {
-				correctedSearch: false,
-				url: 'https://www.youtube.com/search?q=murder drones',
-				originalUrl: 'https://www.youtube.com/search?q=murder drones',
-				name: 'Search',
-				searchString: 'murder drones',
-				searchSuggestion: '',
-				isCorrectedSearch: false,
-				items: [
-					{
-						shortFormContent: false,
-						type: 'stream',
-						name: 'MURDER DRONES - Pilot',
-						url: 'https://www.youtube.com/watch?v=video-test-id',
-						thumbnailUrl:
-							'https://i.ytimg.com/vi/video-test-id/hq720.jpg',
-						uploaderName: 'GLITCH',
-						uploaderUrl: 'https://www.youtube.com/channel/channel-id',
-						uploaderAvatarUrl:
-							'https://yt3.ggpht.com/random-unicode-characters',
-						uploaderVerified: true,
-						duration: 86,
-						viewCount: 10717139,
-						uploadDate: '2025-11-13T16:00Z',
-						streamType: 'VIDEO_STREAM',
-						isShortFormContent: false
-					}
-				],
-				nextPageUrl: 'https://www.youtube.com/search?prettyPrint=false',
-				hasNextPage: true
-			};
+			const mockApiResponse: SearchResponse = searchResponseFixture;
 
 			const mockFetch = vi.fn().mockResolvedValue({
 				ok: true,
@@ -261,12 +145,12 @@ describe('Search Integration Tests', () => {
 				params: {},
 				route: { id: '/search' },
 				data: {}
-			} as any);
+			} as never) as LoadResponse;
 
 			expect(mockFetch).toHaveBeenCalledWith(
 				expect.stringContaining('/search?searchString=murder%20drones&sortFilter=desc')
 			);
-			expect(search.results).toHaveLength(1);
+			expect(search.results).toHaveLength(2);
 			expect(search.query).toBe('murder drones');
 			expect(search.sortFilter).toBe('desc');
 			expect(search.error).toBeNull();
@@ -282,7 +166,7 @@ describe('Search Integration Tests', () => {
 				params: {},
 				route: { id: '/search' },
 				data: {}
-			} as never);
+			} as never) as LoadResponse;
 
 			expect(search.results).toEqual([]);
 			expect(search.query).toBe('');
@@ -298,7 +182,7 @@ describe('Search Integration Tests', () => {
 				params: {},
 				route: { id: '/search' },
 				data: {}
-			} as never);
+			} as never) as LoadResponse;
 
 			expect(search.results).toEqual([]);
 			expect(search.query).toBe('');
@@ -314,7 +198,7 @@ describe('Search Integration Tests', () => {
 				params: {},
 				route: { id: '/search' },
 				data: {}
-			} as never);
+			} as never) as LoadResponse;
 
 			expect(search.results).toEqual([]);
 			expect(search.query).toBe('');
@@ -322,7 +206,7 @@ describe('Search Integration Tests', () => {
 		});
 
 		it('should use default sort filter when not provided', async () => {
-			const mockApiResponse: SearchResult = { searchString: 'test', items: [] };
+			const mockApiResponse: SearchResponse = searchResponseFixture;
 
 			const mockFetch = vi.fn().mockResolvedValue({
 				ok: true,
@@ -337,7 +221,7 @@ describe('Search Integration Tests', () => {
 				params: {},
 				route: { id: '/search' },
 				data: {}
-			} as never);
+			} as never) as LoadResponse;
 
 			expect(mockFetch).toHaveBeenCalledWith(expect.stringContaining('sortFilter=asc'));
 			expect(search.sortFilter).toBe('asc');
@@ -358,7 +242,7 @@ describe('Search Integration Tests', () => {
 				params: {},
 				route: { id: '/search' },
 				data: {}
-			} as never);
+			} as never) as LoadResponse;
 
 			expect(search.results).toEqual([]);
 			expect(search.query).toBe('error test');
@@ -377,7 +261,7 @@ describe('Search Integration Tests', () => {
 				params: {},
 				route: { id: '/search' },
 				data: {}
-			} as never);
+			} as never) as LoadResponse;
 
 			expect(search.results).toEqual([]);
 			expect(search.query).toBe('network error');
