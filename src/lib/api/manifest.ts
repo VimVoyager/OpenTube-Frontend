@@ -1,4 +1,5 @@
 import { PUBLIC_API_URL } from '$env/static/public';
+import { DOMParser } from '@xmldom/xmldom';
 
 const API_BASE_URL = PUBLIC_API_URL;
 
@@ -50,8 +51,8 @@ export async function getManifest(
         const manifestXml = await res.text();
         
         const parser = new DOMParser();
-        const xmlDoc = parser.parseFromString(manifestXml, 'application/xml');
-        const mpdElement = xmlDoc.querySelector('MPD');
+        const xmlDoc = parser.parseFromString(manifestXml, 'text/xml');
+        const mpdElement = xmlDoc.getElementsByTagNameNS('urn:mpeg:dash:schema:mpd:2011', 'MPD')[0];
         
         const durationStr = mpdElement?.getAttribute('mediaPresentationDuration');
         const duration = durationStr ? parseDuration(durationStr) : 0;
