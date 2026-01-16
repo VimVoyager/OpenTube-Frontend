@@ -1,0 +1,32 @@
+[
+	{
+		"url": "https://i.ytimg.com/vi/pilot-id/xs.jpg",
+		"height": 94,
+		"width": 168,
+		"estimatedResolutionLevel": "LOW"
+	},
+	{
+		"url": "https://i.ytimg.com/vi/pilot-id/sm.jpg",
+		"height": 110,
+		"width": 196,
+		"estimatedResolutionLevel": "LOW"
+	},
+	{
+		"url": "https://i.ytimg.com/vi/pilot-id/md.jpg",
+		"height": 138,
+		"width": 246,
+		"estimatedResolutionLevel": "LOW"
+	},
+	{
+		"url": "https://i.ytimg.com/vi/pilot-id/lg.jpg",
+		"height": 188,
+		"width": 336,
+		"estimatedResolutionLevel": "MEDIUM"
+	},
+	{
+		"url": "https://i.ytimg.com/vi/pilot-id/xl.jpg",
+		"height": 1080,
+		"width": 1920,
+		"estimatedResolutionLevel": "HIGH"
+	}
+]

@@ -1,0 +1,49 @@
+[
+	{
+		"videoTitle": "MURDER DRONES - Pilot",
+		"description": {
+			"content": "Murder Drones is a show about cute little robots that murder eachother",
+			"type": 1
+		},
+		"uploaderAvatars": [
+			{
+				"url": "https://yt3.ggpht.com/random-unicode-characters/sm",
+				"height": 48,
+				"width": 48,
+				"estimatedResolutionLevel": "LOW"
+			},
+			{
+				"url": "https://yt3.ggpht.com/random-unicode-characters/md",
+				"height": 88,
+				"width": 88,
+				"estimatedResolutionLevel": "LOW"
+			},
+			{
+				"url": "https://yt3.ggpht.com/random-unicode-characters/xl",
+				"height": 176,
+				"width": 176,
+				"estimatedResolutionLevel": "MEDIUM"
+			}
+		],
+		"viewCount": 10000,
+		"likeCount": 555,
+		"dislikeCount": 10,
+		"channelName": "GLITCH",
+		"channelSubscriberCount": 50000,
+		"uploadDate": "2021-10-29T16:00:13-07:00"
+	},
+	{
+		"videoTitle": "MURDER DRONES - Heartbeat",
+		"description": {
+			"content": "",
+			"type": 1
+		},
+		"uploaderAvatars": [],
+		"viewCount": -1,
+		"likeCount": -1,
+		"dislikeCount": -1,
+		"channelName": "",
+		"channelSubscriberCount": -1,
+		"uploadDate": ""
+	}
+]

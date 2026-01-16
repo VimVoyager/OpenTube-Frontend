@@ -7,6 +7,8 @@ import { adaptPlayerConfig } from '$lib/adapters/player';
 import { adaptVideoMetadata } from '$lib/adapters/metadata';
 import { adaptRelatedVideos } from '$lib/adapters/relatedVideos';
 import { load } from './+page';
+import detailsResponseFixture from '../../../tests/fixtures/api/detailsResponseFixture.json'
+import thumbnailsResponseFixture from '../../../tests/fixtures/api/thumbnailsResponseFixture.json';
 import type { Details, RelatedItem, Thumbnail } from '$lib/types';
 
 import { DOMParser as XMLDomParser } from '@xmldom/xmldom';
@@ -32,17 +34,7 @@ describe('Video Detail Integration Tests', () => {
 
 	describe('API + Adapter Integration - Video Details', () => {
 		it('should fetch and transform video details correctly', async () => {
-			const mockDetails: Details = {
-				videoTitle: 'Test Video Title',
-				description: { content: 'Test video description' },
-				channelName: 'Test Channel',
-				uploaderAvatars: [{ url: 'https://example.com/avatar.jpg', height: 100, width: 100 }],
-				viewCount: 10000,
-				uploadDate: '2024-01-15',
-				likeCount: 500,
-				dislikeCount: 10,
-				channelSubscriberCount: 50000
-			} as Details;
+			const mockDetails: Details = detailsResponseFixture[0];
 
 			const mockFetch = vi.fn().mockResolvedValue({
 				ok: true,
@@ -56,41 +48,31 @@ describe('Video Detail Integration Tests', () => {
 				expect.stringContaining('/streams/details?id=test-video-id')
 			);
 			expect(metadata).toEqual({
-				title: 'Test Video Title',
-				description: 'Test video description',
-				channelName: 'Test Channel',
-				channelAvatar: 'https://example.com/avatar.jpg',
+				title: 'MURDER DRONES - Pilot',
+				description: 'Murder Drones is a show about cute little robots that murder eachother',
+				channelName: 'GLITCH',
+				channelAvatar: "https://yt3.ggpht.com/random-unicode-characters/xl",
 				viewCount: 10000,
-				uploadDate: '2024-01-15',
-				likeCount: 500,
+				uploadDate: '2021-10-29T16:00:13-07:00',
+				likeCount: 555,
 				dislikeCount: 10,
 				subscriberCount: 50000
 			});
 		});
 
 		it('should handle missing optional fields in video details', async () => {
-			const mockDetails: Details = {
-				videoTitle: 'Video Without Details',
-				description: { content: '' },
-				channelName: '',
-				uploaderAvatars: [],
-				viewCount: -1,
-				uploadDate: '',
-				likeCount: -1,
-				dislikeCount: -1,
-				channelSubscriberCount: -1
-			} as Details;
+			const mockDetails: Details = detailsResponseFixture[1];
 
 			const mockFetch = vi.fn().mockResolvedValue({
 				ok: true,
 				json: async () => mockDetails
 			});
 
-			const details = await getVideoDetails('test-id', mockFetch);
+			const details = await getVideoDetails('test-video-id', mockFetch);
 			const metadata = adaptVideoMetadata(details, 'default-avatar.jpg');
 
 			expect(metadata).toEqual({
-				title: 'Video Without Details',
+				title: 'MURDER DRONES - Heartbeat',
 				description: 'No description available',
 				channelName: 'Unknown Channel',
 				channelAvatar: 'default-avatar.jpg',
@@ -102,14 +84,14 @@ describe('Video Detail Integration Tests', () => {
 			});
 		});
 
-		it('should handle API errors for video details', async () => {
+		it('should handle API errors for video details', () => {
 			const mockFetch = vi.fn().mockResolvedValue({
 				ok: false,
 				status: 404,
 				statusText: 'Not Found'
 			});
 
-			await expect(getVideoDetails('invalid-id', mockFetch)).rejects.toThrow(
+			expect(getVideoDetails('invalid-id', mockFetch)).rejects.toThrow(
 				'Failed to fetch video details for invalid-id: 404 Not Found'
 			);
 		});
@@ -117,26 +99,7 @@ describe('Video Detail Integration Tests', () => {
 
 	describe('API + Adapter Integration - Thumbnails', () => {
 		it('should fetch and select high quality thumbnail', async () => {
-			const mockThumbnails: Thumbnail[] = [
-				{
-					url: 'https://example.com/low.jpg',
-					height: 180,
-					width: 320,
-					estimatedResolutionLevel: 'LOW'
-				},
-				{
-					url: 'https://example.com/medium.jpg',
-					height: 360,
-					width: 640,
-					estimatedResolutionLevel: 'MEDIUM'
-				},
-				{
-					url: 'https://example.com/high.jpg',
-					height: 720,
-					width: 1280,
-					estimatedResolutionLevel: 'HIGH'
-				}
-			];
+			const mockThumbnails: Thumbnail[] = thumbnailsResponseFixture
 
 			const mockFetch = vi.fn().mockResolvedValue({
 				ok: true,
@@ -149,28 +112,15 @@ describe('Video Detail Integration Tests', () => {
 				expect.stringContaining('/streams/thumbnails?id=test-id')
 			);
 			expect(thumbnail).toEqual({
-				url: 'https://example.com/high.jpg',
-				height: 720,
-				width: 1280,
+				url: 'https://i.ytimg.com/vi/pilot-id/xl.jpg',
+				height: 1080,
+				width: 1920,
 				estimatedResolutionLevel: 'HIGH'
 			});
 		});
 
 		it('should fallback to last thumbnail if no high quality available', async () => {
-			const mockThumbnails: Thumbnail[] = [
-				{
-					url: 'https://example.com/low.jpg',
-					height: 180,
-					width: 320,
-					estimatedResolutionLevel: 'LOW'
-				},
-				{
-					url: 'https://example.com/medium.jpg',
-					height: 360,
-					width: 640,
-					estimatedResolutionLevel: 'MEDIUM'
-				}
-			];
+			const mockThumbnails: Thumbnail[] = [thumbnailsResponseFixture[2], thumbnailsResponseFixture[3]];
 
 			const mockFetch = vi.fn().mockResolvedValue({
 				ok: true,
@@ -180,9 +130,9 @@ describe('Video Detail Integration Tests', () => {
 			const thumbnail = await getVideoThumbnails('test-id', mockFetch);
 
 			expect(thumbnail).toEqual({
-				url: 'https://example.com/medium.jpg',
-				height: 360,
-				width: 640,
+				url: 'https://i.ytimg.com/vi/pilot-id/lg.jpg',
+				height: 188,
+				width: 336,
 				estimatedResolutionLevel: 'MEDIUM'
 			});
 		});
