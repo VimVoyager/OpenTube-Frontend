@@ -4,46 +4,12 @@
  * Contains reusable mock data for API responses across all API test files
  */
 
-import type { Details, Stream, Subtitle, SearchResult, RelatedItem, SearchItem } from '$lib/types';
+import type { Stream, Subtitle, SearchResult, RelatedItem, SearchItem } from '$lib/types';
 
 // =============================================================================
 // Video Details Fixtures
 // =============================================================================
 
-export const mockVideoDetails: Details = {
-	uploaderAvatars: [
-		{
-			url: 'https://example.com/avatar.jpg',
-			height: 48,
-			width: 48,
-			estimatedResolutionLevel: 'LOW'
-		}
-	],
-	videoTitle: 'Test Video Title',
-	description: {
-		content: 'This is a test video description with details about the content.'
-	},
-	uploadDate: '2024-01-15',
-	channelSubscriberCount: 1500000,
-	dislikeCount: 100,
-	likeCount: 50000,
-	viewCount: 1000000,
-	channelName: 'Test Channel'
-};
-
-export const mockVideoDetailsMinimal: Details = {
-	uploaderAvatars: [],
-	videoTitle: 'Minimal Video',
-	description: {
-		content: ''
-	},
-	uploadDate: '2024-01-01',
-	channelSubscriberCount: 0,
-	dislikeCount: 0,
-	likeCount: 0,
-	viewCount: 0,
-	channelName: 'Unknown Channel'
-};
 
 // =============================================================================
 // Stream Fixtures
