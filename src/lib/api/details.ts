@@ -1,4 +1,4 @@
-import type { Details } from "$lib/types";
+import type { Details } from '$lib/types';
 import { PUBLIC_API_URL } from '$env/static/public';
 
 const API_BASE_URL = PUBLIC_API_URL;
@@ -13,20 +13,14 @@ export async function getVideoDetails(
     const fetcher = fetchFn ?? globalThis.fetch;
 
     try {
-        const res = await fetcher(
-            `${API_BASE_URL}/streams/details?id=${encodeURIComponent(id)}`
-        );
+			const res = await fetcher(`${API_BASE_URL}/streams/details?id=${encodeURIComponent(id)}`);
 
-        if (!res.ok) {
-            throw new Error(
-                `Failed to fetch video details for ${id}: ${res.status} ${res.statusText}`
-            );
-        }
+			if (!res.ok) {
+				throw new Error(`Failed to fetch video details for ${id}: ${res.status} ${res.statusText}`);
+			}
 
-        const data = await res.json();
-        return data;
-        
-    } catch (error) {
+			return await res.json();
+		} catch (error) {
         console.error('Error fetching video details:', error);
         throw error;
     }

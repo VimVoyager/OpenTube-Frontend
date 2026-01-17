@@ -56,9 +56,7 @@ export interface ItagItem {
 export interface Details {
 	uploaderAvatars: Avatar[];
 	videoTitle: string;
-	description: {
-		content: string;
-	};
+	description: Description;
 	uploadDate: string;
 	channelSubscriberCount: number;
 	dislikeCount: number;

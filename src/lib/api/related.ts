@@ -33,9 +33,9 @@ export async function getRelatedStreams(
 
         // Handle different response formats
         if (Array.isArray(data)) {
-            return data as RelatedItem[];
+            return data as RelatedItemResponse[];
         } else if (data.streams && Array.isArray(data.streams)) {
-            return data.streams as RelatedItem[];
+            return data.streams as RelatedItemResponse[];
         } else {
             throw new Error('Unexpected response format for related streams');
         }

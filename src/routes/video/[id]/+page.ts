@@ -4,30 +4,16 @@ import { getRelatedStreams } from '$lib/api/related';
 import { adaptPlayerConfig } from '$lib/adapters/player';
 import { adaptVideoMetadata } from '$lib/adapters/metadata';
 import { adaptRelatedVideos } from '$lib/adapters/relatedVideos';
-import {
-	type VideoPlayerConfig,
-	type VideoMetadata,
-	type RelatedVideoConfig
-} from '$lib/adapters/types';
 import thumbnailPlaceholder from '$lib/assets/thumbnail-placeholder.jpg';
 import logoPlaceholder from '$lib/assets/logo-placeholder.svg';
 import { getManifest } from '$lib/api/manifest';
 import { getVideoThumbnails } from '$lib/api/thumbnails';
-
-/**
- * Page data structure
- */
-export interface PageData {
-	playerConfig: VideoPlayerConfig;
-	metadata: VideoMetadata;
-	relatedVideos: RelatedVideoConfig[];
-	error?: string;
-}
+import type { VideoPageData } from '../../types';
 
 /**
  * Creates error page data with default values
  */
-function createErrorPageData(error: unknown): PageData {
+function createErrorPageData(error: unknown): VideoPageData {
 	const errorMessage = error instanceof Error ? error.message : 'Unknown error loading video';
 
 	return {
@@ -81,7 +67,7 @@ async function fetchVideoData(
 /**
  * Page load function - fetches and transforms data
  */
-export const load: PageLoad = async ({ params, fetch }): Promise<PageData> => {
+export const load: PageLoad = async ({ params, fetch }): Promise<VideoPageData> => {
 	try {
 		// Fetch all data in parallel
 		const { thumbnails, details, manifest, relatedStreams } = await fetchVideoData(
