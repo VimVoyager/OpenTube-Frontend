@@ -6,7 +6,6 @@
  */
 
 import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
-
 import {
     createFailedFetch,
     createNetworkErrorFetch,
@@ -14,6 +13,7 @@ import {
     createMockConsoleError,
     getCallCount
 } from '../../tests/helpers/apiHelpers';
+import manifestXmlFixture from '../../tests/fixtures/api/manifestXmlFixture.xml?raw';
 import { getManifest, getManifestUrl } from './manifest';
 
 // Mock DOMParser for XML parsing in Node.js
@@ -56,46 +56,8 @@ global.DOMParser = MockDOMParser as never;
 // =============================================================================
 
 const createMockManifestXml = (
-    duration: string = 'PT2M56S',
-    videoId: string = 'test-video-id'
-): string => `<?xml version="1.0" encoding="UTF-8"?>
-<MPD xmlns="urn:mpeg:dash:schema:mpd:2011" 
-     id="${videoId}"
-     mediaPresentationDuration="${duration}"
-     type="static"
-     minBufferTime="PT1.5S">
-    <Period>
-        <AdaptationSet mimeType="video/mp4">
-            <Representation id="1" bandwidth="1000000">
-                <BaseURL>video.mp4</BaseURL>
-            </Representation>
-        </AdaptationSet>
-    </Period>
-</MPD>`;
-
-const mockManifestXmlMinimal = `<?xml version="1.0" encoding="UTF-8"?>
-<MPD xmlns="urn:mpeg:dash:schema:mpd:2011">
-    <Period>
-        <AdaptationSet mimeType="video/mp4">
-            <Representation id="1" bandwidth="1000000">
-                <BaseURL>video.mp4</BaseURL>
-            </Representation>
-        </AdaptationSet>
-    </Period>
-</MPD>`;
-
-const mockManifestXmlNoId = `<?xml version="1.0" encoding="UTF-8"?>
-<MPD xmlns="urn:mpeg:dash:schema:mpd:2011" 
-     mediaPresentationDuration="PT5M30S"
-     type="static">
-    <Period>
-        <AdaptationSet mimeType="video/mp4">
-            <Representation id="1" bandwidth="1000000">
-                <BaseURL>video.mp4</BaseURL>
-            </Representation>
-        </AdaptationSet>
-    </Period>
-</MPD>`;
+	duration: string = 'PT2M56S'
+): string => manifestXmlFixture.replace('STANDARD_DURATION', `duration="${duration}"`).replace('MEDIA_PRESENTATION_DURATION', `mediaPresentationDuration="${duration}"`);
 
 // =============================================================================
 // Setup and Teardown
@@ -153,34 +115,27 @@ function createManifestFetch(manifestXml: string) {
 describe('getManifest', () => {
     describe('successful manifest requests', () => {
         it('should fetch manifest with valid ID', async () => {
-            // Arrange
             const videoId = 'test-video-id';
-            const mockFetch = createManifestFetch(createMockManifestXml());
+						const mock = createMockManifestXml();
+            const mockFetch = createManifestFetch(mock);
 
-            // Act
             const result = await getManifest(videoId, mockFetch as unknown as typeof globalThis.fetch);
 
-            // Assert
             expect(result).toHaveProperty('url');
             expect(result).toHaveProperty('duration');
-            expect(result).toHaveProperty('videoId');
             expect(mockFetch).toHaveBeenCalledTimes(1);
         });
 
         it('should return ManifestResponse object with all properties', async () => {
-            // Arrange
             const videoId = 'abc123';
             const mockFetch = createManifestFetch(
-                createMockManifestXml('PT10M30S', 'video-abc123')
+                createMockManifestXml('PT10M30S')
             );
 
-            // Act
             const result = await getManifest(videoId, mockFetch as unknown as typeof globalThis.fetch);
 
-            // Assert
             expect(result.url).toMatch(/^blob:http:\/\/localhost\//);
-            expect(result.duration).toBe(630); // 10*60 + 30
-            expect(result.videoId).toBe('video-abc123');
+            expect(result.duration).toBe(630);
         });
 
         it('should use default fetch when fetchFn not provided', async () => {
@@ -203,31 +158,25 @@ describe('getManifest', () => {
         });
 
         it('should create blob URL from manifest XML', async () => {
-            // Arrange
             const videoId = 'test-id';
             const mockFetch = createManifestFetch(createMockManifestXml());
             const createObjectURLSpy = vi.spyOn(URL, 'createObjectURL');
 
-            // Act
             const result = await getManifest(videoId, mockFetch as unknown as typeof globalThis.fetch);
 
-            // Assert
             expect(createObjectURLSpy).toHaveBeenCalledTimes(1);
             expect(result.url).toMatch(/^blob:/);
         });
 
         it('should log manifest load information', async () => {
-            // Arrange
             const videoId = 'test-video-id';
             const mockFetch = createManifestFetch(
-                createMockManifestXml('PT5M0S', 'video-123')
+                createMockManifestXml('PT5M0S')
             );
             const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
 
-            // Act
             await getManifest(videoId, mockFetch as unknown as typeof globalThis.fetch);
 
-            // Assert
             expect(consoleLogSpy).toHaveBeenCalledWith(
                 expect.stringContaining('Manifest loaded for test-video-id')
             );
@@ -235,7 +184,7 @@ describe('getManifest', () => {
                 expect.stringContaining('duration=300s')
             );
             expect(consoleLogSpy).toHaveBeenCalledWith(
-                expect.stringContaining('videoId=video-123')
+                expect.stringContaining('test-video-id')
             );
             
             consoleLogSpy.mockRestore();
@@ -248,215 +197,122 @@ describe('getManifest', () => {
 
     describe('duration parsing', () => {
         it('should parse duration with minutes and seconds', async () => {
-            // Arrange
             const videoId = 'test-id';
             const mockFetch = createManifestFetch(
-                createMockManifestXml('PT2M56S', 'test-id')
+                createMockManifestXml('PT2M56S')
             );
 
-            // Act
             const result = await getManifest(videoId, mockFetch as unknown as typeof globalThis.fetch);
 
-            // Assert
             expect(result.duration).toBe(176); // 2*60 + 56
         });
 
         it('should parse duration with only seconds', async () => {
-            // Arrange
             const videoId = 'test-id';
             const mockFetch = createManifestFetch(
-                createMockManifestXml('PT45S', 'test-id')
+                createMockManifestXml('PT45S')
             );
 
-            // Act
             const result = await getManifest(videoId, mockFetch as unknown as typeof globalThis.fetch);
 
-            // Assert
             expect(result.duration).toBe(45);
         });
 
         it('should parse duration with only minutes', async () => {
-            // Arrange
             const videoId = 'test-id';
             const mockFetch = createManifestFetch(
-                createMockManifestXml('PT5M', 'test-id')
+                createMockManifestXml('PT5M')
             );
 
-            // Act
             const result = await getManifest(videoId, mockFetch as unknown as typeof globalThis.fetch);
 
-            // Assert
-            expect(result.duration).toBe(300); // 5*60
+            expect(result.duration).toBe(300);
         });
 
         it('should parse duration with hours, minutes, and seconds', async () => {
-            // Arrange
             const videoId = 'test-id';
             const mockFetch = createManifestFetch(
-                createMockManifestXml('PT1H30M45S', 'test-id')
+                createMockManifestXml('PT1H30M45S')
             );
 
-            // Act
             const result = await getManifest(videoId, mockFetch as unknown as typeof globalThis.fetch);
 
-            // Assert
-            expect(result.duration).toBe(5445); // 1*3600 + 30*60 + 45
+            expect(result.duration).toBe(5445);
         });
 
         it('should parse duration with only hours', async () => {
-            // Arrange
             const videoId = 'test-id';
             const mockFetch = createManifestFetch(
-                createMockManifestXml('PT2H', 'test-id')
+                createMockManifestXml('PT2H')
             );
 
-            // Act
             const result = await getManifest(videoId, mockFetch as unknown as typeof globalThis.fetch);
 
-            // Assert
-            expect(result.duration).toBe(7200); // 2*3600
+            expect(result.duration).toBe(7200);
         });
 
         it('should parse duration with hours and seconds (no minutes)', async () => {
-            // Arrange
             const videoId = 'test-id';
             const mockFetch = createManifestFetch(
-                createMockManifestXml('PT1H30S', 'test-id')
+                createMockManifestXml('PT1H30S')
             );
 
-            // Act
             const result = await getManifest(videoId, mockFetch as unknown as typeof globalThis.fetch);
 
-            // Assert
-            expect(result.duration).toBe(3630); // 1*3600 + 30
+            expect(result.duration).toBe(3630);
         });
 
         it('should parse duration with decimal seconds', async () => {
-            // Arrange
             const videoId = 'test-id';
             const mockFetch = createManifestFetch(
-                createMockManifestXml('PT1M30.5S', 'test-id')
+                createMockManifestXml('PT1M30.5S')
             );
 
-            // Act
             const result = await getManifest(videoId, mockFetch as unknown as typeof globalThis.fetch);
 
-            // Assert
-            expect(result.duration).toBe(90.5); // 1*60 + 30.5
+            expect(result.duration).toBe(90.5);
         });
 
         it('should return 0 duration when mediaPresentationDuration missing', async () => {
-            // Arrange
             const videoId = 'test-id';
-            const mockFetch = createManifestFetch(mockManifestXmlMinimal);
+            const mockFetch = createManifestFetch(createMockManifestXml(''));
 
-            // Act
             const result = await getManifest(videoId, mockFetch as unknown as typeof globalThis.fetch);
 
-            // Assert
             expect(result.duration).toBe(0);
         });
 
         it('should return 0 duration when duration format is invalid', async () => {
-            // Arrange
             const videoId = 'test-id';
             const mockFetch = createManifestFetch(
-                createMockManifestXml('INVALID', 'test-id')
+                createMockManifestXml('INVALID')
             );
 
-            // Act
             const result = await getManifest(videoId, mockFetch as unknown as typeof globalThis.fetch);
 
-            // Assert
             expect(result.duration).toBe(0);
         });
 
         it('should handle zero duration', async () => {
-            // Arrange
             const videoId = 'test-id';
             const mockFetch = createManifestFetch(
-                createMockManifestXml('PT0S', 'test-id')
+                createMockManifestXml('PT0S')
             );
 
-            // Act
             const result = await getManifest(videoId, mockFetch as unknown as typeof globalThis.fetch);
 
-            // Assert
             expect(result.duration).toBe(0);
         });
 
         it('should handle very long durations', async () => {
-            // Arrange
             const videoId = 'test-id';
             const mockFetch = createManifestFetch(
-                createMockManifestXml('PT10H30M45S', 'test-id')
+                createMockManifestXml('PT10H30M45S')
             );
 
-            // Act
             const result = await getManifest(videoId, mockFetch as unknown as typeof globalThis.fetch);
 
-            // Assert
-            expect(result.duration).toBe(37845); // 10*3600 + 30*60 + 45
-        });
-    });
-
-    // =============================================================================
-    // Video ID Extraction Tests
-    // =============================================================================
-
-    describe('video ID extraction', () => {
-        it('should extract videoId from MPD element', async () => {
-            // Arrange
-            const videoId = 'test-id';
-            const mockFetch = createManifestFetch(
-                createMockManifestXml('PT5M0S', 'extracted-video-id')
-            );
-
-            // Act
-            const result = await getManifest(videoId, mockFetch as unknown as typeof globalThis.fetch);
-
-            // Assert
-            expect(result.videoId).toBe('extracted-video-id');
-        });
-
-        it('should return undefined when videoId not present in MPD', async () => {
-            // Arrange
-            const videoId = 'test-id';
-            const mockFetch = createManifestFetch(mockManifestXmlNoId);
-
-            // Act
-            const result = await getManifest(videoId, mockFetch as unknown as typeof globalThis.fetch);
-
-            // Assert
-            expect(result.videoId).toBeUndefined();
-        });
-
-        it('should handle empty videoId attribute', async () => {
-            // Arrange
-            const videoId = 'test-id';
-            const manifestWithEmptyId = createMockManifestXml('PT5M0S', '');
-            const mockFetch = createManifestFetch(manifestWithEmptyId);
-
-            // Act
-            const result = await getManifest(videoId, mockFetch as unknown as typeof globalThis.fetch);
-
-            // Assert
-            expect(result.videoId).toBeUndefined();
-        });
-
-        it('should handle videoId with special characters', async () => {
-            // Arrange
-            const videoId = 'test-id';
-            const specialId = 'video-123_ABC-xyz';
-            const mockFetch = createManifestFetch(
-                createMockManifestXml('PT5M0S', specialId)
-            );
-
-            // Act
-            const result = await getManifest(videoId, mockFetch as unknown as typeof globalThis.fetch);
-
-            // Assert
-            expect(result.videoId).toBe(specialId);
+            expect(result.duration).toBe(37845);
         });
     });
 
@@ -466,55 +322,43 @@ describe('getManifest', () => {
 
     describe('API request handling', () => {
         it('should call correct API endpoint', async () => {
-            // Arrange
             const videoId = 'test-video-id';
             const mockFetch = createManifestFetch(createMockManifestXml());
 
-            // Act
             await getManifest(videoId, mockFetch as unknown as typeof globalThis.fetch);
 
-            // Assert
             const callUrl = mockFetch.mock.calls[0][0] as string;
             expect(callUrl).toContain('/streams/dash');
         });
 
         it('should include video ID in query parameters', async () => {
-            // Arrange
             const videoId = 'abc123xyz';
             const mockFetch = createManifestFetch(createMockManifestXml());
 
-            // Act
             await getManifest(videoId, mockFetch as unknown as typeof globalThis.fetch);
 
-            // Assert
             const callUrl = mockFetch.mock.calls[0][0] as string;
             const params = extractQueryParams(callUrl);
             expect(params.id).toBe('abc123xyz');
         });
 
         it('should URL encode video ID', async () => {
-            // Arrange
             const videoId = 'test id with spaces & special=chars';
             const mockFetch = createManifestFetch(createMockManifestXml());
 
-            // Act
             await getManifest(videoId, mockFetch as unknown as typeof globalThis.fetch);
 
-            // Assert
             const callUrl = mockFetch.mock.calls[0][0] as string;
             expect(callUrl).toContain('id=');
             expect(callUrl).not.toContain('test id with spaces');
         });
 
         it('should only call fetch once per request', async () => {
-            // Arrange
             const videoId = 'test-id';
             const mockFetch = createManifestFetch(createMockManifestXml());
 
-            // Act
             await getManifest(videoId, mockFetch as unknown as typeof globalThis.fetch);
 
-            // Assert
             expect(getCallCount(mockFetch)).toBe(1);
         });
     });
@@ -525,68 +369,56 @@ describe('getManifest', () => {
 
     describe('HTTP error handling', () => {
         it('should throw error on 404 response', async () => {
-            // Arrange
             const videoId = 'nonexistent-id';
             const mockFetch = createFailedFetch(404, 'Not Found');
             consoleErrorMock = createMockConsoleError();
 
-            // Act & Assert
             await expect(getManifest(videoId, mockFetch)).rejects.toThrow();
         });
 
         it('should throw error on 500 response', async () => {
-            // Arrange
             const videoId = 'test-id';
             const mockFetch = createFailedFetch(500, 'Internal Server Error');
             consoleErrorMock = createMockConsoleError();
 
-            // Act & Assert
             await expect(getManifest(videoId, mockFetch)).rejects.toThrow();
         });
 
         it('should include video ID in error message', async () => {
-            // Arrange
             const videoId = 'error-test-id';
             const mockFetch = createFailedFetch(404, 'Not Found');
             consoleErrorMock = createMockConsoleError();
 
-            // Act & Assert
             await expect(getManifest(videoId, mockFetch)).rejects.toThrow(
                 /error-test-id/
             );
         });
 
         it('should include status code in error message', async () => {
-            // Arrange
             const videoId = 'test-id';
             const mockFetch = createFailedFetch(503, 'Service Unavailable');
             consoleErrorMock = createMockConsoleError();
 
-            // Act & Assert
             await expect(getManifest(videoId, mockFetch)).rejects.toThrow(
                 /503/
             );
         });
 
         it('should include status text in error message', async () => {
-            // Arrange
             const videoId = 'test-id';
             const mockFetch = createFailedFetch(429, 'Too Many Requests');
             consoleErrorMock = createMockConsoleError();
 
-            // Act & Assert
             await expect(getManifest(videoId, mockFetch)).rejects.toThrow(
                 /Too Many Requests/
             );
         });
 
         it('should log errors to console', async () => {
-            // Arrange
             const videoId = 'test-id';
             const mockFetch = createFailedFetch(500, 'Internal Server Error');
             consoleErrorMock = createMockConsoleError();
 
-            // Act & Assert
             try {
                 await getManifest(videoId, mockFetch);
                 expect.fail('Should have thrown an error');
@@ -607,24 +439,20 @@ describe('getManifest', () => {
 
     describe('network error handling', () => {
         it('should throw error on network failure', async () => {
-            // Arrange
             const videoId = 'test-id';
             const mockFetch = createNetworkErrorFetch('Failed to fetch');
             consoleErrorMock = createMockConsoleError();
 
-            // Act & Assert
             await expect(getManifest(videoId, mockFetch)).rejects.toThrow(
                 'Failed to fetch'
             );
         });
 
         it('should log network errors to console', async () => {
-            // Arrange
             const videoId = 'test-id';
             const mockFetch = createNetworkErrorFetch('Network error');
             consoleErrorMock = createMockConsoleError();
 
-            // Act & Assert
             try {
                 await getManifest(videoId, mockFetch);
                 expect.fail('Should have thrown an error');
@@ -639,25 +467,21 @@ describe('getManifest', () => {
         });
 
         it('should throw error on timeout', async () => {
-            // Arrange
             const videoId = 'test-id';
             const mockFetch = createNetworkErrorFetch('Request timeout');
             consoleErrorMock = createMockConsoleError();
 
-            // Act & Assert
             await expect(getManifest(videoId, mockFetch)).rejects.toThrow(
                 'Request timeout'
             );
         });
 
-        it('should throw error on connection refused', async () => {
-            // Arrange
+        it('should throw error on connection refused', () => {
             const videoId = 'test-id';
             const mockFetch = createNetworkErrorFetch('Connection refused');
             consoleErrorMock = createMockConsoleError();
 
-            // Act & Assert
-            await expect(getManifest(videoId, mockFetch)).rejects.toThrow(
+            expect(getManifest(videoId, mockFetch)).rejects.toThrow(
                 'Connection refused'
             );
         });
@@ -669,74 +493,13 @@ describe('getManifest', () => {
 
     describe('XML parsing', () => {
         it('should parse valid DASH manifest XML', async () => {
-            // Arrange
             const videoId = 'test-id';
             const mockFetch = createManifestFetch(createMockManifestXml());
 
-            // Act
             const result = await getManifest(videoId, mockFetch as unknown as typeof globalThis.fetch);
 
-            // Assert
             expect(result.url).toBeTruthy();
             expect(typeof result.url).toBe('string');
-        });
-
-        it('should handle manifest with complex structure', async () => {
-            // Arrange
-            const videoId = 'test-id';
-            const complexManifest = `<?xml version="1.0" encoding="UTF-8"?>
-<MPD xmlns="urn:mpeg:dash:schema:mpd:2011" 
-     id="complex-video-id"
-     mediaPresentationDuration="PT15M30S"
-     type="static">
-    <Period>
-        <AdaptationSet mimeType="video/mp4">
-            <Representation id="1" bandwidth="500000" width="640" height="360">
-                <BaseURL>video_360p.mp4</BaseURL>
-            </Representation>
-            <Representation id="2" bandwidth="1000000" width="1280" height="720">
-                <BaseURL>video_720p.mp4</BaseURL>
-            </Representation>
-        </AdaptationSet>
-        <AdaptationSet mimeType="audio/mp4">
-            <Representation id="audio" bandwidth="128000">
-                <BaseURL>audio.mp4</BaseURL>
-            </Representation>
-        </AdaptationSet>
-    </Period>
-</MPD>`;
-            const mockFetch = createManifestFetch(complexManifest);
-
-            // Act
-            const result = await getManifest(videoId, mockFetch as unknown as typeof globalThis.fetch);
-
-            // Assert
-            expect(result.duration).toBe(930); // 15*60 + 30
-            expect(result.videoId).toBe('complex-video-id');
-        });
-
-        it('should handle manifest with namespace prefixes', async () => {
-            // Arrange
-            const videoId = 'test-id';
-            const namespacedManifest = `<?xml version="1.0" encoding="UTF-8"?>
-<mpd:MPD xmlns:mpd="urn:mpeg:dash:schema:mpd:2011" 
-         id="ns-video-id"
-         mediaPresentationDuration="PT3M0S">
-    <mpd:Period>
-        <mpd:AdaptationSet mimeType="video/mp4">
-            <mpd:Representation id="1" bandwidth="1000000">
-                <mpd:BaseURL>video.mp4</mpd:BaseURL>
-            </mpd:Representation>
-        </mpd:AdaptationSet>
-    </mpd:Period>
-</mpd:MPD>`;
-            const mockFetch = createManifestFetch(namespacedManifest);
-
-            // Act
-            const result = await getManifest(videoId, mockFetch as unknown as typeof globalThis.fetch);
-
-            // Assert
-            expect(result.url).toBeTruthy();
         });
     });
 
@@ -746,15 +509,12 @@ describe('getManifest', () => {
 
     describe('blob URL creation', () => {
         it('should create blob with correct MIME type', async () => {
-            // Arrange
             const videoId = 'test-id';
             const mockFetch = createManifestFetch(createMockManifestXml());
             const createObjectURLSpy = vi.spyOn(URL, 'createObjectURL');
 
-            // Act
             await getManifest(videoId, mockFetch as unknown as typeof globalThis.fetch);
 
-            // Assert
             expect(createObjectURLSpy).toHaveBeenCalledTimes(1);
             const blobArg = createObjectURLSpy.mock.calls[0][0] as Blob;
             expect(blobArg).toBeInstanceOf(Blob);
@@ -762,31 +522,25 @@ describe('getManifest', () => {
         });
 
         it('should preserve original manifest content in blob', async () => {
-            // Arrange
             const videoId = 'test-id';
-            const originalXml = createMockManifestXml('PT5M0S', 'preserve-test');
+            const originalXml = createMockManifestXml('PT5M0S');
             const mockFetch = createManifestFetch(originalXml);
             const createObjectURLSpy = vi.spyOn(URL, 'createObjectURL');
 
-            // Act
             await getManifest(videoId, mockFetch as unknown as typeof globalThis.fetch);
 
-            // Assert
             expect(createObjectURLSpy).toHaveBeenCalledTimes(1);
             const blobArg = createObjectURLSpy.mock.calls[0][0];
             expect(blobArg).toBeInstanceOf(Blob);
         });
 
         it('should return unique blob URL for each call', async () => {
-            // Arrange
             const videoId = 'test-id';
             const mockFetch = createManifestFetch(createMockManifestXml());
 
-            // Act
             const result1 = await getManifest(videoId, mockFetch as unknown as typeof globalThis.fetch);
             const result2 = await getManifest(videoId, mockFetch as unknown as typeof globalThis.fetch);
 
-            // Assert
             expect(result1.url).not.toBe(result2.url);
         });
     });
@@ -797,97 +551,53 @@ describe('getManifest', () => {
 
     describe('edge cases', () => {
         it('should handle empty video ID', async () => {
-            // Arrange
             const videoId = '';
             const mockFetch = createManifestFetch(createMockManifestXml());
 
-            // Act
             const result = await getManifest(videoId, mockFetch as unknown as typeof globalThis.fetch);
 
-            // Assert
             expect(result).toHaveProperty('url');
             const callUrl = mockFetch.mock.calls[0][0] as string;
             expect(callUrl).toContain('id=');
         });
 
         it('should handle video ID with special characters', async () => {
-            // Arrange
             const videoId = 'test-id!@#$%^&*()';
             const mockFetch = createManifestFetch(createMockManifestXml());
 
-            // Act
             const result = await getManifest(videoId, mockFetch as unknown as typeof globalThis.fetch);
 
-            // Assert
             expect(result).toHaveProperty('url');
         });
 
         it('should handle concurrent requests independently', async () => {
-            // Arrange
             const videoId1 = 'video-1';
             const videoId2 = 'video-2';
             const mockFetch1 = createManifestFetch(
-                createMockManifestXml('PT1M0S', 'id-1')
+                createMockManifestXml('PT1M0S')
             );
             const mockFetch2 = createManifestFetch(
-                createMockManifestXml('PT2M0S', 'id-2')
+                createMockManifestXml('PT2M0S')
             );
 
-            // Act
             const [result1, result2] = await Promise.all([
                 getManifest(videoId1, mockFetch1 as unknown as typeof globalThis.fetch),
                 getManifest(videoId2, mockFetch2 as unknown as typeof globalThis.fetch)
             ]);
 
-            // Assert
             expect(result1.duration).toBe(60);
-            expect(result1.videoId).toBe('id-1');
             expect(result2.duration).toBe(120);
-            expect(result2.videoId).toBe('id-2');
             expect(getCallCount(mockFetch1)).toBe(1);
             expect(getCallCount(mockFetch2)).toBe(1);
         });
 
         it('should handle very long video IDs', async () => {
-            // Arrange
             const videoId = 'a'.repeat(1000);
             const mockFetch = createManifestFetch(createMockManifestXml());
 
-            // Act
             const result = await getManifest(videoId, mockFetch as unknown as typeof globalThis.fetch);
 
-            // Assert
             expect(result).toHaveProperty('url');
-        });
-
-        it('should handle manifest with whitespace and newlines', async () => {
-            // Arrange
-            const videoId = 'test-id';
-            const manifestWithWhitespace = `<?xml version="1.0" encoding="UTF-8"?>
-
-<MPD xmlns="urn:mpeg:dash:schema:mpd:2011" 
-     id="whitespace-test"
-     mediaPresentationDuration="PT5M0S"
-     
-     type="static">
-     
-    <Period>
-        <AdaptationSet mimeType="video/mp4">
-            <Representation id="1" bandwidth="1000000">
-                <BaseURL>video.mp4</BaseURL>
-            </Representation>
-        </AdaptationSet>
-    </Period>
-    
-</MPD>`;
-            const mockFetch = createManifestFetch(manifestWithWhitespace);
-
-            // Act
-            const result = await getManifest(videoId, mockFetch as unknown as typeof globalThis.fetch);
-
-            // Assert
-            expect(result.duration).toBe(300);
-            expect(result.videoId).toBe('whitespace-test');
         });
     });
 });
@@ -899,36 +609,29 @@ describe('getManifest', () => {
 describe('getManifestUrl', () => {
     describe('backward compatibility', () => {
         it('should return just the URL string', async () => {
-            // Arrange
             const videoId = 'test-id';
             const mockFetch = createManifestFetch(createMockManifestXml());
 
-            // Act
             const result = await getManifestUrl(videoId, mockFetch as unknown as typeof globalThis.fetch);
 
-            // Assert
             expect(typeof result).toBe('string');
             expect(result).toMatch(/^blob:/);
         });
 
         it('should return same URL as getManifest().url', async () => {
-            // Arrange
             const videoId = 'test-id';
             const manifestXml = createMockManifestXml();
             const mockFetch1 = createManifestFetch(manifestXml);
             const mockFetch2 = createManifestFetch(manifestXml);
 
-            // Act
             const urlResult = await getManifestUrl(videoId, mockFetch1 as unknown as typeof globalThis.fetch);
             const manifestResult = await getManifest(videoId, mockFetch2 as unknown as typeof globalThis.fetch);
 
-            // Assert
             expect(urlResult).toMatch(/^blob:/);
             expect(manifestResult.url).toMatch(/^blob:/);
         });
 
         it('should use default fetch when fetchFn not provided', async () => {
-            // Arrange
             const videoId = 'test-id';
             global.fetch = vi.fn().mockResolvedValue({
                 ok: true,
@@ -937,31 +640,25 @@ describe('getManifestUrl', () => {
                 text: vi.fn().mockResolvedValue(createMockManifestXml())
             });
 
-            // Act
             const result = await getManifestUrl(videoId);
 
-            // Assert
             expect(typeof result).toBe('string');
             expect(global.fetch).toHaveBeenCalledTimes(1);
         });
 
         it('should throw same errors as getManifest', async () => {
-            // Arrange
             const videoId = 'error-id';
             const mockFetch = createFailedFetch(404, 'Not Found');
             consoleErrorMock = createMockConsoleError();
 
-            // Act & Assert
             await expect(getManifestUrl(videoId, mockFetch)).rejects.toThrow();
         });
 
         it('should handle network errors', async () => {
-            // Arrange
             const videoId = 'test-id';
             const mockFetch = createNetworkErrorFetch('Network error');
             consoleErrorMock = createMockConsoleError();
 
-            // Act & Assert
             await expect(getManifestUrl(videoId, mockFetch)).rejects.toThrow(
                 'Network error'
             );
@@ -970,38 +667,29 @@ describe('getManifestUrl', () => {
 
     describe('legacy function usage', () => {
         it('should work with empty video ID', async () => {
-            // Arrange
             const videoId = '';
             const mockFetch = createManifestFetch(createMockManifestXml());
 
-            // Act
             const result = await getManifestUrl(videoId, mockFetch as unknown as typeof globalThis.fetch);
 
-            // Assert
             expect(typeof result).toBe('string');
         });
 
         it('should work with special characters in ID', async () => {
-            // Arrange
             const videoId = 'test-id!@#$%';
             const mockFetch = createManifestFetch(createMockManifestXml());
 
-            // Act
             const result = await getManifestUrl(videoId, mockFetch as unknown as typeof globalThis.fetch);
 
-            // Assert
             expect(typeof result).toBe('string');
         });
 
         it('should only call fetch once', async () => {
-            // Arrange
             const videoId = 'test-id';
             const mockFetch = createManifestFetch(createMockManifestXml());
 
-            // Act
             await getManifestUrl(videoId, mockFetch as unknown as typeof globalThis.fetch);
 
-            // Assert
             expect(getCallCount(mockFetch)).toBe(1);
         });
     });

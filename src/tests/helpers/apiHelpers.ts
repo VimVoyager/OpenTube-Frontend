@@ -30,13 +30,6 @@ export function mockStaticEnv() {
     });
 }
 
-export function mockDynamicEnv() {
-    vi.mock('$env/dynamic/public', () => ({
-        PUBLIC_API_URL: 'http://localhost:8000'
-    }));
-}
-
-
 // =============================================================================
 // Mock Fetch Helpers
 // =============================================================================
