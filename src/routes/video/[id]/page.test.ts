@@ -7,7 +7,7 @@ import { getRelatedStreams } from '$lib/api/related';
 import { getVideoThumbnails } from '$lib/api/thumbnails';
 import { adaptPlayerConfig } from '$lib/adapters/player';
 import { adaptVideoMetadata } from '$lib/adapters/metadata';
-import { adaptRelatedVideos } from '$lib/adapters/relatedVideos';
+import { adaptRelatedVideos } from '$lib/adapters/related';
 // import { mockStaticEnv } from '../../../tests/helpers/apiHelpers';
 
 vi.mock('$env/static/public', () => {

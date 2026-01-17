@@ -3,7 +3,7 @@ import { getVideoDetails } from '$lib/api/details';
 import { getRelatedStreams } from '$lib/api/related';
 import { adaptPlayerConfig } from '$lib/adapters/player';
 import { adaptVideoMetadata } from '$lib/adapters/metadata';
-import { adaptRelatedVideos } from '$lib/adapters/relatedVideos';
+import { adaptRelatedVideos } from '$lib/adapters/related';
 import thumbnailPlaceholder from '$lib/assets/thumbnail-placeholder.jpg';
 import logoPlaceholder from '$lib/assets/logo-placeholder.svg';
 import { getManifest } from '$lib/api/manifest';
