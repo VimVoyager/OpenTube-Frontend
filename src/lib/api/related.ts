@@ -1,6 +1,5 @@
-import type { RelatedItem } from "$lib/types";
-import { PUBLIC_API_URL } from '$env/static/public';
 import type { RelatedItemResponse } from '$lib/api/types';
+import { PUBLIC_API_URL } from '$env/static/public';
 
 const API_BASE_URL = PUBLIC_API_URL;
 

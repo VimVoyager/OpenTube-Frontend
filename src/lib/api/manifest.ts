@@ -1,17 +1,8 @@
 import { PUBLIC_API_URL } from '$env/static/public';
 import { DOMParser } from '@xmldom/xmldom';
+import type { ManifestResponse } from '$lib/api/types';
 
 const API_BASE_URL = PUBLIC_API_URL;
-
-
-/**
- * Manifest response containing both blob URL and parsed metadata
- */
-export interface ManifestResponse {
-	url: string;
-	duration: number;
-	videoId?: string;
-}
 
 /**
  * Parse ISO 8601 duration format (PT2M56S) to seconds

@@ -55,3 +55,12 @@ export interface RelatedItemResponse {
 	uploaderVerified: boolean;
 	shortFormContent: boolean;
 }
+
+/**
+ * Manifest response containing both blob URL and parsed metadata
+ */
+export interface ManifestResponse {
+	url: string;
+	duration: number;
+	videoId?: string;
+}

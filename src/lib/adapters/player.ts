@@ -1,8 +1,5 @@
 import type { VideoPlayerConfig } from './types';
 
-
-
-
 /**
  * Adapt video and audio streams into player configuration
  */
