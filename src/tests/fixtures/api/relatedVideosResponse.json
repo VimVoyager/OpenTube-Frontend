@@ -1,0 +1,138 @@
+[
+	{
+		"infoType": "STREAM",
+		"serviceId": 0,
+		"url": "https://www.youtube.com/watch?v=heartbeat-id",
+		"name": "MURDER DRONES - Heartbeat",
+		"thumbnails": [
+			{
+				"url": "https://i.ytimg.com/vi/heartbeat-id/hqdefault.jpg/sm",
+				"height": 94,
+				"width": 168,
+				"estimatedResolutionLevel": "LOW"
+			},
+			{
+				"url": "https://i.ytimg.com/vi/heartbeat-id/hqdefault.jpg/md",
+				"height": 188,
+				"width": 336,
+				"estimatedResolutionLevel": "MEDIUM"
+			}
+		],
+		"streamType": "VIDEO_STREAM",
+		"uploaderName": "GLITCH",
+		"textualUploadDate": "3 years ago",
+		"uploadDate": {
+			"approximation": true
+		},
+		"viewCount": 39000000,
+		"duration": 1049,
+		"uploaderUrl": "https://www.youtube.com/channel/channel-id",
+		"uploaderAvatars": [
+			{
+				"url": "https://yt3.ggpht.com/random-unicode-characters",
+				"height": 68,
+				"width": 68,
+				"estimatedResolutionLevel": "LOW"
+			}
+		],
+		"uploaderVerified": true,
+		"shortFormContent": false
+	},
+	{
+		"infoType": "STREAM",
+		"serviceId": 0,
+		"url": "https://www.youtube.com/watch?v=pilot-id",
+		"name": "KNIGHTS OF GUINEVERE - Pilot",
+		"thumbnails": [
+			{
+				"url": "https://i.ytimg.com/vi/pilot-id/hqdefault.jpg",
+				"height": 94,
+				"width": 168,
+				"estimatedResolutionLevel": "LOW"
+			},
+			{
+				"url": "https://i.ytimg.com/vi/pilot-id/hqdefault.jpg",
+				"height": 188,
+				"width": 336,
+				"estimatedResolutionLevel": "MEDIUM"
+			}
+		],
+		"streamType": "VIDEO_STREAM",
+		"uploaderName": "GLITCH",
+		"textualUploadDate": "3 months ago",
+		"uploadDate": {
+			"approximation": true
+		},
+		"viewCount": 16000000,
+		"duration": 1588,
+		"uploaderUrl": "https://www.youtube.com/channel/channel-id",
+		"uploaderAvatars": [
+			{
+				"url": "https://yt3.ggpht.com/random-unicode-characters",
+				"height": 68,
+				"width": 68,
+				"estimatedResolutionLevel": "LOW"
+			}
+		],
+		"uploaderVerified": true,
+		"shortFormContent": false
+	},
+	{
+		"infoType": "STREAM",
+		"serviceId": 0,
+		"url": "",
+		"name": "MURDER DRONES - The Promening",
+		"thumbnails": [],
+		"streamType": "VIDEO_STREAM",
+		"uploaderName": "",
+		"textualUploadDate": "",
+		"uploadDate": {
+			"approximation": true
+		},
+		"viewCount": 0,
+		"duration": 0,
+		"uploaderUrl": "",
+		"uploaderAvatars": [],
+		"uploaderVerified": true,
+		"shortFormContent": false
+	},
+	{
+		"infoType": "STREAM",
+		"serviceId": 0,
+		"url": "https://www.youtube.com/watch?v=cabin-fever-id",
+		"name": "MURDER DRONES - Cabin Fever",
+		"thumbnails": [
+			{
+				"url": "https://i.ytimg.com/vi/cabin-fever-id/hqdefault.jpg",
+				"height": 94,
+				"width": 168,
+				"estimatedResolutionLevel": "LOW"
+			},
+			{
+				"url": "https://i.ytimg.com/vi/cabin-fever-id/hqdefault.jpg",
+				"height": 188,
+				"width": 336,
+				"estimatedResolutionLevel": "MEDIUM"
+			}
+		],
+		"streamType": "VIDEO_STREAM",
+		"uploaderName": "GLITCH",
+		"textualUploadDate": "2 years ago",
+		"uploadDate": {
+			"approximation": true
+		},
+		"viewCount": -1,
+		"duration": -1,
+		"uploaderUrl": "https://www.youtube.com/channel/channel-id",
+		"uploaderAvatars": [
+			{
+				"url": "https://yt3.ggpht.com/random-unicode-characters",
+				"height": 68,
+				"width": 68,
+				"estimatedResolutionLevel": "LOW"
+			}
+		],
+		"uploaderVerified": true,
+		"shortFormContent": false
+	}
+]

@@ -1,3 +1,5 @@
+import type { Avatar, Thumbnail } from '$lib/types';
+
 /**
  * API Response for Search
  */
@@ -29,4 +31,27 @@ export interface SearchResponseData {
 	streamType: string;
 	isShortFormContent: boolean;
 	uploaderUrl?: string;
+}
+
+/**
+ * API response for related videos
+ */
+export interface RelatedItemResponse {
+	infoType: string;
+	serviceId: number;
+	url: string;
+	name: string;
+	thumbnails: Thumbnail[];
+	streamType: string;
+	uploaderName: string;
+	textualUploadDate: string;
+	uploadDate?: {
+		approximation: boolean;
+	};
+	viewCount: number;
+	duration: number;
+	uploaderUrl: string;
+	uploaderAvatars: Avatar[];
+	uploaderVerified: boolean;
+	shortFormContent: boolean;
 }

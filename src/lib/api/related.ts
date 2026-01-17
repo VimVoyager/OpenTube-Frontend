@@ -1,5 +1,6 @@
 import type { RelatedItem } from "$lib/types";
 import { PUBLIC_API_URL } from '$env/static/public';
+import type { RelatedItemResponse } from '$lib/api/types';
 
 const API_BASE_URL = PUBLIC_API_URL;
 
@@ -9,7 +10,7 @@ const API_BASE_URL = PUBLIC_API_URL;
 export async function getRelatedStreams(
     id: string,
     fetchFn?: typeof globalThis.fetch
-): Promise<RelatedItem[]> {
+): Promise<RelatedItemResponse[]> {
     const fetcher = fetchFn ?? globalThis.fetch;
 
     try {

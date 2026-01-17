@@ -7,14 +7,14 @@ import { adaptPlayerConfig } from '$lib/adapters/player';
 import { adaptVideoMetadata } from '$lib/adapters/metadata';
 import { adaptRelatedVideos } from '$lib/adapters/relatedVideos';
 import { load } from './+page';
-import { readFile } from 'fs/promises';
-import { join } from 'path';
 import detailsResponseFixture from '../../../tests/fixtures/api/detailsResponseFixture.json'
 import thumbnailsResponseFixture from '../../../tests/fixtures/api/thumbnailsResponseFixture.json';
 import manifestXmlFixture from '../../../tests/fixtures/api/manifestXmlFixture.xml?raw'
+import relatedVideosFixture from '../../../tests/fixtures/api/relatedVideosResponse.json'
 import type { Details, RelatedItem, Thumbnail } from '$lib/types';
 
 import { DOMParser as XMLDomParser } from '@xmldom/xmldom';
+import type { RelatedItemResponse } from '$lib/api/types';
 
 describe('Video Detail Integration Tests', () => {
 	beforeEach(() => {
@@ -170,11 +170,11 @@ describe('Video Detail Integration Tests', () => {
 
 		it('should parse different duration formats', async () => {
 			const testCases = [
-				{ xml: 'duration=PT1H2M3S', expected: 3723 }, // 1h 2m 3s
-				{ xml: 'duration=PT45M', expected: 2700 }, // 45m
-				{ xml: 'duration=PT30S', expected: 30 }, // 30s
-				{ xml: 'duration=PT2H', expected: 7200 }, // 2h
-				{ xml: 'duration=PT1M30.5S', expected: 90.5 } // 1m 30.5s
+				{ xml: 'duration=PT1H2M3S', expected: 3723 },
+				{ xml: 'duration=PT45M', expected: 2700 },
+				{ xml: 'duration=PT30S', expected: 30 },
+				{ xml: 'duration=PT2H', expected: 7200 },
+				{ xml: 'duration=PT1M30.5S', expected: 90.5 }
 			];
 
 			for (const testCase of testCases) {
@@ -220,30 +220,7 @@ describe('Video Detail Integration Tests', () => {
 
 	describe('API + Adapter Integration - Related Videos', () => {
 		it('should fetch and transform related videos correctly', async () => {
-			const mockRelatedVideos: RelatedItem[] = [
-				{
-					url: 'https://youtube.com/watch?v=related1',
-					id: 'related1',
-					name: 'Related Video 1',
-					thumbnails: [{ url: 'https://example.com/thumb1.jpg', height: 180, width: 320 }],
-					uploaderName: 'Related Channel 1',
-					uploaderAvatars: [{ url: 'https://example.com/avatar1.jpg', height: 100, width: 100 }],
-					viewCount: 5000,
-					duration: 180,
-					textualUploadDate: '2 days ago'
-				} as RelatedItem,
-				{
-					url: 'https://youtube.com/watch?v=related2',
-					id: 'related2',
-					name: 'Related Video 2',
-					thumbnails: [{ url: 'https://example.com/thumb2.jpg', height: 180, width: 320 }],
-					uploaderName: 'Related Channel 2',
-					uploaderAvatars: [{ url: 'https://example.com/avatar2.jpg', height: 100, width: 100 }],
-					viewCount: 10000,
-					duration: 240,
-					textualUploadDate: '1 week ago'
-				} as RelatedItem
-			];
+			const mockRelatedVideos: RelatedItemResponse[] = [relatedVideosFixture[0], relatedVideosFixture[1]];
 
 			const mockFetch = vi.fn().mockResolvedValue({
 				ok: true,
@@ -262,15 +239,15 @@ describe('Video Detail Integration Tests', () => {
 			);
 			expect(relatedVideos).toHaveLength(2);
 			expect(relatedVideos[0]).toEqual({
-				id: 'related1',
-				url: 'https://youtube.com/watch?v=related1',
-				title: 'Related Video 1',
-				thumbnail: 'https://example.com/thumb1.jpg',
-				channelName: 'Related Channel 1',
-				channelAvatar: 'https://example.com/avatar1.jpg',
-				viewCount: 5000,
-				duration: 180,
-				uploadDate: '2 days ago'
+				id: "heartbeat-id",
+				url: 'https://www.youtube.com/watch?v=heartbeat-id',
+				title: 'MURDER DRONES - Heartbeat',
+				thumbnail: 'https://i.ytimg.com/vi/heartbeat-id/hqdefault.jpg/md',
+				channelName: 'GLITCH',
+				channelAvatar: 'https://yt3.ggpht.com/random-unicode-characters',
+				viewCount: 39000000,
+				duration: 1049,
+				uploadDate: '3 years ago'
 			});
 		});
 
@@ -303,30 +280,7 @@ describe('Video Detail Integration Tests', () => {
 		});
 
 		it('should filter out invalid related videos', async () => {
-			const mockRelatedVideos: RelatedItem[] = [
-				{
-					url: 'https://youtube.com/watch?v=valid',
-					id: 'valid',
-					name: 'Valid Video',
-					thumbnails: [],
-					uploaderName: 'Channel',
-					uploaderAvatars: [],
-					viewCount: 100,
-					duration: 60,
-					textualUploadDate: 'today'
-				} as RelatedItem,
-				{
-					url: '',
-					id: 'invalid',
-					name: '',
-					thumbnails: [],
-					uploaderName: '',
-					uploaderAvatars: [],
-					viewCount: 0,
-					duration: 0,
-					textualUploadDate: ''
-				} as RelatedItem
-			];
+			const mockRelatedVideos: RelatedItemResponse[] = relatedVideosFixture;
 
 			const mockFetch = vi.fn().mockResolvedValue({
 				ok: true,
@@ -340,8 +294,10 @@ describe('Video Detail Integration Tests', () => {
 				'default-avatar.jpg'
 			);
 
-			expect(relatedVideos).toHaveLength(1);
-			expect(relatedVideos[0].title).toBe('Valid Video');
+			expect(relatedVideos).toHaveLength(3);
+			expect(relatedVideos[0].title).toBe('MURDER DRONES - Heartbeat');
+			expect(relatedVideos[1].title).toBe('KNIGHTS OF GUINEVERE - Pilot');
+			expect(relatedVideos[2].title).toBe('MURDER DRONES - Cabin Fever');
 		});
 
 		it('should handle empty related videos', async () => {
@@ -361,19 +317,7 @@ describe('Video Detail Integration Tests', () => {
 		});
 
 		it('should handle negative counts in related videos', async () => {
-			const mockRelatedVideos: RelatedItem[] = [
-				{
-					url: 'https://youtube.com/watch?v=test',
-					id: 'test',
-					name: 'Test Video',
-					thumbnails: [],
-					uploaderName: 'Channel',
-					uploaderAvatars: [],
-					viewCount: -1,
-					duration: -1,
-					textualUploadDate: ''
-				} as RelatedItem
-			];
+			const mockRelatedVideos: RelatedItemResponse[] = [relatedVideosFixture[3]];
 
 			const mockFetch = vi.fn().mockResolvedValue({
 				ok: true,
