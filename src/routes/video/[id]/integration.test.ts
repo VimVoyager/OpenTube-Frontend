@@ -16,6 +16,11 @@ import type { Details, Thumbnail } from '$lib/types';
 import type { RelatedItemResponse } from '$lib/api/types';
 import type { VideoPageData } from '../../types';
 
+const createMockManifestXml = (duration: string = 'PT2M56S'): string =>
+	manifestXmlFixture
+		.replace('STANDARD_DURATION', `duration="${duration}"`)
+		.replace('MEDIA_PRESENTATION_DURATION', `mediaPresentationDuration="${duration}"`);
+
 describe('Video Detail Integration Tests', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -154,10 +159,9 @@ describe('Video Detail Integration Tests', () => {
 
 	describe('API + Adapter Integration - Manifest', () => {
 		it('should fetch and parse DASH manifest correctly', async () => {
-			const mockManifestXml = manifestXmlFixture.replace('{{DURATION}}', 'duration=PT1H2M3S');
 			const mockFetch = vi.fn().mockResolvedValue({
 				ok: true,
-				text: async () => mockManifestXml
+				text: async () => createMockManifestXml('PT1H2M3S')
 			});
 
 			const manifest = await getManifest('test-id', mockFetch);
@@ -170,19 +174,17 @@ describe('Video Detail Integration Tests', () => {
 
 		it('should parse different duration formats', async () => {
 			const testCases = [
-				{ xml: 'duration=PT1H2M3S', expected: 3723 },
-				{ xml: 'duration=PT45M', expected: 2700 },
-				{ xml: 'duration=PT30S', expected: 30 },
-				{ xml: 'duration=PT2H', expected: 7200 },
-				{ xml: 'duration=PT1M30.5S', expected: 90.5 }
+				{ xml: 'PT1H2M3S', expected: 3723 },
+				{ xml: 'PT45M', expected: 2700 },
+				{ xml: 'PT30S', expected: 30 },
+				{ xml: 'PT2H', expected: 7200 },
+				{ xml: 'PT1M30.5S', expected: 90.5 }
 			];
 
 			for (const testCase of testCases) {
-				const mockManifestXml = manifestXmlFixture.replace('{{DURATION}}', testCase.xml);
-
 				const mockFetch = vi.fn().mockResolvedValue({
 					ok: true,
-					text: async () => mockManifestXml
+					text: async () => createMockManifestXml(testCase.xml)
 				});
 
 				const manifest = await getManifest('test-id', mockFetch);
@@ -191,11 +193,9 @@ describe('Video Detail Integration Tests', () => {
 		});
 
 		it('should handle manifest without duration', async () => {
-			const mockManifestXml = manifestXmlFixture.replace('{{DURATION}}', '');
-
 			const mockFetch = vi.fn().mockResolvedValue({
 				ok: true,
-				text: async () => mockManifestXml
+				text: async () => createMockManifestXml('')
 			});
 
 			const manifest = await getManifest('test-id', mockFetch);
@@ -340,14 +340,13 @@ describe('Video Detail Integration Tests', () => {
 		it('should load complete video page data through full pipeline', async () => {
 			const mockThumbnails: Thumbnail[] = thumbnailsResponseFixture;
 			const mockDetails: Details = detailsResponseFixture[0];
-			const mockManifestXml = manifestXmlFixture.replace('{{DURATION}}', 'duration=PT1H2M3S');
 			const mockRelatedVideos: RelatedItemResponse[] = relatedVideosFixture;
 
 			const mockFetch = vi
 				.fn()
 				.mockResolvedValueOnce({ ok: true, json: async () => mockThumbnails })
 				.mockResolvedValueOnce({ ok: true, json: async () => mockDetails })
-				.mockResolvedValueOnce({ ok: true, text: async () => mockManifestXml })
+				.mockResolvedValueOnce({ ok: true, text: async () => createMockManifestXml('PT1H2M3S') })
 				.mockResolvedValueOnce({ ok: true, json: async () => mockRelatedVideos });
 
 			const result = await load({
@@ -422,7 +421,10 @@ describe('Video Detail Integration Tests', () => {
 		it('should continue loading even if related videos fail', async () => {
 			const mockThumbnails: Thumbnail[] = thumbnailsResponseFixture;
 			const mockDetails: Details = detailsResponseFixture[0];
-			const mockManifestXml = manifestXmlFixture.replace('{{DURATION}}', 'duration=PT1H2M3S');
+			const mockManifestXml = manifestXmlFixture
+				.replace('STANDARD_DURATION', 'duration="PT1H2M3S"')
+			;
+			console.log('mockManifestXml: ', mockManifestXml);
 
 			const mockFetch = vi
 				.fn()
@@ -448,3 +450,4 @@ describe('Video Detail Integration Tests', () => {
 		});
 	});
 });
+

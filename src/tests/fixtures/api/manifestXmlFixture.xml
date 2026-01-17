@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <MPD xmlns="urn:mpeg:dash:schema:mpd:2011"
      type="static"
-     mediaPresentationDuration="{{DURATION}}"
+     MEDIA_PRESENTATION_DURATION
      minBufferTime="PT2S"
      profiles="urn:mpeg:dash:profile:isoff-on-demand:2011">
-    <Period "{{DURATION}}">
+    <Period STANDARD_DURATION>
         <AdaptationSet
                 id="0"
                 contentType="video"
