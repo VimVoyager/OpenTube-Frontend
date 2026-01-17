@@ -1,0 +1,57 @@
+[
+	{
+		"id": "heartbeat-id",
+		"url": "https://www.youtube.com/watch?v=heartbeat-id",
+		"title": "MURDER DRONES - Heartbeat",
+		"thumbnail": "https://i.ytimg.com/vi/heartbeat-id/hqdefault.jpg/md",
+		"channelName": "GLITCH",
+		"channelAvatar": "https://yt3.ggpht.com/random-unicode-characters/md",
+		"viewCount": 39000000,
+		"duration": 1049,
+		"uploadDate": "3 years ago"
+	},
+	{
+		"id": "pilot-id",
+		"url": "https://www.youtube.com/watch?v=pilot-id",
+		"title": "KNIGHTS OF GUINEVERE - Pilot",
+		"thumbnail": "https://i.ytimg.com/vi/heartbeat-id/hqdefault.jpg/md",
+		"channelName": "GLITCH",
+		"channelAvatar": "https://yt3.ggpht.com/random-unicode-characters",
+		"viewCount": 16000000,
+		"duration": 1588,
+		"uploadDate": "3 month ago"
+	},
+	{
+		"id": "promening-id",
+		"url": "",
+		"title": "",
+		"thumbnail": "",
+		"channelName": "",
+		"channelAvatar": "",
+		"viewCount": 0,
+		"duration": 0,
+		"uploadDate": ""
+	},
+	{
+		"id": "cabin-fever-id",
+		"url": "https://www.youtube.com/watch?v=cabin-fever-id",
+		"title": "MURDER DRONES - Cabin Fever",
+		"thumbnail": "thumbnail-placeholder.jpg",
+		"channelName": "GLITCH",
+		"channelAvatar": "https://yt3.ggpht.com/random-unicode-characters",
+		"viewCount": 0,
+		"duration": 0,
+		"uploadDate": "2 years ago"
+	},
+	{
+		"id": "they-all-get-guns-id",
+		"url": "https://www.youtube.com/watch?v=they-all-get-guns-id",
+		"title": "THE AMAZING DIGITAL CIRCUS - They All Get Guns",
+		"thumbnail": "https://i.ytimg.com/vi/they-all-get-guns-id/hqdefault.jpg/md",
+		"channelName": "",
+		"channelAvatar": "https://yt3.ggpht.com/random-unicode-characters",
+		"viewCount": -1,
+		"duration": -1,
+		"uploadDate": ""
+	}
+]

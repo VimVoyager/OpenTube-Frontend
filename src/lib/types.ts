@@ -113,19 +113,16 @@ export interface Avatar {
 
 export interface RelatedItem {
 	id: string;
-	infoType: string;
 	url: string;
-	name: string;
-	thumbnails: Thumbnail[];
-	streamType: string;
-	uploaderName: string;
-	textualUploadDate: string;
+	title: string;
+	thumbnail: string;
+	channelName: string;
+	uploadDate: string;
 	viewCount: number;
 	duration: number;
-	uploaderUrl: string;
-	uploaderAvatars: Avatar[];
-	uploaderSubscriberCount: number;
-	shortFormContent: boolean;
+	channelUrl?: string;
+	channelAvatar: string;
+	shortFormContent?: boolean;
 }
 
 export interface Subtitle {

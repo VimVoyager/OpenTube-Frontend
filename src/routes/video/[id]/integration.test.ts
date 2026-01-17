@@ -6,7 +6,7 @@ import { getRelatedStreams } from '$lib/api/related';
 import { getVideoThumbnails } from '$lib/api/thumbnails';
 import { adaptPlayerConfig } from '$lib/adapters/player';
 import { adaptVideoMetadata } from '$lib/adapters/metadata';
-import { adaptRelatedVideos } from '$lib/adapters/relatedVideos';
+import { adaptRelatedVideos } from '$lib/adapters/related';
 import { load } from './+page';
 import detailsResponseFixture from '../../../tests/fixtures/api/detailsResponseFixture.json'
 import thumbnailsResponseFixture from '../../../tests/fixtures/api/thumbnailsResponseFixture.json';
@@ -244,7 +244,7 @@ describe('Video Detail Integration Tests', () => {
 				title: 'MURDER DRONES - Heartbeat',
 				thumbnail: 'https://i.ytimg.com/vi/heartbeat-id/hqdefault.jpg/md',
 				channelName: 'GLITCH',
-				channelAvatar: 'https://yt3.ggpht.com/random-unicode-characters',
+				channelAvatar: 'https://yt3.ggpht.com/random-unicode-characters/md',
 				viewCount: 39000000,
 				duration: 1049,
 				uploadDate: '3 years ago'
@@ -294,7 +294,7 @@ describe('Video Detail Integration Tests', () => {
 				'default-avatar.jpg'
 			);
 
-			expect(relatedVideos).toHaveLength(3);
+			expect(relatedVideos).toHaveLength(4);
 			expect(relatedVideos[0].title).toBe('MURDER DRONES - Heartbeat');
 			expect(relatedVideos[1].title).toBe('KNIGHTS OF GUINEVERE - Pilot');
 			expect(relatedVideos[2].title).toBe('MURDER DRONES - Cabin Fever');
@@ -375,7 +375,7 @@ describe('Video Detail Integration Tests', () => {
 			expect(result.metadata.viewCount).toBe(10000);
 
 			// Verify related videos
-			expect(result.relatedVideos).toHaveLength(3);
+			expect(result.relatedVideos).toHaveLength(4);
 			expect(result.relatedVideos[0].title).toBe('MURDER DRONES - Heartbeat');
 
 			// Verify no error

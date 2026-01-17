@@ -29,10 +29,16 @@
 		"uploaderUrl": "https://www.youtube.com/channel/channel-id",
 		"uploaderAvatars": [
 			{
-				"url": "https://yt3.ggpht.com/random-unicode-characters",
+				"url": "https://yt3.ggpht.com/random-unicode-characters/sm",
 				"height": 68,
 				"width": 68,
 				"estimatedResolutionLevel": "LOW"
+			},
+			{
+				"url": "https://yt3.ggpht.com/random-unicode-characters/md",
+				"height": 85,
+				"width": 85,
+				"estimatedResolutionLevel": "MEDIUM"
 			}
 		],
 		"uploaderVerified": true,
@@ -45,13 +51,13 @@
 		"name": "KNIGHTS OF GUINEVERE - Pilot",
 		"thumbnails": [
 			{
-				"url": "https://i.ytimg.com/vi/pilot-id/hqdefault.jpg",
+				"url": "https://i.ytimg.com/vi/pilot-id/hqdefault.jpg/sm",
 				"height": 94,
 				"width": 168,
 				"estimatedResolutionLevel": "LOW"
 			},
 			{
-				"url": "https://i.ytimg.com/vi/pilot-id/hqdefault.jpg",
+				"url": "https://i.ytimg.com/vi/pilot-id/hqdefault.jpg/md",
 				"height": 188,
 				"width": 336,
 				"estimatedResolutionLevel": "MEDIUM"
@@ -81,7 +87,7 @@
 		"infoType": "STREAM",
 		"serviceId": 0,
 		"url": "",
-		"name": "MURDER DRONES - The Promening",
+		"name": "",
 		"thumbnails": [],
 		"streamType": "VIDEO_STREAM",
 		"uploaderName": "",
@@ -101,23 +107,42 @@
 		"serviceId": 0,
 		"url": "https://www.youtube.com/watch?v=cabin-fever-id",
 		"name": "MURDER DRONES - Cabin Fever",
-		"thumbnails": [
-			{
-				"url": "https://i.ytimg.com/vi/cabin-fever-id/hqdefault.jpg",
-				"height": 94,
-				"width": 168,
-				"estimatedResolutionLevel": "LOW"
-			},
-			{
-				"url": "https://i.ytimg.com/vi/cabin-fever-id/hqdefault.jpg",
-				"height": 188,
-				"width": 336,
-				"estimatedResolutionLevel": "MEDIUM"
-			}
-		],
+		"thumbnails": [],
 		"streamType": "VIDEO_STREAM",
 		"uploaderName": "GLITCH",
 		"textualUploadDate": "2 years ago",
+		"uploadDate": {
+			"approximation": true
+		},
+		"viewCount": -1,
+		"duration": -1,
+		"uploaderUrl": "https://www.youtube.com/channel/channel-id",
+		"uploaderAvatars": [],
+		"uploaderVerified": true,
+		"shortFormContent": false
+	},
+	{
+		"infoType": "STREAM",
+		"serviceId": 0,
+		"url": "https://www.youtube.com/watch?v=they-all-get-guns-id",
+		"name": "THE AMAZING DIGITAL CIRCUS - They All Get Guns",
+		"thumbnails": [
+				{
+					"url": "https://i.ytimg.com/vi/they-all-get-guns-id/hqdefault.jpg/sm",
+					"height": 94,
+					"width": 168,
+					"estimatedResolutionLevel": "LOW"
+				},
+				{
+					"url": "https://i.ytimg.com/vi/they-all-get-guns-id/hqdefault.jpg/md",
+					"height": 188,
+					"width": 336,
+					"estimatedResolutionLevel": "MEDIUM"
+				}
+		],
+		"streamType": "VIDEO_STREAM",
+		"uploaderName": "",
+		"textualUploadDate": "",
 		"uploadDate": {
 			"approximation": true
 		},
