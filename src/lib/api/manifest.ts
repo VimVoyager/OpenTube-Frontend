@@ -56,8 +56,9 @@ export async function getManifest(
         
         const durationStr = mpdElement?.getAttribute('mediaPresentationDuration');
         const duration = durationStr ? parseDuration(durationStr) : 0;
-        
-        const videoId = mpdElement?.getAttribute('id');
+
+				const adaptationSet = xmlDoc.getElementsByTagNameNS('urn:mpeg:dash:schema:mpd:2011', 'AdaptationSet')[0];
+        const videoId = adaptationSet?.getAttribute('id');
         
         const blob = new Blob([manifestXml], { type: 'application/dash+xml' });
         const url = URL.createObjectURL(blob);

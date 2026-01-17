@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MPD xmlns="urn:mpeg:dash:schema:mpd:2011"
+     type="static"
+     mediaPresentationDuration="{{DURATION}}"
+     minBufferTime="PT2S"
+     profiles="urn:mpeg:dash:profile:isoff-on-demand:2011">
+    <Period "{{DURATION}}">
+        <AdaptationSet
+                id="0"
+                contentType="video"
+                mimeType="video/webm"
+                subsegmentAlignment="true"
+                startWithSAP="1">
+            <Representation
+                    id="video-2"
+                    bandwidth="4341249"
+                    codecs="avc1.640028"
+                    width="1920"
+                    height="1080"
+                    frameRate="30">
+                <BaseURL>https://rr2---sn-8pgbpohxqp5-cimy.googlevideo.com/videoplayback/1080</BaseURL>
+                <SegmentBase indexRange="742-4517">
+                    <Initialization range="0-741"/>
+                </SegmentBase>
+            </Representation>
+            <Representation
+                    id="video-3"
+                    bandwidth="2218656"
+                    codecs="avc1.4d401f"
+                    width="1280"
+                    height="720"
+                    frameRate="30">
+                <BaseURL>https://rr2---sn-8pgbpohxqp5-cimy.googlevideo.com/videoplayback/720</BaseURL>
+                <SegmentBase indexRange="740-4515">
+                    <Initialization range="0-739"/>
+                </SegmentBase>
+            </Representation>
+        </AdaptationSet>
+        <AdaptationSet
+                id="1"
+                contentType="audio"
+                mimeType="audio/mp4"
+                lang="en"
+                label="English"
+                subsegmentAlignment="true"
+                startWithSAP="1">
+            <Representation
+                    id="audio-1"
+                    bandwidth="131932"
+                    codecs="mp4a.40.2"
+                    audioSamplingRate="44100">
+                <AudioChannelConfiguration
+                        schemeIdUri="urn:mpeg:dash:23003:3:audio_channel_configuration:2011"
+                        value="2"/>
+                <BaseURL>https://rr2---sn-8pgbpohxqp5-cimy.googlevideo.com/videoplayback?expire=1768624022&amp;ei=NrtqaYe9JP6pkdUPr-aCmQE&amp;ip=82.10.49.220&amp;id=o-AH6hZmnC718Ep8p7rylqfvInRyKOdK8qSsxTZwlg0Npo&amp;itag=140&amp;source=youtube&amp;requiressl=yes&amp;xpc=EgVo2aDSNQ%3D%3D&amp;cps=133&amp;met=1768602422%2C&amp;mh=Xc&amp;mm=31%2C29&amp;mn=sn-8pgbpohxqp5-cimy%2Csn-8pgbpohxqp5-aiges&amp;ms=au%2Crdu&amp;mv=m&amp;mvi=2&amp;pl=22&amp;rms=au%2Cau&amp;initcwndbps=4082500&amp;bui=AW-iu_rquPeBTTwUnHcMKjv1-kFc60kBYqELWYd8jqeSrQ_qeumwx8Y_HGSCIhbO84lbamuyEcs2afgH&amp;spc=q5xjPI63w_prkBj3eqtabVLVTMi7Rmbz6SWP3ws4v13p0McZcII&amp;vprv=1&amp;svpuc=1&amp;xtags=acont%3Doriginal%3Alang%3Den&amp;mime=audio%2Fmp4&amp;rqh=1&amp;gir=yes&amp;clen=26143245&amp;dur=1615.319&amp;lmt=1726390247088765&amp;mt=1768602065&amp;fvip=1&amp;keepalive=yes&amp;fexp=51552689%2C51565115%2C51565681%2C51580968%2C51626155&amp;c=ANDROID&amp;txp=4532434&amp;sparams=expire%2Cei%2Cip%2Cid%2Citag%2Csource%2Crequiressl%2Cxpc%2Cbui%2Cspc%2Cvprv%2Csvpuc%2Cxtags%2Cmime%2Crqh%2Cgir%2Cclen%2Cdur%2Clmt&amp;sig=AJfQdSswRgIhAImVxCC2QY5oHKvYgrwgRSnRc2bxs1qkyvzMrynDHIpLAiEAs3UoXLkgCk4QU7liNnl2zfASW7Phl_U-0WX_sySIw2g%3D&amp;lsparams=cps%2Cmet%2Cmh%2Cmm%2Cmn%2Cms%2Cmv%2Cmvi%2Cpl%2Crms%2Cinitcwndbps&amp;lsig=APaTxxMwRQIhAK0vJc7YIC5CPA1NDjUHJz9HFqNhYGyM_47CX3syiIB1AiAEN2lSLczC-xz9SM0V1KPwkZLUxUG2D9rbPj1qMSzdHg%3D%3D&amp;cpn=UaomV9xNQvyc9GGe</BaseURL>
+                <SegmentBase indexRange="723-2698">
+                    <Initialization range="0-722"/>
+                </SegmentBase>
+            </Representation>
+        </AdaptationSet>
+        <AdaptationSet
+                id="102"
+                contentType="text"
+                lang="en"
+                mimeType="application/ttml+xml">
+            <Role schemeIdUri="urn:mpeg:dash:role:2011" value="subtitles"/>
+            <Representation id="subtitle-1" bandwidth="256">
+                <BaseURL>https://www.youtube.com/api/timedtext?v=mImFz8mkaHo&amp;ei=NrtqaYe9JP6pkdUPr-aCmQE&amp;caps=asr&amp;opi=112496729&amp;xoaf=5&amp;xowf=1&amp;hl=en-GB&amp;ip=0.0.0.0&amp;ipbits=0&amp;expire=1768627622&amp;sparams=ip,ipbits,expire,v,ei,caps,opi,xoaf&amp;signature=3AC7670248FEC25FC4192520B5BD64E8DE264E4D.CEA5DC1AFF5EC812612A4DDA73B6B355BB132F90&amp;key=yt8&amp;lang=en&amp;fmt=ttml</BaseURL>
+            </Representation>
+        </AdaptationSet>
+    </Period>
+</MPD>

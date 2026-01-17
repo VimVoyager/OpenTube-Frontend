@@ -7,8 +7,11 @@ import { adaptPlayerConfig } from '$lib/adapters/player';
 import { adaptVideoMetadata } from '$lib/adapters/metadata';
 import { adaptRelatedVideos } from '$lib/adapters/relatedVideos';
 import { load } from './+page';
+import { readFile } from 'fs/promises';
+import { join } from 'path';
 import detailsResponseFixture from '../../../tests/fixtures/api/detailsResponseFixture.json'
 import thumbnailsResponseFixture from '../../../tests/fixtures/api/thumbnailsResponseFixture.json';
+import manifestXmlFixture from '../../../tests/fixtures/api/manifestXmlFixture.xml?raw'
 import type { Details, RelatedItem, Thumbnail } from '$lib/types';
 
 import { DOMParser as XMLDomParser } from '@xmldom/xmldom';
@@ -151,16 +154,7 @@ describe('Video Detail Integration Tests', () => {
 
 	describe('API + Adapter Integration - Manifest', () => {
 		it('should fetch and parse DASH manifest correctly', async () => {
-			const mockManifestXml = `<?xml version="1.0" encoding="UTF-8"?>
-<MPD xmlns="urn:mpeg:dash:schema:mpd:2011" mediaPresentationDuration="PT5M30S" id="video123">
-  <Period>
-    <AdaptationSet>
-      <Representation id="video" bandwidth="1000000">
-      </Representation>
-    </AdaptationSet>
-  </Period>
-</MPD>`;
-
+			const mockManifestXml = manifestXmlFixture.replace('{{DURATION}}', 'duration=PT1H2M3S');
 			const mockFetch = vi.fn().mockResolvedValue({
 				ok: true,
 				text: async () => mockManifestXml
@@ -170,27 +164,25 @@ describe('Video Detail Integration Tests', () => {
 
 			expect(mockFetch).toHaveBeenCalledWith(expect.stringContaining('/streams/dash?id=test-id'));
 			expect(manifest.url).toBe('blob:mock-manifest-url');
-			expect(manifest.duration).toBe(330); // 5m30s = 330 seconds
-			expect(manifest.videoId).toBe('video123');
+			expect(manifest.duration).toBe(3723);
+			expect(manifest.videoId).toBe('0');
 		});
 
 		it('should parse different duration formats', async () => {
 			const testCases = [
-				{ xml: 'PT1H2M3S', expected: 3723 }, // 1h 2m 3s
-				{ xml: 'PT45M', expected: 2700 }, // 45m
-				{ xml: 'PT30S', expected: 30 }, // 30s
-				{ xml: 'PT2H', expected: 7200 }, // 2h
-				{ xml: 'PT1M30.5S', expected: 90.5 } // 1m 30.5s
+				{ xml: 'duration=PT1H2M3S', expected: 3723 }, // 1h 2m 3s
+				{ xml: 'duration=PT45M', expected: 2700 }, // 45m
+				{ xml: 'duration=PT30S', expected: 30 }, // 30s
+				{ xml: 'duration=PT2H', expected: 7200 }, // 2h
+				{ xml: 'duration=PT1M30.5S', expected: 90.5 } // 1m 30.5s
 			];
 
 			for (const testCase of testCases) {
-				const mockXml = `<?xml version="1.0" encoding="UTF-8"?>
-<MPD xmlns="urn:mpeg:dash:schema:mpd:2011" mediaPresentationDuration="${testCase.xml}">
-</MPD>`;
+				const mockManifestXml = manifestXmlFixture.replace('{{DURATION}}', testCase.xml);
 
 				const mockFetch = vi.fn().mockResolvedValue({
 					ok: true,
-					text: async () => mockXml
+					text: async () => mockManifestXml
 				});
 
 				const manifest = await getManifest('test-id', mockFetch);
@@ -199,10 +191,7 @@ describe('Video Detail Integration Tests', () => {
 		});
 
 		it('should handle manifest without duration', async () => {
-			const mockManifestXml = `<?xml version="1.0" encoding="UTF-8"?>
-<MPD xmlns="urn:mpeg:dash:schema:mpd:2011">
-  <Period></Period>
-</MPD>`;
+			const mockManifestXml = manifestXmlFixture.replace('{{DURATION}}', '');
 
 			const mockFetch = vi.fn().mockResolvedValue({
 				ok: true,
