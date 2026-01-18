@@ -22,7 +22,6 @@ function adaptSearchItem(
 		viewCount: handleNegativeCount(item.viewCount) || 0,
 		duration: handleNegativeCount(item.duration) || 0,
 		uploadDate: item.uploadDate || '',
-		description: item.description || '',
 		type: item.type || 'stream',
 	};
 }

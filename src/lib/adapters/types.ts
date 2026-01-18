@@ -103,7 +103,6 @@ export interface SearchResultConfig {
 	viewCount: number;
 	duration: number;
 	uploadDate: string;
-	description: string;
 	type: string;
 }
 

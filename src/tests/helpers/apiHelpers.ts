@@ -124,7 +124,7 @@ export function createErrorResponse(
 export function createSuccessfulFetch<T>(
 	data: T,
 	options: { format?: 'json' | 'xml' } = {}
-) {
+): typeof fetch {
 	const { format = 'json' } = options;
 
 	if (format === 'xml') {
@@ -147,8 +147,10 @@ export function createFailedFetch(
 /**
  * Creates a mock fetch function that throws a network error
  */
-export function createNetworkErrorFetch(): typeof globalThis.fetch {
-    return vi.fn().mockRejectedValue(new Error('Network error'));
+export function createNetworkErrorFetch(
+	message: string = 'Network Error',
+): typeof globalThis.fetch {
+    return vi.fn().mockRejectedValue(new Error(message));
 }
 
 /**
