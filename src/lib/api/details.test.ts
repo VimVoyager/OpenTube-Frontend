@@ -129,7 +129,7 @@ describe('getVideoDetails', () => {
 
             await getVideoDetails(videoId, mockFetch as unknown as typeof globalThis.fetch);
 
-            const callUrl = mockFetch.mock.calls[0][0] as string;
+            const callUrl = (mockFetch as ReturnType<typeof vi.fn>).mock.calls[0][0] as string;
             expect(callUrl).toContain('http://localhost:8000/api/v1/streams/details');
             expect(callUrl).toContain(`id=${videoId}`);
         });
@@ -140,7 +140,7 @@ describe('getVideoDetails', () => {
 
             await getVideoDetails(videoId, mockFetch as unknown as typeof globalThis.fetch);
 
-            const callUrl = mockFetch.mock.calls[0][0] as string;
+            const callUrl = (mockFetch as ReturnType<typeof vi.fn>).mock.calls[0][0] as string;
             const params = extractQueryParams(callUrl);
             expect(params.id).toBe(videoId);
         });
@@ -151,7 +151,7 @@ describe('getVideoDetails', () => {
 
             await getVideoDetails(videoId, mockFetch as unknown as typeof globalThis.fetch);
 
-            const callUrl = mockFetch.mock.calls[0][0] as string;
+            const callUrl = (mockFetch as ReturnType<typeof vi.fn>).mock.calls[0][0] as string;
             const params = extractQueryParams(callUrl);
             expect(params.id).toBe(videoId);
         });
@@ -325,7 +325,7 @@ describe('getVideoDetails', () => {
 
             await getVideoDetails(videoId, mockFetch as unknown as typeof globalThis.fetch);
 
-            expect(getCallCount(mockFetch)).toBe(1);
+            expect(getCallCount((mockFetch as ReturnType<typeof vi.fn>))).toBe(1);
         });
 
         it('should handle concurrent requests independently', async () => {
@@ -341,8 +341,8 @@ describe('getVideoDetails', () => {
 
             expect(result1).toEqual(mockDetailsResponse);
             expect(result2).toEqual(mockDetailsResponse);
-            expect(getCallCount(mockFetch1)).toBe(1);
-            expect(getCallCount(mockFetch2)).toBe(1);
+            expect(getCallCount(mockFetch1 as ReturnType<typeof vi.fn>)).toBe(1);
+            expect(getCallCount(mockFetch2 as ReturnType<typeof vi.fn>)).toBe(1);
         });
 
         it('should handle very long video IDs', async () => {

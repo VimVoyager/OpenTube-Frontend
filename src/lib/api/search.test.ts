@@ -566,7 +566,7 @@ describe('getSearchResults', () => {
 			await getSearchResults(query, sortFilter, mockFetch as unknown as typeof globalThis.fetch);
 
 			// Assert
-			expect(getCallCount(mockFetch)).toBe(1);
+			expect(getCallCount(mockFetch as ReturnType<typeof vi.fn>)).toBe(1);
 		});
 
 		it('should handle concurrent requests independently', async () => {
@@ -586,8 +586,8 @@ describe('getSearchResults', () => {
 			// Assert
 			expect(result1).toEqual(mockSearchResult);
 			expect(result2).toEqual(mockEmptySearchResult);
-			expect(getCallCount(mockFetch1)).toBe(1);
-			expect(getCallCount(mockFetch2)).toBe(1);
+			expect(getCallCount(mockFetch1 as ReturnType<typeof vi.fn>)).toBe(1);
+			expect(getCallCount(mockFetch2 as ReturnType<typeof vi.fn>)).toBe(1);
 		});
 
 		it('should handle empty items array', async () => {

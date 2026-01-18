@@ -196,7 +196,7 @@ describe('getRelatedStreams', () => {
 
             await expect(
                 getRelatedStreams(videoId, mockFetch as unknown as typeof globalThis.fetch)
-            ).rejects.toThrow('Network error');
+            ).rejects.toThrow('Network Error');
             
             expect(consoleErrorSpy.mock).toHaveBeenCalledTimes(1);
         });

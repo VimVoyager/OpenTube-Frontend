@@ -4,7 +4,7 @@ import type { Thumbnail } from '$lib/types';
 const API_BASE_URL = PUBLIC_API_URL;
 
 /**
- * Getch thumbnail images for a given video ID
+ * Fetch thumbnail images for a given video ID
  */
 export async function getVideoThumbnails(
     id: string,

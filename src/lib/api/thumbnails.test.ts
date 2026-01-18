@@ -97,7 +97,7 @@ describe('getVideoThumbnails', () => {
 						const mockFetch = createNetworkErrorFetch()
 
             await expect(getVideoThumbnails(mockVideoId, mockFetch)).rejects.toThrow(
-                'Network error'
+                'Network Error'
             );
         });
 

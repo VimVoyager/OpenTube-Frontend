@@ -311,7 +311,7 @@ describe('getManifest', () => {
 
             await getManifest(videoId, mockFetch as unknown as typeof globalThis.fetch);
 
-            const callUrl = mockFetch.mock.calls[0][0] as string;
+            const callUrl = (mockFetch as ReturnType<typeof vi.fn>).mock.calls[0][0] as string;
             expect(callUrl).toContain('/streams/dash');
         });
 
@@ -321,7 +321,7 @@ describe('getManifest', () => {
 
             await getManifest(videoId, mockFetch as unknown as typeof globalThis.fetch);
 
-            const callUrl = mockFetch.mock.calls[0][0] as string;
+            const callUrl = (mockFetch as ReturnType<typeof vi.fn>).mock.calls[0][0] as string;
             const params = extractQueryParams(callUrl);
             expect(params.id).toBe('abc123xyz');
         });
@@ -332,7 +332,7 @@ describe('getManifest', () => {
 
             await getManifest(videoId, mockFetch as unknown as typeof globalThis.fetch);
 
-            const callUrl = mockFetch.mock.calls[0][0] as string;
+            const callUrl = (mockFetch as ReturnType<typeof vi.fn>).mock.calls[0][0] as string;
             expect(callUrl).toContain('id=');
             expect(callUrl).not.toContain('test id with spaces');
         });
@@ -343,7 +343,7 @@ describe('getManifest', () => {
 
             await getManifest(videoId, mockFetch as unknown as typeof globalThis.fetch);
 
-            expect(getCallCount(mockFetch)).toBe(1);
+            expect(getCallCount(mockFetch as ReturnType<typeof vi.fn>)).toBe(1);
         });
     });
 
@@ -541,7 +541,7 @@ describe('getManifest', () => {
             const result = await getManifest(videoId, mockFetch as unknown as typeof globalThis.fetch);
 
             expect(result).toHaveProperty('url');
-            const callUrl = mockFetch.mock.calls[0][0] as string;
+            const callUrl = (mockFetch as ReturnType<typeof vi.fn>).mock.calls[0][0] as string;
             expect(callUrl).toContain('id=');
         });
 
@@ -573,8 +573,8 @@ describe('getManifest', () => {
 
             expect(result1.duration).toBe(60);
             expect(result2.duration).toBe(120);
-            expect(getCallCount(mockFetch1)).toBe(1);
-            expect(getCallCount(mockFetch2)).toBe(1);
+            expect(getCallCount(mockFetch1 as ReturnType<typeof vi.fn>)).toBe(1);
+            expect(getCallCount(mockFetch2 as ReturnType<typeof vi.fn>)).toBe(1);
         });
 
         it('should handle very long video IDs', async () => {
@@ -676,7 +676,7 @@ describe('getManifestUrl', () => {
 
             await getManifestUrl(videoId, mockFetch as unknown as typeof globalThis.fetch);
 
-            expect(getCallCount(mockFetch)).toBe(1);
+            expect(getCallCount(mockFetch as ReturnType<typeof vi.fn>)).toBe(1);
         });
     });
 });
