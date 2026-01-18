@@ -7,11 +7,6 @@
 import type { Stream, Subtitle, SearchResult, RelatedItem, SearchItem } from '$lib/types';
 
 // =============================================================================
-// Video Details Fixtures
-// =============================================================================
-
-
-// =============================================================================
 // Stream Fixtures
 // =============================================================================
 
@@ -123,19 +118,6 @@ export const mockVideoStreams: Stream[] = [
 		quality: '480p',
 		bitrate: 1000000,
 		url: 'https://example.com/video/stream3'
-	}
-];
-
-export const mockAudioStreams: Stream[] = [
-	mockAudioStream,
-	mockAudioStreamWithLanguage,
-	{
-		...mockAudioStream,
-		id: 'audio-stream-3',
-		itag: 139,
-		bitrate: 48000,
-		quality: 'low',
-		url: 'https://example.com/audio/stream3'
 	}
 ];
 
@@ -284,13 +266,6 @@ export const mockRelatedStreams: RelatedItem[] = [
 	}
 ];
 
-export const mockRelatedVideoStreamArrayResponse = mockRelatedStreams;
-
-export const mockRelatedStreamObjectResponse = {
-	streams: mockRelatedStreams,
-	videoId: 'test-video-id'
-};
-
 export const mockSearchItemStream: SearchItem = {
 	type: 'stream',
 	name: 'Test Video Title',
@@ -364,26 +339,4 @@ export const mockSearchResultWithSuggestion: SearchResult = {
 	searchSuggestion: 'test',
 	isCorrectedSearch: true,
 	items: [mockSearchItemStream]
-};
-
-// =============================================================================
-// Response Wrappers (for different API response formats)
-// =============================================================================
-
-export const mockVideoStreamsArrayResponse = mockVideoStreams;
-export const mockVideoStreamsObjectResponse = {
-	streams: mockVideoStreams,
-	videoId: 'test-video-id'
-};
-
-export const mockAudioStreamsArrayResponse = mockAudioStreams;
-export const mockAudioStreamsObjectResponse = {
-	streams: mockAudioStreams,
-	videoId: 'test-video-id'
-};
-
-export const mockSubtitlesArrayResponse = mockSubtitles;
-export const mockSubtitlesObjectResponse = {
-	subtitles: mockSubtitles,
-	videoId: 'test-video-id'
 };
