@@ -102,18 +102,6 @@ afterEach(() => {
 
 describe('getManifest', () => {
     describe('successful manifest requests', () => {
-        it('should fetch manifest with valid ID', async () => {
-            const videoId = 'test-video-id';
-						const mock = createMockManifestXml();
-            const mockFetch = createSuccessfulFetch(mock, { format: 'xml'});
-
-            const result = await getManifest(videoId, mockFetch as unknown as typeof globalThis.fetch);
-
-            expect(result).toHaveProperty('url');
-            expect(result).toHaveProperty('duration');
-            expect(mockFetch).toHaveBeenCalledTimes(1);
-        });
-
         it('should return ManifestResponse object with all properties', async () => {
             const videoId = 'abc123';
             const mockFetch = createSuccessfulFetch(
