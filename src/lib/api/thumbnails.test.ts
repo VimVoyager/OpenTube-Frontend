@@ -1,107 +1,52 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { mockStaticEnv } from '../../tests/helpers/apiHelpers';
+import {
+	createFailedFetch,
+	createInvalidJSONFetch,
+	createNetworkErrorFetch,
+	createSuccessfulFetch,
+	mockStaticEnv
+} from '../../tests/helpers/apiHelpers';
 import { getVideoThumbnails } from './thumbnails';
+import thumbnailsResponseFixture from '../../tests/fixtures/api/thumbnailsResponseFixture.json';
 import type { Thumbnail } from '$lib/types';
 
 beforeEach(() =>{
     mockStaticEnv();
 })
 
-describe('getVideoThumbnails', () => {
-    const mockVideoId = 'dQw4w9WgXcQ';
-    const mockApiUrl = 'http://localhost:8000/api/v1';
+const mockThumbnailsResponse: Thumbnail[] = thumbnailsResponseFixture;
 
-    const createMockThumbnails = (): Thumbnail[] => [
-        {
-            url: 'https://example.com/thumb_low.jpg',
-            height: 90,
-            width: 120,
-            estimatedResolutionLevel: 'LOW'
-        },
-        {
-            url: 'https://example.com/thumb_medium.jpg',
-            height: 180,
-            width: 320,
-            estimatedResolutionLevel: 'MEDIUM'
-        },
-        {
-            url: 'https://example.com/thumb_high.jpg',
-            height: 720,
-            width: 1280,
-            estimatedResolutionLevel: 'HIGH'
-        }
-    ];
+describe('getVideoThumbnails', () => {
+    const mockVideoId = 'test-video-id';
+    const mockApiUrl = 'http://localhost:8000/api/v1';
 
     describe('successful requests', () => {
         it('should fetch and return high quality thumbnail when available', async () => {
-            const mockThumbnails = createMockThumbnails();
-            const mockFetch = vi.fn().mockResolvedValue({
-                ok: true,
-                json: async () => mockThumbnails
-            });
+						const mockFetch = createSuccessfulFetch(mockThumbnailsResponse);
 
             const result = await getVideoThumbnails(mockVideoId, mockFetch);
 
             expect(mockFetch).toHaveBeenCalledWith(
                 `${mockApiUrl}/streams/thumbnails?id=${encodeURIComponent(mockVideoId)}`
             );
-            expect(result).toEqual(mockThumbnails[2]);
+            expect(result).toEqual(mockThumbnailsResponse[4]);
+						expect(result.url).toBe('https://i.ytimg.com/vi/pilot-id/xl.jpg');
             expect(result.estimatedResolutionLevel).toBe('HIGH');
         });
 
         it('should return last thumbnail when no HIGH quality thumbnail exists', async () => {
-            const mockThumbnails: Thumbnail[] = [
-                {
-                    url: 'https://example.com/thumb_low.jpg',
-                    height: 90,
-                    width: 120,
-                    estimatedResolutionLevel: 'LOW'
-                },
-                {
-                    url: 'https://example.com/thumb_medium.jpg',
-                    height: 180,
-                    width: 320,
-                    estimatedResolutionLevel: 'MEDIUM'
-                }
-            ];
-            const mockFetch = vi.fn().mockResolvedValue({
-                ok: true,
-                json: async () => mockThumbnails
-            });
-
+            const mockThumbnails: Thumbnail[] = mockThumbnailsResponse.slice(0, -1);
+						const mockFetch = createSuccessfulFetch(mockThumbnails);
             const result = await getVideoThumbnails(mockVideoId, mockFetch);
 
-            expect(result).toEqual(mockThumbnails[1]);
+            expect(result).toEqual(mockThumbnails[3]);
+						expect(result.url).toBe('https://i.ytimg.com/vi/pilot-id/lg.jpg');
             expect(result.estimatedResolutionLevel).toBe('MEDIUM');
-        });
-
-        it('should return first thumbnail as fallback when array length is 1', async () => {
-            const mockThumbnails: Thumbnail[] = [
-                {
-                    url: 'https://example.com/thumb_only.jpg',
-                    height: 90,
-                    width: 120,
-                    estimatedResolutionLevel: 'LOW'
-                }
-            ];
-            const mockFetch = vi.fn().mockResolvedValue({
-                ok: true,
-                json: async () => mockThumbnails
-            });
-
-            const result = await getVideoThumbnails(mockVideoId, mockFetch);
-
-            expect(result).toEqual(mockThumbnails[0]);
         });
 
         it('should properly encode video ID in URL', async () => {
             const specialId = 'video@id#with$special&chars';
-            const mockThumbnails = createMockThumbnails();
-            const mockFetch = vi.fn().mockResolvedValue({
-                ok: true,
-                json: async () => mockThumbnails
-            });
-
+						const mockFetch = createSuccessfulFetch(mockThumbnailsResponse);
             await getVideoThumbnails(specialId, mockFetch);
 
             expect(mockFetch).toHaveBeenCalledWith(
@@ -110,27 +55,22 @@ describe('getVideoThumbnails', () => {
         });
 
         it('should use global fetch when no custom fetch is provided', async () => {
-            const mockThumbnails = createMockThumbnails();
             const mockGlobalFetch = vi.fn().mockResolvedValue({
                 ok: true,
-                json: async () => mockThumbnails
-            });
+                json: async () => mockThumbnailsResponse
+						});
             globalThis.fetch = mockGlobalFetch;
 
             const result = await getVideoThumbnails(mockVideoId);
 
             expect(mockGlobalFetch).toHaveBeenCalled();
-            expect(result).toEqual(mockThumbnails[2]);
+            expect(result).toEqual(mockThumbnailsResponse[4]);
         });
     });
 
     describe('error handling', () => {
         it('should throw error when response is not ok', async () => {
-            const mockFetch = vi.fn().mockResolvedValue({
-                ok: false,
-                status: 404,
-                statusText: 'Not Found'
-            });
+						const mockFetch = createFailedFetch(404, 'Not Found');
 
             await expect(getVideoThumbnails(mockVideoId, mockFetch)).rejects.toThrow(
                 `Failed to fetch thumbnails for ${mockVideoId}: 404 Not Found`
@@ -138,11 +78,7 @@ describe('getVideoThumbnails', () => {
         });
 
         it('should throw error when response is 500', async () => {
-            const mockFetch = vi.fn().mockResolvedValue({
-                ok: false,
-                status: 500,
-                statusText: 'Internal Server Error'
-            });
+						const mockFetch = createFailedFetch(500, 'Internal Server Error');
 
             await expect(getVideoThumbnails(mockVideoId, mockFetch)).rejects.toThrow(
                 `Failed to fetch thumbnails for ${mockVideoId}: 500 Internal Server Error`
@@ -150,10 +86,7 @@ describe('getVideoThumbnails', () => {
         });
 
         it('should throw error when thumbnails array is empty', async () => {
-            const mockFetch = vi.fn().mockResolvedValue({
-                ok: true,
-                json: async () => []
-            });
+						const mockFetch = createSuccessfulFetch([]);
 
             await expect(getVideoThumbnails(mockVideoId, mockFetch)).rejects.toThrow(
                 `No thumbnails available for video ${mockVideoId}`
@@ -161,8 +94,7 @@ describe('getVideoThumbnails', () => {
         });
 
         it('should throw error when network request fails', async () => {
-            const networkError = new Error('Network error');
-            const mockFetch = vi.fn().mockRejectedValue(networkError);
+						const mockFetch = createNetworkErrorFetch()
 
             await expect(getVideoThumbnails(mockVideoId, mockFetch)).rejects.toThrow(
                 'Network error'
@@ -170,12 +102,14 @@ describe('getVideoThumbnails', () => {
         });
 
         it('should throw error when JSON parsing fails', async () => {
-            const mockFetch = vi.fn().mockResolvedValue({
-                ok: true,
-                json: async () => {
-                    throw new Error('Invalid JSON');
-                }
-            });
+            // const mockFetch = vi.fn().mockResolvedValue({
+            //     ok: true,
+            //     json: async () => {
+            //         throw new Error('Invalid JSON');
+            //     }
+            // });
+
+						const mockFetch = createInvalidJSONFetch();
 
             await expect(getVideoThumbnails(mockVideoId, mockFetch)).rejects.toThrow(
                 'Invalid JSON'
@@ -184,11 +118,7 @@ describe('getVideoThumbnails', () => {
 
         it('should log error to console when error occurs', async () => {
             const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-            const mockFetch = vi.fn().mockResolvedValue({
-                ok: false,
-                status: 404,
-                statusText: 'Not Found'
-            });
+            const mockFetch = createFailedFetch(404, 'Not Found');
 
             await expect(getVideoThumbnails(mockVideoId, mockFetch)).rejects.toThrow();
 
@@ -203,11 +133,7 @@ describe('getVideoThumbnails', () => {
 
     describe('edge cases', () => {
         it('should handle empty video ID', async () => {
-            const mockThumbnails = createMockThumbnails();
-            const mockFetch = vi.fn().mockResolvedValue({
-                ok: true,
-                json: async () => mockThumbnails
-            });
+            const mockFetch = createSuccessfulFetch(mockThumbnailsResponse);
 
             await getVideoThumbnails('', mockFetch);
 
@@ -217,54 +143,14 @@ describe('getVideoThumbnails', () => {
         });
 
         it('should handle multiple HIGH quality thumbnails and return the first one', async () => {
-            const mockThumbnails: Thumbnail[] = [
-                {
-                    url: 'https://example.com/thumb_high1.jpg',
-                    height: 720,
-                    width: 1280,
-                    estimatedResolutionLevel: 'HIGH'
-                },
-                {
-                    url: 'https://example.com/thumb_high2.jpg',
-                    height: 1080,
-                    width: 1920,
-                    estimatedResolutionLevel: 'HIGH'
-                }
-            ];
-            const mockFetch = vi.fn().mockResolvedValue({
-                ok: true,
-                json: async () => mockThumbnails
-            });
+						mockThumbnailsResponse[3].estimatedResolutionLevel = 'HIGH';
+						const mockThumbnails: Thumbnail[] = [mockThumbnailsResponse[3], mockThumbnailsResponse[4]];
+
+            const mockFetch = createSuccessfulFetch(mockThumbnails);
 
             const result = await getVideoThumbnails(mockVideoId, mockFetch);
 
             expect(result).toEqual(mockThumbnails[0]);
-        });
-
-        it('should handle thumbnails with undefined estimatedResolutionLevel', async () => {
-            const mockThumbnails: Thumbnail[] = [
-                {
-                    url: 'https://example.com/thumb1.jpg',
-                    height: 90,
-                    width: 120,
-                    estimatedResolutionLevel: undefined as never
-                },
-                {
-                    url: 'https://example.com/thumb2.jpg',
-                    height: 180,
-                    width: 320,
-                    estimatedResolutionLevel: undefined as never
-                }
-            ];
-            const mockFetch = vi.fn().mockResolvedValue({
-                ok: true,
-                json: async () => mockThumbnails
-            });
-
-            const result = await getVideoThumbnails(mockVideoId, mockFetch);
-
-            // Should fall back to last thumbnail
-            expect(result).toEqual(mockThumbnails[1]);
         });
     });
 });

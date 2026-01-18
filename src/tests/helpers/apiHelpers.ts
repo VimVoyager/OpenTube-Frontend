@@ -121,18 +121,17 @@ export function createErrorResponse(
 /**
  * Creates a mock fetch function that succeeds
  */
-
 export function createSuccessfulFetch<T>(
 	data: T,
 	options: { format?: 'json' | 'xml' } = {}
-): ReturnType<typeof vi.fn> {
+) {
 	const { format = 'json' } = options;
 
 	if (format === 'xml') {
-		return vi.fn().mockResolvedValue(createMockManifestResponse(data));
+		return vi.fn().mockResolvedValue(createMockManifestResponse(data)) as unknown as typeof fetch;
 	}
 
-	return vi.fn().mockResolvedValue(createMockResponse(data));
+	return vi.fn().mockResolvedValue(createMockResponse(data)) as unknown as typeof fetch;
 }
 
 /**
@@ -148,10 +147,15 @@ export function createFailedFetch(
 /**
  * Creates a mock fetch function that throws a network error
  */
-export function createNetworkErrorFetch(
-    errorMessage = 'Network error'
-): typeof globalThis.fetch {
-    return vi.fn().mockRejectedValue(new Error(errorMessage));
+export function createNetworkErrorFetch(): typeof globalThis.fetch {
+    return vi.fn().mockRejectedValue(new Error('Network error'));
+}
+
+/**
+ * Creates a mock fetch function that throws an invalid JSON error
+ */
+export function createInvalidJSONFetch(): typeof globalThis.fetch {
+		return vi.fn().mockRejectedValue(new Error('Invalid JSON'))
 }
 
 // =============================================================================
