@@ -63,6 +63,35 @@ export function createMockResponse<T>(
 }
 
 /**
+ * Create successful mock fetch response for manifest XML
+ */
+function createMockManifestResponse<T>(
+	data: T,
+	options: { status?: number; statusText?: string } = {}
+): Response {
+	const { status = 200, statusText = 'OK' } = options;
+	return {
+		ok: status >= 200 && status < 300,
+		status,
+		statusText,
+		json: vi.fn().mockResolvedValue(data),
+		text: vi.fn().mockResolvedValue(data),
+		headers: new Headers({ 'Content-Type': 'application/xml' }), // Set content type to XML
+		blob: vi.fn().mockResolvedValue(new Blob()),
+		arrayBuffer: vi.fn().mockResolvedValue(new ArrayBuffer(0)),
+		bytes: vi.fn().mockResolvedValue(new Uint8Array()),
+		formData: vi.fn().mockResolvedValue(new FormData()),
+		clone: vi.fn(),
+		body: null,
+		bodyUsed: false,
+		redirected: false,
+		type: 'basic',
+		url: ''
+	} as Response;
+}
+
+
+/**
  * Creates a failed mock fetch response
  */
 export function createErrorResponse(
@@ -92,8 +121,18 @@ export function createErrorResponse(
 /**
  * Creates a mock fetch function that succeeds
  */
-export function createSuccessfulFetch<T>(data: T): ReturnType<typeof vi.fn> {
-    return vi.fn().mockResolvedValue(createMockResponse(data));
+
+export function createSuccessfulFetch<T>(
+	data: T,
+	options: { format?: 'json' | 'xml' } = {}
+): ReturnType<typeof vi.fn> {
+	const { format = 'json' } = options;
+
+	if (format === 'xml') {
+		return vi.fn().mockResolvedValue(createMockManifestResponse(data));
+	}
+
+	return vi.fn().mockResolvedValue(createMockResponse(data));
 }
 
 /**
