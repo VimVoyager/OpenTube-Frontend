@@ -20,11 +20,11 @@ function adaptRelatedVideo(item: RelatedItemResponse, defaultThumbnail: string, 
 		uploadDate: item.textualUploadDate || '',
 	};
 }
+
 /**
  * Adapts an array of related items into related video configurations
  * Filters out invalid items (missing required fields) and transforms remaining items
  */
-
 export function adaptRelatedVideos(
 	items: RelatedItemResponse[] | undefined,
 	defaultThumbnail: string,
