@@ -101,7 +101,6 @@ describe('Search Integration Tests', () => {
 				viewCount: 0, // -1 converted to 0
 				duration: 0, // -1 converted to 0
 				uploadDate: '',
-				description: '',
 				type: 'stream'
 			});
 		});
