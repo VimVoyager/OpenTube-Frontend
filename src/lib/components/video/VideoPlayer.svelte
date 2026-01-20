@@ -30,6 +30,7 @@
 		}
 
 		try {
+			// console.log('video element', videoElement);
 			player = new shaka.Player();
 
 			await player.attach(videoElement);
@@ -131,6 +132,8 @@
 
 <div bind:this={videoContainer} class="video-container" data-shaka-player-container>
 	<video
+		id="video"
+		data-testid="video-player"
 		bind:this={videoElement}
 		class="video-player"
 		poster={config.poster}

@@ -24,7 +24,6 @@ vi.mock('$env/static/public', () => {
 	});
 });
 
-
 // Mock $app/stores if needed
 vi.mock('$app/stores', () => ({
 	page: {
