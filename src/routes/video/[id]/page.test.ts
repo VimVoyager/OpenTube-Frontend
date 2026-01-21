@@ -8,14 +8,6 @@ import { getVideoThumbnails } from '$lib/api/thumbnails';
 import { adaptPlayerConfig } from '$lib/adapters/player';
 import { adaptVideoMetadata } from '$lib/adapters/metadata';
 import { adaptRelatedVideos } from '$lib/adapters/related';
-// import { mockStaticEnv } from '../../../tests/helpers/apiHelpers';
-
-vi.mock('$env/static/public', () => {
-    return Promise.resolve({
-        PUBLIC_API_URL: 'http://localhost:8000/api/v1',
-        PUBLIC_PROXY_URL: 'http://localhost:8888'
-    });
-});
 
 // Mock all dependencies
 vi.mock('$lib/api/details');
@@ -24,7 +16,7 @@ vi.mock('$lib/api/related');
 vi.mock('$lib/api/thumbnails');
 vi.mock('$lib/adapters/metadata');
 vi.mock('$lib/adapters/player');
-vi.mock('$lib/adapters/relatedVideos');
+vi.mock('$lib/adapters/related');
 
 describe('+page.ts', () => {
     // Mock data fixtures
