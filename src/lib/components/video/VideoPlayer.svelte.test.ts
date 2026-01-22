@@ -48,12 +48,12 @@ class MockShakaPlayer {
 		return mockPlayerInstance.getNetworkingEngine();
 	}
 
-	addEventListener = vi.fn((event: string, callback: any) => {
-		return mockPlayerInstance.addEventListener(event, callback);
+	addEventListener = vi.fn((event: string, listener: (event: ShakaErrorEvent) => void) => {
+		return mockPlayerInstance.addEventListener(event, listener);
 	});
 
-	removeEventListener = vi.fn((event: string, callback: any) => {
-		return mockPlayerInstance.removeEventListener(event, callback);
+	removeEventListener = vi.fn((event: string, listener: (event: ShakaErrorEvent) => void) => {
+		return mockPlayerInstance.removeEventListener(event, listener);
 	});
 
 	destroy = vi.fn(() => {
@@ -64,11 +64,11 @@ class MockShakaPlayer {
 }
 
 class MockShakaUIOverlay {
-	constructor(player: any, container: any, video: any) {
+	constructor() {
 		// console.log('MockShakaUIOverlay constructor called');
 	}
 
-	configure(config: any) {
+	configure(config: ShakaUIConfiguration) {
 		// console.log('UI configure called with:', config);
 		mockUIInstance.configure(config);
 	}
@@ -98,6 +98,7 @@ vi.mock('shaka-player/dist/shaka-player.ui', () => ({
 vi.mock('shaka-player/dist/controls.css', () => ({}));
 
 import VideoPlayer from './VideoPlayer.svelte';
+import type { ShakaErrorEvent, ShakaUIConfiguration } from '$lib/types';
 
 describe('VideoPlayer.svelte', () => {
 	let consoleErrorSpy: ReturnType<typeof vi.spyOn>;
@@ -394,6 +395,8 @@ describe('VideoPlayer.svelte', () => {
 		});
 
 		it('should handle networking engine being null', async () => {
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+			// @ts-expect-error
 			mockPlayerInstance.getNetworkingEngine.mockReturnValue(null);
 
 			expect(() => {
