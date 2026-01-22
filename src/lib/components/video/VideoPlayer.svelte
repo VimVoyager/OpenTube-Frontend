@@ -1,15 +1,22 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
+	import { SvelteURL} from 'svelte/reactivity';
 	import { browser } from '$app/environment';
 	import { PUBLIC_PROXY_URL } from '$env/static/public';
 	import type { VideoPlayerConfig } from '$lib/adapters/types';
+	import type {
+		ShakaPlayerInstance,
+		ShakaRequest,
+		ShakaUIConfiguration,
+		ShakaUIOverlayInstance
+	} from '$lib/types';
 
 	export let config: VideoPlayerConfig;
 
 	let videoElement: HTMLVideoElement;
 	let videoContainer: HTMLDivElement;
-	let player: any = null;
-	let ui: any = null;
+	let player: ShakaPlayerInstance | null = null;
+	let ui: ShakaUIOverlayInstance | null = null;
 
 	const PROXY_URL = PUBLIC_PROXY_URL || '/proxy';
 
@@ -30,7 +37,6 @@
 		}
 
 		try {
-			// console.log('video element', videoElement);
 			player = new shaka.Player();
 
 			await player.attach(videoElement);
@@ -41,7 +47,7 @@
 				videoElement
 			);
 
-			const config_ui = {
+			const config_ui: ShakaUIConfiguration = {
 				addSeekBar: true,
 				addBigPlayButton: true,
 				controlPanelElements: [
@@ -59,19 +65,14 @@
 
 			ui.configure(config_ui);
 
-			// Get the controls from UI
-			const controls = ui.getControls();
-
-			player.addEventListener('error', (event: any) => {
+			player.addEventListener('error', (event: Event) => {
 				console.error('Shaka Player error event:', event);
 			});
 
 			// Request filter to proxy googlevideo.com URLs
 			const networkingEngine = player.getNetworkingEngine();
 			if (networkingEngine) {
-				networkingEngine.registerRequestFilter((type: number, request: { uris: string[]; headers: { Range?: any; }; }) => {
-					console.log('Request filter - Type:', type, 'URL:', request.uris[0]);
-
+				networkingEngine.registerRequestFilter((type: number, request: ShakaRequest) => {
 					// Type 1 is SEGMENT in Shaka Player
 					if (type === 1) {
 						const originalUrl = new URL(request.uris[0]);
@@ -85,25 +86,22 @@
 								? `${window.location.origin}${PROXY_URL}`
 								: PROXY_URL;
 
-							console.log('Proxy base URL:', proxyBase);
-
 							// Build the new proxied URL
-							const proxyUrl = new URL(proxyBase);
-							const newPath = proxyUrl.pathname + originalUrl.pathname;
-							
-							const proxiedUrl = new URL(proxyBase);
-							proxiedUrl.pathname = newPath;
-							proxiedUrl.search = originalUrl.search;
+							const proxyUrl = new SvelteURL(proxyBase);
+							proxyUrl.pathname = new SvelteURL(proxyBase).pathname + originalUrl.pathname;
+
+							// const proxiedUrl = new URL(proxyBase);
+							// proxiedUrl.pathname = newPath;
+							proxyUrl.search = originalUrl.search;
 
 							// Handle Range header conversion to query parameter
 							if (request.headers.Range) {
 								const rangeValue = request.headers.Range.split('=')[1];
-								proxiedUrl.searchParams.set('range', rangeValue);
+								proxyUrl.searchParams.set('range', rangeValue);
 								request.headers = {};
 							}
 
-							request.uris[0] = proxiedUrl.toString();
-							console.log('Proxied request URL:', request.uris[0].substring(0, 150) + '...');
+							request.uris[0] = proxyUrl.toString();
 						}
 					}
 				});
@@ -114,7 +112,6 @@
 			}
 
 			await player.load(config.manifestUrl);
-			console.log('Video loaded successfully!');
 		} catch (error) {
 			console.error('Error initializing or loading video player:', error);
 		}
@@ -140,7 +137,7 @@
 		data-shaka-player
 		playsinline
 	>
-		<track kind="captions" label="English captions" />
+		<track kind="captions" label="Captions"/>
 	</video>
 </div>
 

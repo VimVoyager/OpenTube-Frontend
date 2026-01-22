@@ -268,6 +268,19 @@ export interface ShakaPlayerClass {
 	new(video?: HTMLMediaElement): ShakaPlayerInstance;
 	isBrowserSupported(): boolean;
 }
+export interface ShakaNetworkingEngine {
+	registerRequestFilter(filter: (type: number, request: ShakaRequest) => void): void;
+	unregisterRequestFilter(filter: (type: number, request: ShakaRequest) => void): void;
+}
+
+export interface ShakaRequest {
+	uris: string[];
+	method: string;
+	body: ArrayBuffer | null;
+	headers: Record<string, string>;
+	allowCrossSiteCredentials: boolean;
+	retryParameters: any;
+}
 
 export interface ShakaPlayerInstance {
 	attach(video: HTMLMediaElement): Promise<void>;
@@ -276,6 +289,7 @@ export interface ShakaPlayerInstance {
 	destroy(): Promise<void>;
 	addEventListener(type: string, listener: (event: ShakaErrorEvent) => void): void;
 	removeEventListener(type: string, listener: (event: ShakaErrorEvent) => void): void;
+	getNetworkingEngine(): ShakaNetworkingEngine | null;
 }
 
 export interface ShakaUIOverlayClass {

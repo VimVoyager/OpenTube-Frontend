@@ -26,7 +26,9 @@ declare module 'shaka-player/dist/shaka-player.ui' {
 		ShakaPolyfill,
 		ShakaPlayerConfiguration,
 		ShakaUIConfiguration,
-		ShakaErrorEvent
+		ShakaErrorEvent,
+		ShakaNetworkingEngine,
+		ShakaRequest
 	} from '$lib/types';
 
 	const shaka: {
