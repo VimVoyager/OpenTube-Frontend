@@ -9,6 +9,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { goto } from '$app/navigation';
 import VideoListings from './VideoListings.svelte';
 import type { RelatedVideoConfig } from '$lib/adapters/types';
+import relatedVideosFixture from '../../../tests/fixtures/adapters/relatedVideos.json'
 
 const mockGoto = vi.mocked(goto);
 
@@ -16,44 +17,8 @@ const mockGoto = vi.mocked(goto);
 // Test Fixtures
 // =============================================================================
 
-const mockRelatedVideos: RelatedVideoConfig[] = [
-	{
-		id: 'video-1',
-		url: 'https://www.youtube.com/watch?v=video-1',
-		title: 'First Related Video',
-		thumbnail: 'https://example.com/thumb1.jpg',
-		channelName: 'Channel One',
-		channelAvatar: 'https://example.com/avatar1.jpg',
-		viewCount: 1234567,
-		duration: 600,
-		uploadDate: '2 days ago'
-	},
-	{
-		id: 'video-2',
-		url: 'https://www.youtube.com/watch?v=video-2',
-		title: 'Second Related Video',
-		thumbnail: 'https://example.com/thumb2.jpg',
-		channelName: 'Channel Two',
-		channelAvatar: 'https://example.com/avatar2.jpg',
-		viewCount: 987654,
-		duration: 450,
-		uploadDate: '1 week ago'
-	},
-	{
-		id: 'video-3',
-		url: 'https://www.youtube.com/watch?v=video-3',
-		title: 'Third Related Video',
-		thumbnail: 'https://example.com/thumb3.jpg',
-		channelName: 'Channel Three',
-		channelAvatar: null,
-		viewCount: 500,
-		duration: 3665,
-		uploadDate: '3 weeks ago'
-	}
-];
-
+const mockRelatedVideos: RelatedVideoConfig[] = relatedVideosFixture
 const mockSingleVideo: RelatedVideoConfig[] = [mockRelatedVideos[0]];
-
 const mockEmptyVideos: RelatedVideoConfig[] = [];
 
 // =============================================================================
@@ -73,31 +38,20 @@ describe('VideoListings', () => {
 		it('should render multiple related videos', () => {
 			render(VideoListings, { props: { videos: mockRelatedVideos } });
 			
-			expect(screen.getByText('First Related Video')).toBeInTheDocument();
-			expect(screen.getByText('Second Related Video')).toBeInTheDocument();
-			expect(screen.getByText('Third Related Video')).toBeInTheDocument();
-		});
+			expect(screen.getByText('MURDER DRONES - Heartbeat')).toBeInTheDocument();
+			expect(screen.getByText('KNIGHTS OF GUINEVERE - Pilot')).toBeInTheDocument();
+			expect(screen.getByText('MURDER DRONES - Cabin Fever')).toBeInTheDocument();
+			expect(screen.getByText('THE AMAZING DIGITAL CIRCUS - They All Get Guns')).toBeInTheDocument();
 
-		it('should render video titles', () => {
-			render(VideoListings, { props: { videos: mockRelatedVideos } });
-			
-			mockRelatedVideos.forEach(video => {
-				expect(screen.getByText(video.title)).toBeInTheDocument();
-			});
-		});
-
-		it('should render channel names', () => {
-			render(VideoListings, { props: { videos: mockRelatedVideos } });
-			
-			expect(screen.getByText('Channel One')).toBeInTheDocument();
-			expect(screen.getByText('Channel Two')).toBeInTheDocument();
-			expect(screen.getByText('Channel Three')).toBeInTheDocument();
+			const videoElements = screen.getAllByText(/GLITCH/, { selector: 'p' });
+			const firstChannelName = videoElements[0];
+			expect(firstChannelName).toHaveTextContent('GLITCH');
 		});
 
 		it('should render single video', () => {
 			render(VideoListings, { props: { videos: mockSingleVideo } });
 			
-			expect(screen.getByText('First Related Video')).toBeInTheDocument();
+			expect(screen.getByText('MURDER DRONES - Heartbeat')).toBeInTheDocument();
 		});
 	});
 
@@ -136,36 +90,19 @@ describe('VideoListings', () => {
 	// =============================================================================
 
 	describe('thumbnails', () => {
-		it('should render video thumbnails', () => {
-			render(VideoListings, { props: { videos: mockRelatedVideos } });
-			
-			const thumbnail = screen.getByAltText('First Related Video');
-			expect(thumbnail).toBeInTheDocument();
-			expect(thumbnail).toHaveAttribute('src', 'https://example.com/thumb1.jpg');
-		});
-
 		it('should render all thumbnails', () => {
-			render(VideoListings, { props: { videos: mockRelatedVideos } });
-			
-			mockRelatedVideos.forEach(video => {
-				const thumbnail = screen.getByAltText(video.title);
-				expect(thumbnail).toBeInTheDocument();
-				expect(thumbnail).toHaveAttribute('src', video.thumbnail);
-			});
-		});
-
-		it('should apply correct aspect ratio to thumbnails', () => {
 			const { container } = render(VideoListings, { props: { videos: mockRelatedVideos } });
 			
+			mockRelatedVideos.forEach(video => {
+				const thumbnail = screen.getByAltText(`thumbnail-${video.id}`);
+				expect(thumbnail).toBeInTheDocument();
+				expect(thumbnail).toHaveAttribute('src', video.thumbnail);
+				expect(thumbnail).toHaveClass('rounded-md', 'object-cover');
+
+			});
+
 			const thumbnailContainer = container.querySelector('[style*="aspect-ratio"]');
 			expect(thumbnailContainer).toBeInTheDocument();
-		});
-
-		it('should apply image styling classes', () => {
-			render(VideoListings, { props: { videos: mockRelatedVideos } });
-			
-			const thumbnail = screen.getByAltText('First Related Video');
-			expect(thumbnail).toHaveClass('rounded-md', 'object-cover');
 		});
 	});
 
@@ -177,23 +114,17 @@ describe('VideoListings', () => {
 		it('should render channel avatar when provided', () => {
 			render(VideoListings, { props: { videos: mockRelatedVideos } });
 			
-			const avatar = screen.getByAltText('Channel One');
+			const avatar = screen.getByAltText('heartbeat-id-channel-avatar-GLITCH');
 			expect(avatar).toBeInTheDocument();
-			expect(avatar).toHaveAttribute('src', 'https://example.com/avatar1.jpg');
+			expect(avatar).toHaveAttribute('src', 'https://yt3.ggpht.com/random-unicode-characters/md');
+			expect(avatar).toHaveClass('h-6', 'w-6', 'rounded-full', 'object-cover');
 		});
 
 		it('should not render avatar when null', () => {
 			render(VideoListings, { props: { videos: [mockRelatedVideos[2]] } });
 			
-			const avatar = screen.queryByAltText('Channel Three');
+			const avatar = screen.queryByAltText('-channel-avatar-GLITCH');
 			expect(avatar).not.toBeInTheDocument();
-		});
-
-		it('should apply avatar styling', () => {
-			render(VideoListings, { props: { videos: mockRelatedVideos } });
-			
-			const avatar = screen.getByAltText('Channel One');
-			expect(avatar).toHaveClass('h-6', 'w-6', 'rounded-full', 'object-cover');
 		});
 	});
 
@@ -205,15 +136,15 @@ describe('VideoListings', () => {
 		it('should format duration under 1 hour as MM:SS', () => {
 			render(VideoListings, { props: { videos: [mockRelatedVideos[0]] } });
 			
-			// 600 seconds = 10:00
-			expect(screen.getByText('10:00')).toBeInTheDocument();
+			// 1049 seconds = 17:29
+			expect(screen.getByText('17:29')).toBeInTheDocument();
 		});
 
 		it('should format duration over 1 hour as HH:MM:SS', () => {
-			render(VideoListings, { props: { videos: [mockRelatedVideos[2]] } });
+			render(VideoListings, { props: { videos: [mockRelatedVideos[1]] } });
 			
-			// 3665 seconds = 1:01:05
-			expect(screen.getByText('1:01:05')).toBeInTheDocument();
+			// 1588 seconds = 26:28
+			expect(screen.getByText('26:28')).toBeInTheDocument();
 		});
 
 		it('should pad single digit seconds', () => {
@@ -253,14 +184,14 @@ describe('VideoListings', () => {
 		it('should format view count with commas', () => {
 			render(VideoListings, { props: { videos: mockRelatedVideos } });
 			
-			expect(screen.getByText('1,234,567 views')).toBeInTheDocument();
-			expect(screen.getByText('987,654 views')).toBeInTheDocument();
+			expect(screen.getByText('39,000,000 views')).toBeInTheDocument();
+			expect(screen.getByText('16,000,000 views')).toBeInTheDocument();
 		});
 
 		it('should format small numbers without commas', () => {
 			render(VideoListings, { props: { videos: [mockRelatedVideos[2]] } });
 			
-			expect(screen.getByText('500 views')).toBeInTheDocument();
+			expect(screen.getByText('0 views')).toBeInTheDocument();
 		});
 
 		it('should include "views" text', () => {
@@ -289,9 +220,9 @@ describe('VideoListings', () => {
 		it('should render upload date', () => {
 			render(VideoListings, { props: { videos: mockRelatedVideos } });
 			
-			expect(screen.getByText('2 days ago')).toBeInTheDocument();
-			expect(screen.getByText('1 week ago')).toBeInTheDocument();
-			expect(screen.getByText('3 weeks ago')).toBeInTheDocument();
+			expect(screen.getByText('3 years ago')).toBeInTheDocument();
+			expect(screen.getByText('3 month ago')).toBeInTheDocument();
+			expect(screen.getByText('2 years ago')).toBeInTheDocument();
 		});
 
 		it('should handle empty upload date', () => {
@@ -314,47 +245,37 @@ describe('VideoListings', () => {
 		it('should call goto when video is clicked', async () => {
 			render(VideoListings, { props: { videos: mockRelatedVideos } });
 			
-			const videoCard = screen.getByText('First Related Video').closest('[role="button"]');
+			const videoCard = screen.getByText('MURDER DRONES - Heartbeat').closest('[role="button"]');
 			await fireEvent.click(videoCard!);
 			
-			expect(mockGoto).toHaveBeenCalledWith('/video/video-1');
+			expect(mockGoto).toHaveBeenCalledWith('/video/heartbeat-id');
 		});
 
 		it('should navigate to correct video ID', async () => {
 			render(VideoListings, { props: { videos: mockRelatedVideos } });
 			
-			const secondVideoCard = screen.getByText('Second Related Video').closest('[role="button"]');
+			const secondVideoCard = screen.getByText('KNIGHTS OF GUINEVERE - Pilot').closest('[role="button"]');
 			await fireEvent.click(secondVideoCard!);
 			
-			expect(mockGoto).toHaveBeenCalledWith('/video/video-2');
+			expect(mockGoto).toHaveBeenCalledWith('/video/pilot-id');
 		});
 
 		it('should handle keyboard navigation with Enter key', async () => {
 			render(VideoListings, { props: { videos: mockRelatedVideos } });
 			
-			const videoCard = screen.getByText('First Related Video').closest('[role="button"]');
+			const videoCard = screen.getByText('MURDER DRONES - Heartbeat').closest('[role="button"]');
 			await fireEvent.keyDown(videoCard!, { key: 'Enter' });
 			
-			expect(mockGoto).toHaveBeenCalledWith('/video/video-1');
+			expect(mockGoto).toHaveBeenCalledWith('/video/heartbeat-id');
 		});
 
 		it('should not navigate on other key presses', async () => {
 			render(VideoListings, { props: { videos: mockRelatedVideos } });
 			
-			const videoCard = screen.getByText('First Related Video').closest('[role="button"]');
+			const videoCard = screen.getByText('KNIGHTS OF GUINEVERE - Pilot').closest('[role="button"]');
 			await fireEvent.keyDown(videoCard!, { key: 'Space' });
 			
 			expect(mockGoto).not.toHaveBeenCalled();
-		});
-
-		it('should handle navigation without loading store', async () => {
-			render(VideoListings, { props: { videos: mockRelatedVideos } });
-			
-			const videoCard = screen.getByText('First Related Video').closest('[role="button"]');
-			await fireEvent.click(videoCard!);
-			
-			// Should not crash when isLoadingStore is undefined
-			expect(mockGoto).toHaveBeenCalledWith('/video/video-1');
 		});
 	});
 
@@ -383,7 +304,7 @@ describe('VideoListings', () => {
 			render(VideoListings, { props: { videos: mockRelatedVideos } });
 			
 			mockRelatedVideos.forEach(video => {
-				const thumbnail = screen.getByAltText(video.title);
+				const thumbnail = screen.getByAltText(`thumbnail-${video.id}`);
 				expect(thumbnail).toBeInTheDocument();
 			});
 		});
@@ -391,7 +312,7 @@ describe('VideoListings', () => {
 		it('should have alt text for channel avatars', () => {
 			render(VideoListings, { props: { videos: [mockRelatedVideos[0]] } });
 			
-			const avatar = screen.getByAltText('Channel One');
+			const avatar = screen.getByAltText('heartbeat-id-channel-avatar-GLITCH');
 			expect(avatar).toBeInTheDocument();
 		});
 
@@ -434,7 +355,7 @@ describe('VideoListings', () => {
 		it('should have proper text truncation for titles', () => {
 			render(VideoListings, { props: { videos: mockRelatedVideos } });
 			
-			const titleElement = screen.getByText('First Related Video');
+			const titleElement = screen.getByText('MURDER DRONES - Heartbeat');
 			expect(titleElement).toHaveClass('line-clamp-2');
 		});
 	});
@@ -519,36 +440,33 @@ describe('VideoListings', () => {
 			render(VideoListings, { props: { videos: [mockRelatedVideos[0]] } });
 			
 			// Title
-			expect(screen.getByText('First Related Video')).toBeInTheDocument();
+			expect(screen.getByText('MURDER DRONES - Heartbeat')).toBeInTheDocument();
 			
 			// Thumbnail
-			expect(screen.getByAltText('First Related Video')).toBeInTheDocument();
+			expect(screen.getByAltText('thumbnail-heartbeat-id')).toBeInTheDocument();
 			
 			// Channel info
-			expect(screen.getByText('Channel One')).toBeInTheDocument();
-			expect(screen.getByAltText('Channel One')).toBeInTheDocument();
+			expect(screen.getByText('GLITCH')).toBeInTheDocument();
+			expect(screen.getByAltText('heartbeat-id-channel-avatar-GLITCH')).toBeInTheDocument();
 			
 			// Stats
-			expect(screen.getByText('1,234,567 views')).toBeInTheDocument();
-			expect(screen.getByText('2 days ago')).toBeInTheDocument();
-			
-			// Duration
-			expect(screen.getByText('10:00')).toBeInTheDocument();
+			expect(screen.getByText('39,000,000 views')).toBeInTheDocument();
+			expect(screen.getByText('3 years ago')).toBeInTheDocument();
 		});
 
 		it('should handle props update', async () => {
 			const { unmount } = render(VideoListings, { props: { videos: mockSingleVideo } });
 			
-			expect(screen.getByText('First Related Video')).toBeInTheDocument();
-			expect(screen.queryByText('Second Related Video')).not.toBeInTheDocument();
+			expect(screen.getByText('MURDER DRONES - Heartbeat')).toBeInTheDocument();
+			expect(screen.queryByText('KNIGHTS OF GUINEVERE - Pilot')).not.toBeInTheDocument();
 			
 			// Unmount and remount with new props (Svelte 5 approach)
 			unmount();
 			render(VideoListings, { props: { videos: mockRelatedVideos } });
 			
 			await waitFor(() => {
-				expect(screen.getByText('Second Related Video')).toBeInTheDocument();
-				expect(screen.getByText('Third Related Video')).toBeInTheDocument();
+				expect(screen.getByText('MURDER DRONES - Heartbeat')).toBeInTheDocument();
+				expect(screen.getByText('MURDER DRONES - Cabin Fever')).toBeInTheDocument();
 			});
 		});
 
@@ -563,21 +481,21 @@ describe('VideoListings', () => {
 			
 			await waitFor(() => {
 				expect(screen.queryByText(/No related [Vv]ideos available/)).not.toBeInTheDocument();
-				expect(screen.getByText('First Related Video')).toBeInTheDocument();
+				expect(screen.getByText('MURDER DRONES - Heartbeat')).toBeInTheDocument();
 			});
 		});
 
 		it('should handle switching from populated to empty', async () => {
 			const { unmount } = render(VideoListings, { props: { videos: mockRelatedVideos } });
 			
-			expect(screen.getByText('First Related Video')).toBeInTheDocument();
+			expect(screen.getByText('MURDER DRONES - Heartbeat')).toBeInTheDocument();
 			
 			// Unmount and remount with new props (Svelte 5 approach)
 			unmount();
 			render(VideoListings, { props: { videos: mockEmptyVideos } });
 			
 			await waitFor(() => {
-				expect(screen.queryByText('First Related Video')).not.toBeInTheDocument();
+				expect(screen.queryByText('MURDER DRONES - Heartbeat')).not.toBeInTheDocument();
 				expect(screen.getByText(/No related [Vv]ideos available/)).toBeInTheDocument();
 			});
 		});

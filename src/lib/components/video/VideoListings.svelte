@@ -45,7 +45,7 @@
 					<div class="relative" style="aspect-ratio: 16/9;">
 						<img 
 							src={video.thumbnail} 
-							alt={video.title}
+							alt={`thumbnail-${video.id}`}
 							class="w-full h-full rounded-md object-cover"
 						/>
 						<!-- Duration badge -->
@@ -69,7 +69,7 @@
 						{#if video.channelAvatar}
 							<img 
 								src={video.channelAvatar} 
-								alt={video.channelName}
+								alt={`${video.id}-channel-avatar-${video.channelName}`}
 								class="h-6 w-6 rounded-full object-cover shrink-0"
 							/>
 						{/if}
