@@ -1,11 +1,35 @@
-{
-	"title": "MURDER DRONES - Pilot",
-	"description": "Murder Drones is a show about cute little robots that murder eachother",
-	"channelAvatar": "https://yt3.ggpht.com/random-unicode-characters/xl",
-	"viewCount": 10000,
-	"likeCount": 555,
-	"dislikeCount": 10,
-	"channelName": "GLITCH",
-	"subscriberCount": 50000,
-	"uploadDate": "2021-10-29T16:00:13-07:00"
-}
+[
+	{
+		"title": "MURDER DRONES - Pilot",
+		"description": "Murder Drones is a show about cute little robots that murder eachother",
+		"channelAvatar": "https://yt3.ggpht.com/random-unicode-characters/xl",
+		"viewCount": 10000,
+		"likeCount": 555,
+		"dislikeCount": 10,
+		"channelName": "GLITCH",
+		"subscriberCount": 50000,
+		"uploadDate": "2021-10-29T16:00:13-07:00"
+	},
+	{
+		"title": "MURDER DRONES - Cabin Fever",
+		"description": "We goin campin' ... Uzi you ok?",
+		"channelAvatar": null,
+		"viewCount": 999999999999,
+		"likeCount": 50000000000,
+		"dislikeCount": 500000,
+		"channelName": "GLITCH",
+		"subscriberCount": 100000000,
+		"uploadDate": "2023-11-14T17:00:13-07:00"
+	},
+	{
+		"title": "MURDER DRONES - The Promening",
+		"description": "Murder Drones is a show about cute little robots that murder eachother. aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbfffffffffffffffffffffffffffffffffffffffffffff",
+		"channelAvatar": "https://yt3.ggpht.com/random-unicode-characters/xl",
+		"viewCount": 0,
+		"likeCount": 0,
+		"dislikeCount": 0,
+		"channelName": "GLITCH",
+		"subscriberCount": 0,
+		"uploadDate": "2024-08-06T16:00:13-07:00"
+	}
+]

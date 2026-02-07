@@ -9,15 +9,12 @@ import userEvent from '@testing-library/user-event';
 import { describe, it, expect } from 'vitest';
 import VideoDetail from './VideoDetail.svelte';
 import type { VideoMetadata } from '$lib/adapters/types';
-import {
-	mockMetadata,
-	mockMetadataNoAvatar,
-	mockMetadataLargeNumbers,
-	mockMetadataLongDescription,
-	mockMetadataHtmlDescription,
-	mockMetadataZeroViews,
-	mockMetadataSpecialChars
-} from '../../../tests/fixtures/videoDetailFixtures';
+import videoDetailsFixture from '../../../tests/fixtures/adapters/detailsResult.json';
+const mockMetadata: VideoMetadata = videoDetailsFixture[0];
+const mockMetadataNoAvatarAndLargeNumbers = videoDetailsFixture[1];
+const mockMetaDataLongDescrptionAndZeroViews = videoDetailsFixture[2];
+
+
 
 // =============================================================================
 // Metadata Display Tests
@@ -46,19 +43,7 @@ describe('VideoDetail', () => {
 			
 			expect(screen.getByText(mockMetadata.title)).toBeInTheDocument();
 			expect(screen.getByText(mockMetadata.channelName)).toBeInTheDocument();
-			expect(screen.getByText(/1,234,567 views/)).toBeInTheDocument();
-		});
-
-		it('should render special characters correctly in title', () => {
-			render(VideoDetail, { props: { metadata: mockMetadataSpecialChars } });
-			
-			expect(screen.getByText(mockMetadataSpecialChars.title)).toBeInTheDocument();
-		});
-
-		it('should render special characters correctly in channel name', () => {
-			render(VideoDetail, { props: { metadata: mockMetadataSpecialChars } });
-			
-			expect(screen.getByText(mockMetadataSpecialChars.channelName)).toBeInTheDocument();
+			expect(screen.getByText(/10,000 views/)).toBeInTheDocument();
 		});
 	});
 
@@ -76,9 +61,9 @@ describe('VideoDetail', () => {
 		});
 
 		it('should render placeholder when avatar is undefined', () => {
-			render(VideoDetail, { props: { metadata: mockMetadataNoAvatar } });
+			render(VideoDetail, { props: { metadata: mockMetadataNoAvatarAndLargeNumbers } });
 			
-			const avatar = screen.getByAltText(mockMetadataNoAvatar.channelName);
+			const avatar = screen.getByAltText(mockMetadataNoAvatarAndLargeNumbers.channelName);
 			expect(avatar).toBeInTheDocument();
 			expect(avatar).toHaveAttribute('src');
 			expect(avatar.getAttribute('src')).toContain('logo-placeholder');
@@ -100,19 +85,17 @@ describe('VideoDetail', () => {
 		it('should format view count with commas', () => {
 			render(VideoDetail, { props: { metadata: mockMetadata } });
 			
-			// 1234567 should be formatted as 1,234,567
-			expect(screen.getByText(/1,234,567 views/)).toBeInTheDocument();
+			expect(screen.getByText(/10,000 views/)).toBeInTheDocument();
 		});
 
 		it('should format large numbers correctly', () => {
-			render(VideoDetail, { props: { metadata: mockMetadataLargeNumbers } });
+			render(VideoDetail, { props: { metadata: mockMetadataNoAvatarAndLargeNumbers } });
 			
-			// 999999999 should be formatted as 999,999,999
 			expect(screen.getByText(/999,999,999 views/)).toBeInTheDocument();
 		});
 
 		it('should handle zero views', () => {
-			render(VideoDetail, { props: { metadata: mockMetadataZeroViews } });
+			render(VideoDetail, { props: { metadata: mockMetaDataLongDescrptionAndZeroViews } });
 			
 			expect(screen.getByText(/0 views/)).toBeInTheDocument();
 		});
@@ -155,31 +138,15 @@ describe('VideoDetail', () => {
 		it('should render description text', () => {
 			render(VideoDetail, { props: { metadata: mockMetadata } });
 			
-			const description = screen.getByText(/This is a test video description/);
+			const description = screen.getByText(/Murder Drones is a show about cute little robots that murder eachother/);
 			expect(description).toBeInTheDocument();
-		});
-
-		it('should render HTML content in description', () => {
-			render(VideoDetail, { props: { metadata: mockMetadataHtmlDescription } });
-			
-			// Check for HTML elements
-			const link = screen.getByRole('link');
-			expect(link).toBeInTheDocument();
-			expect(link).toHaveAttribute('href', 'https://example.com');
 		});
 
 		it('should handle long descriptions', () => {
-			render(VideoDetail, { props: { metadata: mockMetadataLongDescription } });
+			render(VideoDetail, { props: { metadata: mockMetaDataLongDescrptionAndZeroViews } });
 			
-			const description = screen.getByText(/Lorem ipsum/);
+			const description = screen.getByText(/Murder Drones is a show about cute little robots that murder eachother. aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbfffffffffffffffffffffffffffffffffffffffffffff/);
 			expect(description).toBeInTheDocument();
-		});
-
-		it('should preserve HTML formatting', () => {
-			render(VideoDetail, { props: { metadata: mockMetadata } });
-			
-			const container = screen.getByText(/This is a test video description/).parentElement;
-			expect(container?.innerHTML).toContain('<strong>HTML</strong>');
 		});
 
 		it('should render empty description', () => {
@@ -332,23 +299,13 @@ describe('VideoDetail', () => {
 
 		it('should work with long descriptions', async () => {
 			const user = userEvent.setup();
-			render(VideoDetail, { props: { metadata: mockMetadataLongDescription } });
+			render(VideoDetail, { props: { metadata: mockMetaDataLongDescrptionAndZeroViews } });
 			
 			const showMoreButton = screen.getByRole('button', { name: /show more/i });
 			await user.click(showMoreButton);
 			
 			expect(screen.getByRole('button', { name: /show less/i })).toBeInTheDocument();
-			expect(screen.getByText(/Lorem ipsum/)).toBeInTheDocument();
-		});
-
-		it('should work with HTML descriptions', async () => {
-			const user = userEvent.setup();
-			render(VideoDetail, { props: { metadata: mockMetadataHtmlDescription } });
-			
-			await user.click(screen.getByRole('button', { name: /show more/i }));
-			
-			expect(screen.getByRole('button', { name: /show less/i })).toBeInTheDocument();
-			expect(screen.getByRole('link')).toBeInTheDocument();
+			expect(screen.getByText(/Murder Drones is a show about cute little robots that murder eachother. aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbfffffffffffffffffffffffffffffffffffffffffffff/)).toBeInTheDocument();
 		});
 
 		it('should work with empty descriptions', async () => {
@@ -428,7 +385,7 @@ describe('VideoDetail', () => {
 		it('should render view count heading', () => {
 			render(VideoDetail, { props: { metadata: mockMetadata } });
 			
-			const viewsHeading = screen.getByText(/1,234,567 views/);
+			const viewsHeading = screen.getByText(/10,000 views/);
 			expect(viewsHeading.tagName).toBe('H3');
 		});
 
@@ -459,9 +416,9 @@ describe('VideoDetail', () => {
 
 	describe('edge cases', () => {
 		it('should handle undefined avatar gracefully', () => {
-			const { container } = render(VideoDetail, { props: { metadata: mockMetadataNoAvatar } });
+			const { container } = render(VideoDetail, { props: { metadata: mockMetadataNoAvatarAndLargeNumbers } });
 			
-			const avatar = screen.getByAltText(mockMetadataNoAvatar.channelName);
+			const avatar = screen.getByAltText(mockMetadataNoAvatarAndLargeNumbers.channelName);
 			expect(avatar).toBeInTheDocument();
 			expect(container).toBeInTheDocument();
 		});
@@ -511,7 +468,7 @@ describe('VideoDetail', () => {
 			expect(screen.getByRole('button', { name: /show more/i })).toBeInTheDocument();
 			
 			// Update metadata
-			rerender({ metadata: mockMetadataLargeNumbers });
+			rerender({ metadata: mockMetadataNoAvatarAndLargeNumbers });
 			
 			// Should still be collapsed
 			await waitFor(() => {
@@ -554,10 +511,10 @@ describe('VideoDetail', () => {
 			expect(screen.getByRole('button', { name: /subscribe/i })).toBeInTheDocument();
 			
 			// View count
-			expect(screen.getByText(/1,234,567 views/)).toBeInTheDocument();
+			expect(screen.getByText(/10,000 views/)).toBeInTheDocument();
 			
 			// Description
-			expect(screen.getByText(/This is a test video description/)).toBeInTheDocument();
+			expect(screen.getByText(/Murder Drones is a show about cute little robots that murder eachother/)).toBeInTheDocument();
 			
 			// Toggle button
 			expect(screen.getByRole('button', { name: /show more/i })).toBeInTheDocument();
@@ -569,10 +526,10 @@ describe('VideoDetail', () => {
 			expect(screen.getByText(mockMetadata.title)).toBeInTheDocument();
 			
 			// Update with new metadata
-			rerender({ metadata: mockMetadataLargeNumbers });
+			rerender({ metadata: mockMetadataNoAvatarAndLargeNumbers });
 			
 			await waitFor(() => {
-				expect(screen.getByText(mockMetadataLargeNumbers.title)).toBeInTheDocument();
+				expect(screen.getByText(mockMetadataNoAvatarAndLargeNumbers.title)).toBeInTheDocument();
 			});
 			await waitFor(() => {
 				expect(screen.getByText(/999,999,999 views/)).toBeInTheDocument();

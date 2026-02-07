@@ -27,7 +27,7 @@ import type { VideoMetadata } from '$lib/adapters/types';
 
 const mockDetailsResponse: Details = detailsResponseFixture[0];
 const mockEmptyDetailsResponse: Details = detailsResponseFixture[1];
-const mockDetailsResult: VideoMetadata = detailsResultFixture;
+const mockDetailsResult: VideoMetadata = detailsResultFixture[0];
 
 const defaultAvatar = 'https://example.com/default-avatar.jpg';
 
