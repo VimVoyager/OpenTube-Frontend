@@ -1,18 +1,13 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import {
 	createFailedFetch,
 	createInvalidJSONFetch,
 	createNetworkErrorFetch,
 	createSuccessfulFetch,
-	mockStaticEnv
 } from '../../tests/helpers/apiHelpers';
 import { getVideoThumbnails } from './thumbnails';
 import thumbnailsResponseFixture from '../../tests/fixtures/api/thumbnailsResponseFixture.json';
 import type { Thumbnail } from '$lib/types';
-
-beforeEach(() =>{
-    mockStaticEnv();
-})
 
 const mockThumbnailsResponse: Thumbnail[] = thumbnailsResponseFixture;
 
