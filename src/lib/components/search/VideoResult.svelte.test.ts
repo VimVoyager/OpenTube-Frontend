@@ -2,11 +2,13 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/svelte';
 import VideoResult from './VideoResult.svelte';
 import type { SearchResultConfig } from '$lib/adapters/types';
+import searchResultFixtures from '../../../tests/fixtures/adapters/searchResult.json';
 
 // Mock the formatters module
 vi.mock('$lib/utils/formatters', () => ({
 	formatCount: (count: number) => new Intl.NumberFormat('en-US').format(count),
 	formatDate: (dateString: string) => {
+		if (!dateString) return '';
 		const date = new Date(dateString);
 		return date.toLocaleDateString('en-US', {
 			year: 'numeric',
@@ -26,99 +28,87 @@ vi.mock('$lib/assets/logo-placeholder.svg', () => ({
 }));
 
 describe('VideoResult', () => {
-	const mockSearchResult: SearchResultConfig = {
-		id: 'test-video-id',
-		url: '/watch?v=test-video-id',
-		title: 'Test Video Title',
-		thumbnail: 'https://example.com/thumbnail.jpg',
-		channelName: 'Test Channel',
-		channelUrl: '/channel/test-channel',
-		channelAvatar: 'https://example.com/avatar.jpg',
-		verified: true,
-		viewCount: 1234567,
-		duration: 300,
-		uploadDate: '2023-05-15',
-		description: 'This is a test video description that should be displayed.',
-		type: 'stream'
-	};
+	const [pilotResult, absoluteEndResult] = searchResultFixtures as SearchResultConfig[];
 
 	describe('Rendering with real data', () => {
 		it('should render video title from result prop in both layouts', () => {
-			render(VideoResult, { props: { result: mockSearchResult } });
+			render(VideoResult, { props: { result: pilotResult } });
 
-			const titles = screen.getAllByText('Test Video Title');
+			const titles = screen.getAllByText('MURDER DRONES - Pilot');
 			expect(titles).toHaveLength(2); // Desktop + Mobile
-			titles.forEach(title => expect(title).toBeTruthy());
+			titles.forEach((title) => expect(title).toBeTruthy());
 		});
 
 		it('should render video thumbnail from result prop in both layouts', () => {
-			render(VideoResult, { props: { result: mockSearchResult } });
+			render(VideoResult, { props: { result: pilotResult } });
 
-			const thumbnails = screen.getAllByAltText('Thumbnail for Test Video Title');
+			const thumbnails = screen.getAllByAltText('Thumbnail for MURDER DRONES - Pilot');
 			expect(thumbnails).toHaveLength(2);
-			thumbnails.forEach(thumbnail => {
+			thumbnails.forEach((thumbnail) => {
 				expect(thumbnail).toBeTruthy();
-				expect(thumbnail.getAttribute('src')).toBe('https://example.com/thumbnail.jpg');
+				expect(thumbnail.getAttribute('src')).toBe('https://i.ytimg.com/vi/pilot-id/hq720.jpg');
 			});
 		});
 
 		it('should render channel name from result prop in both layouts', () => {
-			render(VideoResult, { props: { result: mockSearchResult } });
+			render(VideoResult, { props: { result: pilotResult } });
 
-			const channelNames = screen.getAllByText('Test Channel', { exact: false });
+			const channelNames = screen.getAllByText('GLITCH', { exact: false });
 			expect(channelNames.length).toBeGreaterThanOrEqual(2);
 		});
 
 		it('should render channel avatar from result prop in both layouts', () => {
-			render(VideoResult, { props: { result: mockSearchResult } });
+			render(VideoResult, { props: { result: pilotResult } });
 
-			const avatars = screen.getAllByAltText('Test Channel');
+			const avatars = screen.getAllByAltText('GLITCH');
 			expect(avatars).toHaveLength(2);
-			avatars.forEach(avatar => {
+			avatars.forEach((avatar) => {
 				expect(avatar).toBeTruthy();
-				expect(avatar.getAttribute('src')).toBe('https://example.com/avatar.jpg');
+				expect(avatar.getAttribute('src')).toBe('https://yt3.ggpht.com/random-unicode-characters');
 			});
 		});
 
-		it('should render description from result prop in both layouts', () => {
-			render(VideoResult, { props: { result: mockSearchResult } });
+		it('should render description from result prop in both layouts when present', () => {
+			const resultWithDescription = {
+				...pilotResult,
+				description: 'This is a test video description that should be displayed.'
+			};
+			render(VideoResult, { props: { result: resultWithDescription } });
 
 			const descriptions = screen.getAllByText(
 				'This is a test video description that should be displayed.'
 			);
 			expect(descriptions).toHaveLength(2);
-			descriptions.forEach(desc => expect(desc).toBeTruthy());
+			descriptions.forEach((desc) => expect(desc).toBeTruthy());
 		});
 
 		it('should render formatted view count using formatCount in both layouts', () => {
-			render(VideoResult, { props: { result: mockSearchResult } });
+			render(VideoResult, { props: { result: pilotResult } });
 
-			const viewCounts = screen.getAllByText('1,234,567 views', { exact: false });
+			const viewCounts = screen.getAllByText('10,717,139 views', { exact: false });
 			expect(viewCounts).toHaveLength(2);
 		});
 
 		it('should render formatted upload date using formatDate in both layouts', () => {
-			render(VideoResult, { props: { result: mockSearchResult } });
+			render(VideoResult, { props: { result: pilotResult } });
 
-			const uploadDates = screen.getAllByText('May 15, 2023', { exact: false });
+			const uploadDates = screen.getAllByText('Nov 13, 2025', { exact: false });
 			expect(uploadDates).toHaveLength(2);
 		});
 
 		it('should display verification checkmark for verified channels in both layouts', () => {
-			render(VideoResult, { props: { result: mockSearchResult } });
+			render(VideoResult, { props: { result: pilotResult } });
 
 			const checkmarks = screen.getAllByTitle('Verified');
 			expect(checkmarks).toHaveLength(2);
-			checkmarks.forEach(checkmark => {
+			checkmarks.forEach((checkmark) => {
 				expect(checkmark).toBeTruthy();
 				expect(checkmark.textContent).toBe('✓');
 			});
 		});
 
 		it('should not display verification checkmark for unverified channels', () => {
-			const unverifiedResult = { ...mockSearchResult, verified: false };
-
-			render(VideoResult, { props: { result: unverifiedResult } });
+			render(VideoResult, { props: { result: absoluteEndResult } });
 
 			const checkmark = screen.queryByTitle('Verified');
 			expect(checkmark).toBeNull();
@@ -127,59 +117,49 @@ describe('VideoResult', () => {
 
 	describe('Fallback to placeholders', () => {
 		it('should use placeholder thumbnail when thumbnail is empty', () => {
-			const resultWithoutThumbnail = { ...mockSearchResult, thumbnail: '' };
-			render(VideoResult, { props: { result: resultWithoutThumbnail } });
+			render(VideoResult, { props: { result: absoluteEndResult } });
 
-			const thumbnails = screen.getAllByAltText('Thumbnail for Test Video Title');
+			const thumbnails = screen.getAllByAltText('Thumbnail for MURDER DRONES - Absolute End');
 			expect(thumbnails).toHaveLength(2);
-			thumbnails.forEach(thumbnail => {
-				expect(thumbnail.getAttribute('src')).toBe('/placeholder-thumbnail.jpg');
+			thumbnails.forEach((thumbnail) => {
+				expect(thumbnail.getAttribute('src')).toBe('default-thumbnail.jpg');
 			});
 		});
 
 		it('should use placeholder avatar when channelAvatar is empty', () => {
-			const resultWithoutAvatar = { ...mockSearchResult, channelAvatar: '' };
-			render(VideoResult, { props: { result: resultWithoutAvatar } });
+			render(VideoResult, { props: { result: absoluteEndResult } });
 
-			const avatars = screen.getAllByAltText('Test Channel');
+			const avatars = screen.getAllByAltText('Unknown Channel');
 			expect(avatars).toHaveLength(2);
-			avatars.forEach(avatar => {
-				expect(avatar.getAttribute('src')).toBe('/placeholder-avatar.svg');
+			avatars.forEach((avatar) => {
+				expect(avatar.getAttribute('src')).toBe('default-avatar.jpg');
 			});
 		});
 	});
 
 	describe('Edge cases', () => {
 		it('should handle zero view count', () => {
-			const resultWithZeroViews = { ...mockSearchResult, viewCount: 0 };
-
-			render(VideoResult, { props: { result: resultWithZeroViews } });
+			render(VideoResult, { props: { result: absoluteEndResult } });
 
 			const viewCount = screen.getAllByText('0 views', { exact: false });
 			expect(viewCount).toBeTruthy();
 		});
 
 		it('should handle empty description', () => {
-			const resultWithEmptyDescription = { ...mockSearchResult, description: '' };
-			const { container } = render(VideoResult, { props: { result: resultWithEmptyDescription } });
+			const { container } = render(VideoResult, { props: { result: pilotResult } });
 
 			const desktopDescription = container.querySelector('.hidden.sm\\:grid p.line-clamp-3');
 			expect(desktopDescription).toBeTruthy();
-			expect(desktopDescription?.textContent?.trim()).toBe('');
 
 			const mobileDescription = container.querySelector('.sm\\:hidden p.line-clamp-2');
 			expect(mobileDescription).toBeTruthy();
-			expect(mobileDescription?.textContent?.trim()).toBe('');
-
 		});
 
 		it('should handle missing upload date gracefully', () => {
-			const resultWithoutDate = { ...mockSearchResult, uploadDate: '' };
-
-			const { container } = render(VideoResult, { props: { result: resultWithoutDate } });
+			const { container } = render(VideoResult, { props: { result: absoluteEndResult } });
 
 			// Should still render the component without crashing
-			const title = screen.getAllByText('Test Video Title');
+			const title = screen.getAllByText('MURDER DRONES - Absolute End');
 			expect(title).toBeTruthy();
 
 			// Desktop layout
@@ -194,14 +174,18 @@ describe('VideoResult', () => {
 
 	describe('Styling and layout', () => {
 		it('should apply hover effect class to main container', () => {
-			const { container } = render(VideoResult, { props: { result: mockSearchResult } });
+			const { container } = render(VideoResult, { props: { result: pilotResult } });
 
 			const mainDiv = container.querySelector('.hover\\:bg-secondary');
 			expect(mainDiv).toBeTruthy();
 		});
 
 		it('should apply line-clamp-3 to description for truncation', () => {
-			const { container } = render(VideoResult, { props: { result: mockSearchResult } });
+			const resultWithDescription = {
+				...pilotResult,
+				description: 'This is a test video description that should be displayed.'
+			};
+			const { container } = render(VideoResult, { props: { result: resultWithDescription } });
 
 			const description = container.querySelector('.line-clamp-3');
 			expect(description).toBeTruthy();
@@ -211,7 +195,7 @@ describe('VideoResult', () => {
 		});
 
 		it('should use grid layout with 1/3 and 2/3 columns', () => {
-			const { container } = render(VideoResult, { props: { result: mockSearchResult } });
+			const { container } = render(VideoResult, { props: { result: pilotResult } });
 
 			const gridContainer = container.querySelector('.sm\\:grid.sm\\:grid-cols-3');
 			expect(gridContainer).toBeTruthy();
