@@ -55,7 +55,6 @@ describe('Search Integration Tests', () => {
 				viewCount: 10717139,
 				duration: 86,
 				uploadDate: '2025-11-13T16:00Z',
-				description: '',
 				type: 'stream'
 			});
 		});
