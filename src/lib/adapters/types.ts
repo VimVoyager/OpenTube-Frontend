@@ -89,7 +89,6 @@ export interface RelatedVideoConfig {
 
 /**
  * Search result configuration for VideoResult component display
- * Add this to your existing adapters/types.ts file
  */
 export interface SearchResultConfig {
 	id: string;
@@ -104,5 +103,26 @@ export interface SearchResultConfig {
 	duration: number;
 	uploadDate: string;
 	type: string;
+}
+
+/**
+ * Comments result configuration for Comments component display
+ */
+export interface CommentConfig {
+	id: string;
+	text: string;
+	author: string;
+	authorAvatar: string;
+	authorUrl: string;
+	isVerified: boolean;
+	isChannelOwner: boolean;
+	uploadDate: string;
+	likeCount: number;
+	likeCountText: string;
+	isPinned: boolean;
+	isHearted: boolean;
+	replyCount: number;
+	hasReplies: boolean;
+	repliesUrl?: string;
 }
 
