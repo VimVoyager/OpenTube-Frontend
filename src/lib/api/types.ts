@@ -64,3 +64,29 @@ export interface ManifestResponse {
 	duration: number;
 	videoId?: string;
 }
+
+/**
+ * API response for comments
+ */
+export interface CommentResponse {
+	commentId: string;
+	commentText: {
+		content: string;
+		type: number;
+	};
+	uploaderName: string;
+	uploaderAvatars: Avatar[];
+	uploaderUrl: string;
+	uploaderVerified: boolean;
+	textualUploadDate: string;
+	likeCount: number;
+	textualLikeCount: string;
+	heartedByUploader: boolean;
+	pinned: boolean;
+	replyCount: number;
+	replies?: {
+		url: string;
+		id: string;
+	};
+	channelOwner: boolean;
+}
