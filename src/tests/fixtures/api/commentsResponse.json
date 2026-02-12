@@ -1,145 +1,154 @@
-{
-	"serviceId": 0,
-	"id": "pilot-id",
-	"url": "https://www.youtube.com/watch?v=pilot-id",
-	"originalUrl": "https://www.youtube.com/watch?v=pilot-id",
-	"name": "Comments",
-	"errors": [],
-	"relatedItems": [
-		{
-			"infoType": "COMMENT",
-			"serviceId": 0,
-			"url": "https://www.youtube.com/watch?v=pilot-id",
-			"name": "@GLITCH",
-			"thumbnails": [
-				{
-					"url": "https://yt3.ggpht.com/random-unicode-characters",
-					"height": 88,
-					"width": 88,
-					"estimatedResolutionLevel": "LOW"
-				}
-			],
-			"commentId": "UgyiJE43h1yLACMgiwh4AaABAg",
-			"commentText": {
-				"content": "Thank you all so much for watching. This was an absolute wonderful show our little animation team had the pleasure of making and we really hope you enjoyed it! \r<br>We&apos;d like to do a full season and are currently seeking funding! You can help support us by getting some merch ► <a href=\"http://murderdrones.store/\">http://murderdrones.store/\r</a><br>No pressure though, hope you have a great day! 💙",
-				"type": 1
-			},
-			"uploaderName": "@GLITCH",
-			"uploaderAvatars": [
-				{
-					"url": "https://yt3.ggpht.com/random-unicode-characters",
-					"height": 88,
-					"width": 88,
-					"estimatedResolutionLevel": "LOW"
-				}
-			],
-			"uploaderUrl": "https://www.youtube.com/channel/UCn_FAXem2-e3HQvmK-mOH4g",
-			"uploaderVerified": false,
-			"textualUploadDate": "4 years ago",
-			"uploadDate": {
-				"approximation": true
-			},
-			"likeCount": 64000,
-			"textualLikeCount": "64k",
-			"heartedByUploader": false,
-			"pinned": true,
-			"streamPosition": -1,
-			"replyCount": 914,
-			"replies": {
+[
+	{
+		"serviceId": 0,
+		"id": "pilot-id",
+		"url": "https://www.youtube.com/watch?v=pilot-id",
+		"originalUrl": "https://www.youtube.com/watch?v=pilot-id",
+		"name": "Comments",
+		"errors": [],
+		"relatedItems": [
+			{
+				"infoType": "COMMENT",
+				"serviceId": 0,
 				"url": "https://www.youtube.com/watch?v=pilot-id",
-				"id": "replies-id"
+				"name": "@GLITCH",
+				"thumbnails": [
+					{
+						"url": "https://yt3.ggpht.com/random-unicode-characters",
+						"height": 88,
+						"width": 88,
+						"estimatedResolutionLevel": "LOW"
+					}
+				],
+				"commentId": "UgyiJE43h1yLACMgiwh4AaABAg",
+				"commentText": {
+					"content": "Thank you all so much for watching. This was an absolute wonderful show our little animation team had the pleasure of making and we really hope you enjoyed it! \r<br>We&apos;d like to do a full season and are currently seeking funding! You can help support us by getting some merch ► <a href=\"http://murderdrones.store/\">http://murderdrones.store/\r</a><br>No pressure though, hope you have a great day! 💙",
+					"type": 1
+				},
+				"uploaderName": "@GLITCH",
+				"uploaderAvatars": [
+					{
+						"url": "https://yt3.ggpht.com/random-unicode-characters",
+						"height": 88,
+						"width": 88,
+						"estimatedResolutionLevel": "LOW"
+					}
+				],
+				"uploaderUrl": "https://www.youtube.com/channel/UCn_FAXem2-e3HQvmK-mOH4g",
+				"uploaderVerified": false,
+				"textualUploadDate": "4 years ago",
+				"uploadDate": {
+					"approximation": true
+				},
+				"likeCount": 64000,
+				"textualLikeCount": "64k",
+				"heartedByUploader": false,
+				"pinned": true,
+				"streamPosition": -1,
+				"replyCount": 914,
+				"replies": {
+					"url": "https://www.youtube.com/watch?v=pilot-id",
+					"id": "reply-id-1"
+				},
+				"channelOwner": true
 			},
-			"channelOwner": true
-		},
-		{
-			"infoType": "COMMENT",
-			"serviceId": 0,
-			"url": "https://www.youtube.com/watch?v=pilot-id",
-			"name": "@VirtualHelpSystem",
-			"thumbnails": [
-				{
-					"url": "https://yt3.ggpht.com/random-unicode-characters",
-					"height": 88,
-					"width": 88,
-					"estimatedResolutionLevel": "LOW"
-				}
-			],
-			"commentId": "comment-id",
-			"commentText": {
-				"content": "Love the little easter egg of N&apos;s Target Lock mechanism saying &quot;Plot Armour Detected&quot;",
-				"type": 1
-			},
-			"uploaderName": "@VirtualHelpSystem",
-			"uploaderAvatars": [
-				{
-					"url": "https://yt3.ggpht.com/random-unicode-characters",
-					"height": 88,
-					"width": 88,
-					"estimatedResolutionLevel": "LOW"
-				}
-			],
-			"uploaderUrl": "https://www.youtube.com/channel/channel-id",
-			"uploaderVerified": false,
-			"textualUploadDate": "2 years ago",
-			"uploadDate": {
-				"approximation": true
-			},
-			"likeCount": 9000,
-			"textualLikeCount": "9k",
-			"heartedByUploader": false,
-			"pinned": false,
-			"streamPosition": -1,
-			"replyCount": 38,
-			"replies": {
+			{
+				"infoType": "COMMENT",
+				"serviceId": 0,
 				"url": "https://www.youtube.com/watch?v=pilot-id",
-				"id": "replies-id"
+				"name": "@VirtualHelpSystem",
+				"thumbnails": [
+					{
+						"url": "https://yt3.ggpht.com/random-unicode-characters",
+						"height": 88,
+						"width": 88,
+						"estimatedResolutionLevel": "LOW"
+					}
+				],
+				"commentId": "comment-id",
+				"commentText": {
+					"content": "Love the little easter egg of N&apos;s Target Lock mechanism saying &quot;Plot Armour Detected&quot;",
+					"type": 1
+				},
+				"uploaderName": "@VirtualHelpSystem",
+				"uploaderAvatars": [
+					{
+						"url": "https://yt3.ggpht.com/random-unicode-characters",
+						"height": 88,
+						"width": 88,
+						"estimatedResolutionLevel": "LOW"
+					}
+				],
+				"uploaderUrl": "https://www.youtube.com/channel/channel-id",
+				"uploaderVerified": false,
+				"textualUploadDate": "2 years ago",
+				"uploadDate": {
+					"approximation": true
+				},
+				"likeCount": 9000,
+				"textualLikeCount": "9k",
+				"heartedByUploader": false,
+				"pinned": false,
+				"streamPosition": -1,
+				"replyCount": 38,
+				"replies": {
+					"url": "https://www.youtube.com/watch?v=pilot-id",
+					"id": "reply-id-2"
+				},
+				"channelOwner": false
 			},
-			"channelOwner": false
-		},
-		{
-			"infoType": "COMMENT",
-			"serviceId": 0,
-			"url": "https://www.youtube.com/watch?v=pilot-id",
-			"name": "@Beeschurgers",
-			"thumbnails": [
-				{
-					"url": "https://yt3.ggpht.com/random-unicode-characters",
-					"height": 88,
-					"width": 88,
-					"estimatedResolutionLevel": "LOW"
-				}
-			],
-			"commentId": "comment-id",
-			"commentText": {
-				"content": "that switch up with N when he lived up to his name as a murder drone was a fantastic example of how to make an adorable, seemingly harmless character terrifying",
-				"type": 1
-			},
-			"uploaderName": "@Beeschurgers",
-			"uploaderAvatars": [
-				{
-					"url": "https://yt3.ggpht.com/random-unicode-charactes",
-					"height": 88,
-					"width": 88,
-					"estimatedResolutionLevel": "LOW"
-				}
-			],
-			"uploaderUrl": "https://www.youtube.com/channel/channel-id",
-			"uploaderVerified": false,
-			"textualUploadDate": "3 years ago",
-			"uploadDate": {
-				"approximation": true
-			},
-			"likeCount": 7800,
-			"textualLikeCount": "7.8k",
-			"heartedByUploader": false,
-			"pinned": false,
-			"streamPosition": -1,
-			"replyCount": 24,
-			"replies": {
+			{
+				"infoType": "COMMENT",
+				"serviceId": 0,
 				"url": "https://www.youtube.com/watch?v=pilot-id",
-				"id": "replies-id"
-			},
-			"channelOwner": false
-		}
-	]
-}
+				"name": "@Beeschurgers",
+				"thumbnails": [
+					{
+						"url": "https://yt3.ggpht.com/random-unicode-characters",
+						"height": 88,
+						"width": 88,
+						"estimatedResolutionLevel": "LOW"
+					}
+				],
+				"commentId": "comment-id",
+				"commentText": {
+					"content": "that switch up with N when he lived up to his name as a murder drone was a fantastic example of how to make an adorable, seemingly harmless character terrifying",
+					"type": 1
+				},
+				"uploaderName": "@Beeschurgers",
+				"uploaderAvatars": [
+					{
+						"url": "https://yt3.ggpht.com/random-unicode-charactes",
+						"height": 88,
+						"width": 88,
+						"estimatedResolutionLevel": "LOW"
+					}
+				],
+				"uploaderUrl": "https://www.youtube.com/channel/channel-id",
+				"uploaderVerified": false,
+				"textualUploadDate": "3 years ago",
+				"uploadDate": {
+					"approximation": true
+				},
+				"likeCount": 7800,
+				"textualLikeCount": "7.8k",
+				"heartedByUploader": false,
+				"pinned": false,
+				"streamPosition": -1,
+				"replyCount": 24,
+				"replies": {
+					"url": "https://www.youtube.com/watch?v=pilot-id",
+					"id": "reply-id-3"
+				},
+				"channelOwner": false
+			}
+		]
+	},
+	{
+		"serviceId": 0,
+		"id": "empty-video-id",
+		"url": "https://www.youtube.com/watch?v=empty-video-id",
+		"name": "Comments",
+		"relatedItems": []
+	}
+]
