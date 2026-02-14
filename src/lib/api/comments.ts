@@ -9,7 +9,7 @@ const API_BASE_URL = PUBLIC_API_URL;
 export async function getVideoComments(
 	id: string,
 	fetchFn?: typeof globalThis.fetch
-): Promise<CommentResponse[]> {
+): Promise<CommentResponse['relatedItems']> {
 	const fetcher = fetchFn ?? globalThis.fetch;
 
 	try {
@@ -19,7 +19,7 @@ export async function getVideoComments(
 			throw new Error(`Failed to fetch comments for ${id}: ${res.status} ${res.statusText}`);
 		}
 
-		const data = await res.json();
+		const data: CommentResponse = await res.json();
 		return data.relatedItems || [];
 	} catch (error) {
 		console.error('Error fetching video comments:', error);

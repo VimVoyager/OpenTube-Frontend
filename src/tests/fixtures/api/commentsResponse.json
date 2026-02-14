@@ -28,10 +28,22 @@
 				"uploaderName": "@GLITCH",
 				"uploaderAvatars": [
 					{
-						"url": "https://yt3.ggpht.com/random-unicode-characters",
+						"url": "https://yt3.ggpht.com/avatar1.jpg",
+						"height": 48,
+						"width": 48,
+						"estimatedResolutionLevel": "LOW"
+					},
+					{
+						"url": "https://yt3.ggpht.com/avatar2.jpg",
 						"height": 88,
 						"width": 88,
-						"estimatedResolutionLevel": "LOW"
+						"estimatedResolutionLevel": "MEDIUM"
+					},
+					{
+						"url": "https://yt3.ggpht.com/avatar3.jpg",
+						"height": 176,
+						"width": 176,
+						"estimatedResolutionLevel": "HIGH"
 					}
 				],
 				"uploaderUrl": "https://www.youtube.com/channel/UCn_FAXem2-e3HQvmK-mOH4g",

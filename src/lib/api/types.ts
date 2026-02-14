@@ -16,7 +16,7 @@ export interface SearchResponse {
 	hasNextPage: boolean;
 }
 
-export interface SearchResponseData {
+interface SearchResponseData {
 	shortFormContent: boolean;
 	type: string;
 	name: string;
@@ -69,24 +69,49 @@ export interface ManifestResponse {
  * API response for comments
  */
 export interface CommentResponse {
+	serviceId: number;
+	id: string;
+	url: string;
+	originalUrl: string;
+	name: string;
+	errors: never[];
+	relatedItems: RelatedCommentItem[];
+}
+
+export interface RelatedCommentItem {
+	infoType: string;
+	serviceId: number;
+	url: string;
+	name: string;
+	thumbnails: Thumbnail[];
 	commentId: string;
-	commentText: {
-		content: string;
-		type: number;
-	};
+	commentText: CommentText;
 	uploaderName: string;
 	uploaderAvatars: Avatar[];
 	uploaderUrl: string;
 	uploaderVerified: boolean;
 	textualUploadDate: string;
+	uploadDate: UploadDate;
 	likeCount: number;
 	textualLikeCount: string;
 	heartedByUploader: boolean;
 	pinned: boolean;
+	streamPosition: number;
 	replyCount: number;
-	replies?: {
-		url: string;
-		id: string;
-	};
+	replies: Replies;
 	channelOwner: boolean;
+}
+
+interface CommentText {
+	content: string;
+	type: number;
+}
+
+interface Replies {
+	url: string;
+	id: string;
+}
+
+interface UploadDate {
+	approximation: boolean;
 }
