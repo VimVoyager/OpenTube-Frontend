@@ -171,7 +171,7 @@ describe('getVideoComments', () => {
 			const heartedComment = result.find((c: CommentResponse) => c.heartedByUploader);
 			expect(heartedComment).toBeDefined();
 			expect(heartedComment?.heartedByUploader).toBe(true);
-			expect(heartedComment?.commentId).toBe('Ugz7bBu7BjvQK0WpaKZ4AaABAg');
+			expect(heartedComment?.commentId).toBe('UgyiJE43h1yLACMgiwh4AaABAg');
 		});
 
 		it('should correctly parse reply information', async () => {

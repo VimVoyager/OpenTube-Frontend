@@ -35,14 +35,14 @@
 					}
 				],
 				"uploaderUrl": "https://www.youtube.com/channel/UCn_FAXem2-e3HQvmK-mOH4g",
-				"uploaderVerified": false,
+				"uploaderVerified": true,
 				"textualUploadDate": "4 years ago",
 				"uploadDate": {
 					"approximation": true
 				},
 				"likeCount": 64000,
 				"textualLikeCount": "64k",
-				"heartedByUploader": false,
+				"heartedByUploader": true,
 				"pinned": true,
 				"streamPosition": -1,
 				"replyCount": 914,
