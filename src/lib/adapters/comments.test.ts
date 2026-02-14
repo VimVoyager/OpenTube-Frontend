@@ -32,7 +32,6 @@ const mockFirstComment: RelatedCommentItem = mockRelatedItems[0];
 const mockSecondComment: RelatedCommentItem = mockRelatedItems[1];
 const mockCommentConfigs: CommentConfig[] = commentsResultFixture as CommentConfig[];
 const mockFirstCommentConfig: CommentConfig = mockCommentConfigs[0];
-const mockSecondCommentConfig: CommentConfig = mockCommentConfigs[1];
 
 const defaultAvatar = 'https://example.com/default-avatar.jpg';
 
