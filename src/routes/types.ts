@@ -1,4 +1,5 @@
 import type {
+	CommentConfig,
 	RelatedVideoConfig,
 	SearchResultConfig,
 	VideoMetadata,
@@ -16,5 +17,6 @@ export interface VideoPageData {
 	playerConfig: VideoPlayerConfig;
 	metadata: VideoMetadata;
 	relatedVideos: RelatedVideoConfig[];
+	comments?: CommentConfig[];
 	error?: string;
 }

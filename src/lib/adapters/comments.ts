@@ -1,4 +1,4 @@
-import type { RelatedCommentItem } from '../api/types';
+import type { CommentResponse, RelatedCommentItem } from '../api/types';
 import type { CommentConfig } from './types';
 import { selectBestAvatar } from '$lib/utils/mediaUtils';
 
@@ -36,4 +36,16 @@ export function adaptComments(
 	defaultAvatar: string
 ): CommentConfig[] {
 	return comments.map((comment) => adaptComment(comment, defaultAvatar));
+}
+
+/**
+ * Adapt a full CommentResponse object from the API
+ * This is a convenience function that extracts relatedItems and adapts them
+ */
+export function adaptCommentResponse(
+	response: CommentResponse | null,
+	defaultAvatar: string
+): CommentConfig[] {
+	if (!response) return [];
+	return adaptComments(response.relatedItems || [], defaultAvatar);
 }

@@ -6,6 +6,7 @@
 	import VideoDetail from '$lib/components/video/VideoDetail.svelte';
 	import VideoListings from '$lib/components/video/VideoListings.svelte';
 	import ErrorCard from '$lib/components/ErrorCard.svelte';
+	import Comments from '$lib/components/video/Comments.svelte';
 
 	let { data }: { data: PageData } = $props();
 
@@ -31,6 +32,7 @@
 	});
 
 	let relatedVideos = $derived(data.relatedVideos ?? []);
+	let comments = $derived((data as any)?.comments ?? []);
 	let error = $derived((data as any)?.error ?? null);
 
 	// Extract video ID for keying components
@@ -85,6 +87,17 @@
 
 					{#key videoId}
 						<VideoDetail {metadata} />
+						<!-- Comments Section -->
+						{#if comments.length > 0}
+							<div class="mt-6">
+								<h2 class="text-lg font-semibold mb-4">{comments.length} Comments</h2>
+								<div class="divide-y divide-gray-200 dark:divide-gray-700">
+									{#each comments as comment (comment.id)}
+										<Comments {comment} />
+									{/each}
+								</div>
+							</div>
+						{/if}
 					{/key}
 				</div>
 			</section>
