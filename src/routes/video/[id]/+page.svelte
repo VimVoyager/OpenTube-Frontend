@@ -49,7 +49,7 @@
 	});
 
 	// Mobile tab state - 'details' or 'related'
-	let activeTab = $state<'details' | 'related'>('details');
+	let activeTab = $state<'details' | 'related' | 'comments'>('details');
 </script>
 
 <div class="w-full bg-primary">
@@ -144,6 +144,18 @@
 							<div class="absolute bottom-0 left-0 right-0 h-0.5 bg-accent"></div>
 						{/if}
 					</button>
+					<button
+						class="flex-1 py-3 text-sm font-medium transition-colors relative
+							{activeTab === 'comments'
+								? 'text-primary'
+								: 'text-secondary hover:text-primary'}"
+						onclick={() => activeTab = 'comments'}
+					>
+						Comments
+						{#if activeTab === 'comments'}
+							<div class="absolute bottom-0 left-0 right-0 h-0.5 bg-accent"></div>
+						{/if}
+					</button>
 				</div>
 			</div>
 
@@ -153,8 +165,19 @@
 					{#key videoId}
 						<VideoDetail {metadata} />
 					{/key}
-				{:else}
+				{:else if activeTab === 'related'}
 					<VideoListings videos={relatedVideos}/>
+				{:else}
+					{#if comments.length > 0}
+						<div class="mt-6">
+							<h2 class="text-lg font-semibold mb-4">{comments.length} Comments</h2>
+							<div class="divide-y divide-gray-200 dark:divide-gray-700">
+								{#each comments as comment (comment.id)}
+									<Comments {comment} />
+								{/each}
+							</div>
+						</div>
+					{/if}
 				{/if}
 			</div>
 		</div>
