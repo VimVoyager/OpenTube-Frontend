@@ -93,7 +93,7 @@ describe('adaptComment', () => {
 		it('should correctly map comment text', () => {
 			const result = adaptComment(mockFirstComment, defaultAvatar);
 
-			expect(result.text).toBe(mockFirstComment.commentText.content);
+			expect(result.text).toBe(mockFirstComment.commentText);
 		});
 
 		it('should correctly map author information', () => {
@@ -317,10 +317,7 @@ describe('adaptComment', () => {
 		it('should handle comment with HTML in text', () => {
 			const comment: RelatedCommentItem = {
 				...mockFirstComment,
-				commentText: {
-					content: '<a href="http://example.com">Link</a><br>New line',
-					type: 1
-				}
+				commentText: '<a href="http://example.com">Link</a><br>New line',
 			};
 
 			const result = adaptComment(comment, defaultAvatar);
@@ -331,10 +328,7 @@ describe('adaptComment', () => {
 		it('should handle undefined comment text content', () => {
 			const comment: RelatedCommentItem = {
 				...mockFirstComment,
-				commentText: {
-					content: undefined as any,
-					type: 1
-				}
+				commentText: undefined as any,
 			};
 
 			const result = adaptComment(comment, defaultAvatar);
@@ -477,7 +471,7 @@ describe('adaptComments', () => {
 		it('should handle array with incomplete comment data', () => {
 			const incompleteComment: RelatedCommentItem = {
 				commentId: 'test-id',
-				commentText: { content: 'Test', type: 1 },
+				commentText: 'Test',
 				uploaderName: '',
 				uploaderAvatars: [],
 				uploaderUrl: '',
