@@ -1,4 +1,5 @@
 <script lang="ts">
+	import logoPlaceholder from '$lib/assets/logo-placeholder.svg';
 	import type { CommentConfig } from '$lib/adapters/types';
 	import { HeartIcon, ThumbsUpIcon, ChevronDownIcon, ChevronUpIcon } from 'lucide-svelte';
 
@@ -28,12 +29,8 @@
 		}
 	}
 
-	function stripHtmlTags(html: string): string {
-		// Basic HTML stripping - converts <br> to newlines and removes other tags
-		return html
-			.replace(/<br\s*\/?>/gi, '\n')
-			.replace(/<a[^>]*href="([^"]*)"[^>]*>([^<]*)<\/a>/gi, '$2 ($1)')
-			.replace(/<[^>]+>/g, '');
+	function handleAvatarError(e: Event) {
+		(e.currentTarget as HTMLImageElement).src = logoPlaceholder;
 	}
 </script>
 
@@ -45,12 +42,13 @@
 >
 	<div class="flex gap-3 py-4">
 		<!-- Avatar -->
-		<div class="flex-shrink-0">
+		<div class="shrink-0">
 			<a href={comment.authorUrl} target="_blank" rel="noopener noreferrer">
 				<img
-					src={comment.authorAvatar}
-					alt="{comment.author}'s avatar"
+					src={comment.authorAvatar || logoPlaceholder}
+					alt="{comment.author}-avatar"
 					class="w-10 h-10 rounded-full object-cover"
+					onerror={handleAvatarError}
 				/>
 			</a>
 		</div>

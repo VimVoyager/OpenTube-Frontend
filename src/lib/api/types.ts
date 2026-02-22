@@ -85,7 +85,7 @@ export interface RelatedCommentItem {
 	name: string;
 	thumbnails: Thumbnail[];
 	commentId: string;
-	commentText: CommentText;
+	commentText: string;
 	uploaderName: string;
 	uploaderAvatars: Avatar[];
 	uploaderUrl: string;

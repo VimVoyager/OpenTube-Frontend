@@ -11,7 +11,7 @@ export function adaptComment(
 ): CommentConfig {
 	return {
 		id: comment.commentId,
-		text: comment.commentText?.content || '',
+		text: comment.commentText || '',
 		author: comment.uploaderName || 'Unknown User',
 		authorAvatar: selectBestAvatar(comment.uploaderAvatars, defaultAvatar),
 		authorUrl: comment.uploaderUrl || '',

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import logoPlaceholder from '$lib/assets/logo-placeholder.svg';
 	import { goto } from '$app/navigation';
 	import type { RelatedVideoConfig } from '$lib/adapters/types';
 
@@ -23,6 +24,10 @@
 	const handleVideoClick = (videoId: string) => {
 		goto(`/video/${videoId}`);
 	};
+
+	function handleAvatarError(e: Event) {
+		(e.currentTarget as HTMLImageElement).src = logoPlaceholder;
+	}
 </script>
 
 <div class="flex w-full flex-col gap-4 px-6">
@@ -68,9 +73,10 @@
 					<div class="mt-1 flex items-center gap-2">
 						{#if video.channelAvatar}
 							<img 
-								src={video.channelAvatar} 
+								src={video.channelAvatar || logoPlaceholder}
 								alt={`${video.id}-channel-avatar-${video.channelName}`}
 								class="h-6 w-6 rounded-full object-cover shrink-0"
+								onerror={handleAvatarError}
 							/>
 						{/if}
 						<p class="text-xs text-secondary truncate">
