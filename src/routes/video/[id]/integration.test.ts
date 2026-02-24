@@ -358,11 +358,12 @@ describe('Video Detail Integration Tests', () => {
 			} as never) as VideoPageData;
 
 			// Verify all API calls were made
-			expect(mockFetch).toHaveBeenCalledTimes(4);
+			expect(mockFetch).toHaveBeenCalledTimes(5);
 			expect(mockFetch).toHaveBeenNthCalledWith(1, expect.stringContaining('/streams/thumbnails?id=test-video-id'));
 			expect(mockFetch).toHaveBeenNthCalledWith(2, expect.stringContaining('/streams/details?id=test-video-id'));
 			expect(mockFetch).toHaveBeenNthCalledWith(3, expect.stringContaining('/streams/dash?id=test-video-id'));
 			expect(mockFetch).toHaveBeenNthCalledWith(4, expect.stringContaining('/streams/related?id=test-video-id'));
+			expect(mockFetch).toHaveBeenNthCalledWith(5, expect.stringContaining('/comments?id=test-video-id'));
 
 			// Verify player config
 			expect(result.playerConfig.manifestUrl).toBe('blob:mock-manifest-url');

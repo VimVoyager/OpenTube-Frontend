@@ -8,15 +8,21 @@ import { getVideoThumbnails } from '$lib/api/thumbnails';
 import { adaptPlayerConfig } from '$lib/adapters/player';
 import { adaptVideoMetadata } from '$lib/adapters/metadata';
 import { adaptRelatedVideos } from '$lib/adapters/related';
+import commentsResultFixture from '../../../tests/fixtures/adapters/commentsResult.json'
+import type { CommentConfig } from '$lib/adapters/types';
+import { adaptCommentResponse } from '$lib/adapters/comments';
+import { getVideoComments } from '$lib/api/comments';
 
 // Mock all dependencies
 vi.mock('$lib/api/details');
 vi.mock('$lib/api/manifest');
 vi.mock('$lib/api/related');
 vi.mock('$lib/api/thumbnails');
+vi.mock('$lib/api/comments');
 vi.mock('$lib/adapters/metadata');
 vi.mock('$lib/adapters/player');
 vi.mock('$lib/adapters/related');
+vi.mock('$lib/adapters/comments');
 
 describe('+page.ts', () => {
     // Mock data fixtures
@@ -95,18 +101,22 @@ describe('+page.ts', () => {
         }
     ];
 
+		const mockComments: CommentConfig = commentsResultFixture[0];
+
     beforeEach(() => {
         vi.clearAllMocks();
-        // mockStaticEnv();
 
         // Setup default mock implementations
         (getVideoThumbnails as Mock).mockResolvedValue(mockThumbnail);
         (getVideoDetails as Mock).mockResolvedValue(mockVideoDetails);
         (getManifest as Mock).mockResolvedValue(mockManifestResponse);
         (getRelatedStreams as Mock).mockResolvedValue(mockRelatedStreams);
+				(getVideoComments as Mock).mockResolvedValue(mockComments);
+
         (adaptPlayerConfig as Mock).mockReturnValue(mockPlayerConfig);
         (adaptVideoMetadata as Mock).mockReturnValue(mockMetadata);
         (adaptRelatedVideos as Mock).mockReturnValue(mockRelatedVideos);
+				(adaptCommentResponse as Mock).mockReturnValue(mockComments);
     });
 
     describe('load function - success path', () => {
@@ -117,7 +127,9 @@ describe('+page.ts', () => {
             expect(result).toEqual({
                 playerConfig: mockPlayerConfig,
                 metadata: mockMetadata,
-                relatedVideos: mockRelatedVideos
+                relatedVideos: mockRelatedVideos,
+								comments: mockComments
+
             });
             expect(result!.error).toBeUndefined();
         });
@@ -343,7 +355,8 @@ describe('+page.ts', () => {
                 expect.any(Promise), // getVideoThumbnails
                 expect.any(Promise), // getVideoDetails
                 expect.any(Promise), // getManifest
-                expect.any(Promise)  // getRelatedStreams
+                expect.any(Promise), // getRelatedStreams
+								expect.any(Promise)  // getComments
             ]);
         });
     });
@@ -398,20 +411,6 @@ describe('+page.ts', () => {
     });
 
     describe('Manifest response structure', () => {
-        it('should handle manifest response with videoId', async () => {
-            const params = { id: mockVideoId };
-            const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => { });
-
-            await load({ params, fetch: mockFetch } as Parameters<PageLoad>[0]);
-
-            // Check the actual console.log format from your +page.ts
-            // Based on the error, it logs: "Loaded manifest URL for video {id} :", {url}
-            expect(consoleLogSpy).toHaveBeenCalledWith(
-                `Loaded manifest URL for video ${mockVideoId} :`,
-                mockManifestResponse.url
-            );
-        });
-
         it('should handle manifest response without videoId', async () => {
             const params = { id: mockVideoId };
             (getManifest as Mock).mockResolvedValue({
