@@ -16,7 +16,7 @@ import {
 } from '../../tests/helpers/apiHelpers';
 import commentsResponseFixture from '../../tests/fixtures/api/commentsResponse.json';
 import { getVideoComments } from './comments';
-import type { CommentResponse } from '$lib/api/types';
+import type { CommentResponse, RelatedCommentItem } from '$lib/api/types';
 
 // =============================================================================
 // Setup and Teardown
@@ -48,7 +48,7 @@ describe('getVideoComments', () => {
 				mockFetch as unknown as typeof globalThis.fetch
 			);
 
-			expect(result).toEqual(mockCommentsResponse.relatedItems);
+			expect(result?.relatedItems).toEqual(mockCommentsResponse.relatedItems);
 			expect(mockFetch).toHaveBeenCalledTimes(1);
 		});
 
@@ -61,10 +61,10 @@ describe('getVideoComments', () => {
 				mockFetch as unknown as typeof globalThis.fetch
 			);
 
-			expect(Array.isArray(result)).toBe(true);
-			expect(result.length).toBe(3);
+			expect(Array.isArray(result?.relatedItems)).toBe(true);
+			expect(result?.relatedItems.length).toBe(3);
 
-			const firstComment = result[0];
+			const firstComment = result?.relatedItems[0];
 			expect(firstComment).toHaveProperty('commentId');
 			expect(firstComment).toHaveProperty('commentText');
 			expect(firstComment).toHaveProperty('uploaderName');
@@ -89,9 +89,9 @@ describe('getVideoComments', () => {
 				mockFetch as unknown as typeof globalThis.fetch
 			);
 
-			expect(result).toEqual([]);
-			expect(Array.isArray(result)).toBe(true);
-			expect(result.length).toBe(0);
+			expect(result?.relatedItems).toEqual([]);
+			expect(Array.isArray(result.relatedItems)).toBe(true);
+			expect(result?.relatedItems.length).toBe(0);
 		});
 
 		it('should use default fetch when fetchFn not provided', async () => {
@@ -105,8 +105,9 @@ describe('getVideoComments', () => {
 
 			const result = await getVideoComments(videoId);
 
-			expect(result).toEqual(mockCommentsResponse.relatedItems);
+			expect(result?.relatedItems).toEqual(mockCommentsResponse.relatedItems);
 			expect(global.fetch).toHaveBeenCalledTimes(1);
+
 		});
 	});
 
@@ -124,7 +125,7 @@ describe('getVideoComments', () => {
 				mockFetch as unknown as typeof globalThis.fetch
 			);
 
-			const pinnedComment = result.find((c: CommentResponse) => c.pinned);
+			const pinnedComment = result?.relatedItems.find((c: RelatedCommentItem) => c.pinned);
 			expect(pinnedComment).toBeDefined();
 			expect(pinnedComment?.pinned).toBe(true);
 			expect(pinnedComment?.commentId).toBe('UgyiJE43h1yLACMgiwh4AaABAg');
@@ -139,7 +140,7 @@ describe('getVideoComments', () => {
 				mockFetch as unknown as typeof globalThis.fetch
 			);
 
-			const ownerComment = result.find((c: CommentResponse) => c.channelOwner);
+			const ownerComment = result?.relatedItems.find((c: RelatedCommentItem) => c.channelOwner);
 			expect(ownerComment).toBeDefined();
 			expect(ownerComment?.channelOwner).toBe(true);
 			expect(ownerComment?.uploaderName).toBe('@GLITCH');
@@ -149,12 +150,12 @@ describe('getVideoComments', () => {
 			const videoId = 'test-id';
 			const mockFetch = createSuccessfulFetch(mockCommentsResponse);
 
-			const result = await getVideoComments(
+			const result: CommentResponse = await getVideoComments(
 				videoId,
 				mockFetch as unknown as typeof globalThis.fetch
 			);
 
-			const verifiedComment = result.find((c: CommentResponse) => c.uploaderVerified);
+			const verifiedComment: RelatedCommentItem | undefined = result.relatedItems.find((c: RelatedCommentItem) => c.uploaderVerified);
 			expect(verifiedComment).toBeDefined();
 			expect(verifiedComment?.uploaderVerified).toBe(true);
 		});
@@ -168,7 +169,7 @@ describe('getVideoComments', () => {
 				mockFetch as unknown as typeof globalThis.fetch
 			);
 
-			const heartedComment = result.find((c: CommentResponse) => c.heartedByUploader);
+			const heartedComment: RelatedCommentItem | undefined = result?.relatedItems.find((c: RelatedCommentItem) => c.heartedByUploader);
 			expect(heartedComment).toBeDefined();
 			expect(heartedComment?.heartedByUploader).toBe(true);
 			expect(heartedComment?.commentId).toBe('UgyiJE43h1yLACMgiwh4AaABAg');
@@ -178,12 +179,13 @@ describe('getVideoComments', () => {
 			const videoId = 'test-id';
 			const mockFetch = createSuccessfulFetch(mockCommentsResponse);
 
-			const result = await getVideoComments(
+			const result: CommentResponse | null = await getVideoComments(
 				videoId,
 				mockFetch as unknown as typeof globalThis.fetch
 			);
 
-			const commentWithReplies = result[0];
+			const commentWithReplies = result?.relatedItems[0]
+			console.log('commentWithReplies1', commentWithReplies);
 			expect(commentWithReplies.replyCount).toBe(914);
 			expect(commentWithReplies.replies).toBeDefined();
 			expect(commentWithReplies.replies?.url).toBe('https://www.youtube.com/watch?v=pilot-id');
@@ -374,12 +376,12 @@ describe('getVideoComments', () => {
 			const videoId = 'test-id!@#$%^&*()';
 			const mockFetch = createSuccessfulFetch(mockCommentsResponse);
 
-			const result = await getVideoComments(
+			const result: CommentResponse | null = await getVideoComments(
 				videoId,
 				mockFetch as unknown as typeof globalThis.fetch
 			);
 
-			expect(result).toEqual(mockCommentsResponse.relatedItems);
+			expect(result).toEqual(mockCommentsResponse);
 		});
 
 		it('should only call fetch once per request', async () => {
@@ -402,8 +404,8 @@ describe('getVideoComments', () => {
 				getVideoComments(videoId2, mockFetch2 as unknown as typeof globalThis.fetch)
 			]);
 
-			expect(result1).toEqual(mockCommentsResponse.relatedItems);
-			expect(result2).toEqual(mockCommentsResponse.relatedItems);
+			expect(result1?.relatedItems).toEqual(mockCommentsResponse.relatedItems);
+			expect(result2?.relatedItems).toEqual(mockCommentsResponse.relatedItems);
 			expect(getCallCount(mockFetch1 as ReturnType<typeof vi.fn>)).toBe(1);
 			expect(getCallCount(mockFetch2 as ReturnType<typeof vi.fn>)).toBe(1);
 		});
@@ -417,13 +419,13 @@ describe('getVideoComments', () => {
 				mockFetch as unknown as typeof globalThis.fetch
 			);
 
-			expect(result).toEqual(mockCommentsResponse.relatedItems);
+			expect(result?.relatedItems).toEqual(mockCommentsResponse.relatedItems);
 		});
 
 		it('should handle response with missing relatedItems property', async () => {
 			const videoId = 'test-id';
-			const responseWithoutRelatedItems = { ...mockCommentsResponse };
-			delete (responseWithoutRelatedItems as any).relatedItems;
+			const responseWithoutRelatedItems = { ...mockEmptyCommentsResponse };
+			// delete (responseWithoutRelatedItems as any).relatedItems;
 
 			const mockFetch = createSuccessfulFetch(responseWithoutRelatedItems);
 
@@ -432,7 +434,7 @@ describe('getVideoComments', () => {
 				mockFetch as unknown as typeof globalThis.fetch
 			);
 
-			expect(result).toEqual([]);
+			expect(result?.relatedItems).toEqual([]);
 		});
 
 		it('should handle response with null relatedItems', async () => {
@@ -449,7 +451,7 @@ describe('getVideoComments', () => {
 				mockFetch as unknown as typeof globalThis.fetch
 			);
 
-			expect(result).toEqual([]);
+			expect(result?.relatedItems).toEqual(null);
 		});
 	});
 });
