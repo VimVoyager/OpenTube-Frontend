@@ -1,4 +1,6 @@
 import type {
+	ChannelConfig,
+	// ChannelVideoConfig,
 	CommentConfig,
 	RelatedVideoConfig,
 	SearchResultConfig,
@@ -18,5 +20,11 @@ export interface VideoPageData {
 	metadata: VideoMetadata;
 	relatedVideos: RelatedVideoConfig[];
 	comments?: CommentConfig[];
+	error?: string;
+}
+
+export interface ChannelPageData {
+	channel: ChannelConfig;
+	// videos: ChannelVideoConfig[];
 	error?: string;
 }

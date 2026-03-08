@@ -126,3 +126,34 @@ export interface CommentConfig {
 	repliesUrl?: string;
 }
 
+/**
+ * Channel result configuration
+ */
+export interface ChannelConfig {
+	id: string;
+	name: string;
+	handle: string;
+	avatarUrl: string | null;
+	bannerUrl: string | null;
+	description: string | null;
+	subscriberCount: string; // formatted, e.g. "16.8M"
+	videoCount: number; // from videos list length or a dedicated field if API provides it
+	verified: boolean;
+}
+
+/**
+ * Channel video result configuration
+ */
+export interface ChannelVideoConfig {
+	id: string;
+	title: string;
+	thumbnail: string;
+	uploaderName: string;
+	uploaderAvatar: string | null;
+	uploadedDate: string;
+	duration: number;
+	viewCount: number;
+}
+
+
+

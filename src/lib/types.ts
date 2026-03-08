@@ -304,3 +304,42 @@ export interface ShakaUIOverlayInstance {
 export interface ShakaPolyfill {
 	installAll(): void;
 }
+
+export interface ChannelImage {
+	url: string;
+	height: number;
+	width: number;
+	estimatedResolution?: string;
+}
+
+export interface ChannelInfoResponse {
+	id: string;
+	name: string;
+	avatarUrl: string | null;
+	bannerUrl: string | null;
+	description: string | null;
+	subscriberCount: number;
+	handle: string | null;
+	verified: boolean;
+	tabs: string[];
+	avatars?: ChannelImage[];
+	banners?: ChannelImage[];
+}
+
+export interface ChannelVideoItem {
+	id: string;
+	title: string;
+	thumbnailUrl: string | null;
+	uploaderName: string;
+	uploaderAvatarUrl: string | null;
+	uploadedDate: string | null;
+	duration: number;
+	viewCount: number;
+	shortDescription: string | null;
+}
+
+export interface ChannelVideosResponse {
+	channelId: string;
+	videos: ChannelVideoItem[];
+	nextPageToken: string | null;
+}
