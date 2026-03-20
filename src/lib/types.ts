@@ -96,7 +96,7 @@ export interface Thumbnail {
 	url: string;
 	height: number;
 	width: number;
-	estimatedResolutionLevel: string;
+	estimatedResolutionLevel?: string;
 }
 
 export interface Description {
@@ -327,19 +327,20 @@ export interface ChannelInfoResponse {
 }
 
 export interface ChannelVideoItem {
-	id: string;
-	title: string;
-	thumbnailUrl: string | null;
+	url: string;
+	name: string;
 	uploaderName: string;
-	uploaderAvatarUrl: string | null;
-	uploadedDate: string | null;
+	uploaderUrl: string | null;
+	uploaderVerified: boolean;
 	duration: number;
 	viewCount: number;
-	shortDescription: string | null;
+	textualUploadDate: string | null;
+	thumbnails: Thumbnail[];
+	isShortFormContent: boolean;
 }
 
 export interface ChannelVideosResponse {
 	channelId: string;
-	videos: ChannelVideoItem[];
+	items: ChannelVideoItem[];
 	nextPageToken: string | null;
 }

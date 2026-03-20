@@ -1,18 +1,18 @@
 import type { PageLoad } from '../../$types';
 import {
 	getChannelInfo,
-	// getChannelVideos
+	getChannelVideos
 } from '$lib/api/channel';
 import {
 	adaptChannelInfo,
-	// adaptChannelVideos
+	adaptChannelVideos
 } from '$lib/adapters/channel';
-// import thumbnailPlaceholder from '$lib/assets/thumbnail-placeholder.jpg';
-// import logoPlaceholder from '$lib/assets/logo-placeholder.svg';
+import thumbnailPlaceholder from '$lib/assets/thumbnail-placeholder.jpg';
+import logoPlaceholder from '$lib/assets/logo-placeholder.svg';
 import type { ChannelPageData } from '../../types';
 import type {
 	ChannelConfig,
-	// ChannelVideoConfig
+	ChannelVideoConfig
 } from '$lib/adapters/types';
 
 /**
@@ -33,7 +33,7 @@ function createErrorPageData(error: unknown): ChannelPageData {
 			videoCount: 0,
 			verified: false
 		},
-		// videos: [],
+		videos: [],
 		error: errorMessage
 	};
 }
@@ -45,33 +45,21 @@ export const load: PageLoad = async ({ params, fetch }): Promise<ChannelPageData
 	try {
 		const channelId: string = params.channelId;
 
-		// Fetch channel info and videos in parallel
-		const [info] = await Promise.all([
+		const [info, videosResponse] = await Promise.all([
 			getChannelInfo(channelId, fetch),
-			// getChannelVideos(channelId, fetch).catch((error) => {
-			// 	console.warn('Failed to fetch channel videos:', error);
-			// 	return null;
-			// })
+			getChannelVideos(channelId, fetch).catch((error) => {
+				console.warn('Failed to fetch channel videos:', error);
+				return null;
+			})
 		]);
 
-		// const [info, videosResponse] = await Promise.all([
-		// 	getChannelInfo(channelId, fetch),
-		// 	getChannelVideos(channelId, fetch).catch((error) => {
-		// 		console.warn('Failed to fetch channel videos:', error);
-		// 		return null;
-		// 	})
-		// ]);
+		const videos: ChannelVideoConfig[] = adaptChannelVideos(videosResponse, thumbnailPlaceholder, logoPlaceholder);
 
-		// const videos: ChannelVideoConfig[] = videosResponse
-		// 	? adaptChannelVideos(videosResponse, thumbnailPlaceholder, logoPlaceholder)
-		// 	: [];
-
-		// const channel: ChannelConfig = adaptChannelInfo(info, videos.length);
 		const channel: ChannelConfig = adaptChannelInfo(info);
 
 		return {
 			channel,
-			// videos
+			videos
 		};
 	} catch (error) {
 		console.error('Error loading channel data:', error);

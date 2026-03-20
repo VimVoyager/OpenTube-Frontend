@@ -149,10 +149,11 @@ export interface ChannelVideoConfig {
 	title: string;
 	thumbnail: string;
 	uploaderName: string;
-	uploaderAvatar: string | null;
+	uploaderUrl: string | null;
 	uploadedDate: string;
 	duration: number;
 	viewCount: number;
+	isShort: boolean;
 }
 
 

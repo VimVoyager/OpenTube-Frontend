@@ -29,3 +29,18 @@ export function formatDate(dateString: string): string {
 		day: 'numeric'
 	});
 }
+
+/**
+ * Formats duration from number of seconds to H:M:S format
+ * Example: 860 -> "14:20"
+ */
+export const formatDuration = (seconds: number): string => {
+	const hours: number = Math.floor(seconds / 3600);
+	const minutes: number = Math.floor((seconds % 3600) / 60);
+	const secs: number = seconds % 60;
+
+	if (hours > 0) {
+		return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+	}
+	return `${minutes}:${secs.toString().padStart(2, '0')}`;
+};

@@ -2,24 +2,9 @@
 	import logoPlaceholder from '$lib/assets/logo-placeholder.svg';
 	import { goto } from '$app/navigation';
 	import type { RelatedVideoConfig } from '$lib/adapters/types';
+	import { formatCount, formatDuration } from '$lib/utils/formatters';
 
 	let { videos = [] }: { videos?: RelatedVideoConfig[] } = $props();
-
-	const formatViewCount = (viewCount: number): string => {
-		const formatter = Intl.NumberFormat('en-US');
-		return formatter.format(viewCount);
-	};
-
-	const formatDuration = (seconds: number): string => {
-		const hours = Math.floor(seconds / 3600);
-		const minutes = Math.floor((seconds % 3600) / 60);
-		const secs = seconds % 60;
-
-		if (hours > 0) {
-			return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-		}
-		return `${minutes}:${secs.toString().padStart(2, '0')}`;
-	}
 
 	const handleVideoClick = (videoId: string) => {
 		goto(`/video/${videoId}`);
@@ -86,7 +71,7 @@
 
 					<!-- Video Stats -->
 					<div class="mt-1 flex flex-row text-xs text-muted">
-						<span>{formatViewCount(video.viewCount)} views</span>
+						<span>{formatCount(video.viewCount)} views</span>
 						{#if video.uploadDate}
 							<span class="mx-2">•</span>
 							<span>{video.uploadDate}</span>

@@ -145,7 +145,7 @@ describe('adaptSearchResults', () => {
 			expect(result[0].type).toBe('stream');
 		});
 
-		// TODO: Add these tests back once channels and playlists have been implemented
+		// TODO: Add these tests back once channel and playlists have been implemented
 		// it('should handle channel type', () => {
 		// 	const item: SearchResult = {
 		// 		...mockSearchResponse,

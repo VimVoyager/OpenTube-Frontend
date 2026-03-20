@@ -96,7 +96,7 @@ describe('VideoResult', () => {
 			expect(uploadDates).toHaveLength(2);
 		});
 
-		it('should display verification checkmark for verified channels in both layouts', () => {
+		it('should display verification checkmark for verified channel in both layouts', () => {
 			render(VideoResult, { props: { result: pilotResult } });
 
 			const checkmarks = screen.getAllByTitle('Verified');
@@ -107,7 +107,7 @@ describe('VideoResult', () => {
 			});
 		});
 
-		it('should not display verification checkmark for unverified channels', () => {
+		it('should not display verification checkmark for unverified channel', () => {
 			render(VideoResult, { props: { result: absoluteEndResult } });
 
 			const checkmark = screen.queryByTitle('Verified');

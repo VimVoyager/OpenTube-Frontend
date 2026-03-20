@@ -21,10 +21,7 @@ export async function getChannelInfo(
 			);
 		}
 
-		const channelInfo: ChannelInfoResponse = await res.json();
-		console.log('channelInfo', channelInfo);
-
-		return channelInfo;
+		return await res.json();
 	} catch (error) {
 		console.error('Error fetching channel info:', error);
 		throw error;
@@ -42,7 +39,7 @@ export async function getChannelVideos(
 
 	try {
 		const res = await fetcher(
-			`${API_BASE_URL}/channels/videos?id=${encodeURIComponent(channelId)}`
+			`${API_BASE_URL}/channels/tab?id=${encodeURIComponent(channelId)}`
 		);
 
 		if (!res.ok) {
@@ -50,8 +47,7 @@ export async function getChannelVideos(
 				`Failed to fetch channel videos for ${channelId}: ${res.status} ${res.statusText}`
 			);
 		}
-
-		return await res.json();
+		return await await res.json();
 	} catch (error) {
 		console.error('Error fetching channel videos:', error);
 		throw error;

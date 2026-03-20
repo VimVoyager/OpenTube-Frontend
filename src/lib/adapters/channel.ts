@@ -1,5 +1,6 @@
 import type { ChannelInfoResponse, ChannelVideoItem, ChannelVideosResponse } from '$lib/types';
 import type { ChannelConfig, ChannelVideoConfig } from '$lib/adapters/types';
+import { extractVideoIdFromUrl } from '$lib/utils/streamSelection';
 
 // ─── Subscriber count formatting ─────────────────────────────────────────────
 
@@ -76,14 +77,15 @@ function adaptChannelVideo(
 	avatarFallback: string
 ): ChannelVideoConfig {
 	return {
-		id: video.id,
-		title: video.title || 'Untitled',
-		thumbnail: video.thumbnailUrl || thumbnailFallback,
+		id: extractVideoIdFromUrl(video.url),
+		title: video.name || 'Untitled',
+		thumbnail: video.thumbnails?.[video.thumbnails.length - 1]?.url ?? thumbnailFallback,
 		uploaderName: video.uploaderName || 'Unknown',
-		uploaderAvatar: video.uploaderAvatarUrl || avatarFallback,
-		uploadedDate: video.uploadedDate || '',
+		uploaderUrl: video.uploaderUrl || avatarFallback,
+		uploadedDate: video.textualUploadDate || '',
 		duration: Math.max(0, video.duration ?? 0),
-		viewCount: Math.max(0, video.viewCount ?? 0)
+		viewCount: Math.max(0, video.viewCount ?? 0),
+		isShort: video.isShortFormContent
 	};
 }
 
@@ -95,6 +97,6 @@ export function adaptChannelVideos(
 	thumbnailFallback: string,
 	avatarFallback: string
 ): ChannelVideoConfig[] {
-	if (!response?.videos) return [];
-	return response.videos.map((v) => adaptChannelVideo(v, thumbnailFallback, avatarFallback));
+	if (!response?.items) return [];
+	return response.items.map((v: ChannelVideoItem) => adaptChannelVideo(v, thumbnailFallback, avatarFallback));
 }

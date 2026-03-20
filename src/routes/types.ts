@@ -1,6 +1,6 @@
 import type {
 	ChannelConfig,
-	// ChannelVideoConfig,
+	ChannelVideoConfig,
 	CommentConfig,
 	RelatedVideoConfig,
 	SearchResultConfig,
@@ -25,6 +25,6 @@ export interface VideoPageData {
 
 export interface ChannelPageData {
 	channel: ChannelConfig;
-	// videos: ChannelVideoConfig[];
+	videos: ChannelVideoConfig[];
 	error?: string;
 }
