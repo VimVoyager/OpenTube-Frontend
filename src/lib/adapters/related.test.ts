@@ -9,7 +9,7 @@ import { adaptRelatedVideos } from './related';
 import relatedVideosResponseFixture from '../../tests/fixtures/api/relatedVideosResponse.json';
 import relatedVideosFixture from '../../tests/fixtures/adapters/relatedVideos.json';
 import type { RelatedItem } from '$lib/types';
-import { extractVideoIdFromUrl } from '$lib/utils/streamSelection';
+import { extractIdFromUrl } from '$lib/utils/streamSelection';
 import { selectBestThumbnail, selectBestUploaderAvatar } from '$lib/utils/mediaUtils';
 import type { RelatedItemResponse } from '$lib/api/types';
 
@@ -62,7 +62,7 @@ describe('adaptRelatedVideos', () => {
 
 	describe('successful related videos adaptation', () => {
 		it('should adapt complete related item correctly', () => {
-			vi.mocked(extractVideoIdFromUrl).mockReturnValueOnce('heartbeat-id');
+			vi.mocked(extractIdFromUrl).mockReturnValueOnce('heartbeat-id');
 
 			const result = adaptRelatedVideos(
 				[mockRelatedItemResponse[0]],
@@ -115,7 +115,7 @@ describe('adaptRelatedVideos', () => {
 
 			adaptRelatedVideos(items, defaultThumbnail, defaultAvatar);
 
-			expect(extractVideoIdFromUrl).toHaveBeenCalledTimes(2);
+			expect(extractIdFromUrl).toHaveBeenCalledTimes(2);
 			expect(selectBestThumbnail).toHaveBeenCalledTimes(2);
 			expect(selectBestUploaderAvatar).toHaveBeenCalledTimes(2);
 		});
@@ -127,7 +127,7 @@ describe('adaptRelatedVideos', () => {
 
 	describe('video ID extraction', () => {
 		it('should extract video ID from URL', () => {
-			vi.mocked(extractVideoIdFromUrl).mockReturnValueOnce('heartbeat-id');
+			vi.mocked(extractIdFromUrl).mockReturnValueOnce('heartbeat-id');
 
 			const result = adaptRelatedVideos(
 				[mockRelatedItemResponse[0]],
@@ -135,7 +135,7 @@ describe('adaptRelatedVideos', () => {
 				defaultAvatar
 			);
 
-			expect(extractVideoIdFromUrl).toHaveBeenCalledWith(mockRelatedItemResponse[0].url);
+			expect(extractIdFromUrl).toHaveBeenCalledWith(mockRelatedItemResponse[0].url);
 			expect(result[0].id).toBe('heartbeat-id');
 		});
 
@@ -143,7 +143,7 @@ describe('adaptRelatedVideos', () => {
 
 		it('should handle empty URL gracefully', () => {
 			const itemWithEmptyUrl = mockRelatedItemResponse[2];
-			vi.mocked(extractVideoIdFromUrl).mockReturnValueOnce('');
+			vi.mocked(extractIdFromUrl).mockReturnValueOnce('');
 
 			const result = adaptRelatedVideos(
 				[itemWithEmptyUrl],
@@ -336,7 +336,7 @@ describe('adaptRelatedVideos', () => {
 		it('should not call utility functions for empty array', () => {
 			adaptRelatedVideos([], defaultThumbnail, defaultAvatar);
 
-			expect(extractVideoIdFromUrl).not.toHaveBeenCalled();
+			expect(extractIdFromUrl).not.toHaveBeenCalled();
 			expect(selectBestThumbnail).not.toHaveBeenCalled();
 			expect(selectBestUploaderAvatar).not.toHaveBeenCalled();
 		});
@@ -344,7 +344,7 @@ describe('adaptRelatedVideos', () => {
 		it('should not call utility functions for undefined', () => {
 			adaptRelatedVideos(undefined, defaultThumbnail, defaultAvatar);
 
-			expect(extractVideoIdFromUrl).not.toHaveBeenCalled();
+			expect(extractIdFromUrl).not.toHaveBeenCalled();
 			expect(selectBestThumbnail).not.toHaveBeenCalled();
 			expect(selectBestUploaderAvatar).not.toHaveBeenCalled();
 		});
@@ -462,7 +462,7 @@ describe('adaptRelatedVideos', () => {
 			const thumbnailUrl = relatedVideosResponseFixture[0].thumbnails[1].url;
 			const avatarUrl = relatedVideosResponseFixture[0].uploaderAvatars[0].url;
 
-			vi.mocked(extractVideoIdFromUrl).mockReturnValueOnce(videoId);
+			vi.mocked(extractIdFromUrl).mockReturnValueOnce(videoId);
 			vi.mocked(selectBestThumbnail).mockReturnValueOnce(thumbnailUrl);
 			vi.mocked(selectBestUploaderAvatar).mockReturnValueOnce(avatarUrl);
 
@@ -478,7 +478,7 @@ describe('adaptRelatedVideos', () => {
 		});
 
 		it('should handle utility functions returning defaults', () => {
-			vi.mocked(extractVideoIdFromUrl).mockReturnValueOnce('');
+			vi.mocked(extractIdFromUrl).mockReturnValueOnce('');
 			vi.mocked(selectBestThumbnail).mockReturnValueOnce(defaultThumbnail);
 			vi.mocked(selectBestUploaderAvatar).mockReturnValueOnce(defaultAvatar);
 

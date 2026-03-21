@@ -2,7 +2,7 @@
  * Extracts video ID from YouTube URL
  * Handles variou YouTube URL formats
  */
-export function extractVideoIdFromUrl(url: string): string {
+export function extractIdFromUrl(url: string): string {
 	if (!url) return '';
 	try {
 		const urlObj = new URL(url);
@@ -23,7 +23,8 @@ export function extractVideoIdFromUrl(url: string): string {
 			/[?&]v=([^&]+)/,           // ?v=ID or &v=ID
 			/youtu\.be\/([^?&]+)/,     // youtu.be/ID
 			/embed\/([^?&]+)/,         // embed/ID
-			/\/watch\/([^?&]+)/        // /watch/ID
+			/\/watch\/([^?&]+)/,        // /watch/ID
+			/\/channel\/([^?&]+)/        // /watch/ID
 		];
 
 		for (const pattern of patterns) {

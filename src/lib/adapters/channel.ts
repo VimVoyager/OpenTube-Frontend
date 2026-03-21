@@ -1,6 +1,6 @@
 import type { ChannelInfoResponse, ChannelVideoItem, ChannelVideosResponse } from '$lib/types';
 import type { ChannelConfig, ChannelVideoConfig } from '$lib/adapters/types';
-import { extractVideoIdFromUrl } from '$lib/utils/streamSelection';
+import { extractIdFromUrl } from '$lib/utils/streamSelection';
 
 // ─── Subscriber count formatting ─────────────────────────────────────────────
 
@@ -77,7 +77,7 @@ function adaptChannelVideo(
 	avatarFallback: string
 ): ChannelVideoConfig {
 	return {
-		id: extractVideoIdFromUrl(video.url),
+		id: extractIdFromUrl(video.url),
 		title: video.name || 'Untitled',
 		thumbnail: video.thumbnails?.[video.thumbnails.length - 1]?.url ?? thumbnailFallback,
 		uploaderName: video.uploaderName || 'Unknown',

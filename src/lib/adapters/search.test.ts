@@ -19,7 +19,7 @@ vi.mock('$lib/utils/streamSelection', () => ({
 	})
 }));
 
-import { extractVideoIdFromUrl } from '$lib/utils/streamSelection';
+import { extractIdFromUrl } from '$lib/utils/streamSelection';
 import type { SearchResponse } from '$lib/api/types';
 import type { SearchResultConfig } from '$lib/adapters/types';
 
@@ -52,7 +52,7 @@ describe('adaptSearchResults', () => {
 
 	describe('successful search results adaptation', () => {
 		it('should adapt complete search item array correctly', () => {
-			vi.mocked(extractVideoIdFromUrl).mockReturnValueOnce('pilot-id');
+			vi.mocked(extractIdFromUrl).mockReturnValueOnce('pilot-id');
 
 			const result = adaptSearchResults(mockSearchResponse, defaultThumbnail, defaultAvatar);
 
@@ -60,8 +60,8 @@ describe('adaptSearchResults', () => {
 			expect(result[0]).toEqual(mockSearchResult[0]);
 			expect(result[1]).toEqual(mockSearchResult[1]);
 
-			expect(extractVideoIdFromUrl).toHaveBeenCalledTimes(2);
-			expect(extractVideoIdFromUrl).toHaveBeenCalledWith(mockSearchResult[0].url);
+			expect(extractIdFromUrl).toHaveBeenCalledTimes(2);
+			expect(extractIdFromUrl).toHaveBeenCalledWith(mockSearchResult[0].url);
 
 			expect(result[0].thumbnail).toBe(mockSearchResult[0].thumbnail);
 			expect(result[1].thumbnail).toBe(defaultThumbnail);
@@ -88,12 +88,12 @@ describe('adaptSearchResults', () => {
 		it('should extract video ID from URL', () => {
 			const result = adaptSearchResults(mockSearchResponse, defaultThumbnail, defaultAvatar);
 
-			expect(extractVideoIdFromUrl).toHaveBeenCalledWith(mockSearchResult[0].url);
+			expect(extractIdFromUrl).toHaveBeenCalledWith(mockSearchResult[0].url);
 			expect(result[0].id).toBe(mockSearchResult[0].id);
 		});
 
 		it('should use empty string when URL extraction fails', () => {
-			vi.mocked(extractVideoIdFromUrl).mockReturnValueOnce('');
+			vi.mocked(extractIdFromUrl).mockReturnValueOnce('');
 
 			const result = adaptSearchResults(mockSearchResponse, defaultThumbnail, defaultAvatar);
 
@@ -294,7 +294,7 @@ describe('adaptSearchResults', () => {
 	describe('integration with utility functions', () => {
 		it('should work correctly with extractVideoIdFromUrl', () => {
 			const videoId = 'extracted-video-id';
-			vi.mocked(extractVideoIdFromUrl).mockReturnValueOnce(videoId);
+			vi.mocked(extractIdFromUrl).mockReturnValueOnce(videoId);
 
 			const result = adaptSearchResults(mockSearchResponse, defaultThumbnail, defaultAvatar);
 
@@ -302,7 +302,7 @@ describe('adaptSearchResults', () => {
 		});
 
 		it('should handle extractVideoIdFromUrl returning empty string', () => {
-			vi.mocked(extractVideoIdFromUrl).mockReturnValueOnce('');
+			vi.mocked(extractIdFromUrl).mockReturnValueOnce('');
 
 			const result = adaptSearchResults(mockSearchResponse, defaultThumbnail, defaultAvatar);
 

@@ -1,17 +1,25 @@
-import { extractVideoIdFromUrl } from '$lib/utils/streamSelection';
+import { extractIdFromUrl } from '$lib/utils/streamSelection';
 import type { SearchResult, SearchItem } from '$lib/types';
-import type { SearchResultConfig } from './types';
+import type { VideoSearchResultConfig, ChannelSearchResultConfig } from './types';
+
+type SearchResultConfig = VideoSearchResultConfig | ChannelSearchResultConfig;
 
 /**
- * Adapts a single search item to search result configuration
+ * Handles negative counts from the API (e.g., -1 for unknown values)
  */
-function adaptSearchItem(
+function handleNegativeCount(count: number | undefined): number {
+	if (count === undefined || count < 0) return 0;
+	return count;
+}
+
+function adaptVideoItem(
 	item: SearchItem,
 	defaultThumbnail: string,
 	defaultAvatar: string
-): SearchResultConfig {
+): VideoSearchResultConfig {
 	return {
-		id: extractVideoIdFromUrl(item.url) || '',
+		type: 'VIDEO_STREAM',
+		id: extractIdFromUrl(item.url) || '',
 		url: item.url || '',
 		title: item.name || 'Untitled Video',
 		thumbnail: item.thumbnailUrl || defaultThumbnail,
@@ -19,38 +27,37 @@ function adaptSearchItem(
 		channelUrl: item.uploaderUrl || '',
 		channelAvatar: item.uploaderAvatarUrl || defaultAvatar,
 		verified: item.uploaderVerified ?? false,
-		viewCount: handleNegativeCount(item.viewCount) || 0,
-		duration: handleNegativeCount(item.duration) || 0,
-		uploadDate: item.uploadDate || '',
-		type: item.type || 'stream',
+		viewCount: handleNegativeCount(item.viewCount),
+		duration: handleNegativeCount(item.duration),
+		uploadDate: item.uploadDate || ''
 	};
 }
 
-/**
- * Adapts an array of search items into search result configurations
- * Filters out invalid items (missing required fields) and transforms remaining items
- */
+function adaptChannelItem(item: SearchItem, defaultAvatar: string): ChannelSearchResultConfig {
+	return {
+		type: 'channel',
+		id: extractIdFromUrl(item.url),
+		name: item.name || 'Unknown Channel',
+		avatarUrl: item.thumbnailUrl || defaultAvatar,
+		description: item.description || null,
+		subscriberCount: handleNegativeCount(item.subscriberCount),
+		verified: item.uploaderVerified ?? false
+	};
+}
+
 export function adaptSearchResults(
 	searchResult: SearchResult | undefined,
 	defaultThumbnail: string,
 	defaultAvatar: string
 ): SearchResultConfig[] {
-	if (!searchResult?.items || searchResult.items.length === 0) {
-		return [];
-	}
+	if (!searchResult?.items || searchResult.items.length === 0) return [];
 
 	return searchResult.items
-		.filter((item) => item && item.url && item.name) // Filter out invalid items
-		.map((item) => adaptSearchItem(item, defaultThumbnail, defaultAvatar));
-}
-
-/**
- * Handles negative counts from the API (e.g., -1 for unknown values)
- * Returns 0 for negative values, otherwise returns the original count
- */
-function handleNegativeCount(count: number | undefined): number {
-	if (count === undefined || count < 0) {
-		return 0;
-	}
-	return count;
+		.filter((item) => item && item.url && item.name)
+		.map((item) => {
+			if (item.type === 'channel') {
+				return adaptChannelItem(item, defaultAvatar);
+			}
+			return adaptVideoItem(item, defaultThumbnail, defaultAvatar);
+		});
 }

@@ -2,6 +2,7 @@
 	import type { PageData } from './$types';
 	import VideoResult from '$lib/components/search/VideoResult.svelte';
 	import ErrorCard from '$lib/components/ErrorCard.svelte';
+	import ChannelResult from '$lib/components/search/ChannelResult.svelte';
 
 	let { data }: { data: PageData } = $props();
 
@@ -53,7 +54,11 @@
 	{:else}
 		<div class="space-y-4">
 			{#each results as result (result.id)}
-				<VideoResult {result} />
+				{#if result.type === 'channel'}
+					<ChannelResult {result} />
+				{:else}
+					<VideoResult {result} />
+				{/if}
 			{/each}
 		</div>
 

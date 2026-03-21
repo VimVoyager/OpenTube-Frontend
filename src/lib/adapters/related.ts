@@ -1,4 +1,4 @@
-import { extractVideoIdFromUrl } from "$lib/utils/streamSelection";
+import { extractIdFromUrl } from "$lib/utils/streamSelection";
 import { selectBestThumbnail, selectBestUploaderAvatar } from '$lib/utils/mediaUtils';
 import type { RelatedVideoConfig } from './types';
 import type { RelatedItemResponse } from '$lib/api/types';
@@ -9,7 +9,7 @@ import type { RelatedItemResponse } from '$lib/api/types';
  */
 function adaptRelatedVideo(item: RelatedItemResponse, defaultThumbnail: string, defaultAvatar: string): RelatedVideoConfig {
 	return {
-		id: extractVideoIdFromUrl(item.url),
+		id: extractIdFromUrl(item.url),
 		url: item.url || '',
 		title: item.name || 'Untitled Video',
 		thumbnail: selectBestThumbnail(item.thumbnails, defaultThumbnail),

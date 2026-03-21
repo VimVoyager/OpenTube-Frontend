@@ -90,7 +90,7 @@ export interface RelatedVideoConfig {
 /**
  * Search result configuration for VideoResult component display
  */
-export interface SearchResultConfig {
+export interface VideoSearchResultConfig {
 	id: string;
 	url: string;
 	title: string;
@@ -102,7 +102,22 @@ export interface SearchResultConfig {
 	viewCount: number;
 	duration: number;
 	uploadDate: string;
-	type: string;
+	type: "VIDEO_STREAM";
+}
+
+/**
+ * Search result configuration for Channel result component display
+ */
+export interface ChannelSearchResultConfig {
+	id: string;
+	url: string;
+	name: string;
+	thumbnail: string;
+	verified: boolean;
+	subscriberCount: number;
+	streamCount: number;
+	description: string | null;
+	type: "channel";
 }
 
 /**
