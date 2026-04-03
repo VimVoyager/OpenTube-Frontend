@@ -85,6 +85,7 @@ export interface RelatedVideoConfig {
 	viewCount: number;
 	uploadDate: string;
 	duration: number;
+	channelId: string;
 }
 
 /**
@@ -110,12 +111,12 @@ export interface VideoSearchResultConfig {
  */
 export interface ChannelSearchResultConfig {
 	id: string;
-	url: string;
+	url?: string;
 	name: string;
-	thumbnail: string;
+	avatar: string;
 	verified: boolean;
 	subscriberCount: number;
-	streamCount: number;
+	streamCount?: number;
 	description: string | null;
 	type: "channel";
 }

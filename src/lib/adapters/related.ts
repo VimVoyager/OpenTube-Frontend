@@ -18,6 +18,7 @@ function adaptRelatedVideo(item: RelatedItemResponse, defaultThumbnail: string, 
 		viewCount: handleNegativeCount(item.viewCount) || 0,
 		duration: handleNegativeCount(item.duration) || 0,
 		uploadDate: item.textualUploadDate || '',
+		channelId: extractIdFromUrl(item.uploaderUrl)
 	};
 }
 

@@ -55,18 +55,24 @@
 					</h3>
 
 					<!-- Channel Info -->
-					<div class="mt-1 flex items-center gap-2">
-						{#if video.channelAvatar}
-							<img 
-								src={video.channelAvatar || logoPlaceholder}
-								alt={`${video.id}-channel-avatar-${video.channelName}`}
-								class="h-6 w-6 rounded-full object-cover shrink-0"
-								onerror={handleAvatarError}
-							/>
-						{/if}
-						<p class="text-xs text-secondary truncate">
-							{video.channelName}
-						</p>
+					<div class="mt-1 flex items-center">
+						<a
+							href="/channel/{video.channelId}"
+							data-sveltekit-preload-data="tap"
+							class="flex items-center gap-2"
+						>
+							{#if video.channelAvatar}
+								<img
+									src={video.channelAvatar || logoPlaceholder}
+									alt={`${video.id}-channel-avatar-${video.channelName}`}
+									class="h-6 w-6 rounded-full object-cover shrink-0"
+									onerror={handleAvatarError}
+								/>
+							{/if}
+							<p class="text-xs text-secondary truncate">
+								{video.channelName}
+							</p>
+						</a>
 					</div>
 
 					<!-- Video Stats -->

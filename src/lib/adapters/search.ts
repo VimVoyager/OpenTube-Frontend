@@ -38,7 +38,7 @@ function adaptChannelItem(item: SearchItem, defaultAvatar: string): ChannelSearc
 		type: 'channel',
 		id: extractIdFromUrl(item.url),
 		name: item.name || 'Unknown Channel',
-		avatarUrl: item.thumbnailUrl || defaultAvatar,
+		avatar: item.thumbnailUrl || defaultAvatar,
 		description: item.description || null,
 		subscriberCount: handleNegativeCount(item.subscriberCount),
 		verified: item.uploaderVerified ?? false

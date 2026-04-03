@@ -6,7 +6,7 @@
 
 	let { result }: { result: ChannelSearchResultConfig } = $props();
 
-	let avatar = $derived(result.thumbnail || avatarPlaceholder);
+	let avatar = $derived(result.avatar || avatarPlaceholder);
 
 	const redirectToChannel = () => goto(`/channel/${result.id}`);
 	function handleKey(event: KeyboardEvent) {
