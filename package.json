@@ -6,7 +6,7 @@
 	"scripts": {
 		"dev": "vite dev",
 		"dev:local": "dotenv -e .env.local -- vite dev",
-		"build": "dotenv -e .env.local -- vite build",
+		"build": "dotenv -e .env -- vite build",
 		"build:dev": "dotenv -e .env.dev -- vite build",
 		"build:prod": "dotenv -e .env.production -- vite build",
 		"preview": "vite preview",
