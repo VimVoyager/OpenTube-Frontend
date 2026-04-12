@@ -5,7 +5,7 @@
 	"type": "module",
 	"scripts": {
 		"dev": "vite dev",
-		"dev:local": "dotenv -e .env.local -- vite dev",
+		"dev:local": "dotenv -e .env -- vite dev",
 		"build": "dotenv -e .env -- vite build",
 		"build:dev": "dotenv -e .env.dev -- vite build",
 		"build:prod": "dotenv -e .env.production -- vite build",

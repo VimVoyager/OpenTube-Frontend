@@ -44,7 +44,7 @@ function selectBestAvatar(
 	fallback: string | null
 ): string | null {
 	if (!avatars || avatars.length === 0) return fallback;
-	return [...avatars].sort((a, b) => b.height - a.height)[0].url;
+	return [...avatars].sort((a: {url: string, height: number}, b: {url: string, height: number}) => b.height - a.height)[0].url;
 }
 
 // ─── Channel info adapter ─────────────────────────────────────────────────────
@@ -93,10 +93,12 @@ function adaptChannelVideo(
  * Adapt a full ChannelVideosResponse into an array of ChannelVideoConfig.
  */
 export function adaptChannelVideos(
-	response: ChannelVideosResponse,
+	response: ChannelVideosResponse | null,
 	thumbnailFallback: string,
 	avatarFallback: string
 ): ChannelVideoConfig[] {
 	if (!response?.items) return [];
-	return response.items.map((v: ChannelVideoItem) => adaptChannelVideo(v, thumbnailFallback, avatarFallback));
+	return response.items.map((v: ChannelVideoItem) =>
+		adaptChannelVideo(v, thumbnailFallback, avatarFallback)
+	);
 }

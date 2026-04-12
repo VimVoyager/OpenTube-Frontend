@@ -18,7 +18,8 @@ function adaptVideoItem(
 	defaultAvatar: string
 ): VideoSearchResultConfig {
 	return {
-		type: 'VIDEO_STREAM',
+		type: (item.type as VideoSearchResultConfig['type']) || 'VIDEO_STREAM',
+		description: item.description || '',
 		id: extractIdFromUrl(item.url) || '',
 		url: item.url || '',
 		title: item.name || 'Untitled Video',

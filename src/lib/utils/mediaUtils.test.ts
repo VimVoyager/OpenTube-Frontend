@@ -13,15 +13,15 @@ import {
 import type { Thumbnail, Avatar } from '$lib/types';
 
 // Helper functions to create test data with all required properties
-const createThumbnail = (url: string, height: number, width: number): Thumbnail => ({
-    url,
+const createThumbnail = (url: string | null, height: number, width: number): Thumbnail => ({
+    url: url as string,
     height,
     width,
     estimatedResolutionLevel: 'MEDIUM' // Default value for tests
 });
 
-const createAvatar = (url: string, height: number, width: number): Avatar => ({
-    url,
+const createAvatar = (url: string | null, height: number, width: number): Avatar => ({
+    url: url as string,
     height,
     width,
     estimatedResolutionLevel: 'MEDIUM' // Default value for tests
@@ -567,14 +567,14 @@ describe('Media Utils Integration', () => {
                     createThumbnail('https://i.ytimg.com/vi/abc/hqdefault.jpg', 360, 480)
                 ],
                 uploaderAvatars: [
-                    createThumbnail('https://yt3.ggpht.com/user/s48.jpg', 48, 48),
-                    createThumbnail('https://yt3.ggpht.com/user/s88.jpg', 88, 88),
-                    createThumbnail('https://yt3.ggpht.com/user/s176.jpg', 176, 176)
+                    createAvatar('https://yt3.ggpht.com/user/s48.jpg', 48, 48),
+                    createAvatar('https://yt3.ggpht.com/user/s88.jpg', 88, 88),
+                    createAvatar('https://yt3.ggpht.com/user/s176.jpg', 176, 176)
                 ]
             };
 
-            const thumbnail = selectBestThumbnail(relatedVideo.thumbnails, 'default-thumb.jpg');
-            const avatar = selectBestUploaderAvatar(relatedVideo.uploaderAvatars, 'default-avatar.jpg');
+            const thumbnail = selectBestThumbnail(relatedVideo!.thumbnails, 'default-thumb.jpg');
+            const avatar = selectBestUploaderAvatar(relatedVideo!.uploaderAvatars, 'default-avatar.jpg');
 
             expect(thumbnail).toBe('https://i.ytimg.com/vi/abc/mqdefault.jpg');
             expect(avatar).toBe('https://yt3.ggpht.com/user/s176.jpg');
@@ -583,10 +583,10 @@ describe('Media Utils Integration', () => {
         it('should select best media for video details', () => {
             const videoDetails = {
                 uploaderAvatars: [
-                    createThumbnail('https://yt3.ggpht.com/channel/s48.jpg', 48, 48),
-                    createThumbnail('https://yt3.ggpht.com/channel/s88.jpg', 88, 88),
-                    createThumbnail('https://yt3.ggpht.com/channel/s176.jpg', 176, 176),
-                    createThumbnail('https://yt3.ggpht.com/channel/s256.jpg', 256, 256)
+                    createAvatar('https://yt3.ggpht.com/channel/s48.jpg', 48, 48),
+                    createAvatar('https://yt3.ggpht.com/channel/s88.jpg', 88, 88),
+                    createAvatar('https://yt3.ggpht.com/channel/s176.jpg', 176, 176),
+                    createAvatar('https://yt3.ggpht.com/channel/s256.jpg', 256, 256)
                 ]
             };
 
@@ -657,9 +657,9 @@ describe('Media Utils Integration', () => {
                     createThumbnail('https://i.ytimg.com/vi/dQw4w9WgXcQ/maxresdefault.jpg', 720, 1280)
                 ],
                 uploaderAvatars: [
-                    createThumbnail('https://yt3.ggpht.com/ytc/channel48.jpg', 48, 48),
-                    createThumbnail('https://yt3.ggpht.com/ytc/channel88.jpg', 88, 88),
-                    createThumbnail('https://yt3.ggpht.com/ytc/channel176.jpg', 176, 176)
+                    createAvatar('https://yt3.ggpht.com/ytc/channel48.jpg', 48, 48),
+                    createAvatar('https://yt3.ggpht.com/ytc/channel88.jpg', 88, 88),
+                    createAvatar('https://yt3.ggpht.com/ytc/channel176.jpg', 176, 176)
                 ]
             };
 
@@ -678,7 +678,7 @@ describe('Media Utils Integration', () => {
                     createThumbnail('https://i.ytimg.com/vi/abc123/default.jpg', 90, 120),
                     createThumbnail('https://i.ytimg.com/vi/abc123/mqdefault.jpg', 180, 320)
                 ],
-                uploaderAvatars: [createThumbnail('https://yt3.ggpht.com/ytc/s48.jpg', 48, 48)]
+                uploaderAvatars: [createAvatar('https://yt3.ggpht.com/ytc/s48.jpg', 48, 48)]
             };
 
             const thumbnail = selectBestThumbnail(limitedVideo.thumbnails, 'placeholder.jpg');
@@ -698,7 +698,7 @@ describe('Media Utils Integration', () => {
                     createThumbnail(null as any, 180, 320),
                     createThumbnail('https://i.ytimg.com/vi/abc/hq.jpg', 360, 480)
                 ],
-                uploaderAvatars: [createThumbnail('', 48, 48)]
+                uploaderAvatars: [createAvatar('', 48, 48)]
             };
 
             const thumbnail = selectBestThumbnail(corruptedVideo.thumbnails, 'broken-thumb.jpg');

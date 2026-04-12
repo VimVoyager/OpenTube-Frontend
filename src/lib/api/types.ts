@@ -4,7 +4,7 @@ import type { Avatar, Thumbnail } from '$lib/types';
  * API Response for Search
  */
 export interface SearchResponse {
-	correctedSearch: boolean;
+	correctedSearch?: boolean;
 	url: string;
 	originalUrl: string;
 	name: string;
@@ -31,6 +31,7 @@ interface SearchResponseData {
 	streamType: string;
 	isShortFormContent: boolean;
 	uploaderUrl?: string;
+	description?: string;
 }
 
 /**
@@ -100,11 +101,6 @@ export interface RelatedCommentItem {
 	replyCount: number;
 	replies: Replies;
 	channelOwner: boolean;
-}
-
-interface CommentText {
-	content: string;
-	type: number;
 }
 
 interface Replies {

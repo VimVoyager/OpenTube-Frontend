@@ -81,11 +81,11 @@ export interface RelatedVideoConfig {
 	title: string;
 	thumbnail: string;
 	channelName: string;
+	channelId: string;
 	channelAvatar: string | null;
 	viewCount: number;
 	uploadDate: string;
 	duration: number;
-	channelId: string;
 }
 
 /**
@@ -103,7 +103,8 @@ export interface VideoSearchResultConfig {
 	viewCount: number;
 	duration: number;
 	uploadDate: string;
-	type: "VIDEO_STREAM";
+	description: string;
+	type: "VIDEO_STREAM" | "stream";
 }
 
 /**
@@ -120,6 +121,8 @@ export interface ChannelSearchResultConfig {
 	description: string | null;
 	type: "channel";
 }
+
+export type SearchResultConfig = VideoSearchResultConfig | ChannelSearchResultConfig;
 
 /**
  * Comments result configuration for Comments component display

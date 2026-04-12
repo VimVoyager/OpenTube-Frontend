@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { load } from './+page';
-import type { SearchResult } from '$lib/types';
+import type { SearchResponse} from '$lib/api/types';
 import type { SearchResultConfig } from '$lib/adapters/types';
 
 // Mock the search API
@@ -35,25 +35,28 @@ describe('+page.ts load function', () => {
     describe('Successful data loading', () => {
         it('should fetch and adapt search results with query parameter', async () => {
             // Arrange
-            const mockSearchData: SearchResult = {
-                searchString: 'test query',
-                items: [
-                    {
-                        type: 'stream',
-                        name: 'Test Video',
-                        url: '/watch?v=test123',
-                        thumbnailUrl: 'https://example.com/thumb.jpg',
-                        uploaderName: 'Test Channel',
-                        uploaderUrl: '/channel/test',
-                        uploaderAvatarUrl: 'https://example.com/avatar.jpg',
-                        uploaderVerified: true,
-                        viewCount: 1000,
-                        duration: 300,
-                        uploadDate: '2023-05-15',
-                        description: 'Test description'
-                    }
-                ]
-            };
+            const mockSearchData: Partial<SearchResponse> = {
+							searchString: 'test query',
+							items: [
+								{
+									type: 'stream',
+									name: 'Test Video',
+									url: '/watch?v=test123',
+									thumbnailUrl: 'https://example.com/thumb.jpg',
+									uploaderName: 'Test Channel',
+									uploaderUrl: '/channel/test',
+									uploaderAvatarUrl: 'https://example.com/avatar.jpg',
+									uploaderVerified: true,
+									viewCount: 1000,
+									duration: 300,
+									uploadDate: '2023-05-15',
+									description: 'Test description',
+									shortFormContent: false,
+									streamType: '',
+									isShortFormContent: false
+								}
+							]
+						};
 
             const mockAdaptedResults: SearchResultConfig[] = [
                 {
@@ -73,13 +76,13 @@ describe('+page.ts load function', () => {
                 }
             ];
 
-            vi.mocked(getSearchResults).mockResolvedValue(mockSearchData);
+            vi.mocked(getSearchResults).mockResolvedValue(mockSearchData as SearchResponse);
             vi.mocked(adaptSearchResults).mockReturnValue(mockAdaptedResults);
 
             const url = new URL('http://localhost/results?query=test+query&sort=asc');
 
             // Act
-            const result = await load({ url, fetch: mockFetch } as any);
+            const result = await load({ url, fetch: mockFetch } as any) as any;
 
             // Assert
             expect(getSearchResults).toHaveBeenCalledWith('test query', 'asc', mockFetch);
@@ -98,18 +101,18 @@ describe('+page.ts load function', () => {
 
         it('should use default sort filter when not provided', async () => {
             // Arrange
-            const mockSearchData: SearchResult = {
+            const mockSearchData: Partial<SearchResponse> = {
                 searchString: 'test',
                 items: []
             };
 
-            vi.mocked(getSearchResults).mockResolvedValue(mockSearchData);
+            vi.mocked(getSearchResults).mockResolvedValue(mockSearchData as SearchResponse);
             vi.mocked(adaptSearchResults).mockReturnValue([]);
 
             const url = new URL('http://localhost/results?query=test');
 
             // Act
-            const result = await load({ url, fetch: mockFetch } as any);
+            const result = await load({ url, fetch: mockFetch } as any) as any;
 
             // Assert
             expect(getSearchResults).toHaveBeenCalledWith('test', 'asc', mockFetch);
@@ -118,18 +121,18 @@ describe('+page.ts load function', () => {
 
         it('should handle custom sort filter parameter', async () => {
             // Arrange
-            const mockSearchData: SearchResult = {
+            const mockSearchData: Partial<SearchResponse> = {
                 searchString: 'test',
                 items: []
             };
 
-            vi.mocked(getSearchResults).mockResolvedValue(mockSearchData);
+            vi.mocked(getSearchResults).mockResolvedValue(mockSearchData as SearchResponse);
             vi.mocked(adaptSearchResults).mockReturnValue([]);
 
             const url = new URL('http://localhost/results?query=test&sort=date');
 
             // Act
-            const result = await load({ url, fetch: mockFetch } as any);
+            const result = await load({ url, fetch: mockFetch } as any) as any;
 
             // Assert
             expect(getSearchResults).toHaveBeenCalledWith('test', 'date', mockFetch);
@@ -227,12 +230,12 @@ describe('+page.ts load function', () => {
 
         it('should handle adapter errors', async () => {
             // Arrange
-            const mockSearchData: SearchResult = {
+            const mockSearchData: Partial<SearchResponse> = {
                 searchString: 'test',
                 items: []
             };
 
-            vi.mocked(getSearchResults).mockResolvedValue(mockSearchData);
+            vi.mocked(getSearchResults).mockResolvedValue(mockSearchData as SearchResponse);
             vi.mocked(adaptSearchResults).mockImplementation(() => {
                 throw new Error('Adapter error');
             });
@@ -255,12 +258,12 @@ describe('+page.ts load function', () => {
     describe('Data transformation', () => {
         it('should pass placeholder images to adapter', async () => {
             // Arrange
-            const mockSearchData: SearchResult = {
+            const mockSearchData: Partial<SearchResponse> = {
                 searchString: 'test',
                 items: []
             };
 
-            vi.mocked(getSearchResults).mockResolvedValue(mockSearchData);
+            vi.mocked(getSearchResults).mockResolvedValue(mockSearchData as SearchResponse);
             vi.mocked(adaptSearchResults).mockReturnValue([]);
 
             const url = new URL('http://localhost/results?query=test');
@@ -278,18 +281,18 @@ describe('+page.ts load function', () => {
 
         it('should handle empty search results', async () => {
             // Arrange
-            const mockSearchData: SearchResult = {
+            const mockSearchData: Partial<SearchResponse> = {
                 searchString: 'test',
                 items: []
             };
 
-            vi.mocked(getSearchResults).mockResolvedValue(mockSearchData);
+            vi.mocked(getSearchResults).mockResolvedValue(mockSearchData as SearchResponse);
             vi.mocked(adaptSearchResults).mockReturnValue([]);
 
             const url = new URL('http://localhost/results?query=test');
 
             // Act
-            const result = await load({ url, fetch: mockFetch } as any);
+            const result = await load({ url, fetch: mockFetch } as any) as any;
 
             // Assert
             expect(result.results).toEqual([]);
@@ -298,18 +301,18 @@ describe('+page.ts load function', () => {
 
         it('should preserve query in response', async () => {
             // Arrange
-            const mockSearchData: SearchResult = {
+            const mockSearchData: Partial<SearchResponse> = {
                 searchString: 'complex search query',
                 items: []
             };
 
-            vi.mocked(getSearchResults).mockResolvedValue(mockSearchData);
+            vi.mocked(getSearchResults).mockResolvedValue(mockSearchData as SearchResponse);
             vi.mocked(adaptSearchResults).mockReturnValue([]);
 
             const url = new URL('http://localhost/results?query=complex+search+query');
 
             // Act
-            const result = await load({ url, fetch: mockFetch } as any);
+            const result = await load({ url, fetch: mockFetch } as any) as any;
 
             // Assert
             expect(result.query).toBe('complex search query');
@@ -319,7 +322,7 @@ describe('+page.ts load function', () => {
     describe('Type safety', () => {
         it('should return correctly typed SearchResultConfig array', async () => {
             // Arrange
-            const mockSearchData: SearchResult = {
+            const mockSearchData: Partial<SearchResponse> = {
                 searchString: 'test',
                 items: []
             };
@@ -342,13 +345,13 @@ describe('+page.ts load function', () => {
                 }
             ];
 
-            vi.mocked(getSearchResults).mockResolvedValue(mockSearchData);
+            vi.mocked(getSearchResults).mockResolvedValue(mockSearchData as SearchResponse);
             vi.mocked(adaptSearchResults).mockReturnValue(mockAdaptedResults);
 
             const url = new URL('http://localhost/results?query=test');
 
             // Act
-            const result = await load({ url, fetch: mockFetch } as any);
+            const result = await load({ url, fetch: mockFetch } as any) as any;
 
             // Assert
             expect(result.results).toBe(mockAdaptedResults);

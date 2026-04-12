@@ -90,7 +90,7 @@ describe('getVideoComments', () => {
 			);
 
 			expect(result?.relatedItems).toEqual([]);
-			expect(Array.isArray(result.relatedItems)).toBe(true);
+			expect(Array.isArray(result!.relatedItems)).toBe(true);
 			expect(result?.relatedItems.length).toBe(0);
 		});
 
@@ -135,12 +135,12 @@ describe('getVideoComments', () => {
 			const videoId = 'test-id';
 			const mockFetch = createSuccessfulFetch(mockCommentsResponse);
 
-			const result = await getVideoComments(
+			const result: CommentResponse | null = await getVideoComments(
 				videoId,
 				mockFetch as unknown as typeof globalThis.fetch
 			);
 
-			const ownerComment = result?.relatedItems.find((c: RelatedCommentItem) => c.channelOwner);
+			const ownerComment: RelatedCommentItem | undefined = result?.relatedItems.find((c: RelatedCommentItem) => c.channelOwner);
 			expect(ownerComment).toBeDefined();
 			expect(ownerComment?.channelOwner).toBe(true);
 			expect(ownerComment?.uploaderName).toBe('@GLITCH');
@@ -150,12 +150,12 @@ describe('getVideoComments', () => {
 			const videoId = 'test-id';
 			const mockFetch = createSuccessfulFetch(mockCommentsResponse);
 
-			const result: CommentResponse = await getVideoComments(
+			const result: CommentResponse | null = await getVideoComments(
 				videoId,
 				mockFetch as unknown as typeof globalThis.fetch
 			);
 
-			const verifiedComment: RelatedCommentItem | undefined = result.relatedItems.find((c: RelatedCommentItem) => c.uploaderVerified);
+			const verifiedComment: RelatedCommentItem | undefined = result!.relatedItems.find((c: RelatedCommentItem) => c.uploaderVerified);
 			expect(verifiedComment).toBeDefined();
 			expect(verifiedComment?.uploaderVerified).toBe(true);
 		});
@@ -164,7 +164,7 @@ describe('getVideoComments', () => {
 			const videoId = 'test-id';
 			const mockFetch = createSuccessfulFetch(mockCommentsResponse);
 
-			const result = await getVideoComments(
+			const result: CommentResponse | null = await getVideoComments(
 				videoId,
 				mockFetch as unknown as typeof globalThis.fetch
 			);
@@ -184,12 +184,12 @@ describe('getVideoComments', () => {
 				mockFetch as unknown as typeof globalThis.fetch
 			);
 
-			const commentWithReplies = result?.relatedItems[0]
+			const commentWithReplies: RelatedCommentItem | undefined = result?.relatedItems[0]
 			console.log('commentWithReplies1', commentWithReplies);
-			expect(commentWithReplies.replyCount).toBe(914);
-			expect(commentWithReplies.replies).toBeDefined();
-			expect(commentWithReplies.replies?.url).toBe('https://www.youtube.com/watch?v=pilot-id');
-			expect(commentWithReplies.replies?.id).toBe('reply-id-1');
+			expect(commentWithReplies!.replyCount).toBe(914);
+			expect(commentWithReplies!.replies).toBeDefined();
+			expect(commentWithReplies!.replies?.url).toBe('https://www.youtube.com/watch?v=pilot-id');
+			expect(commentWithReplies!.replies?.id).toBe('reply-id-1');
 		});
 	});
 
@@ -259,6 +259,7 @@ describe('getVideoComments', () => {
 
 			try {
 				await getVideoComments(videoId, mockFetch as unknown as typeof globalThis.fetch);
+				// eslint-disable-next-line @typescript-eslint/no-unused-vars
 			} catch (error) {
 				// Error is expected
 			}
@@ -340,6 +341,7 @@ describe('getVideoComments', () => {
 
 			try {
 				await getVideoComments(videoId, mockFetch as unknown as typeof globalThis.fetch);
+				// eslint-disable-next-line @typescript-eslint/no-unused-vars
 			} catch (error) {
 				// Error is expected
 			}

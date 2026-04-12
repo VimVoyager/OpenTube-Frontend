@@ -1,11 +1,11 @@
 <script lang="ts">
-	import type { SearchResultConfig } from '$lib/adapters/types';
+	import type { VideoSearchResultConfig } from '$lib/adapters/types';
 	import { formatCount, formatDate } from '$lib/utils/formatters';
 	import thumbnailPlaceholder from '$lib/assets/thumbnail-placeholder.jpg';
 	import avatarPlaceholder from '$lib/assets/logo-placeholder.svg';
 	import { goto } from '$app/navigation';
 
-	let { result }: { result: SearchResultConfig } = $props();
+	let { result }: { result: VideoSearchResultConfig } = $props();
 
 	// Use placeholder only as fallbacks
 	let thumbnail = $derived(result.thumbnail || thumbnailPlaceholder);

@@ -183,7 +183,7 @@ export interface SearchResult {
 }
 
 export interface SearchItem {
-	type: 'VIDEO_STREAM' | 'channel';
+	type: 'VIDEO_STREAM' | 'channel' | 'stream' | 'playlist' | string;
 	name: string;
 	url: string;
 	thumbnailUrl: string;

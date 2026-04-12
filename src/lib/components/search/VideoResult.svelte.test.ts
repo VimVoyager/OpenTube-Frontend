@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/svelte';
 import VideoResult from './VideoResult.svelte';
-import type { SearchResultConfig } from '$lib/adapters/types';
+import type { VideoSearchResultConfig } from '$lib/adapters/types';
 import searchResultFixtures from '../../../tests/fixtures/adapters/searchResult.json';
 
 // Mock the formatters module
@@ -28,7 +28,7 @@ vi.mock('$lib/assets/logo-placeholder.svg', () => ({
 }));
 
 describe('VideoResult', () => {
-	const [pilotResult, absoluteEndResult] = searchResultFixtures as SearchResultConfig[];
+	const [pilotResult, absoluteEndResult] = searchResultFixtures as VideoSearchResultConfig[];
 
 	describe('Rendering with real data', () => {
 		it('should render video title from result prop in both layouts', () => {
@@ -69,7 +69,7 @@ describe('VideoResult', () => {
 		});
 
 		it('should render description from result prop in both layouts when present', () => {
-			const resultWithDescription = {
+			const resultWithDescription: VideoSearchResultConfig = {
 				...pilotResult,
 				description: 'This is a test video description that should be displayed.'
 			};
@@ -181,7 +181,7 @@ describe('VideoResult', () => {
 		});
 
 		it('should apply line-clamp-3 to description for truncation', () => {
-			const resultWithDescription = {
+			const resultWithDescription: VideoSearchResultConfig = {
 				...pilotResult,
 				description: 'This is a test video description that should be displayed.'
 			};

@@ -43,7 +43,7 @@ function createErrorPageData(error: unknown): ChannelPageData {
  */
 export const load: PageLoad = async ({ params, fetch }): Promise<ChannelPageData> => {
 	try {
-		const channelId: string = params.channelId;
+		const channelId: string = (params as Record<string, string>).channelId;
 
 		const [info, videosResponse] = await Promise.all([
 			getChannelInfo(channelId, fetch),

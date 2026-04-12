@@ -115,7 +115,7 @@
 
 	<!-- Tab bar -->
 	<div class="border-b border-default px-6">
-		<nav class="flex" role="tablist" aria-label="Channel sections">
+		<div class="flex" role="tablist" aria-label="Channel sections">
 			{#each tabs as tab}
 				<button
 					role="tab"
@@ -132,7 +132,7 @@
 					{/if}
 				</button>
 			{/each}
-		</nav>
+		</div>
 	</div>
 
 	<!-- Tab content -->

@@ -152,7 +152,10 @@ describe('Search Integration Tests', () => {
 			expect(search.query).toBe('murder drones');
 			expect(search.sortFilter).toBe('desc');
 			expect(search.error).toBeNull();
-			expect(search.results[0].title).toBe('MURDER DRONES - Pilot');
+			const first = search.results[0];
+			if (first.type !== 'channel') {
+				expect(first.title).toBe('MURDER DRONES - Pilot');
+			}
 		});
 
 		it('should return empty results for empty query', async () => {

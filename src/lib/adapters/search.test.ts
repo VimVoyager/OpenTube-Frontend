@@ -21,17 +21,23 @@ vi.mock('$lib/utils/streamSelection', () => ({
 
 import { extractIdFromUrl } from '$lib/utils/streamSelection';
 import type { SearchResponse } from '$lib/api/types';
-import type { SearchResultConfig } from '$lib/adapters/types';
+import type { VideoSearchResultConfig } from '$lib/adapters/types';
 
 // =============================================================================
 // Test Fixtures
 // =============================================================================
 
 const mockSearchResponse: SearchResponse = searchResponseFixture;
-const mockSearchResult: SearchResultConfig[] = searchResultFixture;
+const mockSearchResult: VideoSearchResultConfig[] = searchResultFixture as VideoSearchResultConfig[];
 
 const defaultThumbnail = 'default-thumbnail.jpg';
 const defaultAvatar = 'default-avatar.jpg';
+
+function adaptVideoResults(
+	...args: Parameters<typeof adaptSearchResults>
+): VideoSearchResultConfig[] {
+	return adaptSearchResults(...args) as VideoSearchResultConfig[];
+}
 
 // =============================================================================
 // Setup and Teardown
@@ -54,7 +60,7 @@ describe('adaptSearchResults', () => {
 		it('should adapt complete search item array correctly', () => {
 			vi.mocked(extractIdFromUrl).mockReturnValueOnce('pilot-id');
 
-			const result = adaptSearchResults(mockSearchResponse, defaultThumbnail, defaultAvatar);
+			const result = adaptVideoResults(mockSearchResponse, defaultThumbnail, defaultAvatar);
 
 			expect(result).toHaveLength(2);
 			expect(result[0]).toEqual(mockSearchResult[0]);
@@ -112,7 +118,7 @@ describe('adaptSearchResults', () => {
 				items: [{ ...mockSearchResponse.items[0], uploaderUrl: undefined }]
 			};
 
-			const result = adaptSearchResults(item, defaultThumbnail, defaultAvatar);
+			const result = adaptVideoResults(item, defaultThumbnail, defaultAvatar);
 
 			expect(result[0].channelUrl).toBe('');
 		});
@@ -123,7 +129,7 @@ describe('adaptSearchResults', () => {
 				items: [{ ...mockSearchResponse.items[0], uploaderVerified: undefined }]
 			};
 
-			const result = adaptSearchResults(item, defaultThumbnail, defaultAvatar);
+			const result = adaptVideoResults(item, defaultThumbnail, defaultAvatar);
 
 			expect(result[0].verified).toBe(false);
 		});
@@ -226,7 +232,7 @@ describe('adaptSearchResults', () => {
 				items: [{ ...mockSearchResponse.items[0], viewCount: 999999999999 }]
 			};
 
-			const result = adaptSearchResults(item, defaultThumbnail, defaultAvatar);
+			const result = adaptVideoResults(item, defaultThumbnail, defaultAvatar);
 
 			expect(result[0].viewCount).toBe(999999999999);
 		});
@@ -237,7 +243,7 @@ describe('adaptSearchResults', () => {
 				items: [{ ...mockSearchResponse.items[0], duration: 86400 }] // 24 hours
 			};
 
-			const result = adaptSearchResults(item, defaultThumbnail, defaultAvatar);
+			const result = adaptVideoResults(item, defaultThumbnail, defaultAvatar);
 
 			expect(result[0].duration).toBe(86400);
 		});
@@ -249,7 +255,7 @@ describe('adaptSearchResults', () => {
 				items: [{ ...mockSearchResponse.items[0], name: longTitle }]
 			};
 
-			const result = adaptSearchResults(item, defaultThumbnail, defaultAvatar);
+			const result = adaptVideoResults(item, defaultThumbnail, defaultAvatar);
 
 			expect(result[0].title).toBe(longTitle);
 		});
@@ -261,7 +267,7 @@ describe('adaptSearchResults', () => {
 				items: [{ ...mockSearchResponse.items[0], name: specialTitle }]
 			};
 
-			const result = adaptSearchResults(item, defaultThumbnail, defaultAvatar);
+			const result = adaptVideoResults(item, defaultThumbnail, defaultAvatar);
 
 			expect(result[0].title).toBe(specialTitle);
 		});
@@ -273,7 +279,7 @@ describe('adaptSearchResults', () => {
 				items: [{ ...mockSearchResponse.items[0], uploaderName: unicodeName }]
 			};
 
-			const result = adaptSearchResults(item, defaultThumbnail, defaultAvatar);
+			const result = adaptVideoResults(item, defaultThumbnail, defaultAvatar);
 
 			expect(result[0].channelName).toBe(unicodeName);
 		});
@@ -358,7 +364,7 @@ describe('adaptSearchResults', () => {
 				items: [minimalItem]
 			};
 
-			const result = adaptSearchResults(searchResult, defaultThumbnail, defaultAvatar);
+			const result = adaptVideoResults(searchResult, defaultThumbnail, defaultAvatar);
 
 			expect(result).toHaveLength(1);
 			expect(result[0].title).toBe('Minimal Video');
