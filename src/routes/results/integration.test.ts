@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach} from 'vitest';
 import { getSearchResults } from '$lib/api/search';
 import { adaptSearchResults } from '$lib/adapters/search';
 import { load } from './+page';
@@ -6,6 +6,7 @@ import type { SearchResult } from '$lib/types';
 import type { SearchResponse } from '$lib/api/types';
 import searchResponseFixture from '../../tests/fixtures/api/searchResponseFixture.json';
 import type { LoadResponse } from '../types';
+import type { SearchResultConfig } from '$lib/adapters/types';
 
 describe('Search Integration Tests', () => {
 	beforeEach(() => {
@@ -17,7 +18,7 @@ describe('Search Integration Tests', () => {
 	});
 
 	describe('API + Adapter Integration', () => {
-		it('should fetch and transform search results correctly', async () => {
+		it('should fetch and transform search results correctly', async (): Promise<void> => {
 			// Mock API response
 			const mockApiResponse: SearchResponse = searchResponseFixture;
 			const singleResponse: SearchResponse = {
@@ -33,10 +34,10 @@ describe('Search Integration Tests', () => {
 			});
 
 			// Call API
-			const searchData = await getSearchResults('murder drones', 'asc', mockFetch);
+			const searchData: SearchResponse = await getSearchResults('murder drones', 'asc', mockFetch);
 
 			// Transform with adapter
-			const results = adaptSearchResults(searchData, 'default-thumb.jpg', 'default-avatar.svg');
+			const results: SearchResultConfig[] = adaptSearchResults(searchData, 'default-thumb.jpg', 'default-avatar.svg');
 
 			// Assertions
 			expect(mockFetch).toHaveBeenCalledWith(
@@ -51,6 +52,7 @@ describe('Search Integration Tests', () => {
 				channelName: 'GLITCH',
 				channelUrl: 'https://www.youtube.com/channel/channel-id',
 				channelAvatar: 'https://yt3.ggpht.com/random-unicode-characters',
+				description: 'description here',
 				verified: true,
 				viewCount: 10717139,
 				duration: 86,
@@ -59,7 +61,7 @@ describe('Search Integration Tests', () => {
 			});
 		});
 
-		it('should handle empty search results', async () => {
+		it('should handle empty search results', async (): Promise<void> => {
 			const mockApiResponse: SearchResult = {
 				searchString: 'test',
 				items: []
@@ -67,11 +69,11 @@ describe('Search Integration Tests', () => {
 
 			const mockFetch = vi.fn().mockResolvedValue({
 				ok: true,
-				json: async () => mockApiResponse
+				json: async (): Promise<SearchResult> => mockApiResponse
 			});
 
-			const searchData = await getSearchResults('no results', 'asc', mockFetch);
-			const results = adaptSearchResults(searchData, 'default-thumb.jpg', 'default-avatar.svg');
+			const searchData: SearchResponse = await getSearchResults('no results', 'asc', mockFetch);
+			const results: SearchResultConfig[] = adaptSearchResults(searchData, 'default-thumb.jpg', 'default-avatar.svg');
 
 			expect(results).toEqual([]);
 		});
@@ -95,6 +97,7 @@ describe('Search Integration Tests', () => {
 				thumbnail: 'default-thumb.jpg', // Uses default
 				channelName: 'Unknown Channel', // Uses default
 				channelUrl: 'https://www.youtube.com/channel/channel-id',
+				description: '',
 				channelAvatar: 'default-avatar.svg', // Uses default
 				verified: false,
 				viewCount: 0, // -1 converted to 0

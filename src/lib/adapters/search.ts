@@ -18,7 +18,7 @@ function adaptVideoItem(
 	defaultAvatar: string
 ): VideoSearchResultConfig {
 	return {
-		type: (item.type as VideoSearchResultConfig['type']) || 'VIDEO_STREAM',
+		type: (item.type as VideoSearchResultConfig['type']) || 'stream',
 		description: item.description || '',
 		id: extractIdFromUrl(item.url) || '',
 		url: item.url || '',
@@ -54,8 +54,8 @@ export function adaptSearchResults(
 	if (!searchResult?.items || searchResult.items.length === 0) return [];
 
 	return searchResult.items
-		.filter((item) => item && item.url && item.name)
-		.map((item) => {
+		.filter((item: SearchItem): string => item && item.url && item.name)
+		.map((item: SearchItem):VideoSearchResultConfig | ChannelSearchResultConfig => {
 			if (item.type === 'channel') {
 				return adaptChannelItem(item, defaultAvatar);
 			}

@@ -7,19 +7,19 @@ export function extractIdFromUrl(url: string): string {
 	try {
 		const urlObj = new URL(url);
 
-		const vParam = urlObj.searchParams.get('v');
+		const vParam: string | null = urlObj.searchParams.get('v');
 		if (vParam) {
 			return vParam;
 		}
 
-		const pathParts = urlObj.pathname.split('/').filter(Boolean);
+		const pathParts: string[] = urlObj.pathname.split('/').filter(Boolean);
 		if (pathParts.length > 0) {
 			return pathParts[pathParts.length - 1];
 		}
 
 		return '';
 	} catch {
-		const patterns = [
+		const patterns: RegExp[] = [
 			/[?&]v=([^&]+)/,           // ?v=ID or &v=ID
 			/youtu\.be\/([^?&]+)/,     // youtu.be/ID
 			/embed\/([^?&]+)/,         // embed/ID
@@ -28,7 +28,7 @@ export function extractIdFromUrl(url: string): string {
 		];
 
 		for (const pattern of patterns) {
-			const match = url.match(pattern);
+			const match: RegExpMatchArray | null = url.match(pattern);
 			if (match && match[1]) {
 				return match[1];
 			}

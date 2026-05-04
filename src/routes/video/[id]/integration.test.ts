@@ -244,6 +244,7 @@ describe('Video Detail Integration Tests', () => {
 				title: 'MURDER DRONES - Heartbeat',
 				thumbnail: 'https://i.ytimg.com/vi/heartbeat-id/hqdefault.jpg/md',
 				channelName: 'GLITCH',
+				channelId: 'channel-id',
 				channelAvatar: 'https://yt3.ggpht.com/random-unicode-characters/md',
 				viewCount: 39000000,
 				duration: 1049,

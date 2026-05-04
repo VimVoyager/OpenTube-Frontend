@@ -12,16 +12,16 @@ import type { SearchResult, SearchItem } from '$lib/types';
 
 // Mock the utility module
 vi.mock('$lib/utils/streamSelection', () => ({
-	extractVideoIdFromUrl: vi.fn((url: string) => {
+	extractIdFromUrl: vi.fn((url: string): string => {
 		if (!url) return '';
-		const match = url.match(/[?&]v=([^&]+)/);
+		const match: RegExpMatchArray | null = url.match(/[?&]v=([^&]+)/);
 		return match ? match[1] : '';
 	})
 }));
 
 import { extractIdFromUrl } from '$lib/utils/streamSelection';
 import type { SearchResponse } from '$lib/api/types';
-import type { VideoSearchResultConfig } from '$lib/adapters/types';
+import type { SearchResultConfig, VideoSearchResultConfig } from '$lib/adapters/types';
 
 // =============================================================================
 // Test Fixtures
@@ -60,7 +60,7 @@ describe('adaptSearchResults', () => {
 		it('should adapt complete search item array correctly', () => {
 			vi.mocked(extractIdFromUrl).mockReturnValueOnce('pilot-id');
 
-			const result = adaptVideoResults(mockSearchResponse, defaultThumbnail, defaultAvatar);
+			const result: VideoSearchResultConfig[] = adaptVideoResults(mockSearchResponse, defaultThumbnail, defaultAvatar);
 
 			expect(result).toHaveLength(2);
 			expect(result[0]).toEqual(mockSearchResult[0]);
@@ -92,7 +92,7 @@ describe('adaptSearchResults', () => {
 
 	describe('video ID extraction', () => {
 		it('should extract video ID from URL', () => {
-			const result = adaptSearchResults(mockSearchResponse, defaultThumbnail, defaultAvatar);
+			const result: SearchResultConfig[] = adaptSearchResults(mockSearchResponse, defaultThumbnail, defaultAvatar);
 
 			expect(extractIdFromUrl).toHaveBeenCalledWith(mockSearchResult[0].url);
 			expect(result[0].id).toBe(mockSearchResult[0].id);
@@ -101,7 +101,7 @@ describe('adaptSearchResults', () => {
 		it('should use empty string when URL extraction fails', () => {
 			vi.mocked(extractIdFromUrl).mockReturnValueOnce('');
 
-			const result = adaptSearchResults(mockSearchResponse, defaultThumbnail, defaultAvatar);
+			const result: SearchResultConfig[] = adaptSearchResults(mockSearchResponse, defaultThumbnail, defaultAvatar);
 
 			expect(result[0].id).toBe('');
 		});
@@ -118,7 +118,7 @@ describe('adaptSearchResults', () => {
 				items: [{ ...mockSearchResponse.items[0], uploaderUrl: undefined }]
 			};
 
-			const result = adaptVideoResults(item, defaultThumbnail, defaultAvatar);
+			const result: VideoSearchResultConfig[] = adaptVideoResults(item, defaultThumbnail, defaultAvatar);
 
 			expect(result[0].channelUrl).toBe('');
 		});

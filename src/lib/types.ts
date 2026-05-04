@@ -117,6 +117,7 @@ export interface RelatedItem {
 	title: string;
 	thumbnail: string;
 	channelName: string;
+	channelId: string;
 	uploadDate: string;
 	viewCount: number;
 	duration: number;

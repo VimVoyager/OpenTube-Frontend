@@ -40,6 +40,6 @@ export function adaptRelatedVideos(
 		.map(item => adaptRelatedVideo(item, defaultThumbnail, defaultAvatar));
 }
 
-function handleNegativeCount(count: number) {
+function handleNegativeCount(count: number): number {
     return count < 0 ? 0 : count;
 }

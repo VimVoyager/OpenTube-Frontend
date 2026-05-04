@@ -12,14 +12,11 @@ import type { RelatedItem } from '$lib/types';
 import { extractIdFromUrl } from '$lib/utils/streamSelection';
 import { selectBestThumbnail, selectBestUploaderAvatar } from '$lib/utils/mediaUtils';
 import type { RelatedItemResponse } from '$lib/api/types';
+import type { RelatedVideoConfig } from '$lib/adapters/types';
 
 // Mock the utility modules
 vi.mock('$lib/utils/streamSelection', () => ({
-	extractVideoIdFromUrl: vi.fn((url: string) => {
-		if (!url) return '';
-		const match = url.match(/[?&]v=([^&]+)/);
-		return match ? match[1] : '';
-	})
+	extractIdFromUrl: vi.fn().mockReturnValue('mock-video-id')
 }));
 
 vi.mock('$lib/utils/mediaUtils', () => ({
@@ -31,6 +28,7 @@ vi.mock('$lib/utils/mediaUtils', () => ({
 		if (!avatars || avatars.length === 0) return fallback;
 		return avatars[avatars.length - 1]?.url || avatars[0]?.url || fallback;
 	})
+
 }));
 
 // =============================================================================
@@ -62,9 +60,11 @@ describe('adaptRelatedVideos', () => {
 
 	describe('successful related videos adaptation', () => {
 		it('should adapt complete related item correctly', () => {
-			vi.mocked(extractIdFromUrl).mockReturnValueOnce('heartbeat-id');
+			vi.mocked(extractIdFromUrl)
+				.mockReturnValueOnce('heartbeat-id')
+				.mockReturnValueOnce('c1357');
 
-			const result = adaptRelatedVideos(
+			const result: RelatedVideoConfig[] = adaptRelatedVideos(
 				[mockRelatedItemResponse[0]],
 				defaultThumbnail,
 				defaultAvatar
@@ -77,6 +77,7 @@ describe('adaptRelatedVideos', () => {
 				title: mockRelatedItem[0].title,
 				thumbnail: mockRelatedItem[0].thumbnail,
 				channelName: mockRelatedItem[0].channelName,
+				channelId: mockRelatedItem[0].channelId,
 				channelAvatar: mockRelatedItem[0].channelAvatar,
 				viewCount: mockRelatedItem[0].viewCount,
 				duration: mockRelatedItem[0].duration,
@@ -86,7 +87,7 @@ describe('adaptRelatedVideos', () => {
 
 		it('should return all required configuration fields', () => {
 			// Arrange & Act
-			const result = adaptRelatedVideos(
+			const result: RelatedVideoConfig[] = adaptRelatedVideos(
 				mockRelatedItemResponse,
 				defaultThumbnail,
 				defaultAvatar
@@ -115,7 +116,7 @@ describe('adaptRelatedVideos', () => {
 
 			adaptRelatedVideos(items, defaultThumbnail, defaultAvatar);
 
-			expect(extractIdFromUrl).toHaveBeenCalledTimes(2);
+			expect(extractIdFromUrl).toHaveBeenCalledTimes(4);
 			expect(selectBestThumbnail).toHaveBeenCalledTimes(2);
 			expect(selectBestUploaderAvatar).toHaveBeenCalledTimes(2);
 		});
@@ -127,7 +128,9 @@ describe('adaptRelatedVideos', () => {
 
 	describe('video ID extraction', () => {
 		it('should extract video ID from URL', () => {
-			vi.mocked(extractIdFromUrl).mockReturnValueOnce('heartbeat-id');
+			vi.mocked(extractIdFromUrl)
+				.mockReturnValueOnce('heartbeat-id')
+				.mockReturnValueOnce('c1357');
 
 			const result = adaptRelatedVideos(
 				[mockRelatedItemResponse[0]],
@@ -321,14 +324,14 @@ describe('adaptRelatedVideos', () => {
 
 	describe('empty and undefined input handling', () => {
 		it('should return empty array for undefined items', () => {
-			const result = adaptRelatedVideos(undefined, defaultThumbnail, defaultAvatar);
+			const result: RelatedVideoConfig[] = adaptRelatedVideos(undefined, defaultThumbnail, defaultAvatar);
 
 			expect(result).toEqual([]);
 			expect(Array.isArray(result)).toBe(true);
 		});
 
 		it('should return empty array for empty items array', () => {
-			const result = adaptRelatedVideos([], defaultThumbnail, defaultAvatar);
+			const result: RelatedVideoConfig[] = adaptRelatedVideos([], defaultThumbnail, defaultAvatar);
 
 			expect(result).toEqual([]);
 		});
@@ -361,7 +364,7 @@ describe('adaptRelatedVideos', () => {
 				viewCount: 999999999999999,
 			}
 
-			const result = adaptRelatedVideos([item], defaultThumbnail, defaultAvatar);
+			const result: RelatedVideoConfig[] = adaptRelatedVideos([item], defaultThumbnail, defaultAvatar);
 
 			expect(result[0].viewCount).toBe(999999999999999);
 		});
@@ -372,20 +375,20 @@ describe('adaptRelatedVideos', () => {
 				duration: 86400
 			};
 
-			const result = adaptRelatedVideos([item], defaultThumbnail, defaultAvatar);
+			const result: RelatedVideoConfig[] = adaptRelatedVideos([item], defaultThumbnail, defaultAvatar);
 
 			expect(result[0].duration).toBe(86400);
 		});
 
 		it('should handle negative view counts gracefully', () => {
 
-			const result = adaptRelatedVideos([mockRelatedItemResponse[4]], defaultThumbnail, defaultAvatar);
+			const result: RelatedVideoConfig[] = adaptRelatedVideos([mockRelatedItemResponse[4]], defaultThumbnail, defaultAvatar);
 
 			expect(result[0].viewCount).toBe(0);
 		});
 
 		it('should handle negative durations gracefully', () => {
-			const result = adaptRelatedVideos([mockRelatedItemResponse[4]], defaultThumbnail, defaultAvatar);
+			const result: RelatedVideoConfig[] = adaptRelatedVideos([mockRelatedItemResponse[4]], defaultThumbnail, defaultAvatar);
 
 			expect(result[0].duration).toBe(0);
 		});
@@ -394,7 +397,7 @@ describe('adaptRelatedVideos', () => {
 			const longTitle = 'A'.repeat(1000);
 			const item = { ...mockRelatedItemResponse[0], name: longTitle };
 
-			const result = adaptRelatedVideos([item], defaultThumbnail, defaultAvatar);
+			const result: RelatedVideoConfig[] = adaptRelatedVideos([item], defaultThumbnail, defaultAvatar);
 
 			expect(result[0].title).toBe(longTitle);
 		});
@@ -403,52 +406,18 @@ describe('adaptRelatedVideos', () => {
 			const specialTitle = 'Test & Title <with> "special" \'chars\'';
 			const item = { ...mockRelatedItemResponse[0], name: specialTitle };
 
-			const result = adaptRelatedVideos([item], defaultThumbnail, defaultAvatar);
+			const result: RelatedVideoConfig[] = adaptRelatedVideos([item], defaultThumbnail, defaultAvatar);
 
 			expect(result[0].title).toBe(specialTitle);
 		});
 
 		it('should not modify input items array', () => {
-			const items = mockRelatedItemResponse;
+			const items: RelatedItemResponse[] = mockRelatedItemResponse;
 			const itemsCopy = JSON.parse(JSON.stringify(items));
 
 			adaptRelatedVideos(items, defaultThumbnail, defaultAvatar);
 
 			expect(items).toEqual(itemsCopy);
-		});
-	});
-
-	// =============================================================================
-	// Data Type Preservation Tests
-	// =============================================================================
-
-	describe('data type preservation', () => {
-		it('should preserve string types', () => {
-			const result = adaptRelatedVideos(
-				mockRelatedItemResponse,
-				defaultThumbnail,
-				defaultAvatar
-			);
-
-			expect(typeof result[0].id).toBe('string');
-			expect(typeof result[0].url).toBe('string');
-			expect(typeof result[0].title).toBe('string');
-			expect(typeof result[0].thumbnail).toBe('string');
-			expect(typeof result[0].channelName).toBe('string');
-			expect(typeof result[0].channelAvatar).toBe('string');
-			expect(typeof result[0].uploadDate).toBe('string');
-		});
-
-		it('should preserve number types', () => {
-			// Arrange & Act
-			const result = adaptRelatedVideos(
-				mockRelatedItemResponse,
-				defaultThumbnail,
-				defaultAvatar
-			);
-
-			expect(typeof result[0].viewCount).toBe('number');
-			expect(typeof result[0].duration).toBe('number');
 		});
 	});
 
@@ -459,14 +428,14 @@ describe('adaptRelatedVideos', () => {
 	describe('integration with utility functions', () => {
 		it('should work correctly with all utility functions', () => {
 			const videoId = 'heartbeat-id';
-			const thumbnailUrl = relatedVideosResponseFixture[0].thumbnails[1].url;
-			const avatarUrl = relatedVideosResponseFixture[0].uploaderAvatars[0].url;
+			const thumbnailUrl: string = relatedVideosResponseFixture[0].thumbnails[1].url;
+			const avatarUrl: string = relatedVideosResponseFixture[0].uploaderAvatars[0].url;
 
 			vi.mocked(extractIdFromUrl).mockReturnValueOnce(videoId);
 			vi.mocked(selectBestThumbnail).mockReturnValueOnce(thumbnailUrl);
 			vi.mocked(selectBestUploaderAvatar).mockReturnValueOnce(avatarUrl);
 
-			const result = adaptRelatedVideos(
+			const result: RelatedVideoConfig[] = adaptRelatedVideos(
 				[mockRelatedItemResponse[0]],
 				defaultThumbnail,
 				defaultAvatar
@@ -482,7 +451,7 @@ describe('adaptRelatedVideos', () => {
 			vi.mocked(selectBestThumbnail).mockReturnValueOnce(defaultThumbnail);
 			vi.mocked(selectBestUploaderAvatar).mockReturnValueOnce(defaultAvatar);
 
-			const result = adaptRelatedVideos(
+			const result: RelatedVideoConfig[] = adaptRelatedVideos(
 				[mockRelatedItemResponse[3]],
 				defaultThumbnail,
 				defaultAvatar

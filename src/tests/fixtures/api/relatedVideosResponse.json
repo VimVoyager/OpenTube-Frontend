@@ -127,18 +127,18 @@
 		"url": "https://www.youtube.com/watch?v=they-all-get-guns-id",
 		"name": "THE AMAZING DIGITAL CIRCUS - They All Get Guns",
 		"thumbnails": [
-				{
-					"url": "https://i.ytimg.com/vi/they-all-get-guns-id/hqdefault.jpg/sm",
-					"height": 94,
-					"width": 168,
-					"estimatedResolutionLevel": "LOW"
-				},
-				{
-					"url": "https://i.ytimg.com/vi/they-all-get-guns-id/hqdefault.jpg/md",
-					"height": 188,
-					"width": 336,
-					"estimatedResolutionLevel": "MEDIUM"
-				}
+			{
+				"url": "https://i.ytimg.com/vi/they-all-get-guns-id/hqdefault.jpg/sm",
+				"height": 94,
+				"width": 168,
+				"estimatedResolutionLevel": "LOW"
+			},
+			{
+				"url": "https://i.ytimg.com/vi/they-all-get-guns-id/hqdefault.jpg/md",
+				"height": 188,
+				"width": 336,
+				"estimatedResolutionLevel": "MEDIUM"
+			}
 		],
 		"streamType": "VIDEO_STREAM",
 		"uploaderName": "",
