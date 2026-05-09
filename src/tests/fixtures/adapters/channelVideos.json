@@ -1,0 +1,35 @@
+[
+	{
+		"duration": 210,
+		"id": "glitch-video-1",
+		"isShort": false,
+		"thumbnail": "https://i.ytimg.com/vi/Qsmfc2BI9z8/hqdefault.jpg",
+		"title": "Fitting In at School",
+		"uploadedDate": "2 weeks ago",
+		"uploaderName": "GLITCH",
+		"uploaderUrl": "https://www.youtube.com/channel/glitch-channel-id",
+		"viewCount": 3984544
+	},
+	{
+		"duration": 70,
+		"id": "glitch-video-2",
+		"isShort": false,
+		"thumbnail": "https://i.ytimg.com/vi/AjFk1cY265I/hqdefault.jpg",
+		"title": "Digital Circus Ep 9 Finale [TRAILER]",
+		"uploadedDate": "4 weeks ago",
+		"uploaderName": "GLITCH",
+		"uploaderUrl": "https://www.youtube.com/channel/glitch-channel-id",
+		"viewCount": 28449488
+	},
+	{
+		"duration": 159,
+		"id": "glitch-video-3",
+		"isShort": false,
+		"thumbnail": "https://i.ytimg.com/vi/MT6CdUJj7YM/hqdefault.jpg",
+		"title": "Caine's Requiem",
+		"uploadedDate": "1 month ago",
+		"uploaderName": "GLITCH",
+		"uploaderUrl": "https://www.youtube.com/channel/glitch-channel-id",
+		"viewCount": 15866216
+	}
+]
