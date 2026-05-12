@@ -1,0 +1,75 @@
+{
+	"tab": "videos",
+	"channelId": "glitch-channel-id",
+	"items": [
+		{
+			"url": "https://www.youtube.com/watch?v=glitch-video-1",
+			"name": "Fitting In at School",
+			"uploaderName": "GLITCH",
+			"uploaderUrl": "https://www.youtube.com/channel/glitch-channel-id",
+			"uploaderVerified": true,
+			"duration": 210,
+			"viewCount": 3984544,
+			"textualUploadDate": "2 weeks ago",
+			"isShortFormContent": false,
+			"thumbnails": [
+				{
+					"url": "https://i.ytimg.com/vi/glitch-video-1/hqdefault.jpg?sqp=sm",
+					"height": 94,
+					"width": 168
+				},
+				{
+					"url": "https://i.ytimg.com/vi/glitch-video-1/hqdefault.jpg?sqp=lg",
+					"height": 188,
+					"width": 336
+				}
+			]
+		},
+		{
+			"url": "https://www.youtube.com/watch?v=glitch-video-2",
+			"name": "Digital Circus Ep 9 Finale [TRAILER]",
+			"uploaderName": "GLITCH",
+			"uploaderUrl": "https://www.youtube.com/channel/gltich-channel-id",
+			"uploaderVerified": true,
+			"duration": 70,
+			"viewCount": 28449488,
+			"textualUploadDate": "4 weeks ago",
+			"isShortFormContent": false,
+			"thumbnails": [
+				{
+					"url": "https://i.ytimg.com/vi/glitch-video-2/hqdefault.jpg?sqp=sm",
+					"height": 94,
+					"width": 168
+				},
+				{
+					"url": "https://i.ytimg.com/vi/glitch-video-2/hqdefault.jpg?sqp=lg",
+					"height": 188,
+					"width": 336
+				}
+			]
+		},
+		{
+			"url": "https://www.youtube.com/watch?v=glitch-video-3",
+			"name": "Caine's Requiem",
+			"uploaderName": "GLITCH",
+			"uploaderUrl": "https://www.youtube.com/channel/glitch-channel-id",
+			"uploaderVerified": true,
+			"duration": 159,
+			"viewCount": 15866216,
+			"textualUploadDate": "1 month ago",
+			"isShortFormContent": false,
+			"thumbnails": [
+				{
+					"url": "https://i.ytimg.com/vi/glitch-video-3/hqdefault.jpg?sqp=sm",
+					"height": 94,
+					"width": 168
+				},
+				{
+					"url": "https://i.ytimg.com/vi/glitch-video-3/hqdefault.jpg?sqp=lg",
+					"height": 188,
+					"width": 336
+				}
+			]
+		}
+	]
+}

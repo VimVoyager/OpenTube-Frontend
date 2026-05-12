@@ -1,0 +1,48 @@
+{
+	"serviceId": 0,
+	"id": "glitch-channel-id",
+	"url": "https://www.youtube.com/channel/UCn_FAXem2-e3HQvmK-mOH4g",
+	"originalUrl": "https://www.youtube.com/UCn_FAXem2-e3HQvmK-mOH4g",
+	"name": "GLITCH",
+	"parentChannelName": "",
+	"parentChannelUrl": "",
+	"feedUrl": "https://www.youtube.com/feeds/vidoes.xml?channel_id=glitch-channel-id",
+	"handle": "GLITCH",
+	"subscriberCount": 20600000,
+	"description": "Here you'll find fun, colourful animated shows with occasional violence and existential breakdowns",
+	"verified": true,
+	"avatars": [
+		{
+			"url": "https://yt.googleusercontent.com/sm/avatar.jpg",
+			"height": 72,
+			"width": 72
+		},
+		{
+			"url": "https://yt.googleusercontent.com/md/avatar.jpg",
+			"height": 120,
+			"width": 120
+		},
+		{
+			"url": "https://yt.googleusercontent.com/lg/avatar.jpg",
+			"height": 160,
+			"width": 160
+		}
+	],
+	"banners": [
+		{
+			"url": "https://yt.googleusercontent.com/sm/banner.jpg",
+			"height": 175,
+			"width": 1060
+		},
+		{
+			"url": "https://yt.googleusercontent.com/md/banner.jpg",
+			"height": 351,
+			"width": 2120
+		},
+		{
+			"url": "https://yt.googleusercontent.com/lg/banner.jpg",
+			"height": 424,
+			"width": 2560
+		}
+	]
+}
