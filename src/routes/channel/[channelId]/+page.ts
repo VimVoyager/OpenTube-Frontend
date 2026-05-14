@@ -19,7 +19,7 @@ import type {
  * Creates error page data with safe defaults
  */
 function createErrorPageData(error: unknown): ChannelPageData {
-	const errorMessage = error instanceof Error ? error.message : 'Unknown error loading channel';
+	const errorMessage: string = error instanceof Error ? error.message : 'Unknown error loading channel';
 
 	return {
 		channel: {
@@ -39,7 +39,7 @@ function createErrorPageData(error: unknown): ChannelPageData {
 }
 
 /**
- * Page load function - fetches channel info and videos in parallel
+ * Page load function - fetches channel info and videos in parallel :LoadEvent<RouteParams, null, {} '/'>
  */
 export const load: PageLoad = async ({ params, fetch }): Promise<ChannelPageData> => {
 	try {

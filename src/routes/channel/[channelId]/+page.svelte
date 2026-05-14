@@ -22,7 +22,7 @@
 	let channelVideos = $derived((data as any)?.videos ?? []);
 	let error = $derived((data as any)?.error ?? null);
 
-	let activeTab = $state<ChannelTab>('home');
+	let activeTab = $state<ChannelTab>('videos');
 </script>
 
 <div class="w-full bg-primary min-h-screen">
@@ -39,14 +39,6 @@
 		</div>
 	{:else}
 		<ChannelDetails {channel} bind:activeTab>
-			{#snippet home()}
-				<!-- Placeholder: replace with a dedicated ChannelHome component later -->
-				<div class="flex flex-col items-center justify-center py-12 text-center px-6">
-					<div class="text-4xl mb-4">🏠</div>
-					<p class="text-sm text-secondary">Featured and recent content will appear here</p>
-				</div>
-			{/snippet}
-
 			{#snippet videos()}
 				<ChannelVideos videos={channelVideos} />
 			{/snippet}
