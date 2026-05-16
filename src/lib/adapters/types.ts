@@ -108,6 +108,20 @@ export interface VideoSearchResultConfig {
 }
 
 /**
+ * Playlist video result configuration
+ */
+export interface PlaylistSearchResultConfig {
+	id: string;
+	url: string;
+	title: string;
+	thumbnail: string;
+	uploaderName: string;
+	uploaderUrl: string | null;
+	videoCount: number;
+	type: "playlist";
+}
+
+/**
  * Search result configuration for Channel result component display
  */
 export interface ChannelSearchResultConfig {
@@ -122,7 +136,7 @@ export interface ChannelSearchResultConfig {
 	type: "channel";
 }
 
-export type SearchResultConfig = VideoSearchResultConfig | ChannelSearchResultConfig;
+export type SearchResultConfig = VideoSearchResultConfig | ChannelSearchResultConfig | PlaylistSearchResultConfig;
 
 /**
  * Comments result configuration for Comments component display
@@ -174,6 +188,7 @@ export interface ChannelVideoConfig {
 	viewCount: number;
 	isShort: boolean;
 }
+
 
 
 

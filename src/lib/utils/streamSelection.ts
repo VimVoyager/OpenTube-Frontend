@@ -12,6 +12,10 @@ export function extractIdFromUrl(url: string): string {
 			return vParam;
 		}
 
+		// Playlist ID — for playlist URLs (?list=PLxxx)
+		const listParam: string | null = urlObj.searchParams.get('list');
+		if (listParam) return listParam;
+
 		const pathParts: string[] = urlObj.pathname.split('/').filter(Boolean);
 		if (pathParts.length > 0) {
 			return pathParts[pathParts.length - 1];
@@ -20,11 +24,12 @@ export function extractIdFromUrl(url: string): string {
 		return '';
 	} catch {
 		const patterns: RegExp[] = [
-			/[?&]v=([^&]+)/,           // ?v=ID or &v=ID
-			/youtu\.be\/([^?&]+)/,     // youtu.be/ID
-			/embed\/([^?&]+)/,         // embed/ID
-			/\/watch\/([^?&]+)/,        // /watch/ID
-			/\/channel\/([^?&]+)/        // /watch/ID
+			/[?&]v=([^&]+)/, // ?v=ID or &v=ID
+			/[?&]list=([^&]+)/, // ?list=ID or &list=ID
+			/youtu\.be\/([^?&]+)/, // youtu.be/ID
+			/embed\/([^?&]+)/, // embed/ID
+			/\/watch\/([^?&]+)/, // /watch/ID
+			/\/channel\/([^?&]+)/ // /watch/ID
 		];
 
 		for (const pattern of patterns) {

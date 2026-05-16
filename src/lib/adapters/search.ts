@@ -1,8 +1,8 @@
 import { extractIdFromUrl } from '$lib/utils/streamSelection';
 import type { SearchResult, SearchItem } from '$lib/types';
-import type { VideoSearchResultConfig, ChannelSearchResultConfig } from './types';
+import type { VideoSearchResultConfig, ChannelSearchResultConfig, PlaylistSearchResultConfig } from './types';
 
-type SearchResultConfig = VideoSearchResultConfig | ChannelSearchResultConfig;
+type SearchResultConfig = VideoSearchResultConfig | ChannelSearchResultConfig | PlaylistSearchResultConfig;
 
 /**
  * Handles negative counts from the API (e.g., -1 for unknown values)
@@ -46,6 +46,19 @@ function adaptChannelItem(item: SearchItem, defaultAvatar: string): ChannelSearc
 	};
 }
 
+function adaptPlaylistItem(item: SearchItem, defaultThumbnail: string): PlaylistSearchResultConfig {
+	return {
+		type: 'playlist',
+		id: extractIdFromUrl(item.url),
+		url: item.url || '',
+		title: item.name || 'Untitled Playlist',
+		thumbnail: item.thumbnailUrl || defaultThumbnail,
+		uploaderName: item.uploaderName || 'Unknown',
+		uploaderUrl: item.uploaderUrl || '',
+		videoCount: handleNegativeCount(item.videoCount)
+	};
+}
+
 export function adaptSearchResults(
 	searchResult: SearchResult | undefined,
 	defaultThumbnail: string,
@@ -55,9 +68,12 @@ export function adaptSearchResults(
 
 	return searchResult.items
 		.filter((item: SearchItem): string => item && item.url && item.name)
-		.map((item: SearchItem):VideoSearchResultConfig | ChannelSearchResultConfig => {
+		.map((item: SearchItem): SearchResultConfig => {
 			if (item.type === 'channel') {
 				return adaptChannelItem(item, defaultAvatar);
+			}
+			if (item.type === 'playlist') {
+				return adaptPlaylistItem(item, defaultThumbnail);
 			}
 			return adaptVideoItem(item, defaultThumbnail, defaultAvatar);
 		});
