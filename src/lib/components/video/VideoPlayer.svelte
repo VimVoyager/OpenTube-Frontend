@@ -154,11 +154,6 @@
 		height: auto;
 	}
 
-	/* Ensure Shaka controls are visible */
-	:global(.shaka-controls-container) {
-		background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%);
-	}
-
 	:global(.shaka-overflow-menu) {
 		background: rgba(35, 35, 35, 0.95);
 		border: 1px solid rgba(255, 255, 255, 0.1);
