@@ -5,14 +5,15 @@ import avatarPlaceholder from '$lib/assets/logo-placeholder.svg';
 import type { PageLoad } from './$types';
 import type { SearchResultConfig } from '$lib/adapters/types';
 import type { LoadResponse } from '../types';
+import type { SearchResponse } from '$lib/api/types';
 
 
 
 export const load: PageLoad = async ({ url, fetch }): Promise<LoadResponse> => {
 	try {
 		// Extract search parameter
-		const query = url.searchParams.get('query') ?? '';
-		const sortFilter = url.searchParams.get('sort') ?? 'asc';
+		const query: string = url.searchParams.get('query') ?? '';
+		const sortFilter: string = url.searchParams.get('sort') ?? 'asc';
 
 		// Validate query
 		if (!query.trim()) {
@@ -24,7 +25,7 @@ export const load: PageLoad = async ({ url, fetch }): Promise<LoadResponse> => {
 		}
 
 		// Fetch raw search data from API
-		const searchData = await getSearchResults(query, sortFilter, fetch);
+		const searchData: SearchResponse = await getSearchResults(query, sortFilter, fetch);
 
 		// Transform data using adapter
 		const results: SearchResultConfig[] = adaptSearchResults(
