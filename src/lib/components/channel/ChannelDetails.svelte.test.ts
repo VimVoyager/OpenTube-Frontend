@@ -45,7 +45,7 @@ describe('ChannelDetails', () => {
 
 			const banner = screen.getByAltText('Channel banner');
 			expect(banner).toBeTruthy();
-			expect(banner.getAttribute('src')).toBe('https://yt.googleusercontent.com/banner.jpg');
+			expect(banner.getAttribute('src')).toBe('https://yt.googleusercontent.com/lg/banner.jpg');
 		});
 
 		it('should render fallback gradient div when bannerUrl is absent', () => {
@@ -65,7 +65,7 @@ describe('ChannelDetails', () => {
 
 			const avatar = screen.getByAltText('GLITCH avatar');
 			expect(avatar).toBeTruthy();
-			expect(avatar.getAttribute('src')).toBe('https://yt.googleusercontent.com/avatar.jpg');
+			expect(avatar.getAttribute('src')).toBe('https://yt.googleusercontent.com/lg/avatar.jpg');
 		});
 
 		it('should fall back to placeholder when avatarUrl is empty', () => {

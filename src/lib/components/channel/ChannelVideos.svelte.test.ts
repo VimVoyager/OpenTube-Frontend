@@ -59,7 +59,7 @@ describe('ChannelVideos', () => {
 
 			const thumbnail = screen.getByAltText('Fitting In at School');
 			expect(thumbnail.getAttribute('src')).toBe(
-				'https://i.ytimg.com/vi/Qsmfc2BI9z8/hqdefault.jpg'
+				'https://i.ytimg.com/vi/glitch-video-1/hqdefault.jpg?sqp=lg'
 			);
 		});
 

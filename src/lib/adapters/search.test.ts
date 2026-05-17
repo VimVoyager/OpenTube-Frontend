@@ -27,7 +27,6 @@ vi.mock('$lib/utils/streamSelection', () => ({
 import { extractIdFromUrl } from '$lib/utils/streamSelection';
 import type { SearchResponse } from '$lib/api/types';
 import type {
-	SearchResultConfig,
 	VideoSearchResultConfig,
 	ChannelSearchResultConfig,
 	PlaylistSearchResultConfig
