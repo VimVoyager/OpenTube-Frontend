@@ -3,6 +3,7 @@
 	import VideoResult from '$lib/components/search/VideoResult.svelte';
 	import ErrorCard from '$lib/components/ErrorCard.svelte';
 	import ChannelResult from '$lib/components/search/ChannelResult.svelte';
+	import PlaylistResult from '$lib/components/search/PlaylistResult.svelte';
 
 	let { data }: { data: PageData } = $props();
 
@@ -56,6 +57,8 @@
 			{#each results as result (result.id)}
 				{#if result.type === 'channel'}
 					<ChannelResult {result} />
+				{:else if result.type === 'playlist'}
+					<PlaylistResult {result} />
 				{:else}
 					<VideoResult {result} />
 				{/if}
