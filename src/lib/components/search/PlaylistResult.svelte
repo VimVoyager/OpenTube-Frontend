@@ -66,12 +66,6 @@
 			>
 				{result.uploaderName}
 			</a>
-			<button
-				onclick={redirectToPlaylist}
-				class="mt-3 w-fit rounded-md bg-accent px-3 py-1.5 text-sm font-medium text-white hover:opacity-90 transition-opacity"
-			>
-				▶ Play all
-			</button>
 		</div>
 	</div>
 
