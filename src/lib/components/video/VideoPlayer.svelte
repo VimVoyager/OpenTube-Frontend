@@ -90,8 +90,6 @@
 							const proxyUrl = new SvelteURL(proxyBase);
 							proxyUrl.pathname = new SvelteURL(proxyBase).pathname + originalUrl.pathname;
 
-							// const proxiedUrl = new URL(proxyBase);
-							// proxiedUrl.pathname = newPath;
 							proxyUrl.search = originalUrl.search;
 
 							// Handle Range header conversion to query parameter
@@ -120,21 +118,22 @@
 	onDestroy(() => {
 		if (ui) {
 			ui.destroy();
+			ui = null;
 		}
 		if (player) {
 			player.destroy();
+			player = null;
 		}
 	});
 </script>
 
-<div bind:this={videoContainer} class="video-container" data-shaka-player-container>
+<div bind:this={videoContainer} class="video-container">
 	<video
 		id="video"
 		data-testid="video-player"
 		bind:this={videoElement}
 		class="video-player"
 		poster={config.poster}
-		data-shaka-player
 		playsinline
 	>
 		<track kind="captions" label="Captions"/>
