@@ -669,4 +669,111 @@ describe('+page.svelte - Search Results', () => {
 			expect(finalData.query).toBe('final query');
 		});
 	});
+
+	describe('Result type routing', () => {
+		const mockChannelResult: SearchResultConfig = {
+			type: 'channel',
+			id: 'channel-1',
+			name: 'Test Channel',
+			avatar: 'https://example.com/avatar.jpg',
+			description: 'A test channel',
+			subscriberCount: 1000000,
+			verified: true
+		};
+
+		const mockPlaylistResult: SearchResultConfig = {
+			type: 'playlist',
+			id: 'playlist-1',
+			url: 'https://www.youtube.com/playlist?list=playlist-1',
+			title: 'Test Playlist',
+			thumbnail: 'https://example.com/thumb.jpg',
+			uploaderName: 'Test Uploader',
+			uploaderUrl: 'https://www.youtube.com/channel/test',
+			videoCount: 12
+		};
+
+		it('should render stream results using the VideoResult component', () => {
+			const data = createMockPageData({ results: [mockSearchResults[0]] });
+			render(Page, { props: { data } });
+
+			// VideoResult renders the video title — confirms VideoResult was used
+			expect(screen.getAllByText('First Video Title')).toBeTruthy();
+		});
+
+		it('should render channel results using the ChannelResult component', () => {
+			const data = createMockPageData({ results: [mockChannelResult] });
+			render(Page, { props: { data } });
+
+			// ChannelResult renders the channel name — confirms ChannelResult was used
+			expect(screen.getAllByText('Test Channel')).toBeTruthy();
+		});
+
+		it('should render playlist results using the PlaylistResult component', () => {
+			const data = createMockPageData({ results: [mockPlaylistResult] });
+			render(Page, { props: { data } });
+
+			// PlaylistResult renders the playlist title — confirms PlaylistResult was used
+			expect(screen.getAllByText('Test Playlist')).toBeTruthy();
+		});
+
+		it('should render the "Playlist" label for playlist results', () => {
+			const data = createMockPageData({ results: [mockPlaylistResult] });
+			render(Page, { props: { data } });
+
+			// PlaylistResult renders a "Playlist" label — unique to that component
+			const labels = screen.getAllByText('Playlist');
+			expect(labels.length).toBeGreaterThanOrEqual(1);
+		});
+
+		it('should render the video count badge for playlist results', () => {
+			const data = createMockPageData({ results: [mockPlaylistResult] });
+			render(Page, { props: { data } });
+
+			const badges = screen.getAllByText('12 videos');
+			expect(badges.length).toBeGreaterThanOrEqual(1);
+		});
+
+		it('should render mixed result types in the same results list', () => {
+			const data = createMockPageData({
+				results: [mockSearchResults[0], mockChannelResult, mockPlaylistResult]
+			});
+			const { container } = render(Page, { props: { data } });
+
+			// All three types present — results container should exist
+			const resultsContainer = container.querySelector('.space-y-4');
+			expect(resultsContainer).toBeTruthy();
+
+			expect(screen.getAllByText('First Video Title')).toBeTruthy();
+			expect(screen.getAllByText('Test Channel')).toBeTruthy();
+			expect(screen.getAllByText('Test Playlist')).toBeTruthy();
+		});
+
+		it('should show the correct results count for a mixed-type result list', () => {
+			const data = createMockPageData({
+				results: [mockSearchResults[0], mockChannelResult, mockPlaylistResult]
+			});
+			render(Page, { props: { data } });
+
+			// Count reflects all types — not just streams
+			expect(screen.getByText('Showing 3 results')).toBeTruthy();
+		});
+
+		it('should show correct singular count for a single playlist result', () => {
+			const data = createMockPageData({ results: [mockPlaylistResult] });
+			render(Page, { props: { data } });
+
+			expect(screen.getByText('Showing 1 result')).toBeTruthy();
+		});
+
+		it('should render each result inside the space-y-4 container', () => {
+			const data = createMockPageData({
+				results: [mockSearchResults[0], mockChannelResult, mockPlaylistResult]
+			});
+			const { container } = render(Page, { props: { data } });
+
+			const resultsContainer = container.querySelector('.space-y-4');
+			expect(resultsContainer?.children.length).toBe(3);
+		});
+	});
+
 });
