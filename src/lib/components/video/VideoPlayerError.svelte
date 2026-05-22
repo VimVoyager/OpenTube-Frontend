@@ -1,0 +1,251 @@
+<script lang="ts">
+	const CATEGORY: Record<number, string> = {
+		1: 'NETWORK',
+		2: 'TEXT',
+		3: 'MEDIA',
+		4: 'MANIFEST',
+		5: 'STREAMING',
+		6: 'DRM',
+		7: 'PLAYER',
+		8: 'CAST',
+		9: 'STORAGE'
+	};
+
+	export interface ShakaErrorDetail {
+		category: number;
+		code: number;
+		severity: number;
+	}
+
+	interface Props {
+		error: ShakaErrorDetail;
+		onRetry: () => void;
+		retrying?: boolean;
+	}
+
+	let { error, onRetry, retrying = false }: Props = $props();
+
+	function getMessage(category: number): { title: string; body: string } {
+		switch (category) {
+			case 1: // NETWORK
+				return {
+					title: 'Network Error',
+					body: 'Something went wrong fetching the stream. Check your connection and try again.'
+				};
+			case 4: // MANIFEST
+				return {
+					title: 'Stream Unavailable',
+					body: 'The video manifest could not be loaded. The stream may be unavailable or restricted.'
+				};
+			case 3: // MEDIA
+				return {
+					title: 'Media Error',
+					body: "There was a problem decoding the video. Your browser may not support this stream's format."
+				};
+			case 6: // DRM
+				return {
+					title: 'DRM Error',
+					body: 'A content protection error occurred. This stream may use unsupported DRM.'
+				};
+			case 5: // STREAMING
+				return {
+					title: 'Streaming Error',
+					body: 'Playback was interrupted. The stream may have stalled or encountered a segment error.'
+				};
+			default:
+				return {
+					title: 'Playback Error',
+					body: 'An unexpected error occurred while loading the video.'
+				};
+		}
+	}
+
+	let { title, body } = $derived(getMessage(error.category));
+	let categoryName = $derived(CATEGORY[error.category] ?? 'UNKNOWN');
+	let severityLabel = $derived(error.severity === 2 ? 'Critical' : 'Recoverable');
+</script>
+
+<!--
+	Fills the same space as the <video> element (width:100%, aspect-ratio 16/9).
+	Uses CSS variables so it inherits whatever theme the page sets.
+-->
+<div
+	class="error-shell"
+	role="alert"
+	aria-live="assertive"
+	aria-atomic="true"
+	data-testid="video-player-error"
+>
+	<!-- Warning triangle icon -->
+	<div class="error-icon" aria-hidden="true">
+		<svg
+			xmlns="http://www.w3.org/2000/svg"
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke="currentColor"
+			stroke-width="1.5"
+			stroke-linecap="round"
+			stroke-linejoin="round"
+		>
+			<path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+			<line x1="12" y1="9" x2="12" y2="13" />
+			<line x1="12" y1="17" x2="12.01" y2="17" />
+		</svg>
+	</div>
+
+	<h3 class="error-title">{title}</h3>
+	<p class="error-body">{body}</p>
+
+	<!-- Debug pill — useful in dev, unobtrusive in prod -->
+	<p class="error-debug" aria-label="Debug: error category {categoryName}, code {error.code}, severity {severityLabel}">
+		{categoryName}/{error.code} &bull; {severityLabel}
+	</p>
+
+	<button
+		class="retry-btn"
+		onclick={onRetry}
+		disabled={retrying}
+		aria-label={retrying ? 'Retrying, please wait' : 'Retry loading the video'}
+	>
+		{#if retrying}
+			<span class="spinner" aria-hidden="true"></span>
+			Retrying…
+		{:else}
+			<!-- Refresh icon -->
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="2"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				aria-hidden="true"
+			>
+				<polyline points="1 4 1 10 7 10" />
+				<path d="M3.51 15a9 9 0 1 0 .49-3.84" />
+			</svg>
+			Try again
+		{/if}
+	</button>
+</div>
+
+<style>
+    .error-shell {
+        /* Match the video element's natural dimensions */
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        background: #0a0a0a;
+
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        padding: 2rem;
+        text-align: center;
+        box-sizing: border-box;
+
+        /* Subtle noise-style border between player and page */
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .error-icon {
+        color: #f97316; /* orange-500 — warning, not pure red/destructive */
+        width: 3rem;
+        height: 3rem;
+        flex-shrink: 0;
+        margin-bottom: 0.25rem;
+    }
+
+    .error-icon svg {
+        width: 100%;
+        height: 100%;
+    }
+
+    .error-title {
+        margin: 0;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #f4f4f5; /* zinc-100 */
+        letter-spacing: -0.01em;
+    }
+
+    .error-body {
+        margin: 0;
+        font-size: 0.875rem;
+        color: #a1a1aa; /* zinc-400 */
+        max-width: 36ch;
+        line-height: 1.5;
+    }
+
+    .error-debug {
+        margin: 0;
+        font-size: 0.7rem;
+        font-family: ui-monospace, 'Cascadia Code', 'Fira Code', monospace;
+        color: #52525b; /* zinc-600 */
+        letter-spacing: 0.03em;
+    }
+
+    .retry-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        margin-top: 0.5rem;
+        padding: 0.5rem 1.25rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #18181b; /* zinc-900 */
+        background: #f4f4f5; /* zinc-100 */
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background 0.15s ease, opacity 0.15s ease, transform 0.1s ease;
+    }
+
+    .retry-btn:hover:not(:disabled) {
+        background: #ffffff;
+        transform: translateY(-1px);
+    }
+
+    .retry-btn:active:not(:disabled) {
+        transform: translateY(0);
+    }
+
+    .retry-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .retry-btn svg {
+        width: 1rem;
+        height: 1rem;
+        flex-shrink: 0;
+    }
+
+    /* Spinner for the retrying state */
+    .spinner {
+        display: inline-block;
+        width: 0.875rem;
+        height: 0.875rem;
+        border: 2px solid rgba(0, 0, 0, 0.2);
+        border-top-color: #18181b;
+        border-radius: 50%;
+        animation: spin 0.7s linear infinite;
+        flex-shrink: 0;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    /* Scale down gracefully on very small players (mobile, sidebar) */
+    @media (max-width: 480px) {
+        .error-title {
+            font-size: 1rem;
+        }
+        .error-body {
+            font-size: 0.8rem;
+        }
+    }
+</style>

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount, onDestroy } from 'svelte';
+	import { onMount, onDestroy, tick } from 'svelte';
 	import { SvelteURL} from 'svelte/reactivity';
 	import { browser } from '$app/environment';
 	import { PUBLIC_PROXY_URL } from '$env/static/public';
@@ -10,18 +10,104 @@
 		ShakaUIConfiguration,
 		ShakaUIOverlayInstance
 	} from '$lib/types';
+	import VideoPlayerError, { type ShakaErrorDetail } from '$lib/components/video/VideoPlayerError.svelte';
 
-	export let config: VideoPlayerConfig;
+	let { config }: { config: VideoPlayerConfig } = $props();
 
-	let videoElement: HTMLVideoElement;
-	let videoContainer: HTMLDivElement;
+	let videoElement: HTMLVideoElement = $state(null!);
+	let videoContainer: HTMLDivElement = $state(null!);
 	let player: ShakaPlayerInstance | null = null;
 	let ui: ShakaUIOverlayInstance | null = null;
 
+	// Error State
+	let playerError = $state<ShakaErrorDetail | null>(null);
+	let retrying = $state(false);
+
 	const PROXY_URL = PUBLIC_PROXY_URL || '/proxy';
 
+	function setShakaControlsVisible(visible: boolean) {
+		if (!videoContainer) return;
+		const controls = videoContainer.querySelector('.shaka-controls-container') as HTMLElement | null;
+		if (controls) {
+			controls.style.visibility = visible ? '' : 'hidden';
+			controls.style.pointerEvents = visible ? '' : 'none';
+		}
+	}
+
+	/**
+	 * Load or reload the manifest into an already-attached player.
+	 * Called on first mount and on retry.
+	 */
+	async function loadManifest() {
+		if (!player) return;
+
+		if(!config.manifestUrl) {
+			console.error('Manifest URL is empty or undefined');
+			playerError = { category: 4, code: 0, severity: 2};
+			await tick();
+			setShakaControlsVisible(false);
+			return;
+		}
+
+		try {
+			await player.load(config.manifestUrl);
+			playerError = null;
+			await tick();
+			setShakaControlsVisible(true);
+		} catch (err) {
+			console.error('Error loading video player manifest:', err);
+			// If Shaka threw its own error object, extract the detail.
+			// Otherwise fall back to a generic MANIFEST error.
+			const shakaErr = err as any;
+			if (typeof shakaErr?.category === 'number') {
+				playerError = {
+					category: shakaErr.category,
+					code: shakaErr.code,
+					severity: shakaErr.severity ?? 2
+				};
+			} else {
+				playerError = { category: 4, code: 0, severity: 2 };
+			}
+			await tick();
+			setShakaControlsVisible(false);
+		}
+	}
+
+	/**
+	 * Shaka event error handler
+	 */
+	function handleShakaErrorEvent(event: Event) {
+		const detail = (event as CustomEvent)?.detail;
+		if (!detail) return;
+
+		const { category, code, severity } = detail;
+
+		console.error(
+			`Shaka error — category: ${category}, code: ${code}, severity: ${severity}`,
+			detail
+		);
+
+		playerError = { category, code, severity };
+	}
+
+	async function handleRetry() {
+		if (retrying) return;
+		retrying = true;
+		playerError = null;
+
+		await tick();
+		setShakaControlsVisible(false);
+
+		// Small tick so Svelte can re-render the video element before we load
+		// await new Promise((r) => setTimeout(r, 50));
+
+		await loadManifest();
+		retrying = false;
+	}
+
+
+
 	onMount(async () => {
-		// Only run in browser
 		if (!browser) return;
 
 		// Dynamically import Shaka Player only in the browser (no SSR)
@@ -33,6 +119,7 @@
 
 		if (!shaka.Player.isBrowserSupported()) {
 			console.error('Browser not supported!');
+			playerError = { category: 7, code: 0, severity: 2};
 			return;
 		}
 
@@ -65,9 +152,7 @@
 
 			ui.configure(config_ui);
 
-			player.addEventListener('error', (event: Event) => {
-				console.error('Shaka Player error event:', event);
-			});
+			player.addEventListener('error', handleShakaErrorEvent);
 
 			// Request filter to proxy googlevideo.com URLs
 			const networkingEngine = player.getNetworkingEngine();
@@ -89,7 +174,6 @@
 							// Build the new proxied URL
 							const proxyUrl = new SvelteURL(proxyBase);
 							proxyUrl.pathname = new SvelteURL(proxyBase).pathname + originalUrl.pathname;
-
 							proxyUrl.search = originalUrl.search;
 
 							// Handle Range header conversion to query parameter
@@ -105,13 +189,12 @@
 				});
 			}
 
-			if (!config.manifestUrl || config.manifestUrl === '') {
-				throw new Error('Manifest URL is empty or undefined');
-			}
-
-			await player.load(config.manifestUrl);
+			await loadManifest();
 		} catch (error) {
-			console.error('Error initializing or loading video player:', error);
+			console.error('Error initializing video player:', error);
+			playerError = { category: 7, code: 0, severity: 2 };
+			await tick();
+			setShakaControlsVisible(false);
 		}
 	});
 
@@ -128,16 +211,20 @@
 </script>
 
 <div bind:this={videoContainer} class="video-container">
-	<video
-		id="video"
-		data-testid="video-player"
-		bind:this={videoElement}
-		class="video-player"
-		poster={config.poster}
-		playsinline
-	>
+	{#if playerError && !retrying}
+		<VideoPlayerError error={playerError} onRetry={handleRetry} {retrying} />
+	{:else}
+		<video
+			id="video"
+			data-testid="video-player"
+			bind:this={videoElement}
+			class="video-player"
+			poster={config.poster}
+			playsinline
+		>
 		<track kind="captions" label="Captions"/>
-	</video>
+		</video>
+		{/if}
 </div>
 
 <style>
