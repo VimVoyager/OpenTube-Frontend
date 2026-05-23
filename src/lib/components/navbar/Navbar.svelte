@@ -28,16 +28,18 @@
 			<!-- Logo -->
 			<div class="flex px-2 lg:px-0 shrink-0">
 				<div class="flex items-center">
-					<img
-						src={logo}
-						alt="OpenTube"
-						class="h-11 w-auto dark:hidden"
-					/>
-					<img
-						src={logo}
-						alt="OpenTube"
-						class="h-11 w-auto not-dark:hidden"
-					/>
+					<a href="/">
+						<img
+							src={logo}
+							alt="OpenTube"
+							class="h-11 w-auto dark:hidden"
+						/>
+						<img
+							src={logo}
+							alt="OpenTube"
+							class="h-11 w-auto not-dark:hidden"
+						/>
+					</a>
 				</div>
 			</div>
 
