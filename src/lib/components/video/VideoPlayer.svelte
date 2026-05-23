@@ -98,9 +98,6 @@
 		await tick();
 		setShakaControlsVisible(false);
 
-		// Small tick so Svelte can re-render the video element before we load
-		// await new Promise((r) => setTimeout(r, 50));
-
 		await loadManifest();
 		retrying = false;
 	}
@@ -163,7 +160,6 @@
 						const originalUrl = new URL(request.uris[0]);
 
 						if (originalUrl.host.endsWith('.googlevideo.com')) {
-
 							originalUrl.searchParams.set('host', originalUrl.host);
 
 							// Parse proxy URL
@@ -211,20 +207,23 @@
 </script>
 
 <div bind:this={videoContainer} class="video-container">
-	{#if playerError && !retrying}
-		<VideoPlayerError error={playerError} onRetry={handleRetry} {retrying} />
-	{:else}
-		<video
-			id="video"
-			data-testid="video-player"
-			bind:this={videoElement}
-			class="video-player"
-			poster={config.poster}
-			playsinline
-		>
+	<video
+		id="video"
+		data-testid="video-player"
+		bind:this={videoElement}
+		class="video-player"
+		poster={config.poster}
+		playsinline
+	>
+
 		<track kind="captions" label="Captions"/>
-		</video>
-		{/if}
+	</video>
+
+	{#if playerError && !retrying}
+		<div class="error-overlay">
+			<VideoPlayerError error={playerError} onRetry={handleRetry} {retrying} />
+		</div>
+	{/if}
 </div>
 
 <style>
@@ -241,7 +240,13 @@
 		height: auto;
 	}
 
-	:global(.shaka-overflow-menu) {
+  .error-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 10;
+  }
+
+  :global(.shaka-overflow-menu) {
 		background: rgba(35, 35, 35, 0.95);
 		border: 1px solid rgba(255, 255, 255, 0.1);
 	}
