@@ -1,4 +1,4 @@
-import type { Avatar, Thumbnail } from '$lib/types';
+import type { Avatar, Description, RelatedItem, Thumbnail } from '$lib/types';
 
 /**
  * API Response for Search
@@ -110,4 +110,65 @@ interface Replies {
 
 interface UploadDate {
 	approximation: boolean;
+}
+
+export interface Image {
+	url: string;
+	height: number;
+	width: number;
+	estimatedResolution?: string;
+}
+
+export interface ChannelVideoItem {
+	url: string;
+	name: string;
+	uploaderName: string;
+	uploaderUrl: string | null;
+	uploaderVerified: boolean;
+	duration: number;
+	viewCount: number;
+	textualUploadDate: string | null;
+	thumbnails: Thumbnail[];
+	isShortFormContent: boolean;
+}
+
+export interface ChannelInfoResponse {
+	id: string;
+	name: string;
+	avatarUrl: string | null;
+	bannerUrl: string | null;
+	description: string | null;
+	subscriberCount: number;
+	handle: string | null;
+	verified: boolean;
+	tabs: string[];
+	avatars?: Avatar[];
+	banners?: Image[];
+}
+
+export interface ChannelVideosResponse {
+	channelId: string;
+	items: ChannelVideoItem[];
+	nextPageToken: string | null;
+}
+
+export interface PlaylistResponse {
+	serviceId: number;
+	id: string;
+	url: string;
+	originalUrl: string;
+	name: string;
+	errors?: never[];
+	relatedItems: RelatedItem[];
+	contentFilters?: never[];
+	sortFilter: string;
+	uploaderUrl: string;
+	uploaderName: string;
+	subChannelUrl: string;
+	subChannelName: string;
+	description: Description;
+	banners?: never[];
+	subChannelAvatars?: never[];
+	thumbnails: Thumbnail[];
+	uploaderAvatars: Avatar[];
 }
