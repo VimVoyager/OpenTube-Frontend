@@ -2,14 +2,30 @@
 	import type { PlaylistSearchResultConfig } from '$lib/adapters/types';
 	import thumbnailPlaceholder from '$lib/assets/thumbnail-placeholder.jpg';
 	import { goto } from '$app/navigation';
+	import { getPlaylist } from '$lib/api/playlist';
 
 	let { result }: { result: PlaylistSearchResultConfig } = $props();
 
 	let thumbnail = $derived(result.thumbnail || thumbnailPlaceholder);
+	let loading = $state(false);
 
 	// TODO: Update redirect to correct endpoint when created.
-	const redirectToPlaylist = () => goto(`/video/${encodeURIComponent(result.id)}?playlist=${encodeURIComponent(result.id)}&index=0`);
-
+	async function redirectToPlaylist() {
+		if (loading) return;
+		try {
+			loading = true;
+			const playlist = await getPlaylist(result.id);
+			const firstVideo = playlist.relatedItems?.[0];
+			if (!firstVideo?.url) throw new Error('Playlist has no videos');
+			const videoId = firstVideo.url.split('v=')[1]?.split('&')[0];
+			if (!videoId) throw new Error('Could not extract video ID');
+			await goto(`/video/${encodeURIComponent(videoId)}?playlist=${encodeURIComponent(result.id)}&index=0`);
+		} catch (e) {
+			console.error('Failed to load playlist:', e);
+		} finally {
+			loading = false;
+		}
+	}
 	function handleKey(event: KeyboardEvent) {
 		if (event.key === 'Enter') redirectToPlaylist();
 	}
