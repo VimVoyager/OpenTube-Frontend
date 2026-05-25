@@ -2,6 +2,7 @@ import type {
 	ChannelConfig,
 	ChannelVideoConfig,
 	CommentConfig,
+	PlaylistInfoConfig,
 	RelatedVideoConfig,
 	SearchResultConfig,
 	VideoMetadata,
@@ -20,6 +21,10 @@ export interface VideoPageData {
 	metadata: VideoMetadata;
 	relatedVideos: RelatedVideoConfig[];
 	comments?: CommentConfig[];
+	playlistId?: string | null;
+	playlistIndex?: number | null;
+	playlistVideos?: RelatedVideoConfig[] | null;
+	playlistInfo?: PlaylistInfoConfig | null;
 	error?: string;
 }
 

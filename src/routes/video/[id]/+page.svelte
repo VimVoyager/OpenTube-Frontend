@@ -7,6 +7,7 @@
 	import VideoListings from '$lib/components/video/VideoListings.svelte';
 	import ErrorCard from '$lib/components/ErrorCard.svelte';
 	import Comments from '$lib/components/video/Comments.svelte';
+	import PlaylistQueue from '$lib/components/video/PlaylistQueue.svelte';
 
 	let { data }: { data: PageData } = $props();
 
@@ -34,6 +35,8 @@
 	let relatedVideos = $derived(data.relatedVideos ?? []);
 	let comments = $derived((data as any)?.comments ?? []);
 	let error = $derived((data as any)?.error ?? null);
+	let playlistId = $derived((data as any)?.playlistId ?? null);
+	let playlistIndex = $derived((data as any)?.playlistIndex ?? 0);
 
 	// Extract video ID for keying components
 	let videoId = $derived(playerConfig.manifestUrl || playerConfig.poster || Date.now().toString());
@@ -42,6 +45,11 @@
 	let hasError = $derived(!!error);
 	let hasValidManifest = $derived(!!(playerConfig.manifestUrl));
 
+	let isPlaylist = $derived(!!playlistId);
+
+	let playlistVideos = $derived((data as any)?.playlistVideos ?? null);
+	let playlistInfo = $derived((data as any)?.playlistInfo ?? null);
+
 	// Delay player initialisation until mounted (for Shaka Player)
 	let showPlayer = $state(false);
 	onMount(() => {
@@ -49,7 +57,7 @@
 	});
 
 	// Mobile tab state - 'details' or 'related'
-	let activeTab = $state<'details' | 'related' | 'comments'>('details');
+	let activeTab = $state<'details' | 'playlist' | 'related' | 'comments'>('details');
 </script>
 
 <div class="w-full bg-primary">
@@ -102,6 +110,14 @@
 				</div>
 			</section>
 			<aside class="mt-7.75 flex w-1/3 flex-col gap-5">
+				{#if isPlaylist}
+					<PlaylistQueue
+						videos={playlistVideos}
+						playlistName={playlistInfo?.name}
+						{playlistId}
+						currentIndex={playlistIndex}
+					/>
+				{/if}
 				<VideoListings videos={relatedVideos}/>
 			</aside>
 		</div>
@@ -132,6 +148,20 @@
 							<div class="absolute bottom-0 left-0 right-0 h-0.5 bg-accent"></div>
 						{/if}
 					</button>
+
+					{#if isPlaylist}
+						<button
+							class="flex-1 py-3 text-sm font-medium transition-colors relative
+								{activeTab === 'playlist' ? 'text-primary' : 'text-secondary hover:text-primary'}"
+							onclick={() => activeTab = 'playlist'}
+						>
+							Playlist
+							{#if activeTab === 'playlist'}
+								<div class="absolute bottom-0 left-0 right-0 h-0.5 bg-accent"></div>
+							{/if}
+						</button>
+					{/if}
+
 					<button
 						class="flex-1 py-3 text-sm font-medium transition-colors relative
 							{activeTab === 'related' 
@@ -144,6 +174,7 @@
 							<div class="absolute bottom-0 left-0 right-0 h-0.5 bg-accent"></div>
 						{/if}
 					</button>
+
 					<button
 						class="flex-1 py-3 text-sm font-medium transition-colors relative
 							{activeTab === 'comments'
@@ -165,8 +196,17 @@
 					{#key videoId}
 						<VideoDetail {metadata} />
 					{/key}
+
+				{:else if activeTab === 'playlist' && isPlaylist}
+					<PlaylistQueue
+						videos={relatedVideos}
+						{playlistId}
+						currentIndex={playlistIndex}
+					/>
+
 				{:else if activeTab === 'related'}
 					<VideoListings videos={relatedVideos}/>
+
 				{:else}
 					{#if comments.length > 0}
 						<div class="mt-6">
