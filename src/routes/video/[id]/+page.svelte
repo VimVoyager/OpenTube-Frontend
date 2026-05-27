@@ -109,7 +109,7 @@
 					{/key}
 				</div>
 			</section>
-			<aside class="mt-7.75 flex w-1/3 flex-col gap-5">
+			<aside class="mt-7.75 flex w-1/3 flex-col gap-5 px-6">
 				{#if isPlaylist}
 					<PlaylistQueue
 						videos={playlistVideos}
