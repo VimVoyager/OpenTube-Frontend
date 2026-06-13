@@ -42,6 +42,19 @@ export async function getManifest(
             );
         }
 
+				// Muxed progressive fallback
+				const streamType: string = res.headers.get('X-Stream-Type') as string;
+				if (streamType === 'muxed-progressive') {
+					const directUrl = await res.text();
+					console.log(`Muxed progressive fallback for ${id}`);
+					return {
+						url: directUrl,
+						duration: 0,
+						isMuxed: true
+					};
+				}
+
+
         const manifestXml: string = await res.text();
         
         const parser = new DOMParser();
