@@ -49,8 +49,11 @@
 			return;
 		}
 
+		const mimeType: string = config.isMuxed ? 'video/mp4' : 'application/dash+xml';
+
 		try {
-			await player.load(config.manifestUrl);
+			console.log('isMuxed:', config.isMuxed, 'mimeType:', mimeType);
+			await player.load(config.manifestUrl, null, mimeType);
 			playerError = null;
 			await tick();
 			setShakaControlsVisible(true);
@@ -107,6 +110,8 @@
 	onMount(async () => {
 		if (!browser) return;
 
+		console.log('config received:', config);
+
 		// Dynamically import Shaka Player only in the browser (no SSR)
 		const shakaModule = await import('shaka-player/dist/shaka-player.ui');
 		await import('shaka-player/dist/controls.css');
@@ -155,8 +160,8 @@
 			const networkingEngine = player.getNetworkingEngine();
 			if (networkingEngine) {
 				networkingEngine.registerRequestFilter((type: number, request: ShakaRequest) => {
-					// Type 1 is SEGMENT in Shaka Player
-					if (type === 1) {
+					// Type 1 = SEGMENT, Type 2 = MANIFEST (also covers direct MP4 initial fetch)
+					// if (type === 1 || type === 2) {
 						const originalUrl = new URL(request.uris[0]);
 
 						if (originalUrl.host.endsWith('.googlevideo.com')) {
@@ -181,7 +186,7 @@
 
 							request.uris[0] = proxyUrl.toString();
 						}
-					}
+					// }
 				});
 			}
 
