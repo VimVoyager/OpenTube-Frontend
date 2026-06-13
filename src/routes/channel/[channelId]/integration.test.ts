@@ -56,7 +56,7 @@ beforeEach(() => {
 // Integration tests
 // =============================================================================
 
-describe('Channel +page.server.ts — integration', () => {
+describe('Channel +page.ts — integration', () => {
 	describe('Successful full pipeline', () => {
 		it('should return adapted channel and videos from real fixtures', async () => {
 			// Arrange

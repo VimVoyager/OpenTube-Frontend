@@ -59,7 +59,7 @@ beforeEach(() => {
 // load() tests
 // =============================================================================
 
-describe('+page.server.ts load function', () => {
+describe('+page.ts load function', () => {
 	describe('Successful data loading', () => {
 		it('should fetch channel info and videos in parallel', async () => {
 			vi.mocked(getChannelInfo).mockResolvedValue(mockInfoResponse as ChannelInfoResponse);
