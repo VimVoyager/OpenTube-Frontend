@@ -20,6 +20,7 @@ export interface VideoPlayerConfig {
 	manifestUrl: string;
 	duration: number;
 	poster: string;
+	isMuxed?: boolean
 }
 
 /**

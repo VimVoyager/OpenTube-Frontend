@@ -64,6 +64,7 @@ export interface ManifestResponse {
 	url: string;
 	duration: number;
 	videoId?: string;
+	isMuxed?: boolean;
 }
 
 /**
