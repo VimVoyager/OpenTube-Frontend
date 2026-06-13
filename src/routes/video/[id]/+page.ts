@@ -111,11 +111,12 @@ export const load: PageLoad = async ({ params, url, fetch }): Promise<VideoPageD
 					: Promise.resolve(null)
 			]);
 
-		const playerConfig: VideoPlayerConfig = adaptPlayerConfig(
-			manifest.url,
-			manifest.duration,
-			thumbnails.url
-		);
+
+		const playerConfig: VideoPlayerConfig = {
+			...adaptPlayerConfig(manifest.url, manifest.duration, thumbnails.url),
+			isMuxed: manifest.isMuxed ?? false
+		};
+
 		const metadata: VideoMetadata = adaptVideoMetadata(details, thumbnails.url);
 		const relatedVideos: RelatedVideoConfig[] = adaptRelatedVideos(
 			relatedStreams,
