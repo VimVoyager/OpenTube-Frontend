@@ -6,12 +6,12 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { formatSubscriberCount, adaptChannelInfo, adaptChannelVideos } from './channel';
-import type { ChannelInfoResponse, ChannelVideosResponse } from '$lib/types';
 import type { ChannelConfig, ChannelVideoConfig } from '$lib/adapters/types';
 import channelDetailsResponseFixture from '../../tests/fixtures/api/channelDetailsResponse.json';
 import channelVideosResponseFixture from '../../tests/fixtures/api/channelVideosResponse.json';
 import channelDetailsFixture from '../../tests/fixtures/adapters/channelDetails.json';
 import channelVideosFixture from '../../tests/fixtures/adapters/channelVideos.json';
+import type { ChannelInfoResponse, ChannelVideosResponse } from '$lib/api/types';
 
 // Mock extractIdFromUrl — keeps tests decoupled from URL parsing utility
 vi.mock('$lib/utils/streamSelection', () => ({

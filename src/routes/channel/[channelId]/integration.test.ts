@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { load } from './+page';
-import type { ChannelInfoResponse, ChannelVideosResponse } from '$lib/types';
 import type { ChannelConfig, ChannelVideoConfig } from '$lib/adapters/types';
 import channelDetailsResponseFixture from '../../../tests/fixtures/api/channelDetailsResponse.json';
 import channelVideosResponseFixture from '../../../tests/fixtures/api/channelVideosResponse.json';
@@ -32,6 +31,7 @@ vi.mock('$lib/utils/streamSelection', () => ({
 }));
 
 import { getChannelInfo, getChannelVideos } from '$lib/api/channel';
+import type { ChannelInfoResponse, ChannelVideosResponse } from '$lib/api/types';
 
 // =============================================================================
 // Fixtures
@@ -56,7 +56,7 @@ beforeEach(() => {
 // Integration tests
 // =============================================================================
 
-describe('Channel +page.ts — integration', () => {
+describe('Channel +page.server.ts — integration', () => {
 	describe('Successful full pipeline', () => {
 		it('should return adapted channel and videos from real fixtures', async () => {
 			// Arrange

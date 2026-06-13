@@ -1,6 +1,6 @@
-import type { ChannelInfoResponse, ChannelVideoItem, ChannelVideosResponse } from '$lib/types';
 import type { ChannelConfig, ChannelVideoConfig } from '$lib/adapters/types';
 import { extractIdFromUrl } from '$lib/utils/streamSelection';
+import type { ChannelInfoResponse, ChannelVideoItem, ChannelVideosResponse } from '$lib/api/types';
 
 // ─── Subscriber count formatting ─────────────────────────────────────────────
 
@@ -11,11 +11,11 @@ import { extractIdFromUrl } from '$lib/utils/streamSelection';
 export function formatSubscriberCount(count: number): string {
 	if (count < 0) return '0';
 	if (count >= 1_000_000) {
-		const val = count / 1_000_000;
+		const val: number = count / 1_000_000;
 		return `${parseFloat(val.toFixed(1))}M`;
 	}
 	if (count >= 1_000) {
-		const val = count / 1_000;
+		const val: number = count / 1_000;
 		return `${parseFloat(val.toFixed(1))}K`;
 	}
 	return count.toString();
@@ -32,7 +32,8 @@ function selectBestBanner(
 	fallback: string | null
 ): string | null {
 	if (!banners || banners.length === 0) return fallback;
-	return [...banners].sort((a, b) => b.width - a.width)[0].url;
+	return [...banners].sort((a: { url: string; width: number }, b: { url: string; width: number }): number => b.width - a.width)[0]
+		.url;
 }
 
 /**
@@ -44,7 +45,7 @@ function selectBestAvatar(
 	fallback: string | null
 ): string | null {
 	if (!avatars || avatars.length === 0) return fallback;
-	return [...avatars].sort((a: {url: string, height: number}, b: {url: string, height: number}) => b.height - a.height)[0].url;
+	return [...avatars].sort((a: {url: string, height: number}, b: {url: string, height: number}): number => b.height - a.height)[0].url;
 }
 
 // ─── Channel info adapter ─────────────────────────────────────────────────────
@@ -98,7 +99,7 @@ export function adaptChannelVideos(
 	avatarFallback: string
 ): ChannelVideoConfig[] {
 	if (!response?.items) return [];
-	return response.items.map((v: ChannelVideoItem) =>
+	return response.items.map((v: ChannelVideoItem): ChannelVideoConfig =>
 		adaptChannelVideo(v, thumbnailFallback, avatarFallback)
 	);
 }

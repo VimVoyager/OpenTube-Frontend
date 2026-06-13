@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { load } from './+page';
-import type { ChannelInfoResponse, ChannelVideosResponse } from '$lib/types';
 import type { ChannelConfig, ChannelVideoConfig } from '$lib/adapters/types';
 import channelDetailsResponseFixture from '../../../tests/fixtures/api/channelDetailsResponse.json';
 import channelVideosResponseFixture from '../../../tests/fixtures/api/channelVideosResponse.json';
@@ -30,6 +29,7 @@ vi.mock('$lib/assets/logo-placeholder.svg', () => ({
 
 import { getChannelInfo, getChannelVideos } from '$lib/api/channel';
 import { adaptChannelInfo, adaptChannelVideos } from '$lib/adapters/channel';
+import type { ChannelInfoResponse, ChannelVideosResponse } from '$lib/api/types';
 
 // =============================================================================
 // Fixtures
@@ -59,7 +59,7 @@ beforeEach(() => {
 // load() tests
 // =============================================================================
 
-describe('+page.ts load function', () => {
+describe('+page.server.ts load function', () => {
 	describe('Successful data loading', () => {
 		it('should fetch channel info and videos in parallel', async () => {
 			vi.mocked(getChannelInfo).mockResolvedValue(mockInfoResponse as ChannelInfoResponse);
