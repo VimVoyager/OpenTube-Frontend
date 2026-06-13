@@ -1,14 +1,9 @@
 <script lang="ts">
 	import logoPlaceholder from '$lib/assets/logo-placeholder.svg';
-	import { goto } from '$app/navigation';
 	import type { RelatedVideoConfig } from '$lib/adapters/types';
 	import { formatCount, formatDuration } from '$lib/utils/formatters';
 
 	let { videos = [] }: { videos?: RelatedVideoConfig[] } = $props();
-
-	const handleVideoClick = (videoId: string) => {
-		goto(`/video/${videoId}`);
-	};
 
 	function handleAvatarError(e: Event) {
 		(e.currentTarget as HTMLImageElement).src = logoPlaceholder;
@@ -24,12 +19,11 @@
 		</div>
 	{:else}
 		{#each videos as video (video.id)}
-			<div 
-				role="button" 
-				tabindex="0"
-				onclick={() => handleVideoClick(video.id)}
-				onkeydown={(e) => e.key === 'Enter' && handleVideoClick(video.id)} 
-				class="group flex gap-2 hover:bg-secondary rounded-lg transition-colors p-2 mx-2 cursor-pointer">
+			<div class="group relative flex gap-2 hover:bg-secondary rounded-lg transition-colors p-2 mx-2">
+
+				<!-- Stretched invisible link covering the whole card -->
+				<a href="/video/{encodeURIComponent(video.id)}" class="absolute inset-0 rounded-lg" aria-label={video.title}></a>
+
 				<!-- Thumbnail -->
 				<div class="relative shrink-0 w-40">
 					<div class="relative" style="aspect-ratio: 16/9;">
@@ -47,7 +41,7 @@
 					</div>
 				</div>
 
-				<!-- Video Info -->
+			<!-- Video Info -->
 				<div class="flex flex-col flex-1 min-w-0">
 					<!-- Title -->
 					<h3 class="text-sm font-semibold text-primary line-clamp-2 group-hover:text-accent transition-colors">
@@ -59,7 +53,7 @@
 						<a
 							href="/channel/{video.channelId}"
 							data-sveltekit-preload-data="tap"
-							class="flex items-center gap-2"
+							class="relative z-20 flex items-center gap-2"
 						>
 							{#if video.channelAvatar}
 								<img
