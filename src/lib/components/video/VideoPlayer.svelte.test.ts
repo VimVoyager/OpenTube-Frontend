@@ -40,8 +40,9 @@ class MockShakaPlayer {
 		return Promise.resolve();
 	}
 
-	load(manifestUrl: string) {
-		return mockPlayerInstance.load(manifestUrl);
+	load(manifestUrl: string, startTime?: number | null, mimeType?: string) {
+		// Forward all arguments so the mime type used for muxed streams is observable
+		return mockPlayerInstance.load(manifestUrl, startTime, mimeType);
 	}
 
 	getNetworkingEngine() {
@@ -221,7 +222,11 @@ describe('VideoPlayer.svelte', () => {
 					});
 
 					// Manifest and event listener
-					expect(mockPlayerInstance.load).toHaveBeenCalledWith(mockConfig.manifestUrl);
+					expect(mockPlayerInstance.load).toHaveBeenCalledWith(
+						mockConfig.manifestUrl,
+						null,
+						'application/dash+xml'
+					);
 					expect(mockPlayerInstance.addEventListener).toHaveBeenCalledWith(
 						'error',
 						expect.any(Function)
@@ -244,9 +249,13 @@ describe('VideoPlayer.svelte', () => {
 	});
 
 	describe('Manifest loading', () => {
-		it('should load manifest URL', async () => {
+		it('should load manifest URL with DASH mime type', async () => {
 			await renderAndWaitForInit();
-			expect(mockPlayerInstance.load).toHaveBeenCalledWith(mockConfig.manifestUrl);
+			expect(mockPlayerInstance.load).toHaveBeenCalledWith(
+				mockConfig.manifestUrl,
+				null,
+				'application/dash+xml'
+			);
 		});
 
 		it('should handle empty manifest URL', async () => {
@@ -276,12 +285,6 @@ describe('VideoPlayer.svelte', () => {
 				{ timeout: 2000 }
 			);
 		});
-
-		// it('should handle player attach errors', async () => {
-		// 	// mockPlayerInstance.attach.mockRejectedValueOnce(new Error('Attach failed'));
-		// 	render(VideoPlayer, { config: mockConfig });
-		// 	await waitForConsoleError();
-		// });
 	});
 
 	describe('Component cleanup', () => {
@@ -300,7 +303,25 @@ describe('VideoPlayer.svelte', () => {
 		it('should handle different manifest URLs', async () => {
 			const config = { ...mockConfig, manifestUrl: 'blob:http://localhost:5173/other' };
 			await renderAndWaitForInit(config);
-			expect(mockPlayerInstance.load).toHaveBeenCalledWith('blob:http://localhost:5173/other');
+			expect(mockPlayerInstance.load).toHaveBeenCalledWith(
+				'blob:http://localhost:5173/other',
+				null,
+				'application/dash+xml'
+			);
+		});
+
+		it('should load muxed streams with video/mp4 mime type', async () => {
+			const config = {
+				...mockConfig,
+				manifestUrl: 'https://example.com/direct-stream.mp4',
+				isMuxed: true
+			};
+			await renderAndWaitForInit(config);
+			expect(mockPlayerInstance.load).toHaveBeenCalledWith(
+				'https://example.com/direct-stream.mp4',
+				null,
+				'video/mp4'
+			);
 		});
 
 		it('should handle empty poster', () => {
@@ -383,15 +404,21 @@ describe('VideoPlayer.svelte', () => {
 			expect(mockRequest.uris[0]).toBe(originalUrl);
 		});
 
-		it('should only filter segment requests (type 1)', async () => {
+		it('should proxy googlevideo.com requests for all request types', async () => {
+			// The type guard was deliberately removed: the direct MP4 initial
+			// fetch for muxed streams arrives as a manifest-type request and
+			// must be proxied too
 			await renderAndWaitForInit();
 			const filterFunction = getRegisteredFilter();
 
-			const originalUrl = 'https://rr3---sn-25ge7nsk.googlevideo.com/videoplayback?id=123';
-			const mockRequest = createMockRequest(originalUrl);
+			const mockRequest = createMockRequest(
+				'https://rr3---sn-25ge7nsk.googlevideo.com/videoplayback?id=123'
+			);
 			filterFunction(MANIFEST_TYPE, mockRequest);
 
-			expect(mockRequest.uris[0]).toBe(originalUrl);
+			expect(mockRequest.uris[0]).toContain('http://localhost:8888');
+			expect(mockRequest.uris[0]).toContain('host=rr3---sn-25ge7nsk.googlevideo.com');
+			expect(mockRequest.uris[0]).toContain('id=123');
 		});
 
 		it('should handle networking engine being null', async () => {

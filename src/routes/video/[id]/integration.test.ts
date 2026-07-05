@@ -21,6 +21,17 @@ const createMockManifestXml = (duration: string = 'PT2M56S'): string =>
 		.replace('STANDARD_DURATION', `duration="${duration}"`)
 		.replace('MEDIA_PRESENTATION_DURATION', `mediaPresentationDuration="${duration}"`);
 
+// getManifest reads res.headers.get('X-Stream-Type') for the muxed-progressive
+// fallback, so every mocked manifest response must include a headers object
+const createManifestResponse = (
+	xml: string,
+	headers: Record<string, string> = {}
+): { ok: boolean; headers: Headers; text: () => Promise<string> } => ({
+	ok: true,
+	headers: new Headers(headers),
+	text: async () => xml
+});
+
 describe('Video Detail Integration Tests', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -92,14 +103,14 @@ describe('Video Detail Integration Tests', () => {
 			});
 		});
 
-		it('should handle API errors for video details', () => {
+		it('should handle API errors for video details', async () => {
 			const mockFetch = vi.fn().mockResolvedValue({
 				ok: false,
 				status: 404,
 				statusText: 'Not Found'
 			});
 
-			expect(getVideoDetails('invalid-id', mockFetch)).rejects.toThrow(
+			await expect(getVideoDetails('invalid-id', mockFetch)).rejects.toThrow(
 				'Failed to fetch video details for invalid-id: 404 Not Found'
 			);
 		});
@@ -159,10 +170,9 @@ describe('Video Detail Integration Tests', () => {
 
 	describe('API + Adapter Integration - Manifest', () => {
 		it('should fetch and parse DASH manifest correctly', async () => {
-			const mockFetch = vi.fn().mockResolvedValue({
-				ok: true,
-				text: async () => createMockManifestXml('PT1H2M3S')
-			});
+			const mockFetch = vi.fn().mockResolvedValue(
+				createManifestResponse(createMockManifestXml('PT1H2M3S'))
+			);
 
 			const manifest = await getManifest('test-id', mockFetch);
 
@@ -182,10 +192,9 @@ describe('Video Detail Integration Tests', () => {
 			];
 
 			for (const testCase of testCases) {
-				const mockFetch = vi.fn().mockResolvedValue({
-					ok: true,
-					text: async () => createMockManifestXml(testCase.xml)
-				});
+				const mockFetch = vi.fn().mockResolvedValue(
+					createManifestResponse(createMockManifestXml(testCase.xml))
+				);
 
 				const manifest = await getManifest('test-id', mockFetch);
 				expect(manifest.duration).toBe(testCase.expected);
@@ -193,14 +202,29 @@ describe('Video Detail Integration Tests', () => {
 		});
 
 		it('should handle manifest without duration', async () => {
-			const mockFetch = vi.fn().mockResolvedValue({
-				ok: true,
-				text: async () => createMockManifestXml('')
-			});
+			const mockFetch = vi.fn().mockResolvedValue(
+				createManifestResponse(createMockManifestXml(''))
+			);
 
 			const manifest = await getManifest('test-id', mockFetch);
 
 			expect(manifest.duration).toBe(0);
+		});
+
+		it('should return direct URL for muxed-progressive stream type', async () => {
+			const directUrl = 'https://example.com/direct-stream.mp4';
+			const mockFetch = vi.fn().mockResolvedValue(
+				createManifestResponse(directUrl, { 'X-Stream-Type': 'muxed-progressive' })
+			);
+			const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+
+			const manifest = await getManifest('test-id', mockFetch);
+
+			expect(manifest.url).toBe(directUrl);
+			expect(manifest.duration).toBe(0);
+			expect(manifest.isMuxed).toBe(true);
+
+			consoleLogSpy.mockRestore();
 		});
 
 		it('should create player config from manifest', () => {
@@ -251,34 +275,6 @@ describe('Video Detail Integration Tests', () => {
 				uploadDate: '3 years ago'
 			});
 		});
-
-		// it('should handle alternative response format with streams property', async () => {
-		// 	const mockResponse = {
-		// 		streams: [
-		// 			{
-		// 				url: 'https://youtube.com/watch?v=test',
-		// 				id: 'test',
-		// 				name: 'Test Video',
-		// 				thumbnails: [],
-		// 				uploaderName: 'Test',
-		// 				uploaderAvatars: [],
-		// 				viewCount: 100,
-		// 				duration: 60,
-		// 				textualUploadDate: 'today'
-		// 			} as RelatedItemResponse
-		// 		]
-		// 	};
-		//
-		// 	const mockFetch = vi.fn().mockResolvedValue({
-		// 		ok: true,
-		// 		json: async () => mockResponse
-		// 	});
-		//
-		// 	const relatedStreams = await getRelatedStreams('test-id', mockFetch);
-		//
-		// 	expect(relatedStreams).toHaveLength(1);
-		// 	expect(relatedStreams[0].name).toBe('Test Video');
-		// });
 
 		it('should filter out invalid related videos', async () => {
 			const mockRelatedVideos: RelatedItemResponse[] = relatedVideosFixture;
@@ -347,8 +343,12 @@ describe('Video Detail Integration Tests', () => {
 				.fn()
 				.mockResolvedValueOnce({ ok: true, json: async () => mockThumbnails })
 				.mockResolvedValueOnce({ ok: true, json: async () => mockDetails })
-				.mockResolvedValueOnce({ ok: true, text: async () => createMockManifestXml('PT1H2M3S') })
-				.mockResolvedValueOnce({ ok: true, json: async () => mockRelatedVideos });
+				.mockResolvedValueOnce(createManifestResponse(createMockManifestXml('PT1H2M3S')))
+				.mockResolvedValueOnce({ ok: true, json: async () => mockRelatedVideos })
+				// Comments fetch fails gracefully via .catch in load; swap for a
+				// comments response fixture to exercise the comments success path
+				.mockResolvedValueOnce({ ok: false, status: 500, statusText: 'Internal Server Error' });
+			const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => { });
 
 			const result = await load({
 				params: { id: 'test-video-id' },
@@ -368,8 +368,9 @@ describe('Video Detail Integration Tests', () => {
 
 			// Verify player config
 			expect(result.playerConfig.manifestUrl).toBe('blob:mock-manifest-url');
-			expect(result.playerConfig.duration).toBe(3723); // 10 minutes
+			expect(result.playerConfig.duration).toBe(3723); // 1h 2m 3s
 			expect(result.playerConfig.poster).toBe('https://i.ytimg.com/vi/pilot-id/xl.jpg');
+			expect(result.playerConfig.isMuxed).toBe(false);
 
 			// Verify metadata
 			expect(result.metadata.title).toBe('MURDER DRONES - Pilot');
@@ -380,8 +381,16 @@ describe('Video Detail Integration Tests', () => {
 			expect(result.relatedVideos).toHaveLength(4);
 			expect(result.relatedVideos[0].title).toBe('MURDER DRONES - Heartbeat');
 
+			// Verify no playlist context without a playlist param
+			expect(result.playlistId).toBeNull();
+			expect(result.playlistIndex).toBeNull();
+			expect(result.playlistVideos).toBeNull();
+			expect(result.playlistInfo).toBeNull();
+
 			// Verify no error
 			expect(result.error).toBeUndefined();
+
+			consoleWarnSpy.mockRestore();
 		});
 
 		it('should handle video not found (404)', async () => {
@@ -423,17 +432,15 @@ describe('Video Detail Integration Tests', () => {
 		it('should continue loading even if related videos fail', async () => {
 			const mockThumbnails: Thumbnail[] = thumbnailsResponseFixture;
 			const mockDetails: Details = detailsResponseFixture[0];
-			const mockManifestXml = manifestXmlFixture
-				.replace('STANDARD_DURATION', 'duration="PT1H2M3S"')
-			;
-			console.log('mockManifestXml: ', mockManifestXml);
 
 			const mockFetch = vi
 				.fn()
 				.mockResolvedValueOnce({ ok: true, json: async () => mockThumbnails })
 				.mockResolvedValueOnce({ ok: true, json: async () => mockDetails })
-				.mockResolvedValueOnce({ ok: true, text: async () => mockManifestXml })
+				.mockResolvedValueOnce(createManifestResponse(createMockManifestXml('PT1H2M3S')))
+				.mockResolvedValueOnce({ ok: false, status: 500, statusText: 'Internal Server Error' })
 				.mockResolvedValueOnce({ ok: false, status: 500, statusText: 'Internal Server Error' });
+			const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => { });
 
 			const result = await load({
 				params: { id: 'test-id' },
@@ -449,7 +456,12 @@ describe('Video Detail Integration Tests', () => {
 			// Related videos should be empty but not cause error
 			expect(result.relatedVideos).toEqual([]);
 			expect(result.error).toBeUndefined();
+			expect(consoleWarnSpy).toHaveBeenCalledWith(
+				'Failed to fetch related videos:',
+				expect.any(Error)
+			);
+
+			consoleWarnSpy.mockRestore();
 		});
 	});
 });
-
