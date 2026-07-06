@@ -108,7 +108,7 @@ export interface Avatar {
 	url: string;
 	height: number;
 	width: number;
-	estimatedResolutionLevel: string;
+	estimatedResolutionLevel?: string;
 }
 
 export interface RelatedItem {

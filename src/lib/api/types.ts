@@ -165,11 +165,11 @@ export interface PlaylistResponse {
 	sortFilter: string;
 	uploaderUrl: string;
 	uploaderName: string;
-	subChannelUrl: string;
-	subChannelName: string;
+	subChannelUrl?: string;
+	subChannelName?: string;
 	description: Description;
 	banners?: never[];
-	subChannelAvatars?: never[];
+	subChannelAvatars?: Avatar[];
 	thumbnails: Thumbnail[];
 	uploaderAvatars: Avatar[];
 }
