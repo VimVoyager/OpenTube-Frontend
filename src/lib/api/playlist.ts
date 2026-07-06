@@ -22,7 +22,7 @@ export async function getPlaylist(
 		}
 		return await res.json();
 	} catch (error) {
-		console.error('Error fetching channel videos:', error);
+		console.error('Error fetching playlist videos:', error);
 		throw error;
 	}
 }
