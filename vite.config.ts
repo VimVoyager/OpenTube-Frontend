@@ -8,13 +8,13 @@ export default defineConfig({
 	plugins: [tailwindcss(), sveltekit()],
 	server: {
 		port: parseInt(process.env.FRONTEND_PORT || '5173'),
-		strictPort: true,
+		strictPort: true
 	},
 	test: {
 		resolve: {
 			conditions: ['browser', 'import'],
 			alias: {
-				'$lib': path.resolve('./src/lib'),
+				$lib: path.resolve('./src/lib'),
 				'$env/static/public': path.resolve(__dirname, './src/tests/env')
 			}
 		},
@@ -34,13 +34,19 @@ export default defineConfig({
 				'**/*.config.*',
 				'**/mockData/',
 				'dist/',
-				'.svelte-kit/'
+				'.svelte-kit/',
+				'src/lib/assets/**'
 			],
-			// Coverage thresholds
-			lines: 80,
-			functions: 80,
-			branches: 75,
-			statements: 80
+			thresholds: {
+				lines: 85,
+				functions: 85,
+				branches: 80,
+				statements: 85,
+				// risk-weighted floors
+				'src/lib/utils/**': { branches: 95, lines: 95 },
+				'src/lib/adapters/**': { branches: 92, lines: 95 },
+				'src/lib/api/**': { branches: 90, lines: 95 }
+			}
 		},
 
 		// Mock configuration
@@ -60,8 +66,8 @@ export default defineConfig({
 				resolve: {
 					conditions: ['browser'],
 					alias: {
-						'$lib': path.resolve('./src/lib'),
-						'$app': path.resolve('./node_modules/@sveltejs/kit/src/runtime/app'),
+						$lib: path.resolve('./src/lib'),
+						$app: path.resolve('./node_modules/@sveltejs/kit/src/runtime/app'),
 						'$env/static/public': path.resolve('./src/tests/env')
 					}
 				},
@@ -83,7 +89,7 @@ export default defineConfig({
 			{
 				resolve: {
 					alias: {
-						'$lib': path.resolve('./src/lib'),
+						$lib: path.resolve('./src/lib'),
 						'$env/static/public': path.resolve('./src/tests/env')
 					}
 				},
