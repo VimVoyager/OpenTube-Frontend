@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, waitFor } from '@testing-library/svelte';
+import { render, waitFor, fireEvent } from '@testing-library/svelte';
 import '@testing-library/jest-dom';
 import type { VideoPlayerConfig } from '$lib/adapters/types';
 
@@ -7,6 +7,15 @@ let mockRegisterRequestFilter = vi.fn();
 
 const mockNetworkingEngine = {
 	registerRequestFilter: mockRegisterRequestFilter
+};
+
+// helper — the component's registered Shaka 'error' listener
+const getErrorListener = () => {
+	const call = mockPlayerInstance.addEventListener.mock.calls.find(
+		([evt]) => evt === 'error'
+	);
+	expect(call).toBeDefined();
+	return call![1] as (event: { detail?: unknown }) => void;
 };
 
 // Create mocks for Shaka Player
@@ -36,8 +45,7 @@ class MockShakaPlayer {
 	attach(videoEl: HTMLVideoElement) {
 		// console.log('Instance attach called with:', videoEl);
 		capturedVideoElement = videoEl;
-		mockPlayerInstance.attach(videoEl);
-		return Promise.resolve();
+		return mockPlayerInstance.attach(videoEl);
 	}
 
 	load(manifestUrl: string, startTime?: number | null, mimeType?: string) {
@@ -405,9 +413,6 @@ describe('VideoPlayer.svelte', () => {
 		});
 
 		it('should proxy googlevideo.com requests for all request types', async () => {
-			// The type guard was deliberately removed: the direct MP4 initial
-			// fetch for muxed streams arrives as a manifest-type request and
-			// must be proxied too
 			await renderAndWaitForInit();
 			const filterFunction = getRegisteredFilter();
 
@@ -437,6 +442,86 @@ describe('VideoPlayer.svelte', () => {
 				},
 				{ timeout: 2000 }
 			);
+		});
+	});
+
+	describe('Runtime error handling and retry', () => {
+		it('shows the error overlay when Shaka emits an error event', async () => {
+			const { container } = await renderAndWaitForInit();
+			const onShakaError = getErrorListener();
+
+			onShakaError({ detail: { category: 1, code: 1002, severity: 2 } });
+
+			await waitFor(() => {
+				expect(container.querySelector('.error-overlay')).toBeInTheDocument();
+			});
+		});
+
+		it('ignores error events without a detail payload', async () => {
+			const { container } = await renderAndWaitForInit();
+			const onShakaError = getErrorListener();
+
+			onShakaError({});
+
+			// guard branch: no detail → no state change → no overlay
+			expect(container.querySelector('.error-overlay')).not.toBeInTheDocument();
+		});
+
+		it('retry reloads the manifest and clears the error overlay on success', async () => {
+			const { container, getByRole } = await renderAndWaitForInit();
+			getErrorListener()({ detail: { category: 1, code: 1002, severity: 2 } });
+			await waitFor(() => {
+				expect(container.querySelector('.error-overlay')).toBeInTheDocument();
+			});
+			expect(mockPlayerInstance.load).toHaveBeenCalledTimes(1);
+
+			// NOTE: adjust the accessible name to VideoPlayerError's actual retry
+			// button text if this query doesn't match.
+			await fireEvent.click(getByRole('button', { name: /retry/i }));
+
+			await waitFor(() => {
+				expect(mockPlayerInstance.load).toHaveBeenCalledTimes(2);
+				expect(container.querySelector('.error-overlay')).not.toBeInTheDocument();
+			});
+		});
+
+		it('shows the error overlay when player initialization fails', async () => {
+			mockPlayerInstance.attach.mockRejectedValueOnce(new Error('attach failed'));
+			const { container } = render(VideoPlayer, { config: mockConfig });
+
+			await waitFor(() => {
+				expect(consoleErrorSpy).toHaveBeenCalledWith(
+					'Error initializing video player:',
+					expect.any(Error)
+				);
+				expect(container.querySelector('.error-overlay')).toBeInTheDocument();
+			});
+		});
+
+		it('extracts category/code from shaka-shaped load errors', async () => {
+			// covers the typeof shakaErr?.category === 'number' branch (lines 65-70);
+			// the existing plain-Error test covers the generic fallback branch
+			mockPlayerInstance.load.mockRejectedValueOnce({ category: 3, code: 1001, severity: 2 });
+			const { container } = render(VideoPlayer, { config: mockConfig });
+
+			await waitFor(() => {
+				expect(container.querySelector('.error-overlay')).toBeInTheDocument();
+			});
+		});
+
+		it('hides shaka controls while the error overlay is shown', async () => {
+			const invalidConfig = { ...mockConfig, manifestUrl: '' };
+			const { container } = render(VideoPlayer, { config: invalidConfig });
+
+			// stand-in for the DOM node the real Shaka UI Overlay would create
+			const fakeControls = document.createElement('div');
+			fakeControls.className = 'shaka-controls-container';
+			container.querySelector('.video-container')!.appendChild(fakeControls);
+
+			await waitFor(() => {
+				expect(container.querySelector('.error-overlay')).toBeInTheDocument();
+				expect(fakeControls.style.visibility).toBe('hidden');
+			});
 		});
 	});
 });

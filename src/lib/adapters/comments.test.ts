@@ -5,7 +5,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { adaptComment, adaptComments } from './comments';
+import { adaptComment, adaptCommentResponse, adaptComments } from './comments';
 import commentsResponse from '../../tests/fixtures/api/commentsResponse.json';
 import commentsResultFixture from '../../tests/fixtures/adapters/commentsResult.json';
 import type { CommentConfig } from './types';
@@ -524,6 +524,23 @@ describe('adaptComments', () => {
 			const calls = vi.mocked(selectBestAvatar).mock.calls;
 			expect(calls[0][1]).toBe(defaultAvatar);
 			expect(calls[1][1]).toBe(defaultAvatar);
+		});
+	});
+
+	describe('adaptCommentResponse', () => {
+		it.each([
+			['null response', null],
+			['relatedItems undefined', { ...mockCommentsResponseData, relatedItems: undefined }]
+		])('returns [] for %s', (_label, input) => {
+			expect(adaptCommentResponse(input as never, defaultAvatar)).toEqual([]);
+		});
+
+		it('adapts relatedItems from a full response', () => {
+			const result = adaptCommentResponse(mockCommentsResponseData, defaultAvatar);
+
+			expect(result).toHaveLength(mockRelatedItems.length);
+			expect(result[0].id).toBe(mockFirstComment.commentId);
+			expect(result[0]).toEqual(mockFirstCommentConfig);
 		});
 	});
 });
