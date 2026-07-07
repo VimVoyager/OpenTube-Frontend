@@ -26,7 +26,7 @@ export function adaptPlaylistInfo(info: PlaylistResponse): PlaylistInfoConfig {
 		bannerUrl: selectBestBanner(info.banners, null),
 		thumbnailUrl: selectBestThumbnail(info.thumbnails, thumbnailPlaceholder),
 		uploaderUrl: info.uploaderUrl,
-		description: info.description || null
+		description: info.description?.content || null
 	};
 }
 

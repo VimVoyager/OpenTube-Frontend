@@ -2,8 +2,6 @@ import type { ChannelConfig, ChannelVideoConfig } from '$lib/adapters/types';
 import { extractIdFromUrl } from '$lib/utils/streamSelection';
 import type { ChannelInfoResponse, ChannelVideoItem, ChannelVideosResponse } from '$lib/api/types';
 
-// ─── Subscriber count formatting ─────────────────────────────────────────────
-
 /**
  * Format a raw subscriber count into a compact display string.
  * e.g. 16_800_000 → "16.8M", 430_000 → "430K", 980 → "980"
@@ -20,8 +18,6 @@ export function formatSubscriberCount(count: number): string {
 	}
 	return count.toString();
 }
-
-// ─── Image selection helpers ──────────────────────────────────────────────────
 
 /**
  * Pick the best banner from the banners array — prefer the widest one,
@@ -48,8 +44,6 @@ function selectBestAvatar(
 	return [...avatars].sort((a: {url: string, height: number}, b: {url: string, height: number}): number => b.height - a.height)[0].url;
 }
 
-// ─── Channel info adapter ─────────────────────────────────────────────────────
-
 /**
  * Adapt raw channel info from the API into a display-ready ChannelConfig.
  */
@@ -66,8 +60,6 @@ export function adaptChannelInfo(info: ChannelInfoResponse, videoCount: number =
 		verified: info.verified ?? false
 	};
 }
-
-// ─── Channel videos adapter ───────────────────────────────────────────────────
 
 /**
  * Adapt a single raw ChannelVideoItem into a ChannelVideoConfig.

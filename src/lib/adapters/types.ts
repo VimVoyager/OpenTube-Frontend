@@ -168,7 +168,7 @@ export interface PlaylistInfoConfig {
 	uploaderAvatarUrl: string | null;
 	bannerUrl?: string | null;
 	thumbnailUrl: string | null;
-	description?: Description;
+	description?: string | null;
 }
 
 
