@@ -168,7 +168,7 @@ export interface PlaylistResponse {
 	subChannelUrl?: string;
 	subChannelName?: string;
 	description: Description;
-	banners?: never[];
+	banners?: Avatar[];
 	subChannelAvatars?: Avatar[];
 	thumbnails: Thumbnail[];
 	uploaderAvatars: Avatar[];

@@ -44,3 +44,24 @@ export const formatDuration = (seconds: number): string => {
 	}
 	return `${minutes}:${secs.toString().padStart(2, '0')}`;
 };
+
+/**
+ * Parses an ISO 8601 duration (e.g. "PT2M56S") into seconds.
+ * Extracted from manifest.ts — used for DASH mediaPresentationDuration.
+ * Unparseable or missing input returns 0. Day components (P1DT...) are not
+ * supported; YouTube manifests only emit the PT form.
+ * Examples: "PT1H2M3S" -> 3723, "PT1M30.5S" -> 90.5, "" -> 0
+ */
+export function parseIsoDuration(duration: string | null | undefined): number {
+	if (!duration) return 0;
+
+	const match: RegExpMatchArray | null = duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:([\d.]+)S)?/);
+	if (!match) return 0;
+
+	const hours: number = parseInt(match[1] || '0');
+	const minutes: number = parseInt(match[2] || '0');
+	const seconds: number = parseFloat(match[3] || '0');
+
+	return hours * 3600 + minutes * 60 + seconds;
+}
+

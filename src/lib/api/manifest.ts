@@ -1,22 +1,9 @@
 import { PUBLIC_API_URL } from '$env/static/public';
 import { DOMParser } from '@xmldom/xmldom';
+import { parseIsoDuration } from '$lib/utils/formatters';
 import type { ManifestResponse } from '$lib/api/types';
 
 const API_BASE_URL: string = PUBLIC_API_URL;
-
-/**
- * Parse ISO 8601 duration format (PT2M56S) to seconds
- */
-function parseDuration(duration: string): number {
-	const match: RegExpMatchArray | null = duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:([\d.]+)S)?/);
-	if (!match) return 0;
-	
-	const hours: number = parseInt(match[1] || '0');
-	const minutes: number = parseInt(match[2] || '0');
-	const seconds: number = parseFloat(match[3] || '0');
-	
-	return hours * 3600 + minutes * 60 + seconds;
-}
 
 /**
  * Fetch DASH manifest and extract metadata
@@ -62,7 +49,7 @@ export async function getManifest(
         const mpdElement: Element = xmlDoc.getElementsByTagNameNS('urn:mpeg:dash:schema:mpd:2011', 'MPD')[0];
         
         const durationStr: string | null = mpdElement?.getAttribute('mediaPresentationDuration');
-        const duration: number = durationStr ? parseDuration(durationStr) : 0;
+        const duration: number = parseIsoDuration(durationStr);
 
 				const adaptationSet: Element = xmlDoc.getElementsByTagNameNS('urn:mpeg:dash:schema:mpd:2011', 'AdaptationSet')[0];
         const videoId: string | null = adaptationSet?.getAttribute('id');
