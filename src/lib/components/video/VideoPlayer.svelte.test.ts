@@ -9,15 +9,6 @@ const mockNetworkingEngine = {
 	registerRequestFilter: mockRegisterRequestFilter
 };
 
-// helper — the component's registered Shaka 'error' listener
-const getErrorListener = () => {
-	const call = mockPlayerInstance.addEventListener.mock.calls.find(
-		([evt]) => evt === 'error'
-	);
-	expect(call).toBeDefined();
-	return call![1] as (event: { detail?: unknown }) => void;
-};
-
 // Create mocks for Shaka Player
 const mockPlayerInstance = {
 	attach: vi.fn().mockResolvedValue(undefined),
@@ -36,17 +27,17 @@ const mockUIInstance = {
 
 let capturedVideoElement: HTMLVideoElement | null = null;
 
-// Create a proper constructor function
 class MockShakaPlayer {
-	constructor() {
-		// console.log('MockShakaPlayer constructor called');
-	}
 
 	attach(videoEl: HTMLVideoElement) {
-		// console.log('Instance attach called with:', videoEl);
 		capturedVideoElement = videoEl;
+		// Forward the promise so rejection scenarios reach the component
 		return mockPlayerInstance.attach(videoEl);
 	}
+
+	static isBrowserSupported = vi.fn(() => {
+		return true;
+	});
 
 	load(manifestUrl: string, startTime?: number | null, mimeType?: string) {
 		// Forward all arguments so the mime type used for muxed streams is observable
@@ -68,17 +59,10 @@ class MockShakaPlayer {
 	destroy = vi.fn(() => {
 		return mockPlayerInstance.destroy();
 	});
-
-	static isBrowserSupported = vi.fn(() => true);
 }
 
 class MockShakaUIOverlay {
-	constructor() {
-		// console.log('MockShakaUIOverlay constructor called');
-	}
-
 	configure(config: ShakaUIConfiguration) {
-		// console.log('UI configure called with:', config);
 		mockUIInstance.configure(config);
 	}
 
@@ -119,7 +103,7 @@ describe('VideoPlayer.svelte', () => {
 		poster: 'https://example.com/poster.jpg'
 	};
 
-	// ===== Helper Functions =====
+	// Helper Functions
 	const renderAndWaitForInit = async (config = mockConfig) => {
 		const result = render(VideoPlayer, { config });
 		await waitFor(
@@ -136,15 +120,23 @@ describe('VideoPlayer.svelte', () => {
 		return mockRegisterRequestFilter.mock.calls[0][0];
 	};
 
+	const getErrorListener = () => {
+		const call = mockPlayerInstance.addEventListener.mock.calls.find(
+			([evt]) => evt === 'error'
+		);
+		expect(call).toBeDefined();
+		return call![1] as (event: { detail?: unknown }) => void;
+	};
+
 	const createMockRequest = (url: string, headers = {}) => ({
 		uris: [url],
 		headers
 	});
 
-	const waitForConsoleError = () =>
+	const waitForErrorOverlay = (container: HTMLElement) =>
 		waitFor(
 			() => {
-				expect(consoleErrorSpy).toHaveBeenCalled();
+				expect(container.querySelector('.error-overlay')).toBeInTheDocument();
 			},
 			{ timeout: 2000 }
 		);
@@ -152,7 +144,7 @@ describe('VideoPlayer.svelte', () => {
 	const SEGMENT_TYPE = 1;
 	const MANIFEST_TYPE = 0;
 
-	// ===== Test Setup =====
+	// Test Setup
 	beforeEach(() => {
 		vi.clearAllMocks();
 		capturedVideoElement = null;
@@ -164,7 +156,10 @@ describe('VideoPlayer.svelte', () => {
 		consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
 
 		// Reset to success state
-		MockShakaPlayer.isBrowserSupported = vi.fn(() => true);
+		MockShakaPlayer.isBrowserSupported.mockClear();
+		MockShakaPlayer.isBrowserSupported.mockImplementation(() => {
+			return true;
+		});
 		mockPlayerInstance.attach.mockResolvedValue(undefined);
 		mockPlayerInstance.load.mockResolvedValue(undefined);
 		mockPlayerInstance.destroy.mockImplementation(() => Promise.resolve());
@@ -176,25 +171,22 @@ describe('VideoPlayer.svelte', () => {
 		consoleLogSpy.mockRestore();
 	});
 
-	// ===== Tests =====
+	// Tests
 	describe('Component rendering', () => {
-		it('should render video element with poster and required attributes', () => {
+		it('should render video element with poster and required attributes', async () => {
 			const { container } = render(VideoPlayer, { config: mockConfig });
 			const video = container.querySelector('video');
 			expect(video).toBeInTheDocument();
 			expect(video).toHaveAttribute('poster', mockConfig.poster);
 			expect(video).toHaveAttribute('playsinline');
+
+			// let init settle so no pending import straddles the test boundary
+			await waitFor(() => expect(mockPlayerInstance.attach).toHaveBeenCalled());
 		});
 	});
 
-	describe('Player initialization', () => {
-		it('should initialize test environment', async () => {
-			const { container } = render(VideoPlayer, { config: mockConfig });
-			await new Promise((resolve) => setTimeout(resolve, 100));
-			expect(container).toBeTruthy();
-		});
-
-		it('should fully initialize player with all components and configurations', async () => {
+	describe('Player initialisation', () => {
+		it('should fully initialise player with all components and configurations', async () => {
 			render(VideoPlayer, { config: mockConfig });
 
 			await waitFor(
@@ -254,6 +246,18 @@ describe('VideoPlayer.svelte', () => {
 				{ timeout: 2000 }
 			);
 		});
+
+		it('aborts initialization when unmounted before the Shaka import resolves', async () => {
+			const { unmount } = render(VideoPlayer, { config: mockConfig });
+			unmount(); // navigation-away race: init still awaiting the dynamic import
+
+			// let the pending import + guard settle
+			await new Promise((r) => setTimeout(r, 0));
+			await new Promise((r) => setTimeout(r, 0));
+
+			expect(mockPlayerInstance.attach).not.toHaveBeenCalled();
+			expect(consoleErrorSpy).not.toHaveBeenCalled();
+		});
 	});
 
 	describe('Manifest loading', () => {
@@ -266,18 +270,100 @@ describe('VideoPlayer.svelte', () => {
 			);
 		});
 
-		it('should handle empty manifest URL', async () => {
+		it('should show the error overlay for an empty manifest URL', async () => {
 			const invalidConfig = { ...mockConfig, manifestUrl: '' };
-			render(VideoPlayer, { config: invalidConfig });
-			await waitForConsoleError();
+			const { container } = render(VideoPlayer, { config: invalidConfig });
+			await waitForErrorOverlay(container);
 		});
 
-		it('should handle manifest load errors', async () => {
+		it('should show the error overlay when the manifest load fails', async () => {
 			mockPlayerInstance.load.mockRejectedValueOnce(new Error('Load failed'));
-			render(VideoPlayer, { config: mockConfig });
-			await waitForConsoleError();
+			const { container } = render(VideoPlayer, { config: mockConfig });
+			await waitForErrorOverlay(container);
+		});
+
+		it('should extract category/code from shaka-shaped load errors', async () => {
+			// covers the typeof shakaErr?.category === 'number' branch;
+			// the plain-Error test above covers the generic fallback branch
+			mockPlayerInstance.load.mockRejectedValueOnce({ category: 3, code: 1001});
+			const { container } = render(VideoPlayer, { config: mockConfig });
+			await waitForErrorOverlay(container);
 		});
 	});
+
+	describe('Runtime error handling and retry', () => {
+		it('shows the error overlay when Shaka emits an error event', async () => {
+			const { container } = await renderAndWaitForInit();
+			const onShakaError = getErrorListener();
+
+			onShakaError({ detail: { category: 1, code: 1002, severity: 2 } });
+
+			await waitForErrorOverlay(container);
+		});
+
+		it('ignores error events without a detail payload', async () => {
+			const { container } = await renderAndWaitForInit();
+			const onShakaError = getErrorListener();
+
+			onShakaError({});
+
+			// guard branch: no detail, no state change, no overlay
+			expect(container.querySelector('.error-overlay')).not.toBeInTheDocument();
+		});
+
+		it('retry reloads the manifest and clears the error overlay on success', async () => {
+			const { container, getByRole } = await renderAndWaitForInit();
+			getErrorListener()({ detail: { category: 1, code: 1002, severity: 2 } });
+			await waitForErrorOverlay(container);
+			expect(mockPlayerInstance.load).toHaveBeenCalledTimes(1);
+
+			await fireEvent.click(getByRole('button', { name: /retry/i }));
+
+			await waitFor(() => {
+				expect(mockPlayerInstance.load).toHaveBeenCalledTimes(2);
+				expect(container.querySelector('.error-overlay')).not.toBeInTheDocument();
+			});
+		});
+
+		it('shows the overlay again when a retry fails', async () => {
+			const { container, getByRole } = await renderAndWaitForInit();
+			getErrorListener()({ detail: { category: 1, code: 1002, severity: 2 } });
+			await waitForErrorOverlay(container);
+
+			mockPlayerInstance.load.mockRejectedValueOnce({ category: 4, code: 1003, severity: 2 });
+			await fireEvent.click(getByRole('button', { name: /retry|try again/i }));
+
+			await waitFor(() => {
+				expect(mockPlayerInstance.load).toHaveBeenCalledTimes(2);
+				expect(container.querySelector('.error-overlay')).toBeInTheDocument();
+			});
+		});
+
+		it('shows the error overlay when player initialisation fails', async () => {
+			mockPlayerInstance.attach.mockRejectedValueOnce(new Error('attach failed'));
+			const { container } = render(VideoPlayer, { config: mockConfig });
+
+			await waitFor(() => {
+				expect(consoleErrorSpy).toHaveBeenCalledWith(
+					'Error initializing video player:',
+					expect.any(Error)
+				);
+				expect(container.querySelector('.error-overlay')).toBeInTheDocument();
+			});
+		});
+
+		it('hides shaka controls while the error overlay is shown', async () => {
+			const { container } = render(VideoPlayer, { config: { ...mockConfig, manifestUrl: '' } });
+
+			const fakeControls = document.createElement('div');
+			fakeControls.className = 'shaka-controls-container';
+			container.querySelector('.video-container')!.appendChild(fakeControls);
+
+			await waitForErrorOverlay(container);
+			await waitFor(() => expect(fakeControls.style.visibility).toBe('hidden'));
+		});
+	});
+
 
 	describe('Error handling', () => {
 		it('should handle unsupported browser', async () => {
@@ -332,17 +418,18 @@ describe('VideoPlayer.svelte', () => {
 			);
 		});
 
-		it('should handle empty poster', () => {
+		it('should handle empty poster', async () => {
 			const config = { ...mockConfig, poster: '' };
 			const { container } = render(VideoPlayer, { config });
-			const video = container.querySelector('video');
-			expect(video).toHaveAttribute('poster', '');
+			expect(container.querySelector('video')).toHaveAttribute('poster', '');
+			await waitFor(() => expect(mockPlayerInstance.attach).toHaveBeenCalled());
 		});
 
-		it('should handle zero duration', () => {
+		it('should handle zero duration', async () => {
 			const config = { ...mockConfig, duration: 0 };
 			const { container } = render(VideoPlayer, { config });
 			expect(container.querySelector('video')).toBeInTheDocument();
+			await waitFor(() => expect(mockPlayerInstance.attach).toHaveBeenCalled());
 		});
 	});
 
@@ -442,86 +529,6 @@ describe('VideoPlayer.svelte', () => {
 				},
 				{ timeout: 2000 }
 			);
-		});
-	});
-
-	describe('Runtime error handling and retry', () => {
-		it('shows the error overlay when Shaka emits an error event', async () => {
-			const { container } = await renderAndWaitForInit();
-			const onShakaError = getErrorListener();
-
-			onShakaError({ detail: { category: 1, code: 1002, severity: 2 } });
-
-			await waitFor(() => {
-				expect(container.querySelector('.error-overlay')).toBeInTheDocument();
-			});
-		});
-
-		it('ignores error events without a detail payload', async () => {
-			const { container } = await renderAndWaitForInit();
-			const onShakaError = getErrorListener();
-
-			onShakaError({});
-
-			// guard branch: no detail → no state change → no overlay
-			expect(container.querySelector('.error-overlay')).not.toBeInTheDocument();
-		});
-
-		it('retry reloads the manifest and clears the error overlay on success', async () => {
-			const { container, getByRole } = await renderAndWaitForInit();
-			getErrorListener()({ detail: { category: 1, code: 1002, severity: 2 } });
-			await waitFor(() => {
-				expect(container.querySelector('.error-overlay')).toBeInTheDocument();
-			});
-			expect(mockPlayerInstance.load).toHaveBeenCalledTimes(1);
-
-			// NOTE: adjust the accessible name to VideoPlayerError's actual retry
-			// button text if this query doesn't match.
-			await fireEvent.click(getByRole('button', { name: /retry/i }));
-
-			await waitFor(() => {
-				expect(mockPlayerInstance.load).toHaveBeenCalledTimes(2);
-				expect(container.querySelector('.error-overlay')).not.toBeInTheDocument();
-			});
-		});
-
-		it('shows the error overlay when player initialization fails', async () => {
-			mockPlayerInstance.attach.mockRejectedValueOnce(new Error('attach failed'));
-			const { container } = render(VideoPlayer, { config: mockConfig });
-
-			await waitFor(() => {
-				expect(consoleErrorSpy).toHaveBeenCalledWith(
-					'Error initializing video player:',
-					expect.any(Error)
-				);
-				expect(container.querySelector('.error-overlay')).toBeInTheDocument();
-			});
-		});
-
-		it('extracts category/code from shaka-shaped load errors', async () => {
-			// covers the typeof shakaErr?.category === 'number' branch (lines 65-70);
-			// the existing plain-Error test covers the generic fallback branch
-			mockPlayerInstance.load.mockRejectedValueOnce({ category: 3, code: 1001, severity: 2 });
-			const { container } = render(VideoPlayer, { config: mockConfig });
-
-			await waitFor(() => {
-				expect(container.querySelector('.error-overlay')).toBeInTheDocument();
-			});
-		});
-
-		it('hides shaka controls while the error overlay is shown', async () => {
-			const invalidConfig = { ...mockConfig, manifestUrl: '' };
-			const { container } = render(VideoPlayer, { config: invalidConfig });
-
-			// stand-in for the DOM node the real Shaka UI Overlay would create
-			const fakeControls = document.createElement('div');
-			fakeControls.className = 'shaka-controls-container';
-			container.querySelector('.video-container')!.appendChild(fakeControls);
-
-			await waitFor(() => {
-				expect(container.querySelector('.error-overlay')).toBeInTheDocument();
-				expect(fakeControls.style.visibility).toBe('hidden');
-			});
 		});
 	});
 });

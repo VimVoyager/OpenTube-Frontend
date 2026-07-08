@@ -2,12 +2,9 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, fireEvent, waitFor } from '@testing-library/svelte';
 import '@testing-library/jest-dom';
 import type { CommentConfig } from '$lib/adapters/types';
-
-vi.mock('$lib/assets/logo-placeholder.svg', () => ({ default: '/logo-placeholder.svg' }));
-
 import Comments from './Comments.svelte';
 
-// ===== Fixtures =====
+vi.mock('$lib/assets/logo-placeholder.svg', () => ({ default: '/logo-placeholder.svg' }));
 
 const baseComment: CommentConfig = {
 	id: 'comment-123',
@@ -58,8 +55,6 @@ describe('Comments.svelte', () => {
 		vi.useRealTimers();
 	});
 
-	// ===== Rendering =====
-
 	describe('Basic rendering', () => {
 		it('should render the author name', () => {
 			const { getByText } = render(Comments, { comment: baseComment });
@@ -103,8 +98,6 @@ describe('Comments.svelte', () => {
 			expect(container.querySelector('a[href="https://example.com"]')).toBeInTheDocument();
 		});
 	});
-
-	// ===== Conditional Badges =====
 
 	describe('Verified badge', () => {
 		it('should show verified badge when isVerified is true', () => {
@@ -163,8 +156,6 @@ describe('Comments.svelte', () => {
 		});
 	});
 
-	// ===== Full featured comment =====
-
 	describe('Pinned channel owner comment', () => {
 		it('should render all badges for a pinned channel owner comment', () => {
 			const { getByText, container } = render(Comments, { comment: pinnedChannelOwnerComment });
@@ -174,8 +165,6 @@ describe('Comments.svelte', () => {
 			expect(container.querySelector('[title="Hearted by creator"]')).toBeInTheDocument();
 		});
 	});
-
-	// ===== Replies =====
 
 	describe('Reply button', () => {
 		it('should show reply button when hasReplies is true and depth is 0', () => {
@@ -209,7 +198,7 @@ describe('Comments.svelte', () => {
 
 	describe('Toggle replies interaction', () => {
 		it('should show Loading... and disable button while loading replies', async () => {
-			const { getByText, getByRole } = render(Comments, { comment: commentWithReplies });
+			const { getByText } = render(Comments, { comment: commentWithReplies });
 
 			const replyButton = getByText('5 replies').closest('button')!;
 			await fireEvent.click(replyButton);
@@ -254,8 +243,6 @@ describe('Comments.svelte', () => {
 		});
 	});
 
-	// ===== Avatar fallback =====
-
 	describe('Avatar fallback', () => {
 		it('should fall back to logoPlaceholder when authorAvatar is empty', () => {
 			const { getByAltText } = render(Comments, {
@@ -275,8 +262,6 @@ describe('Comments.svelte', () => {
 		});
 	});
 
-	// ===== Depth / indentation =====
-
 	describe('Depth prop', () => {
 		it('should default depth to 0', () => {
 			const { container } = render(Comments, { comment: baseComment });
@@ -295,17 +280,5 @@ describe('Comments.svelte', () => {
 			const commentContainer = container.querySelector('.comment-container');
 			expect(commentContainer).toHaveClass('ml-12');
 		});
-
-		// it('should apply border-left style when depth > 0', () => {
-		// 	const { container } = render(Comments, { comment: baseComment, depth: 1 });
-		// 	const commentContainer = container.querySelector('.comment-container') as HTMLElement;
-		// 	expect(commentContainer.style.borderLeft).toContain('2px solid');
-		// });
-		//
-		// it('should not apply border-left style at depth 0', () => {
-		// 	const { container } = render(Comments, { comment: baseComment });
-		// 	const commentContainer = container.querySelector('.comment-container') as HTMLElement;
-		// 	expect(commentContainer.style.borderLeft).toBe('none');
-		// });
 	});
 });

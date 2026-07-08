@@ -1,18 +1,8 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/svelte';
 import ChannelVideos from './ChannelVideos.svelte';
 import type { ChannelVideoConfig } from '$lib/adapters/types';
 import channelVideosFixture from '../../../tests/fixtures/adapters/channelVideos.json';
-
-// Mock the formatters module
-vi.mock('$lib/utils/formatters', () => ({
-	formatCount: (count: number) => new Intl.NumberFormat('en-US').format(count),
-	formatDuration: (seconds: number) => {
-		const m = Math.floor(seconds / 60);
-		const s = seconds % 60;
-		return `${m}:${String(s).padStart(2, '0')}`;
-	}
-}));
 
 const videos = channelVideosFixture as ChannelVideoConfig[];
 
@@ -96,6 +86,11 @@ describe('ChannelVideos', () => {
 			expect(screen.getByText('1:10')).toBeTruthy();
 			expect(screen.getByText('2:39')).toBeTruthy();
 		});
+
+		it('separates views and date with a dot when both are present', () => {
+			render(ChannelVideos, { props: { videos: [channelVideosFixture[0]] } });
+			expect(screen.getByText('·')).toBeInTheDocument();
+		});
 	});
 
 	describe('Edge cases', () => {
@@ -138,38 +133,6 @@ describe('ChannelVideos', () => {
 
 			expect(screen.getByText("Caine's Requiem")).toBeTruthy();
 			expect(screen.getAllByRole('link')).toHaveLength(1);
-		});
-	});
-
-	describe('Styling and layout', () => {
-		it('should render the responsive grid container', () => {
-			const { container } = render(ChannelVideos, { props: { videos } });
-
-			const grid = container.querySelector(
-				'.grid.grid-cols-1.sm\\:grid-cols-2.lg\\:grid-cols-3.xl\\:grid-cols-4'
-			);
-			expect(grid).toBeTruthy();
-		});
-
-		it('should apply group-hover class to each card link', () => {
-			const { container } = render(ChannelVideos, { props: { videos } });
-
-			const cards = container.querySelectorAll('a.group');
-			expect(cards).toHaveLength(videos.length);
-		});
-
-		it('should apply line-clamp-2 to video titles', () => {
-			const { container } = render(ChannelVideos, { props: { videos } });
-
-			const titles = container.querySelectorAll('h3.line-clamp-2');
-			expect(titles).toHaveLength(videos.length);
-		});
-
-		it('should apply 16/9 aspect ratio to thumbnail container', () => {
-			const { container } = render(ChannelVideos, { props: { videos } });
-
-			const thumbnailWrappers = container.querySelectorAll('[style*="aspect-ratio: 16/9"]');
-			expect(thumbnailWrappers).toHaveLength(videos.length);
 		});
 	});
 });

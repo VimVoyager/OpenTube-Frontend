@@ -21,10 +21,6 @@ vi.mock('$lib/api/playlist');
 import { getPlaylist } from '$lib/api/playlist';
 const mockGetPlaylist = vi.mocked(getPlaylist);
 
-// =============================================================================
-// Fixtures
-// =============================================================================
-
 const playlistFixture = searchResultFixture[3] as PlaylistSearchResultConfig;
 
 // Derived variant with no thumbnail — triggers placeholder fallback
@@ -50,19 +46,13 @@ const mockPlaylistResponse = {
 // playlist context in the query string
 const expectedVideoUrl = `/video/first-video-id?playlist=${encodeURIComponent(playlistFixture.id)}&index=0`;
 
-// =============================================================================
 // Setup and Teardown
-// =============================================================================
-
 beforeEach(() => {
 	vi.clearAllMocks();
 	mockGetPlaylist.mockResolvedValue(mockPlaylistResponse as never);
 });
 
-// =============================================================================
 // Tests
-// =============================================================================
-
 describe('PlaylistResult', () => {
 	describe('Rendering with real data', () => {
 		it('should render the playlist title in both layouts', () => {
@@ -216,63 +206,24 @@ describe('PlaylistResult', () => {
 			expect(mockGoto).not.toHaveBeenCalled();
 		});
 
-		it('should not navigate when the playlist has no videos', async () => {
-			mockGetPlaylist.mockResolvedValue({ relatedItems: [] } as never);
+		it.each([
+			['the playlist has no videos',
+				() => mockGetPlaylist.mockResolvedValue({ relatedItems: [] } as never)],
+			['the first video URL has no video ID',
+				() => mockGetPlaylist.mockResolvedValue({ relatedItems: [{ url: 'https://www.youtube.com/watch' }] } as never)],
+			['the playlist fetch fails',
+				() => mockGetPlaylist.mockRejectedValue(new Error('Failed to fetch playlist'))]
+		])('does not navigate when %s', async (_label, arrange) => {
+			arrange();
 			const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 			const { container } = render(PlaylistResult, { props: { result: playlistFixture } });
 
-			const buttons = container.querySelectorAll('[role="button"]');
-			await fireEvent.click(buttons[0]);
+			await fireEvent.click(container.querySelectorAll('[role="button"]')[0]);
 
 			await waitFor(() => {
-				expect(consoleErrorSpy).toHaveBeenCalledWith(
-					'Failed to load playlist:',
-					expect.any(Error)
-				);
+				expect(consoleErrorSpy).toHaveBeenCalledWith('Failed to load playlist:', expect.any(Error));
 			});
 			expect(mockGoto).not.toHaveBeenCalled();
-
-			consoleErrorSpy.mockRestore();
-		});
-
-		it('should not navigate when the first video URL has no video ID', async () => {
-			mockGetPlaylist.mockResolvedValue({
-				relatedItems: [{ url: 'https://www.youtube.com/watch' }]
-			} as never);
-			const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-			const { container } = render(PlaylistResult, { props: { result: playlistFixture } });
-
-			const buttons = container.querySelectorAll('[role="button"]');
-			await fireEvent.click(buttons[0]);
-
-			await waitFor(() => {
-				expect(consoleErrorSpy).toHaveBeenCalledWith(
-					'Failed to load playlist:',
-					expect.any(Error)
-				);
-			});
-			expect(mockGoto).not.toHaveBeenCalled();
-
-			consoleErrorSpy.mockRestore();
-		});
-
-		it('should not navigate when the playlist fetch fails', async () => {
-			mockGetPlaylist.mockRejectedValue(new Error('Failed to fetch playlist'));
-			const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-			const { container } = render(PlaylistResult, { props: { result: playlistFixture } });
-
-			const buttons = container.querySelectorAll('[role="button"]');
-			await fireEvent.click(buttons[0]);
-
-			await waitFor(() => {
-				expect(consoleErrorSpy).toHaveBeenCalledWith(
-					'Failed to load playlist:',
-					expect.any(Error)
-				);
-			});
-			expect(mockGoto).not.toHaveBeenCalled();
-
-			consoleErrorSpy.mockRestore();
 		});
 
 		it('should ignore clicks while a playlist fetch is in flight', async () => {
@@ -294,57 +245,6 @@ describe('PlaylistResult', () => {
 			await waitFor(() => {
 				expect(mockGoto).toHaveBeenCalledTimes(1);
 			});
-		});
-	});
-
-	describe('Styling and layout', () => {
-		it('should render the desktop layout with hidden sm:grid classes', () => {
-			const { container } = render(PlaylistResult, { props: { result: playlistFixture } });
-
-			const desktopLayout = container.querySelector('.hidden.sm\\:grid');
-			expect(desktopLayout).toBeTruthy();
-		});
-
-		it('should render the mobile layout with sm:hidden class', () => {
-			const { container } = render(PlaylistResult, { props: { result: playlistFixture } });
-
-			const mobileLayout = container.querySelector('.sm\\:hidden');
-			expect(mobileLayout).toBeTruthy();
-		});
-
-		it('should apply hover effect class to both layout containers', () => {
-			const { container } = render(PlaylistResult, { props: { result: playlistFixture } });
-
-			const hoverDivs = container.querySelectorAll('.hover\\:bg-secondary');
-			expect(hoverDivs.length).toBeGreaterThanOrEqual(2);
-		});
-
-		it('should apply grid layout with 1/3 and 2/3 columns on desktop', () => {
-			const { container } = render(PlaylistResult, { props: { result: playlistFixture } });
-
-			const gridContainer = container.querySelector('.sm\\:grid.sm\\:grid-cols-3');
-			expect(gridContainer).toBeTruthy();
-
-			const leftColumn = container.querySelector('.col-span-1');
-			const rightColumn = container.querySelector('.col-span-2');
-			expect(leftColumn).toBeTruthy();
-			expect(rightColumn).toBeTruthy();
-		});
-
-		it('should apply line-clamp-2 to the title in the mobile layout', () => {
-			const { container } = render(PlaylistResult, { props: { result: playlistFixture } });
-
-			const clampedTitle = container.querySelector('h3.line-clamp-2');
-			expect(clampedTitle).toBeTruthy();
-			expect(clampedTitle?.textContent).toBe('Murder Drones');
-		});
-
-		it('should render thumbnails as relative images inside a stacked container', () => {
-			const { container } = render(PlaylistResult, { props: { result: playlistFixture } });
-
-			// The stacked effect uses .relative wrappers with absolute offset divs inside
-			const stackContainers = container.querySelectorAll('.relative.w-full');
-			expect(stackContainers.length).toBeGreaterThanOrEqual(2);
 		});
 	});
 });

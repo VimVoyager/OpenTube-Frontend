@@ -60,12 +60,12 @@
 		} catch (err) {
 			console.error('Error loading video player manifest:', err);
 			// If Shaka threw its own error object, extract the detail.
-			// Otherwise fall back to a generic MANIFEST error.
-			const shakaErr = err as any;
+			// Otherwise, fall back to a generic MANIFEST error.
+			const shakaErr = err as { category?: unknown; code?: number; severity?: number };
 			if (typeof shakaErr?.category === 'number') {
 				playerError = {
 					category: shakaErr.category,
-					code: shakaErr.code,
+					code: shakaErr.code ?? 0,
 					severity: shakaErr.severity ?? 2
 				};
 			} else {
@@ -105,17 +105,18 @@
 		retrying = false;
 	}
 
-
+	let destroyed = false;
+	onDestroy(() => { destroyed = true; });
 
 	onMount(async () => {
 		if (!browser) return;
-
-		console.log('config received:', config);
 
 		// Dynamically import Shaka Player only in the browser (no SSR)
 		const shakaModule = await import('shaka-player/dist/shaka-player.ui');
 		await import('shaka-player/dist/controls.css');
 		const shaka = shakaModule.default;
+
+		if (destroyed || !videoElement) return;
 
 		shaka.polyfill.installAll();
 

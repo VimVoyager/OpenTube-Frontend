@@ -285,7 +285,7 @@ export interface ShakaRequest {
 
 export interface ShakaPlayerInstance {
 	attach(video: HTMLMediaElement): Promise<void>;
-	load(manifestUri: string, startTime?: number, mimeType?: string): Promise<void>;
+	load(manifestUri: string, startTime?: number | null, mimeType?: string): Promise<void>;
 	configure(config: ShakaPlayerConfiguration): void;
 	destroy(): Promise<void>;
 	addEventListener(type: string, listener: (event: ShakaErrorEvent) => void): void;

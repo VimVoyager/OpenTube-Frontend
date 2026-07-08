@@ -1,6 +1,3 @@
-<script lang="ts">
-</script>
-
 <div class="loading-container">
 	<!-- Video player skeleton -->
 	<div class="video-skeleton">

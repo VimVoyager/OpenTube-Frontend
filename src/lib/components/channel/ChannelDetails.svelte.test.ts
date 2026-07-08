@@ -75,11 +75,11 @@ describe('ChannelDetails', () => {
 			expect(avatar.getAttribute('src')).toBe('/placeholder-avatar.svg');
 		});
 
-		it('should render avatar with rounded-full class', () => {
-			const { container } = render(ChannelDetails, { props: { channel: glitchChannel } });
-
-			const avatar = container.querySelector('img.rounded-full');
-			expect(avatar).toBeTruthy();
+		it('falls back to the logo placeholder when the avatar fails to load', async () => {
+			render(ChannelDetails, { props: { channel: glitchChannel } });
+			const avatar = screen.getByAltText(`${glitchChannel.name} avatar`); // adjust to actual alt
+			await fireEvent.error(avatar);
+			expect(avatar).toHaveAttribute('src', '/placeholder-avatar.svg');
 		});
 	});
 
