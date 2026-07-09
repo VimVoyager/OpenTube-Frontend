@@ -2,7 +2,7 @@ node_modules
 .svelte-kit
 build
 .env
-.env
+env
 .git
 .gitignore
 *.md
@@ -13,3 +13,6 @@ coverage
 *.log
 npm-debug.log*
 .DS_Store
+.github
+src/tests/
+*.test.ts
