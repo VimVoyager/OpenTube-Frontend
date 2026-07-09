@@ -38,8 +38,7 @@ export function extractIdFromUrl(url: string): string {
 				return match[1];
 			}
 		}
-		
+
 		return '';
 	}
 }
-

@@ -1,6 +1,6 @@
 /**
  * Test Suite: SearchResultsLoading.svelte
- * 
+ *
  * Tests for search results page loading skeleton with configurable count
  */
 
@@ -8,7 +8,7 @@ import { render, screen } from '@testing-library/svelte';
 import { describe, it, expect } from 'vitest';
 import SearchResultsLoading from './SearchResultsLoading.svelte';
 
-const getItems = () => screen.queryAllByRole('status', { name: 'Loading search result'});
+const getItems = () => screen.queryAllByRole('status', { name: 'Loading search result' });
 
 describe('SearchResultsLoading', () => {
 	it('announces the results container to screen readers', () => {
@@ -33,5 +33,4 @@ describe('SearchResultsLoading', () => {
 		expect(container.querySelector('.mb-6 .h-8')).toBeInTheDocument();
 		expect(container.querySelector('.mt-8 .h-4')).toBeInTheDocument();
 	});
-
 });

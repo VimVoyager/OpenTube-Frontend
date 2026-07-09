@@ -1,6 +1,6 @@
 <script lang="ts">
 	type Variant = 'error' | 'warning' | 'info' | 'empty';
-	
+
 	let {
 		variant = 'error',
 		title,
@@ -48,24 +48,24 @@
 	let iconColorClasses = $derived(iconStyles[variant]);
 </script>
 
-<div class="rounded-lg border {containerClasses} p-8 text-center mx-auto max-w-2xl">
+<div class="rounded-lg border {containerClasses} mx-auto max-w-2xl p-8 text-center">
 	{#if displayIcon}
-		<div class="text-5xl mb-4 {iconColorClasses}">
+		<div class="mb-4 text-5xl {iconColorClasses}">
 			{displayIcon}
 		</div>
 	{/if}
-	
-	<h2 class="text-lg font-semibold text-primary mb-2">
+
+	<h2 class="text-primary mb-2 text-lg font-semibold">
 		{title}
 	</h2>
-	
-	<p class="text-sm text-secondary max-w-md mx-auto">
+
+	<p class="text-secondary mx-auto max-w-md text-sm">
 		{message}
 	</p>
 
 	{#if showRetry && onRetry}
-		<button 
-			class="mt-6 bg-accent hover:bg-accent-hover text-white font-medium px-6 py-2 rounded-md transition-colors"
+		<button
+			class="bg-accent hover:bg-accent-hover mt-6 rounded-md px-6 py-2 font-medium text-white transition-colors"
 			onclick={onRetry}
 		>
 			Retry

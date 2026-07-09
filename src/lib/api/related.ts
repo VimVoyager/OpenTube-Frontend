@@ -7,40 +7,35 @@ const API_BASE_URL = PUBLIC_API_URL;
  * Fetch related video streams for a given video ID
  */
 export async function getRelatedStreams(
-    id: string,
-    fetchFn?: typeof globalThis.fetch
+	id: string,
+	fetchFn?: typeof globalThis.fetch
 ): Promise<RelatedItemResponse[]> {
-    const fetcher = fetchFn ?? globalThis.fetch;
+	const fetcher = fetchFn ?? globalThis.fetch;
 
-    try {
-        const res = await fetcher(
-            `${API_BASE_URL}/streams/related?id=${encodeURIComponent(id)}`
-        );
+	try {
+		const res = await fetcher(`${API_BASE_URL}/streams/related?id=${encodeURIComponent(id)}`);
 
-        if (!res.ok) {
-            throw new Error(
-                `Failed to fetch related streams for ${id}: ${res.status} ${res.statusText}`
-            );
-        }
+		if (!res.ok) {
+			throw new Error(`Failed to fetch related streams for ${id}: ${res.status} ${res.statusText}`);
+		}
 
-        const data = await res.json();
+		const data = await res.json();
 
-        // Validate data exists first
-        if (!data) {
-            throw new Error('Unexpected response format for related streams');
-        }
+		// Validate data exists first
+		if (!data) {
+			throw new Error('Unexpected response format for related streams');
+		}
 
-        // Handle different response formats
-        if (Array.isArray(data)) {
-            return data as RelatedItemResponse[];
-        } else if (data.streams && Array.isArray(data.streams)) {
-            return data.streams as RelatedItemResponse[];
-        } else {
-            throw new Error('Unexpected response format for related streams');
-        }
-    } catch (error) {
-        console.error('Error fetching related streams:', error);
-        throw error;
-    }
+		// Handle different response formats
+		if (Array.isArray(data)) {
+			return data as RelatedItemResponse[];
+		} else if (data.streams && Array.isArray(data.streams)) {
+			return data.streams as RelatedItemResponse[];
+		} else {
+			throw new Error('Unexpected response format for related streams');
+		}
+	} catch (error) {
+		console.error('Error fetching related streams:', error);
+		throw error;
+	}
 }
-

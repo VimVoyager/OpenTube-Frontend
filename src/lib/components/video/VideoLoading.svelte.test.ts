@@ -1,6 +1,6 @@
 /**
  * Test Suite: VideoLoading.svelte
- * 
+ *
  * Tests for video player page loading skeleton
  */
 

@@ -62,7 +62,9 @@ export const buildRelatedItem = (
 		streamType: 'VIDEO_STREAM',
 		uploaderName: 'Test Channel',
 		uploaderUrl: 'https://www.youtube.com/channel/UCtest456',
-		uploaderAvatars: [buildAvatar({ url: 'https://example.com/avatar.jpg', width: 48, height: 48 })],
+		uploaderAvatars: [
+			buildAvatar({ url: 'https://example.com/avatar.jpg', width: 48, height: 48 })
+		],
 		duration: 120,
 		viewCount: 1000,
 		textualUploadDate: '2 weeks ago',
@@ -90,7 +92,9 @@ export const buildPlaylistResponse = (
 		uploaderName: 'Test Channel',
 		uploaderUrl: 'https://www.youtube.com/channel/UCtest456',
 		uploaderVerified: true,
-		uploaderAvatars: [buildAvatar({ url: 'https://example.com/avatar.jpg', width: 176, height: 176 })],
+		uploaderAvatars: [
+			buildAvatar({ url: 'https://example.com/avatar.jpg', width: 176, height: 176 })
+		],
 		banners: [{ url: 'https://example.com/banner.jpg', width: 1060, height: 175 }],
 		thumbnails: [buildThumbnail({ url: 'https://example.com/thumb.jpg' })],
 		description: {
@@ -119,18 +123,31 @@ export const buildChannelDetailsResponse = (
 	banners: { url: string; height: number; width: number; estimatedResolution: string }[] | Image[];
 	avatarUrl?: string | null;
 	bannerUrl?: string | null;
-	tabs?: string[]
-} =>
-	({
-		id: 'UCtest456',
-		name: 'Test Channel',
-		handle: 'TestChannel',
-		subscriberCount: 20_600_000,
-		description: 'A test channel description',
-		verified: true,
-		avatars: [buildAvatar({ url: 'https://example.com/channel-avatar.jpg', height: 120, width: 120, estimatedResolutionLevel: 'MEDIUM' })],
-		banners: [{ url: 'https://example.com/channel-banner.jpg', height: 175, width: 1060, estimatedResolution: 'HIGH' }],
-		...overrides
+	tabs?: string[];
+} => ({
+	id: 'UCtest456',
+	name: 'Test Channel',
+	handle: 'TestChannel',
+	subscriberCount: 20_600_000,
+	description: 'A test channel description',
+	verified: true,
+	avatars: [
+		buildAvatar({
+			url: 'https://example.com/channel-avatar.jpg',
+			height: 120,
+			width: 120,
+			estimatedResolutionLevel: 'MEDIUM'
+		})
+	],
+	banners: [
+		{
+			url: 'https://example.com/channel-banner.jpg',
+			height: 175,
+			width: 1060,
+			estimatedResolution: 'HIGH'
+		}
+	],
+	...overrides
 });
 
 export const buildChannelVideosResponse = (
@@ -147,15 +164,15 @@ export const buildChannelVideosResponse = (
 // Comments
 // ---------------------------------------------------------------------------
 
-export const buildCommentItem = (
-	overrides: Partial<RelatedCommentItem> = {}
-): RelatedCommentItem =>
+export const buildCommentItem = (overrides: Partial<RelatedCommentItem> = {}): RelatedCommentItem =>
 	({
 		infoType: 'COMMENT',
 		serviceId: 0,
 		url: 'https://www.youtube.com/watch?v=video1',
 		name: '@TestUser',
-		thumbnails: [buildThumbnail({ url: 'https://yt3.ggpht.com/comment-thumb.jpg', width: 88, height: 88 })],
+		thumbnails: [
+			buildThumbnail({ url: 'https://yt3.ggpht.com/comment-thumb.jpg', width: 88, height: 88 })
+		],
 		commentId: 'comment-test-id',
 		commentText: 'A test comment',
 		uploaderName: '@TestUser',
@@ -175,9 +192,7 @@ export const buildCommentItem = (
 		...overrides
 	}) as RelatedCommentItem;
 
-export const buildCommentResponse = (
-	overrides: Partial<CommentResponse> = {}
-): CommentResponse =>
+export const buildCommentResponse = (overrides: Partial<CommentResponse> = {}): CommentResponse =>
 	({
 		serviceId: 0,
 		id: 'video1',
@@ -193,23 +208,22 @@ export const buildCommentResponse = (
 // Video details
 // ---------------------------------------------------------------------------
 
-export const buildVideoDetails = (
-	overrides: Partial<Details> = {}
-): Details =>
-	({
-		videoTitle: 'Test Video Title',
-		description: {
-			content: 'A test video description',
-			type: 1
-		},
-		uploaderAvatars: [buildAvatar({ url: 'https://example.com/uploader-avatar.jpg', width: 176, height: 176 })],
-		viewCount: 10_000,
-		likeCount: 555,
-		dislikeCount: 10,
-		channelName: 'Test Channel',
-		channelSubscriberCount: 50_000,
-		uploadDate: '2021-10-29T16:00:13-07:00',
-		...overrides
+export const buildVideoDetails = (overrides: Partial<Details> = {}): Details => ({
+	videoTitle: 'Test Video Title',
+	description: {
+		content: 'A test video description',
+		type: 1
+	},
+	uploaderAvatars: [
+		buildAvatar({ url: 'https://example.com/uploader-avatar.jpg', width: 176, height: 176 })
+	],
+	viewCount: 10_000,
+	likeCount: 555,
+	dislikeCount: 10,
+	channelName: 'Test Channel',
+	channelSubscriberCount: 50_000,
+	uploadDate: '2021-10-29T16:00:13-07:00',
+	...overrides
 });
 
 // ---------------------------------------------------------------------------
@@ -260,9 +274,7 @@ export const buildSearchPlaylistItem = (overrides: Record<string, unknown> = {})
 	...overrides
 });
 
-export const buildSearchResponse = (
-	overrides: Partial<SearchResponse> = {}
-): SearchResponse =>
+export const buildSearchResponse = (overrides: Partial<SearchResponse> = {}): SearchResponse =>
 	({
 		correctedSearch: false,
 		isCorrectedSearch: false,

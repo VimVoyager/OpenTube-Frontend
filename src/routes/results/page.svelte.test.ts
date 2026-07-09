@@ -131,7 +131,13 @@ describe('+page.svelte - Search Results', () => {
 		expect(screen.getByText(/Search Results for "test query"/)).toBeTruthy();
 
 		const errorContainer = container.querySelector('div.bg-accent\\/10');
-		expect(errorContainer).toHaveClass('rounded-lg', 'border', 'border-accent/20', 'p-8', 'text-center');
+		expect(errorContainer).toHaveClass(
+			'rounded-lg',
+			'border',
+			'border-accent/20',
+			'p-8',
+			'text-center'
+		);
 		expect(screen.getByText('Network error occurred')).toHaveClass('text-sm', 'text-secondary');
 
 		expect(container.querySelector('.space-y-4')).toBeNull();
@@ -163,8 +169,16 @@ describe('+page.svelte - Search Results', () => {
 	it.each([
 		{ name: 'multiple results exist', results: mockSearchResults, expectPresent: true },
 		{ name: 'results array is empty', results: [], expectPresent: false },
-		{ name: 'results is null', results: null as unknown as SearchResultConfig[], expectPresent: false },
-		{ name: 'results is undefined', results: undefined as unknown as SearchResultConfig[], expectPresent: false }
+		{
+			name: 'results is null',
+			results: null as unknown as SearchResultConfig[],
+			expectPresent: false
+		},
+		{
+			name: 'results is undefined',
+			results: undefined as unknown as SearchResultConfig[],
+			expectPresent: false
+		}
 	])('should show/hide the results list correctly when $name', ({ results, expectPresent }) => {
 		const data = createMockPageData({ results });
 		const { container } = render(Page, { props: { data } });
@@ -178,17 +192,29 @@ describe('+page.svelte - Search Results', () => {
 	});
 
 	it.each([
-		{ name: 'a single stream result', results: [mockSearchResults[0]], expectedText: 'Showing 1 result' },
+		{
+			name: 'a single stream result',
+			results: [mockSearchResults[0]],
+			expectedText: 'Showing 1 result'
+		},
 		{ name: 'three stream results', results: mockSearchResults, expectedText: 'Showing 3 results' },
 		{
 			name: 'a mixed-type result list',
 			results: [mockSearchResults[0], mockChannelResult, mockPlaylistResult],
 			expectedText: 'Showing 3 results'
 		},
-		{ name: 'a single playlist result', results: [mockPlaylistResult], expectedText: 'Showing 1 result' },
+		{
+			name: 'a single playlist result',
+			results: [mockPlaylistResult],
+			expectedText: 'Showing 1 result'
+		},
 		{
 			name: 'a large results array',
-			results: Array.from({ length: 50 }, (_, i) => ({ ...mockSearchResults[0], id: `video-${i}`, title: `Video ${i}` })),
+			results: Array.from({ length: 50 }, (_, i) => ({
+				...mockSearchResults[0],
+				id: `video-${i}`,
+				title: `Video ${i}`
+			})),
 			expectedText: 'Showing 50 results'
 		}
 	])('should display the correct pluralised count for $name', ({ results, expectedText }) => {
@@ -201,9 +227,24 @@ describe('+page.svelte - Search Results', () => {
 	});
 
 	it.each([
-		{ name: 'error over results', data: { error: 'Test error', results: mockSearchResults }, expectText: 'Test error', notText: 'Showing 3 results' },
-		{ name: 'empty-query prompt over no-results message', data: { query: '', results: [] }, expectText: 'Enter a search query to find videos', notText: 'No results found' },
-		{ name: 'no-results message over empty-query prompt', data: { query: 'test', results: [] }, expectText: 'No results found for "test"', notText: 'Enter a search query' }
+		{
+			name: 'error over results',
+			data: { error: 'Test error', results: mockSearchResults },
+			expectText: 'Test error',
+			notText: 'Showing 3 results'
+		},
+		{
+			name: 'empty-query prompt over no-results message',
+			data: { query: '', results: [] },
+			expectText: 'Enter a search query to find videos',
+			notText: 'No results found'
+		},
+		{
+			name: 'no-results message over empty-query prompt',
+			data: { query: 'test', results: [] },
+			expectText: 'No results found for "test"',
+			notText: 'Enter a search query'
+		}
 	])('should prioritise $name', ({ data: overrides, expectText, notText }) => {
 		const data = createMockPageData(overrides);
 		render(Page, { props: { data } });

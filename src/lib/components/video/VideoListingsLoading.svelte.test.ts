@@ -1,6 +1,6 @@
 /**
  * Test Suite: VideoListingsLoading.svelte
- * 
+ *
  * Tests for related videos listing loading skeleton
  */
 
@@ -14,5 +14,4 @@ describe('VideoListingsLoading', () => {
 		const items = container.querySelectorAll('[style*="aspect-ratio: 16/9"]');
 		expect(items).toHaveLength(5);
 	});
-
 });

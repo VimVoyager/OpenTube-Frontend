@@ -1,6 +1,6 @@
 /**
  * Test Suite: details.ts
- * 
+ *
  * Tests for video details fetching including metadata parsing,
  * error handling, and data validation
  */
@@ -13,5 +13,5 @@ describeJsonFetcher({
 	name: 'getVideoDetails',
 	call: getVideoDetails,
 	endpoint: '/streams/details',
-	fixture: detailsFixture,
+	fixture: detailsFixture
 });

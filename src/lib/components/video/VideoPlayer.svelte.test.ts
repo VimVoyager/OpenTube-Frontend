@@ -28,7 +28,6 @@ const mockUIInstance = {
 let capturedVideoElement: HTMLVideoElement | null = null;
 
 class MockShakaPlayer {
-
 	attach(videoEl: HTMLVideoElement) {
 		capturedVideoElement = videoEl;
 		// Forward the promise so rejection scenarios reach the component
@@ -121,9 +120,7 @@ describe('VideoPlayer.svelte', () => {
 	};
 
 	const getErrorListener = () => {
-		const call = mockPlayerInstance.addEventListener.mock.calls.find(
-			([evt]) => evt === 'error'
-		);
+		const call = mockPlayerInstance.addEventListener.mock.calls.find(([evt]) => evt === 'error');
 		expect(call).toBeDefined();
 		return call![1] as (event: { detail?: unknown }) => void;
 	};
@@ -285,7 +282,7 @@ describe('VideoPlayer.svelte', () => {
 		it('should extract category/code from shaka-shaped load errors', async () => {
 			// covers the typeof shakaErr?.category === 'number' branch;
 			// the plain-Error test above covers the generic fallback branch
-			mockPlayerInstance.load.mockRejectedValueOnce({ category: 3, code: 1001});
+			mockPlayerInstance.load.mockRejectedValueOnce({ category: 3, code: 1001 });
 			const { container } = render(VideoPlayer, { config: mockConfig });
 			await waitForErrorOverlay(container);
 		});
@@ -363,7 +360,6 @@ describe('VideoPlayer.svelte', () => {
 			await waitFor(() => expect(fakeControls.style.visibility).toBe('hidden'));
 		});
 	});
-
 
 	describe('Error handling', () => {
 		it('should handle unsupported browser', async () => {

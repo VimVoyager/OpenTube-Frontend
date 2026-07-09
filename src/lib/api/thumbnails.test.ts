@@ -16,14 +16,16 @@ describe('getVideoThumbnails selection', () => {
 	it('falls back to the last thumbnail when no HIGH exists', async () => {
 		const noHigh = thumbnailFixture.slice(0, -1);
 		const fetchFn = createSuccessfulFetch(noHigh);
-		await expect(getVideoThumbnails('id1', fetchFn as never))
-			.resolves.toEqual(noHigh[noHigh.length - 1]);
+		await expect(getVideoThumbnails('id1', fetchFn as never)).resolves.toEqual(
+			noHigh[noHigh.length - 1]
+		);
 	});
 
 	it('throws when the thumbnails array is empty', async () => {
 		vi.spyOn(console, 'error').mockImplementation(() => {});
 		const fetchFn = createSuccessfulFetch([]);
-		await expect(getVideoThumbnails('id1', fetchFn as never))
-			.rejects.toThrow('No thumbnails available for video id1');
+		await expect(getVideoThumbnails('id1', fetchFn as never)).rejects.toThrow(
+			'No thumbnails available for video id1'
+		);
 	});
 });

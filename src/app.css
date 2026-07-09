@@ -63,7 +63,7 @@
 		background-color: rgb(var(--color-bg-navbar));
 	}
 
-  /* Text utilities */
+	/* Text utilities */
 	.text-primary {
 		color: rgb(var(--color-text-primary));
 	}

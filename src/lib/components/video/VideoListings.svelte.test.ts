@@ -67,7 +67,6 @@ describe('VideoListings', () => {
 
 			expect(avatar).toHaveAttribute('src', '/src/lib/assets/logo-placeholder.svg');
 		});
-
 	});
 
 	describe('duration badge', () => {
@@ -131,7 +130,6 @@ describe('VideoListings', () => {
 			const { container } = render(VideoListings, { props: { videos: [heartbeat] } });
 			expect(container.querySelector('a[href^="/channel/"]')).toHaveClass('z-20');
 		});
-
 	});
 
 	describe('accessibility', () => {

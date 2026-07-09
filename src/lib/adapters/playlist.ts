@@ -11,8 +11,10 @@ function selectBestBanner(
 	fallback: string | null
 ): string | null {
 	if (!banners || banners.length === 0) return fallback;
-	return [...banners].sort((a: { url: string; width: number }, b: { url: string; width: number }): number => b.width - a.width)[0]
-		.url;
+	return [...banners].sort(
+		(a: { url: string; width: number }, b: { url: string; width: number }): number =>
+			b.width - a.width
+	)[0].url;
 }
 
 export function adaptPlaylistInfo(info: PlaylistResponse): PlaylistInfoConfig {
@@ -47,7 +49,7 @@ function adaptPlaylistVideo(video: RelatedItemResponse): RelatedVideoConfig {
 
 export function adaptPlaylistVideos(response: PlaylistResponse): RelatedVideoConfig[] {
 	if (!response?.relatedItems) return [];
-	return response.relatedItems.map((item: RelatedItem): RelatedVideoConfig =>
-		adaptPlaylistVideo(item as RelatedItemResponse)
+	return response.relatedItems.map(
+		(item: RelatedItem): RelatedVideoConfig => adaptPlaylistVideo(item as RelatedItemResponse)
 	);
 }

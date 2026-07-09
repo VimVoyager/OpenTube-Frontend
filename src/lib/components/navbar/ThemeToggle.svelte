@@ -6,7 +6,7 @@
 	onMount(() => {
 		// Check localStorage for saved preference
 		const savedTheme = localStorage.getItem('theme');
-		
+
 		if (savedTheme === 'dark') {
 			isDark = true;
 			document.documentElement.classList.add('dark');
@@ -23,7 +23,7 @@
 
 	function toggleTheme() {
 		isDark = !isDark;
-		
+
 		if (isDark) {
 			document.documentElement.classList.add('dark');
 			localStorage.setItem('theme', 'dark');
@@ -36,7 +36,7 @@
 
 <button
 	onclick={toggleTheme}
-	class="relative inline-flex items-center justify-center rounded-md p-2 text-secondary hover:bg-secondary hover:text-primary focus:outline-2 focus:-outline-offset-1 focus:border-accent transition-colors"
+	class="text-secondary hover:bg-secondary hover:text-primary focus:border-accent relative inline-flex items-center justify-center rounded-md p-2 transition-colors focus:outline-2 focus:-outline-offset-1"
 	aria-label="Toggle theme"
 	title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
 >

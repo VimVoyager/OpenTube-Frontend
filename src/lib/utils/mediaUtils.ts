@@ -1,6 +1,5 @@
 import type { Thumbnail, Avatar } from '$lib/types';
 
-
 /**
  * Selects the best quality thumbnail from available options
  * Prefers medium quality (index 1), falls back to last available, then first
@@ -8,7 +7,9 @@ import type { Thumbnail, Avatar } from '$lib/types';
 export function selectBestThumbnail(thumbnails: Thumbnail[], fallback: string): string {
 	if (!thumbnails || thumbnails.length === 0) return fallback;
 
-	return thumbnails[1]?.url || thumbnails[thumbnails.length - 1]?.url || thumbnails[0]?.url || fallback;
+	return (
+		thumbnails[1]?.url || thumbnails[thumbnails.length - 1]?.url || thumbnails[0]?.url || fallback
+	);
 }
 /**
  * Selects the best quality uploader avatar from available options

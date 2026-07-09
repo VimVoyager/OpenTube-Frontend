@@ -1,6 +1,6 @@
 /**
  * Vitest Setup File - Server Tests
- * 
+ *
  * Setup for server-side tests (Node environment)
  * Runs before each server test suite.
  */
@@ -22,9 +22,9 @@ vi.mock('$lib/assets/thumbnail-placeholder.svg', () => ({
 }));
 
 afterEach(() => {
-    vi.clearAllMocks();
+	vi.clearAllMocks();
 });
 
 beforeAll(() => {
-    process.env.NODE_ENV = 'test';
+	process.env.NODE_ENV = 'test';
 });

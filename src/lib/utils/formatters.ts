@@ -17,7 +17,7 @@ export function formatDate(dateString: string): string {
 	}
 
 	const date = new Date(dateString);
-	
+
 	// Check if date is valid
 	if (isNaN(date.getTime())) {
 		return dateString; // Return original string if invalid
@@ -64,4 +64,3 @@ export function parseIsoDuration(duration: string | null | undefined): number {
 
 	return hours * 3600 + minutes * 60 + seconds;
 }
-

@@ -7,7 +7,7 @@
 
 import { describeJsonFetcher } from '../../tests/helpers/describeJsonFetcher';
 import { getPlaylist } from './playlist';
-import playlistFixture from '../../tests/fixtures/api/playlistResponse.json'
+import playlistFixture from '../../tests/fixtures/api/playlistResponse.json';
 
 describeJsonFetcher({
 	name: 'getPlaylist',

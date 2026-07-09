@@ -28,8 +28,10 @@ function selectBestBanner(
 	fallback: string | null
 ): string | null {
 	if (!banners || banners.length === 0) return fallback;
-	return [...banners].sort((a: { url: string; width: number }, b: { url: string; width: number }): number => b.width - a.width)[0]
-		.url;
+	return [...banners].sort(
+		(a: { url: string; width: number }, b: { url: string; width: number }): number =>
+			b.width - a.width
+	)[0].url;
 }
 
 /**
@@ -41,7 +43,10 @@ function selectBestAvatar(
 	fallback: string | null
 ): string | null {
 	if (!avatars || avatars.length === 0) return fallback;
-	return [...avatars].sort((a: {url: string, height: number}, b: {url: string, height: number}): number => b.height - a.height)[0].url;
+	return [...avatars].sort(
+		(a: { url: string; height: number }, b: { url: string; height: number }): number =>
+			b.height - a.height
+	)[0].url;
 }
 
 /**
@@ -91,7 +96,8 @@ export function adaptChannelVideos(
 	avatarFallback: string
 ): ChannelVideoConfig[] {
 	if (!response?.items) return [];
-	return response.items.map((v: ChannelVideoItem): ChannelVideoConfig =>
-		adaptChannelVideo(v, thumbnailFallback, avatarFallback)
+	return response.items.map(
+		(v: ChannelVideoItem): ChannelVideoConfig =>
+			adaptChannelVideo(v, thumbnailFallback, avatarFallback)
 	);
 }

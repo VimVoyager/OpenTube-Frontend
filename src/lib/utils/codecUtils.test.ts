@@ -83,9 +83,12 @@ describe('inferMimeType', () => {
 		// codec wins over isVideo:
 		['avc1.42E01E', false, 'video/mp4'],
 		['mp4a.40.2', true, 'audio/mp4']
-	])('should infer codec %s (isVideo: %s) as %s when format is absent', (codec, isVideo, expected) => {
-		expect(inferMimeType(undefined, codec, isVideo)).toBe(expected);
-	});
+	])(
+		'should infer codec %s (isVideo: %s) as %s when format is absent',
+		(codec, isVideo, expected) => {
+			expect(inferMimeType(undefined, codec, isVideo)).toBe(expected);
+		}
+	);
 
 	it('should prioritize format over codec when both are recognised', () => {
 		expect(inferMimeType('MP4', 'vp9', true)).toBe('video/mp4');

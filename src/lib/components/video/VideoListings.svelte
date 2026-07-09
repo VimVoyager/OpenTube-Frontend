@@ -14,37 +14,46 @@
 	{#if videos.length === 0}
 		<!-- Empty state -->
 		<div class="flex flex-col items-center justify-center py-8 text-center">
-			<div class="text-4xl mb-4">📹</div>
-			<p class="text-sm text-secondary">No related Videos available</p>
+			<div class="mb-4 text-4xl">📹</div>
+			<p class="text-secondary text-sm">No related Videos available</p>
 		</div>
 	{:else}
 		{#each videos as video (video.id)}
-			<div class="group relative flex gap-2 hover:bg-secondary rounded-lg transition-colors p-2 mx-2">
-
+			<div
+				class="group hover:bg-secondary relative mx-2 flex gap-2 rounded-lg p-2 transition-colors"
+			>
 				<!-- Stretched invisible link covering the whole card -->
-				<a href="/video/{encodeURIComponent(video.id)}" class="absolute inset-0 rounded-lg" aria-label={video.title}></a>
+				<a
+					href="/video/{encodeURIComponent(video.id)}"
+					class="absolute inset-0 rounded-lg"
+					aria-label={video.title}
+				></a>
 
 				<!-- Thumbnail -->
-				<div class="relative shrink-0 w-40">
+				<div class="relative w-40 shrink-0">
 					<div class="relative" style="aspect-ratio: 16/9;">
-						<img 
-							src={video.thumbnail} 
+						<img
+							src={video.thumbnail}
 							alt={`thumbnail-${video.id}`}
-							class="w-full h-full rounded-md object-cover"
+							class="h-full w-full rounded-md object-cover"
 						/>
 						<!-- Duration badge -->
 						{#if video.duration > 0}
-							<span class="absolute bottom-1 right-1 bg-black bg-opacity-80 text-white text-xs px-1 py-0.5 rounded">
+							<span
+								class="bg-opacity-80 absolute right-1 bottom-1 rounded bg-black px-1 py-0.5 text-xs text-white"
+							>
 								{formatDuration(video.duration)}
 							</span>
 						{/if}
 					</div>
 				</div>
 
-			<!-- Video Info -->
-				<div class="flex flex-col flex-1 min-w-0">
+				<!-- Video Info -->
+				<div class="flex min-w-0 flex-1 flex-col">
 					<!-- Title -->
-					<h3 class="text-sm font-semibold text-primary line-clamp-2 group-hover:text-accent transition-colors">
+					<h3
+						class="text-primary group-hover:text-accent line-clamp-2 text-sm font-semibold transition-colors"
+					>
 						{video.title}
 					</h3>
 
@@ -59,18 +68,18 @@
 								<img
 									src={video.channelAvatar || logoPlaceholder}
 									alt={`${video.id}-channel-avatar-${video.channelName}`}
-									class="h-6 w-6 rounded-full object-cover shrink-0"
+									class="h-6 w-6 shrink-0 rounded-full object-cover"
 									onerror={handleAvatarError}
 								/>
 							{/if}
-							<p class="text-xs text-secondary truncate">
+							<p class="text-secondary truncate text-xs">
 								{video.channelName}
 							</p>
 						</a>
 					</div>
 
 					<!-- Video Stats -->
-					<div class="mt-1 flex flex-row text-xs text-muted">
+					<div class="text-muted mt-1 flex flex-row text-xs">
 						<span>{formatCount(video.viewCount)} views</span>
 						{#if video.uploadDate}
 							<span class="mx-2">•</span>

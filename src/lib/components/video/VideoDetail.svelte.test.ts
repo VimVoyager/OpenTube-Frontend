@@ -1,6 +1,6 @@
 /**
  * Test Suite: VideoDetail.svelte
- * 
+ *
  * Tests for video metadata display component with collapsible description
  */
 
@@ -14,7 +14,6 @@ import videoDetailsFixture from '../../../tests/fixtures/adapters/detailsResult.
 const mockMetadata: VideoMetadata = videoDetailsFixture[0];
 const mockNoAvatarLargeNumbers: VideoMetadata = videoDetailsFixture[1];
 const mockLongDescZeroViews: VideoMetadata = videoDetailsFixture[2];
-
 
 describe('VideoDetail', () => {
 	describe('metadata display', () => {

@@ -110,5 +110,4 @@ describe('results load function integration', () => {
 			expect(search.error).toBe('Failed to load search results');
 		});
 	});
-
 });

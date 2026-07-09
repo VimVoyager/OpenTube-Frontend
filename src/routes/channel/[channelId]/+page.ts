@@ -1,25 +1,17 @@
 import type { PageLoad } from '../../$types';
-import {
-	getChannelInfo,
-	getChannelVideos
-} from '$lib/api/channel';
-import {
-	adaptChannelInfo,
-	adaptChannelVideos
-} from '$lib/adapters/channel';
+import { getChannelInfo, getChannelVideos } from '$lib/api/channel';
+import { adaptChannelInfo, adaptChannelVideos } from '$lib/adapters/channel';
 import thumbnailPlaceholder from '$lib/assets/thumbnail-placeholder.jpg';
 import logoPlaceholder from '$lib/assets/logo-placeholder.svg';
 import type { ChannelPageData } from '../../types';
-import type {
-	ChannelConfig,
-	ChannelVideoConfig
-} from '$lib/adapters/types';
+import type { ChannelConfig, ChannelVideoConfig } from '$lib/adapters/types';
 
 /**
  * Creates error page data with safe defaults
  */
 function createErrorPageData(error: unknown): ChannelPageData {
-	const errorMessage: string = error instanceof Error ? error.message : 'Unknown error loading channel';
+	const errorMessage: string =
+		error instanceof Error ? error.message : 'Unknown error loading channel';
 
 	return {
 		channel: {
@@ -53,7 +45,11 @@ export const load: PageLoad = async ({ params, fetch }): Promise<ChannelPageData
 			})
 		]);
 
-		const videos: ChannelVideoConfig[] = adaptChannelVideos(videosResponse, thumbnailPlaceholder, logoPlaceholder);
+		const videos: ChannelVideoConfig[] = adaptChannelVideos(
+			videosResponse,
+			thumbnailPlaceholder,
+			logoPlaceholder
+		);
 
 		const channel: ChannelConfig = adaptChannelInfo(info);
 

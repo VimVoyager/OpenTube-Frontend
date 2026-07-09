@@ -1,6 +1,6 @@
 /**
  * Test Suite: VideoResultLoading.svelte
- * 
+ *
  * Tests for individual search result loading skeleton
  */
 

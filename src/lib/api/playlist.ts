@@ -13,12 +13,12 @@ export async function getPlaylist(
 	} = fetchFn ?? globalThis.fetch;
 
 	try {
-		const res: Response = await fetcher(`${API_BASE_URL}/playlists?id=${encodeURIComponent(playlistId)}`);
+		const res: Response = await fetcher(
+			`${API_BASE_URL}/playlists?id=${encodeURIComponent(playlistId)}`
+		);
 
 		if (!res.ok) {
-			throw new Error(
-				`Failed to fetch playlist ${playlistId}: ${res.status} ${res.statusText}`
-			);
+			throw new Error(`Failed to fetch playlist ${playlistId}: ${res.status} ${res.statusText}`);
 		}
 		return await res.json();
 	} catch (error) {

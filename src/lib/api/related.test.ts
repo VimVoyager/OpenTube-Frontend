@@ -1,6 +1,6 @@
 /**
  * Test Suite: related.ts
- * 
+ *
  * Tests for related video streams fetching
  */
 
@@ -14,14 +14,13 @@ describeJsonFetcher({
 	name: 'getRelatedStreams',
 	call: getRelatedStreams,
 	endpoint: '/streams/related',
-	fixture: relatedVideosFixture,
+	fixture: relatedVideosFixture
 });
 
 describe('getRelatedStreams response normalization', () => {
 	it('unwraps the { streams: [...] } response format', async () => {
 		const fetchFn = createSuccessfulFetch({ streams: relatedVideosFixture });
-		await expect(getRelatedStreams('id1', fetchFn as never))
-			.resolves.toEqual(relatedVideosFixture);
+		await expect(getRelatedStreams('id1', fetchFn as never)).resolves.toEqual(relatedVideosFixture);
 	});
 
 	it.each([
@@ -31,7 +30,8 @@ describe('getRelatedStreams response normalization', () => {
 	])('throws on unexpected format: %s', async (_label, body) => {
 		vi.spyOn(console, 'error').mockImplementation(() => {});
 		const fetchFn = createSuccessfulFetch(body);
-		await expect(getRelatedStreams('id1', fetchFn as never))
-			.rejects.toThrow('Unexpected response format for related streams');
+		await expect(getRelatedStreams('id1', fetchFn as never)).rejects.toThrow(
+			'Unexpected response format for related streams'
+		);
 	});
 });

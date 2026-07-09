@@ -16,7 +16,7 @@ describeJsonFetcher({
 	call: (id, fetchFn) => getSearchResults(id, 'relevance', fetchFn),
 	endpoint: '/search',
 	idParam: 'searchString',
-	fixture: searchResultsFixture,
+	fixture: searchResultsFixture
 });
 
 describe('getSearchResults sort filter', () => {

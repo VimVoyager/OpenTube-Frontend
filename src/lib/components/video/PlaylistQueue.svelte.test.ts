@@ -237,7 +237,6 @@ describe('PlaylistQueue', () => {
 				);
 			});
 		});
-
 	});
 
 	describe('edge cases', () => {

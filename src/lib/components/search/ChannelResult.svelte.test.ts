@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/svelte';
-import { adaptSearchResults} from '$lib/adapters/search';
+import { adaptSearchResults } from '$lib/adapters/search';
 import ChannelResult from './ChannelResult.svelte';
 import type { ChannelSearchResultConfig } from '$lib/adapters/types';
 import channelSearchResultFixtures from '../../../tests/fixtures/adapters/channelSearchResult.json';

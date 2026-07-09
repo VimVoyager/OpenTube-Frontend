@@ -207,12 +207,21 @@ describe('PlaylistResult', () => {
 		});
 
 		it.each([
-			['the playlist has no videos',
-				() => mockGetPlaylist.mockResolvedValue({ relatedItems: [] } as never)],
-			['the first video URL has no video ID',
-				() => mockGetPlaylist.mockResolvedValue({ relatedItems: [{ url: 'https://www.youtube.com/watch' }] } as never)],
-			['the playlist fetch fails',
-				() => mockGetPlaylist.mockRejectedValue(new Error('Failed to fetch playlist'))]
+			[
+				'the playlist has no videos',
+				() => mockGetPlaylist.mockResolvedValue({ relatedItems: [] } as never)
+			],
+			[
+				'the first video URL has no video ID',
+				() =>
+					mockGetPlaylist.mockResolvedValue({
+						relatedItems: [{ url: 'https://www.youtube.com/watch' }]
+					} as never)
+			],
+			[
+				'the playlist fetch fails',
+				() => mockGetPlaylist.mockRejectedValue(new Error('Failed to fetch playlist'))
+			]
 		])('does not navigate when %s', async (_label, arrange) => {
 			arrange();
 			const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
@@ -229,7 +238,10 @@ describe('PlaylistResult', () => {
 		it('should ignore clicks while a playlist fetch is in flight', async () => {
 			let resolveFetch!: (value: unknown) => void;
 			mockGetPlaylist.mockImplementation(
-				() => new Promise((resolve) => { resolveFetch = resolve; }) as never
+				() =>
+					new Promise((resolve) => {
+						resolveFetch = resolve;
+					}) as never
 			);
 			const { container } = render(PlaylistResult, { props: { result: playlistFixture } });
 

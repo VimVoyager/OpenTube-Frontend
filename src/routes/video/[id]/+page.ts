@@ -9,7 +9,7 @@ import thumbnailPlaceholder from '$lib/assets/thumbnail-placeholder.jpg';
 import logoPlaceholder from '$lib/assets/logo-placeholder.svg';
 import { getManifest } from '$lib/api/manifest';
 import { getVideoThumbnails } from '$lib/api/thumbnails';
-import { getPlaylist} from '$lib/api/playlist';
+import { getPlaylist } from '$lib/api/playlist';
 import type { VideoPageData } from '../../types';
 import { getVideoComments } from '$lib/api/comments';
 import type {
@@ -25,7 +25,8 @@ import { adaptCommentResponse } from '$lib/adapters/comments';
  * Creates error page data with default values
  */
 function createErrorPageData(error: unknown): VideoPageData {
-	const errorMessage: string = error instanceof Error ? error.message : 'Unknown error loading video';
+	const errorMessage: string =
+		error instanceof Error ? error.message : 'Unknown error loading video';
 
 	return {
 		playerConfig: {
@@ -110,7 +111,6 @@ export const load: PageLoad = async ({ params, url, fetch }): Promise<VideoPageD
 						})
 					: Promise.resolve(null)
 			]);
-
 
 		const playerConfig: VideoPlayerConfig = {
 			...adaptPlayerConfig(manifest.url, manifest.duration, thumbnails.url),

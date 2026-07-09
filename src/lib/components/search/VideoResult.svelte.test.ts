@@ -125,7 +125,8 @@ describe('VideoResult', () => {
 		it('falls back to placeholder assets when thumbnail/avatar are empty strings', () => {
 			const bare = { ...pilotResult, thumbnail: '', channelAvatar: '' };
 			render(VideoResult, { props: { result: bare } });
-			screen.getAllByAltText('Thumbnail for MURDER DRONES - Pilot')
+			screen
+				.getAllByAltText('Thumbnail for MURDER DRONES - Pilot')
 				.forEach((t) => expect(t.getAttribute('src')).toBe('/placeholder-thumbnail.jpg'));
 			screen
 				.getAllByAltText('GLITCH')

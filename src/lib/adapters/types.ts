@@ -20,7 +20,7 @@ export interface VideoPlayerConfig {
 	manifestUrl: string;
 	duration: number;
 	poster: string;
-	isMuxed?: boolean
+	isMuxed?: boolean;
 }
 
 /**
@@ -70,7 +70,7 @@ export interface VideoSearchResultConfig {
 	duration: number;
 	uploadDate: string;
 	description: string;
-	type: "VIDEO_STREAM" | "stream";
+	type: 'VIDEO_STREAM' | 'stream';
 }
 
 /**
@@ -84,7 +84,7 @@ export interface PlaylistSearchResultConfig {
 	uploaderName: string;
 	uploaderUrl: string | null;
 	videoCount: number;
-	type: "playlist";
+	type: 'playlist';
 }
 
 /**
@@ -99,10 +99,13 @@ export interface ChannelSearchResultConfig {
 	subscriberCount: number;
 	streamCount?: number;
 	description: string | null;
-	type: "channel";
+	type: 'channel';
 }
 
-export type SearchResultConfig = VideoSearchResultConfig | ChannelSearchResultConfig | PlaylistSearchResultConfig;
+export type SearchResultConfig =
+	| VideoSearchResultConfig
+	| ChannelSearchResultConfig
+	| PlaylistSearchResultConfig;
 
 /**
  * Comments result configuration for Comments component display
@@ -170,7 +173,3 @@ export interface PlaylistInfoConfig {
 	thumbnailUrl: string | null;
 	description?: string | null;
 }
-
-
-
-
