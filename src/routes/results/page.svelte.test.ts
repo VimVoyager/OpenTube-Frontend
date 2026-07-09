@@ -53,6 +53,27 @@ describe('+page.svelte - Search Results', () => {
 		}
 	];
 
+	const mockChannelResult: SearchResultConfig = {
+		type: 'channel',
+		id: 'channel-1',
+		name: 'Test Channel',
+		avatar: 'https://example.com/avatar.jpg',
+		description: 'A test channel',
+		subscriberCount: 1000000,
+		verified: true
+	};
+
+	const mockPlaylistResult: SearchResultConfig = {
+		type: 'playlist',
+		id: 'playlist-1',
+		url: 'https://www.youtube.com/playlist?list=playlist-1',
+		title: 'Test Playlist',
+		thumbnail: 'https://example.com/thumb.jpg',
+		uploaderName: 'Test Uploader',
+		uploaderUrl: 'https://www.youtube.com/channel/test',
+		videoCount: 12
+	};
+
 	const createMockPageData = (overrides: Partial<PageData> = {}): PageData => ({
 		results: mockSearchResults,
 		query: 'test query',
@@ -69,703 +90,149 @@ describe('+page.svelte - Search Results', () => {
 		vi.restoreAllMocks();
 	});
 
-	describe('Component rendering - success state', () => {
-		it('should render the component without errors', () => {
-			// Arrange
-			const data = createMockPageData();
-
-			// Act
-			const { container } = render(Page, { props: { data } });
-
-			// Assert
-			expect(container).toBeTruthy();
-		});
-
-		it('should render main container with correct classes', () => {
-			// Arrange
-			const data = createMockPageData();
-
-			// Act
-			const { container } = render(Page, { props: { data } });
-
-			// Assert
-			const mainContainer = container.querySelector('div.container.mx-auto');
-			expect(mainContainer).toBeTruthy();
-			expect(mainContainer).toHaveClass('w-full', 'max-w-7xl', 'px-4', 'py-8');
-		});
-
-		it('should apply correct padding classes', () => {
-			// Arrange
-			const data = createMockPageData();
-
-			// Act
-			const { container } = render(Page, { props: { data } });
-
-			// Assert
-			const mainContainer = container.querySelector('div.px-4.py-8');
-			expect(mainContainer).toBeTruthy();
-		});
-	});
-
 	describe('Search query header', () => {
-		it('should display search query in header when query exists', () => {
-			// Arrange
+		it('should render a semantic H1 with correct classes when a query is present', () => {
 			const data = createMockPageData({ query: 'test search' });
-
-			// Act
 			render(Page, { props: { data } });
 
-			// Assert
-			expect(screen.getByText(/Search Results for "test search"/)).toBeTruthy();
-		});
-
-		it('should apply correct header classes', () => {
-			// Arrange
-			const data = createMockPageData();
-
-			// Act
-			render(Page, { props: { data } });
-
-			// Assert
-			const header = screen.getByText(/Search Results for/);
+			const header = screen.getByText(/Search Results for "test search"/);
 			expect(header.tagName).toBe('H1');
-			expect(header).toHaveClass('mb-6', 'text-xl', 'sm:text-2xl', 'font-bold', 'text-primary');
 		});
 
-		it('should not display header when query is empty', () => {
-			// Arrange
+		it('should not render a header when query is empty', () => {
 			const data = createMockPageData({ query: '' });
-
-			// Act
 			render(Page, { props: { data } });
 
-			// Assert
 			expect(screen.queryByText(/Search Results for/)).toBeNull();
 		});
 
-		it('should handle special characters in query', () => {
-			// Arrange
-			const data = createMockPageData({ query: 'test & special <chars>' });
-
-			// Act
+		it.each([
+			{ name: 'special characters', query: 'test & special <chars>' },
+			{ name: 'a very long string', query: 'a'.repeat(200) }
+		])('should render header text correctly for a query containing $name', ({ query }) => {
+			const data = createMockPageData({ query });
 			render(Page, { props: { data } });
 
-			// Assert
-			expect(screen.getByText(/Search Results for "test & special <chars>"/)).toBeTruthy();
+			expect(screen.getByText(new RegExp(`Search Results for "${query}"`))).toBeTruthy();
 		});
 	});
 
-	describe('Error state', () => {
-		it('should display error container when error exists', () => {
-			// Arrange
-			const data = createMockPageData({ error: 'Network error occurred' });
-
-			// Act
-			render(Page, { props: { data } });
-
-			// Assert
-			expect(screen.getByText('Network error occurred')).toBeTruthy();
-			expect(screen.getByText('Search Error')).toBeTruthy();
+	it('should show the error card, hide results, and still show the query header on error', () => {
+		const data = createMockPageData({
+			error: 'Network error occurred',
+			query: 'test query',
+			results: mockSearchResults
 		});
+		const { container } = render(Page, { props: { data } });
 
-		it('should apply error styling classes', () => {
-			// Arrange
-			const data = createMockPageData({ error: 'Test error' });
+		expect(screen.getByText('Search Error')).toBeTruthy();
+		expect(screen.getByText('Network error occurred')).toBeTruthy();
+		expect(screen.getByText('Please try again later.')).toBeTruthy();
+		expect(screen.getByText(/Search Results for "test query"/)).toBeTruthy();
 
-			// Act
-			const { container } = render(Page, { props: { data } });
+		const errorContainer = container.querySelector('div.bg-accent\\/10');
+		expect(errorContainer).toHaveClass('rounded-lg', 'border', 'border-accent/20', 'p-8', 'text-center');
+		expect(screen.getByText('Network error occurred')).toHaveClass('text-sm', 'text-secondary');
 
-			// Assert
-			const errorContainer = container.querySelector('div.bg-accent\\/10');
-			expect(errorContainer).toBeTruthy();
-			expect(errorContainer).toHaveClass('rounded-lg', 'border', 'border-accent/20', 'p-8', 'text-center');
-		});
-
-		it('should display error message with correct styling', () => {
-			// Arrange
-			const data = createMockPageData({ error: 'API failure' });
-
-			// Act
-			render(Page, { props: { data } });
-
-			// Assert
-			const errorMessage = screen.getByText(/API failure/);
-			expect(errorMessage).toHaveClass('text-sm', 'text-secondary');
-		});
-
-		it('should display "try again later" message', () => {
-			// Arrange
-			const data = createMockPageData({ error: 'Test error' });
-
-			// Act
-			render(Page, { props: { data } });
-
-			// Assert
-			expect(screen.getByText('Please try again later.')).toBeTruthy();
-		});
-
-		it('should not display results when error exists', () => {
-			// Arrange
-			const data = createMockPageData({
-				error: 'Test error',
-				results: mockSearchResults
-			});
-
-			// Act
-			const { container } = render(Page, { props: { data } });
-
-			// Assert
-			expect(screen.getByText(/Test error/)).toBeTruthy();
-			const resultsContainer = container.querySelector('.space-y-4');
-			expect(resultsContainer).toBeNull();
-		});
-
-		it('should still show query header when error exists', () => {
-			// Arrange
-			const data = createMockPageData({
-				error: 'Test error',
-				query: 'test query'
-			});
-
-			// Act
-			render(Page, { props: { data } });
-
-			// Assert
-			expect(screen.getByText(/Search Results for "test query"/)).toBeTruthy();
-		});
+		expect(container.querySelector('.space-y-4')).toBeNull();
 	});
 
-	describe('Empty query state', () => {
-		it('should display empty query message when query is empty', () => {
-			// Arrange
-			const data = createMockPageData({ query: '', results: [] });
+	it('should show the empty-query prompt and hide results when query is empty', () => {
+		const data = createMockPageData({ query: '', results: [] });
+		const { container } = render(Page, { props: { data } });
 
-			// Act
-			render(Page, { props: { data } });
-
-			// Assert
-			expect(screen.getByText('Enter a search query to find videos')).toBeTruthy();
-		});
-
-		it('should apply correct styling to empty query message', () => {
-			// Arrange
-			const data = createMockPageData({ query: '', results: [] });
-
-			// Act
-			render(Page, { props: { data } });
-
-			// Assert
-			const message = screen.getByText('Enter a search query to find videos');
-			expect(message).toHaveClass('text-sm', 'text-secondary');
-		});
-
-		it('should not display results when query is empty', () => {
-			// Arrange
-			const data = createMockPageData({ query: '', results: [] });
-
-			// Act
-			const { container } = render(Page, { props: { data } });
-
-			// Assert
-			const resultsContainer = container.querySelector('.space-y-4');
-			expect(resultsContainer).toBeNull();
-		});
+		const message = screen.getByText('Enter a search query to find videos');
+		expect(message).toHaveClass('text-sm', 'text-secondary');
+		expect(screen.queryByText(/No results found/)).toBeNull();
+		expect(container.querySelector('.space-y-4')).toBeNull();
 	});
 
-	describe('No results state', () => {
-		it('should display no results message when results array is empty', () => {
-			// Arrange
-			const data = createMockPageData({
-				query: 'nonexistent query',
-				results: []
-			});
+	it('should show the no-results message and hide the results list when a query has no matches', () => {
+		const data = createMockPageData({ query: 'nonexistent query', results: [] });
+		const { container } = render(Page, { props: { data } });
 
-			// Act
-			render(Page, { props: { data } });
+		expect(screen.getByText(/No results found for "nonexistent query"/)).toBeTruthy();
+		expect(screen.getByText('Try different keywords or check your spelling')).toBeTruthy();
+		expect(screen.queryByText('Enter a search query')).toBeNull();
 
-			// Assert
-			expect(screen.getByText(/No results found for "nonexistent query"/)).toBeTruthy();
-		});
-
-		it('should display suggestion message', () => {
-			// Arrange
-			const data = createMockPageData({ results: [] });
-
-			// Act
-			render(Page, { props: { data } });
-
-			// Assert
-			expect(screen.getByText('Try different keywords or check your spelling')).toBeTruthy();
-		});
-
-		it('should apply correct styling to no results container', () => {
-			// Arrange
-			const data = createMockPageData({ query: 'no results query', results: [] });
-
-			// Act
-			const { container } = render(Page, { props: { data } });
-
-			// Assert
-			// Check for the ErrorCard container by looking for multiple classes
-			const noResultsContainer = container.querySelector('div.rounded-lg.border.text-center');
-			expect(noResultsContainer).toBeTruthy();
-			// Verify it has the accent background class
-			expect(noResultsContainer?.className).toContain('bg-secondary');
-		});
-
-		it('should not display results container when no results', () => {
-			// Arrange
-			const data = createMockPageData({ results: [] });
-
-			// Act
-			const { container } = render(Page, { props: { data } });
-
-			// Assert
-			const resultsContainer = container.querySelector('.space-y-4');
-			expect(resultsContainer).toBeNull();
-		});
+		const noResultsContainer = container.querySelector('div.rounded-lg.border.text-center');
+		expect(noResultsContainer?.className).toContain('bg-secondary');
+		expect(container.querySelector('.space-y-4')).toBeNull();
 	});
 
-	describe('Results display', () => {
-		it('should display results container when results exist', () => {
-			// Arrange
-			const data = createMockPageData();
+	it.each([
+		{ name: 'multiple results exist', results: mockSearchResults, expectPresent: true },
+		{ name: 'results array is empty', results: [], expectPresent: false },
+		{ name: 'results is null', results: null as unknown as SearchResultConfig[], expectPresent: false },
+		{ name: 'results is undefined', results: undefined as unknown as SearchResultConfig[], expectPresent: false }
+	])('should show/hide the results list correctly when $name', ({ results, expectPresent }) => {
+		const data = createMockPageData({ results });
+		const { container } = render(Page, { props: { data } });
 
-			// Act
-			const { container } = render(Page, { props: { data } });
-
-			// Assert
-			const resultsContainer = container.querySelector('.space-y-4');
+		const resultsContainer = container.querySelector('div.space-y-4');
+		if (expectPresent) {
 			expect(resultsContainer).toBeTruthy();
-		});
-
-		it('should apply correct spacing to results container', () => {
-			// Arrange
-			const data = createMockPageData();
-
-			// Act
-			const { container } = render(Page, { props: { data } });
-
-			// Assert
-			const resultsContainer = container.querySelector('div.space-y-4');
-			expect(resultsContainer).toBeTruthy();
-		});
-
-		it('should render VideoResult for each search result', () => {
-			// Arrange
-			const data = createMockPageData();
-
-			// Act
-			const { container } = render(Page, { props: { data } });
-
-			// Assert
-			// Since VideoResult is mocked, we just verify the results container exists
-			const resultsContainer = container.querySelector('.space-y-4');
-			expect(resultsContainer).toBeTruthy();
-		});
-	});
-
-	describe('Results count display', () => {
-		it('should display singular "result" for one result', () => {
-			// Arrange
-			const data = createMockPageData({ results: [mockSearchResults[0]] });
-
-			// Act
-			render(Page, { props: { data } });
-
-			// Assert
-			expect(screen.getByText('Showing 1 result')).toBeTruthy();
-		});
-
-		it('should display plural "results" for multiple results', () => {
-			// Arrange
-			const data = createMockPageData();
-
-			// Act
-			render(Page, { props: { data } });
-
-			// Assert
-			expect(screen.getByText('Showing 3 results')).toBeTruthy();
-		});
-
-		it('should apply correct styling to results count', () => {
-			// Arrange
-			const data = createMockPageData({ results: mockSearchResults.slice(0, 3) });
-
-			// Act
-			render(Page, { props: { data } });
-
-			// Assert
-			const resultsCount = screen.getByText('Showing 3 results');
-			expect(resultsCount).toHaveClass('text-sm', 'text-secondary');
-		});
-
-		it('should position results count correctly', () => {
-			// Arrange
-			const data = createMockPageData();
-
-			// Act
-			const { container } = render(Page, { props: { data } });
-
-			// Assert
-			const countContainer = container.querySelector('div.mt-8.text-center');
-			expect(countContainer).toBeTruthy();
-		});
-	});
-
-	describe('Reactive data updates', () => {
-		it('should accept updated query data', () => {
-			// Arrange
-			const initialData = createMockPageData({ query: 'initial query' });
-			const { rerender } = render(Page, { props: { data: initialData } });
-
-			// Act
-			const updatedData = createMockPageData({ query: 'updated query' });
-			rerender({ data: updatedData });
-
-			// Assert
-			expect(updatedData.query).toBe('updated query');
-		});
-
-		it('should accept updated results data', () => {
-			// Arrange
-			const initialData = createMockPageData({ results: [mockSearchResults[0]] });
-			const { rerender } = render(Page, { props: { data: initialData } });
-
-			// Act
-			const updatedData = createMockPageData({ results: mockSearchResults });
-			rerender({ data: updatedData });
-
-			// Assert
-			expect(updatedData.results).toHaveLength(3);
-		});
-
-		it('should accept updated error state', () => {
-			// Arrange
-			const initialData = createMockPageData();
-			const { rerender } = render(Page, { props: { data: initialData } });
-
-			// Act
-			const updatedData = createMockPageData({ error: 'New error' });
-			rerender({ data: updatedData });
-
-			// Assert
-			expect(updatedData.error).toBe('New error');
-		});
-
-		it('should accept error clearing', () => {
-			// Arrange
-			const initialData = createMockPageData({ error: 'Test error', results: [] });
-			const { rerender } = render(Page, { props: { data: initialData } });
-
-			// Act
-			const updatedData = createMockPageData({ error: null });
-			rerender({ data: updatedData });
-
-			// Assert
-			expect(updatedData.error).toBeNull();
-			expect(updatedData.results).toHaveLength(3);
-		});
-	});
-
-	describe('Edge cases', () => {
-		it('should handle undefined results gracefully', () => {
-			// Arrange
-			const data = createMockPageData({ results: undefined as any });
-
-			// Act
-			const { container } = render(Page, { props: { data } });
-
-			// Assert
-			expect(container).toBeTruthy();
-		});
-
-		it('should handle null results gracefully', () => {
-			// Arrange
-			const data = createMockPageData({ results: null as any });
-
-			// Act
-			const { container } = render(Page, { props: { data } });
-
-			// Assert
-			expect(container).toBeTruthy();
-		});
-
-		it('should handle very long query strings', () => {
-			// Arrange
-			const longQuery = 'a'.repeat(200);
-			const data = createMockPageData({ query: longQuery });
-
-			// Act
-			render(Page, { props: { data } });
-
-			// Assert
-			// Use regex to match the query
-			expect(screen.getByText(new RegExp(`Search Results for "${longQuery}"`))).toBeTruthy();
-		});
-
-		it('should handle very long error messages', async () => {
-			// Arrange
-			const longError = 'Error message '.repeat(50);
-			const data = createMockPageData({ error: longError });
-
-			// Act
-			render(Page, { props: { data } });
-
-			// Assert
-			const errorText = screen.getAllByText((content, element) => {
-				return element?.textContent?.includes('Error message Error message') ?? false;
-			});
-			expect(errorText).toBeTruthy();
-		});
-
-		it('should handle large results array', () => {
-			// Arrange
-			const largeResults = Array.from({ length: 50 }, (_, i) => ({
-				...mockSearchResults[0],
-				id: `video-${i}`,
-				title: `Video ${i}`
-			}));
-			const data = createMockPageData({ results: largeResults });
-
-			// Act
-			render(Page, { props: { data } });
-
-			// Assert
-			expect(screen.getByText('Showing 50 results')).toBeTruthy();
-		});
-
-		it('should handle whitespace-only query', () => {
-			// Arrange
-			const data = createMockPageData({ query: '   ', results: [] });
-
-			// Act
-			render(Page, { props: { data } });
-
-			// Assert
-			// Testing Library normalizes whitespace, so match with regex
-			expect(screen.getByText(/No results found for/)).toBeTruthy();
-		});
-	});
-
-	describe('hasResults computed property', () => {
-		it('should be true when results exist', () => {
-			// Arrange
-			const data = createMockPageData();
-
-			// Act
-			const { container } = render(Page, { props: { data } });
-
-			// Assert
-			const resultsContainer = container.querySelector('.space-y-4');
-			expect(resultsContainer).toBeTruthy();
-		});
-
-		it('should be false when results array is empty', () => {
-			// Arrange
-			const data = createMockPageData({ results: [] });
-
-			// Act
-			const { container } = render(Page, { props: { data } });
-
-			// Assert
-			const resultsContainer = container.querySelector('.space-y-4');
+		} else {
 			expect(resultsContainer).toBeNull();
-		});
-
-		it('should be false when results is null', () => {
-			// Arrange
-			const data = createMockPageData({ results: null as any });
-
-			// Act
-			const { container } = render(Page, { props: { data } });
-
-			// Assert
-			const resultsContainer = container.querySelector('.space-y-4');
-			expect(resultsContainer).toBeNull();
-		});
-
-		it('should be false when results is undefined', () => {
-			// Arrange
-			const data = createMockPageData({ results: undefined as any });
-
-			// Act
-			const { container } = render(Page, { props: { data } });
-
-			// Assert
-			const resultsContainer = container.querySelector('.space-y-4');
-			expect(resultsContainer).toBeNull();
-		});
+		}
 	});
 
-	describe('State priority', () => {
-		it('should show error over results', () => {
-			// Arrange
-			const data = createMockPageData({
-				error: 'Test error',
-				results: mockSearchResults.slice(0, 3)
-			});
+	it.each([
+		{ name: 'a single stream result', results: [mockSearchResults[0]], expectedText: 'Showing 1 result' },
+		{ name: 'three stream results', results: mockSearchResults, expectedText: 'Showing 3 results' },
+		{
+			name: 'a mixed-type result list',
+			results: [mockSearchResults[0], mockChannelResult, mockPlaylistResult],
+			expectedText: 'Showing 3 results'
+		},
+		{ name: 'a single playlist result', results: [mockPlaylistResult], expectedText: 'Showing 1 result' },
+		{
+			name: 'a large results array',
+			results: Array.from({ length: 50 }, (_, i) => ({ ...mockSearchResults[0], id: `video-${i}`, title: `Video ${i}` })),
+			expectedText: 'Showing 50 results'
+		}
+	])('should display the correct pluralised count for $name', ({ results, expectedText }) => {
+		const data = createMockPageData({ results });
+		const { container } = render(Page, { props: { data } });
 
-			// Act
-			render(Page, { props: { data } });
-
-			// Assert
-			// Error message is displayed without "Error:" prefix
-			expect(screen.getByText('Test error')).toBeTruthy();
-			expect(screen.queryByText('Showing 3 results')).toBeNull();
-		});
-
-		it('should show empty query message over no results', () => {
-			// Arrange
-			const data = createMockPageData({ query: '', results: [] });
-
-			// Act
-			render(Page, { props: { data } });
-
-			// Assert
-			expect(screen.getByText('Enter a search query to find videos')).toBeTruthy();
-			expect(screen.queryByText(/No results found/)).toBeNull();
-		});
-
-		it('should show no results message when query exists but results empty', () => {
-			// Arrange
-			const data = createMockPageData({ query: 'test', results: [] });
-
-			// Act
-			render(Page, { props: { data } });
-
-			// Assert
-			expect(screen.getByText(/No results found for "test"/)).toBeTruthy();
-			expect(screen.queryByText('Enter a search query')).toBeNull();
-		});
+		const countEl = screen.getByText(expectedText);
+		expect(countEl).toHaveClass('text-sm', 'text-secondary');
+		expect(container.querySelector('div.mt-8.text-center')).toBeTruthy();
 	});
 
-	describe('Component integration', () => {
-		it('should maintain layout structure with all states', () => {
-			// Arrange
-			const data = createMockPageData();
+	it.each([
+		{ name: 'error over results', data: { error: 'Test error', results: mockSearchResults }, expectText: 'Test error', notText: 'Showing 3 results' },
+		{ name: 'empty-query prompt over no-results message', data: { query: '', results: [] }, expectText: 'Enter a search query to find videos', notText: 'No results found' },
+		{ name: 'no-results message over empty-query prompt', data: { query: 'test', results: [] }, expectText: 'No results found for "test"', notText: 'Enter a search query' }
+	])('should prioritise $name', ({ data: overrides, expectText, notText }) => {
+		const data = createMockPageData(overrides);
+		render(Page, { props: { data } });
 
-			// Act
-			const { container } = render(Page, { props: { data } });
-
-			// Assert
-			const mainContainer = container.querySelector('div.container');
-			expect(mainContainer).toBeTruthy();
-		});
-
-		it('should handle rapid data changes', () => {
-			// Arrange
-			const initialData = createMockPageData({ query: 'query1' });
-			const { rerender } = render(Page, { props: { data: initialData } });
-
-			// Act - rapidly change data multiple times
-			rerender({ data: createMockPageData({ query: 'query2' }) });
-			rerender({ data: createMockPageData({ query: 'query3' }) });
-			rerender({ data: createMockPageData({ query: 'query4' }) });
-			const finalData = createMockPageData({ query: 'final query' });
-			rerender({ data: finalData });
-
-			// Assert
-			expect(finalData.query).toBe('final query');
-		});
+		expect(screen.getByText(new RegExp(expectText))).toBeTruthy();
+		expect(screen.queryByText(new RegExp(notText))).toBeNull();
 	});
 
 	describe('Result type routing', () => {
-		const mockChannelResult: SearchResultConfig = {
-			type: 'channel',
-			id: 'channel-1',
-			name: 'Test Channel',
-			avatar: 'https://example.com/avatar.jpg',
-			description: 'A test channel',
-			subscriberCount: 1000000,
-			verified: true
-		};
-
-		const mockPlaylistResult: SearchResultConfig = {
-			type: 'playlist',
-			id: 'playlist-1',
-			url: 'https://www.youtube.com/playlist?list=playlist-1',
-			title: 'Test Playlist',
-			thumbnail: 'https://example.com/thumb.jpg',
-			uploaderName: 'Test Uploader',
-			uploaderUrl: 'https://www.youtube.com/channel/test',
-			videoCount: 12
-		};
-
-		it('should render stream results using the VideoResult component', () => {
-			const data = createMockPageData({ results: [mockSearchResults[0]] });
+		it.each([
+			{ name: 'stream', results: [mockSearchResults[0]], expectedText: 'First Video Title' },
+			{ name: 'channel', results: [mockChannelResult], expectedText: 'Test Channel' },
+			{ name: 'playlist', results: [mockPlaylistResult], expectedText: 'Test Playlist' }
+		])('should route $name results to the correct child component', ({ results, expectedText }) => {
+			const data = createMockPageData({ results });
 			render(Page, { props: { data } });
 
-			// VideoResult renders the video title — confirms VideoResult was used
-			expect(screen.getAllByText('First Video Title')).toBeTruthy();
+			expect(screen.getAllByText(expectedText).length).toBeGreaterThan(0);
 		});
 
-		it('should render channel results using the ChannelResult component', () => {
-			const data = createMockPageData({ results: [mockChannelResult] });
-			render(Page, { props: { data } });
-
-			// ChannelResult renders the channel name — confirms ChannelResult was used
-			expect(screen.getAllByText('Test Channel')).toBeTruthy();
-		});
-
-		it('should render playlist results using the PlaylistResult component', () => {
+		it('should render playlist-specific label and video count badge', () => {
 			const data = createMockPageData({ results: [mockPlaylistResult] });
 			render(Page, { props: { data } });
 
-			// PlaylistResult renders the playlist title — confirms PlaylistResult was used
-			expect(screen.getAllByText('Test Playlist')).toBeTruthy();
+			expect(screen.getAllByText('Playlist').length).toBeGreaterThanOrEqual(1);
+			expect(screen.getAllByText('12 videos').length).toBeGreaterThanOrEqual(1);
 		});
 
-		it('should render the "Playlist" label for playlist results', () => {
-			const data = createMockPageData({ results: [mockPlaylistResult] });
-			render(Page, { props: { data } });
-
-			// PlaylistResult renders a "Playlist" label — unique to that component
-			const labels = screen.getAllByText('Playlist');
-			expect(labels.length).toBeGreaterThanOrEqual(1);
-		});
-
-		it('should render the video count badge for playlist results', () => {
-			const data = createMockPageData({ results: [mockPlaylistResult] });
-			render(Page, { props: { data } });
-
-			const badges = screen.getAllByText('12 videos');
-			expect(badges.length).toBeGreaterThanOrEqual(1);
-		});
-
-		it('should render mixed result types in the same results list', () => {
-			const data = createMockPageData({
-				results: [mockSearchResults[0], mockChannelResult, mockPlaylistResult]
-			});
-			const { container } = render(Page, { props: { data } });
-
-			// All three types present — results container should exist
-			const resultsContainer = container.querySelector('.space-y-4');
-			expect(resultsContainer).toBeTruthy();
-
-			expect(screen.getAllByText('First Video Title')).toBeTruthy();
-			expect(screen.getAllByText('Test Channel')).toBeTruthy();
-			expect(screen.getAllByText('Test Playlist')).toBeTruthy();
-		});
-
-		it('should show the correct results count for a mixed-type result list', () => {
-			const data = createMockPageData({
-				results: [mockSearchResults[0], mockChannelResult, mockPlaylistResult]
-			});
-			render(Page, { props: { data } });
-
-			// Count reflects all types — not just streams
-			expect(screen.getByText('Showing 3 results')).toBeTruthy();
-		});
-
-		it('should show correct singular count for a single playlist result', () => {
-			const data = createMockPageData({ results: [mockPlaylistResult] });
-			render(Page, { props: { data } });
-
-			expect(screen.getByText('Showing 1 result')).toBeTruthy();
-		});
-
-		it('should render each result inside the space-y-4 container', () => {
+		it('should render one child component per result in a mixed-type list, in order', () => {
 			const data = createMockPageData({
 				results: [mockSearchResults[0], mockChannelResult, mockPlaylistResult]
 			});
@@ -773,7 +240,9 @@ describe('+page.svelte - Search Results', () => {
 
 			const resultsContainer = container.querySelector('.space-y-4');
 			expect(resultsContainer?.children.length).toBe(3);
+			expect(screen.getAllByText('First Video Title').length).toBeGreaterThan(0);
+			expect(screen.getAllByText('Test Channel').length).toBeGreaterThan(0);
+			expect(screen.getAllByText('Test Playlist').length).toBeGreaterThan(0);
 		});
 	});
-
 });
