@@ -105,10 +105,33 @@ describe('adaptSearchResults', () => {
 			);
 			expect(result).toHaveLength(1);
 		});
+
+		it('drops null entries in the items array', () => {
+			const result = adapt(
+				buildSearchResponse({
+					items: [null, buildSearchStreamItem()]
+				} as never)
+			);
+			expect(result).toHaveLength(1);
+		});
 	});
 
 	describe('fallbacks and clamping', () => {
 		it.each([
+			['stream: empty description', buildSearchStreamItem({ description: '' }), 'description', ''],
+			['stream: empty uploaderUrl', buildSearchStreamItem({ uploaderUrl: '' }), 'channelUrl', ''],
+			[
+				'stream: undefined verified',
+				buildSearchStreamItem({ uploaderVerified: undefined }),
+				'verified',
+				false
+			],
+			[
+				'stream: undefined viewCount',
+				buildSearchStreamItem({ viewCount: undefined }),
+				'viewCount',
+				0
+			],
 			[
 				'stream: empty thumbnail',
 				buildSearchStreamItem({ thumbnailUrl: '' }),
@@ -149,6 +172,18 @@ describe('adaptSearchResults', () => {
 				0
 			],
 			[
+				'channel: undefined verified',
+				buildSearchChannelItem({ uploaderVerified: undefined }),
+				'verified',
+				false
+			],
+			[
+				'channel: undefined subscriberCount',
+				buildSearchChannelItem({ subscriberCount: undefined }),
+				'subscriberCount',
+				0
+			],
+			[
 				'playlist: empty thumbnail',
 				buildSearchPlaylistItem({ thumbnailUrl: '' }),
 				'thumbnail',
@@ -157,6 +192,24 @@ describe('adaptSearchResults', () => {
 			[
 				'playlist: negative videoCount',
 				buildSearchPlaylistItem({ videoCount: -1 }),
+				'videoCount',
+				0
+			],
+			[
+				'playlist: empty uploaderName',
+				buildSearchPlaylistItem({ uploaderName: '' }),
+				'uploaderName',
+				'Unknown'
+			],
+			[
+				'playlist: empty uploaderUrl',
+				buildSearchPlaylistItem({ uploaderUrl: '' }),
+				'uploaderUrl',
+				''
+			],
+			[
+				'playlist: undefined videoCount',
+				buildSearchPlaylistItem({ videoCount: undefined }),
 				'videoCount',
 				0
 			]
