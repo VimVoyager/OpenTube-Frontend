@@ -10,8 +10,7 @@ import type {
 	CommentResponse,
 	RelatedCommentItem,
 	SearchResponse,
-	ChannelInfoResponse,
-	Image
+	ChannelInfoResponse
 } from '$lib/api/types';
 import type { Thumbnail, Avatar, Details } from '$lib/types';
 

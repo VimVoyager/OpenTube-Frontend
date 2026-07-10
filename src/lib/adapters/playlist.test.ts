@@ -43,7 +43,7 @@ describe('adaptPlaylistInfo', () => {
 				[
 					{ url: 'https://example.com/banner-640.jpg', width: 640, height: 360 },
 					{ url: 'https://example.com/banner-2560.jpg', width: 2560, height: 1280 },
-					{ url: 'https://example.com/banner-1060.jpg', width: 1060, height: 800 },
+					{ url: 'https://example.com/banner-1060.jpg', width: 1060, height: 800 }
 				],
 				'https://example.com/banner-2560.jpg'
 			],
@@ -62,7 +62,7 @@ describe('adaptPlaylistInfo', () => {
 		it('does not mutate the original banners array when sorting', () => {
 			const banners = [
 				{ url: 'https://example.com/banner-small.jpg', width: 640, height: 360 },
-				{ url: 'https://example.com/banner-large.jpg', width: 2120, height: 1280 },
+				{ url: 'https://example.com/banner-large.jpg', width: 2120, height: 1280 }
 			];
 			adaptPlaylistInfo(buildPlaylistResponse({ banners }));
 

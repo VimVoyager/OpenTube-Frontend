@@ -4,7 +4,6 @@ import { selectBestThumbnail, selectBestUploaderAvatar } from '$lib/utils/mediaU
 import logoPlaceholder from '$lib/assets/logo-placeholder.svg';
 import thumbnailPlaceholder from '$lib/assets/thumbnail-placeholder.jpg';
 import type { PlaylistInfoConfig, RelatedVideoConfig } from '$lib/adapters/types';
-import type { RelatedItem } from '$lib/types';
 
 function selectBestBanner(
 	banners: { url: string; width: number }[] | undefined,

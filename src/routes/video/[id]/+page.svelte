@@ -195,7 +195,11 @@
 						<VideoDetail {metadata} />
 					{/key}
 				{:else if activeTab === 'playlist' && isPlaylist}
-					<PlaylistQueue videos={relatedVideos} playlistId={playlistId ?? ''} currentIndex={playlistIndex} />
+					<PlaylistQueue
+						videos={relatedVideos}
+						playlistId={playlistId ?? ''}
+						currentIndex={playlistIndex}
+					/>
 				{:else if activeTab === 'related'}
 					<VideoListings videos={relatedVideos} />
 				{:else if comments.length > 0}
