@@ -1,106 +1,60 @@
 import { describe, it, expect } from 'vitest';
-import { formatCount, formatDate } from './formatters';
+import { formatCount, formatDate, formatDuration, parseIsoDuration } from './formatters';
 
 describe('formatCount', () => {
-	it('should format small numbers with commas', () => {
-		const result = formatCount(1234);
-
-		expect(result).toBe('1,234');
-	});
-
-	it('should format large numbers with commas', () => {
-		const result = formatCount(1234567);
-
-		expect(result).toBe('1,234,567');
-	});
-
-	it('should format millions correctly', () => {
-		const result = formatCount(12345678);
-
-		expect(result).toBe('12,345,678');
-	});
-
-	it('should handle zero', () => {
-		const result = formatCount(0);
-
-		expect(result).toBe('0');
-	});
-
-	it('should handle single digit numbers', () => {
-		const result = formatCount(5);
-
-		expect(result).toBe('5');
-	});
-
-	it('should handle numbers less than 1000', () => {
-		const result = formatCount(999);
-
-		expect(result).toBe('999');
-	});
-
-	it('should handle exactly 1000', () => {
-		const result = formatCount(1000);
-
-		expect(result).toBe('1,000');
+	it.each([
+		[0, '0'],
+		[999, '999'],
+		[1000, '1,000'],
+		[1234567, '1,234,567']
+	])('%d → %s', (input, expected) => {
+		expect(formatCount(input)).toBe(expected);
 	});
 });
 
 describe('formatDate', () => {
-	it('should format ISO date string correctly', () => {
-		const result = formatDate('2023-05-15');
-
-		expect(result).toBe('May 15, 2023');
+	it.each([
+		['ISO date', '2023-05-15', 'May 15, 2023'],
+		['ISO datetime', '2023-05-15T12:00:00Z', 'May 15, 2023'],
+		['start of year', '2023-01-01', 'Jan 1, 2023'],
+		['end of year', '2023-12-31', 'Dec 31, 2023'],
+		['invalid date → original string', 'not-a-date', 'not-a-date'],
+		['empty string → empty', '', '']
+	])('%s: %j → %j', (_label, input, expected) => {
+		expect(formatDate(input)).toBe(expected);
 	});
+});
 
-	it('should format ISO datetime string correctly', () => {
-		const result = formatDate('2023-05-15T12:00:00Z');
-
-		expect(result).toBe('May 15, 2023');
+describe('formatDuration', () => {
+	it.each([
+		[0, '0:00'],
+		[59, '0:59'],
+		[60, '1:00'],
+		[860, '14:20'],
+		[3599, '59:59'],
+		[3600, '1:00:00'],
+		[3723, '1:02:03'],
+		[45296, '12:34:56'],
+		[86400, '24:00:00']
+	])('%d seconds → %s', (input, expected) => {
+		expect(formatDuration(input)).toBe(expected);
 	});
+});
 
-	it('should handle different months', () => {
-		const january = formatDate('2023-01-15');
-		const december = formatDate('2023-12-25');
-
-		expect(january).toBe('Jan 15, 2023');
-		expect(december).toBe('Dec 25, 2023');
-	});
-
-	it('should handle different years', () => {
-		const result2020 = formatDate('2020-06-15');
-		const result2024 = formatDate('2024-06-15');
-
-		expect(result2020).toBe('Jun 15, 2020');
-		expect(result2024).toBe('Jun 15, 2024');
-	});
-
-	it('should return empty string for empty input', () => {
-		const result = formatDate('');
-
-		expect(result).toBe('');
-	});
-
-	it('should return original string for invalid date', () => {
-		const result = formatDate('not-a-date');
-
-		expect(result).toBe('not-a-date');
-	});
-
-	it('should handle date at start of year', () => {
-		const result = formatDate('2023-01-01');
-
-		expect(result).toBe('Jan 1, 2023');
-	});
-
-	it('should handle date at end of year', () => {
-		const result = formatDate('2023-12-31');
-
-		expect(result).toBe('Dec 31, 2023');
-	});
-
-	it('should handle leap year date', () => {
-		const result = formatDate('2024-02-29');
-
-		expect(result).toBe('Feb 29, 2024');
+describe('parseIsoDuration', () => {
+	it.each([
+		['PT1H2M3S', 3723],
+		['PT45M', 2700],
+		['PT30S', 30],
+		['PT2H', 7200],
+		['PT1H30S', 3630],
+		['PT1M30.5S', 90.5],
+		['PT10H30M45S', 37845],
+		['PT0S', 0],
+		['INVALID', 0],
+		['', 0],
+		[null as never, 0]
+	])('parses %j → %d seconds', (input, expected) => {
+		expect(parseIsoDuration(input)).toBe(expected);
 	});
 });

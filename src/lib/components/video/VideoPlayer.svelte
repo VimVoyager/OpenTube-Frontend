@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount, onDestroy, tick } from 'svelte';
-	import { SvelteURL} from 'svelte/reactivity';
+	import { SvelteURL } from 'svelte/reactivity';
 	import { browser } from '$app/environment';
 	import { PUBLIC_PROXY_URL } from '$env/static/public';
 	import type { VideoPlayerConfig } from '$lib/adapters/types';
@@ -10,7 +10,9 @@
 		ShakaUIConfiguration,
 		ShakaUIOverlayInstance
 	} from '$lib/types';
-	import VideoPlayerError, { type ShakaErrorDetail } from '$lib/components/video/VideoPlayerError.svelte';
+	import VideoPlayerError, {
+		type ShakaErrorDetail
+	} from '$lib/components/video/VideoPlayerError.svelte';
 
 	let { config }: { config: VideoPlayerConfig } = $props();
 
@@ -27,7 +29,9 @@
 
 	function setShakaControlsVisible(visible: boolean) {
 		if (!videoContainer) return;
-		const controls = videoContainer.querySelector('.shaka-controls-container') as HTMLElement | null;
+		const controls = videoContainer.querySelector(
+			'.shaka-controls-container'
+		) as HTMLElement | null;
 		if (controls) {
 			controls.style.visibility = visible ? '' : 'hidden';
 			controls.style.pointerEvents = visible ? '' : 'none';
@@ -41,9 +45,9 @@
 	async function loadManifest() {
 		if (!player) return;
 
-		if(!config.manifestUrl) {
+		if (!config.manifestUrl) {
 			console.error('Manifest URL is empty or undefined');
-			playerError = { category: 4, code: 0, severity: 2};
+			playerError = { category: 4, code: 0, severity: 2 };
 			await tick();
 			setShakaControlsVisible(false);
 			return;
@@ -60,12 +64,12 @@
 		} catch (err) {
 			console.error('Error loading video player manifest:', err);
 			// If Shaka threw its own error object, extract the detail.
-			// Otherwise fall back to a generic MANIFEST error.
-			const shakaErr = err as any;
+			// Otherwise, fall back to a generic MANIFEST error.
+			const shakaErr = err as { category?: unknown; code?: number; severity?: number };
 			if (typeof shakaErr?.category === 'number') {
 				playerError = {
 					category: shakaErr.category,
-					code: shakaErr.code,
+					code: shakaErr.code ?? 0,
 					severity: shakaErr.severity ?? 2
 				};
 			} else {
@@ -105,23 +109,26 @@
 		retrying = false;
 	}
 
-
+	let destroyed = false;
+	onDestroy(() => {
+		destroyed = true;
+	});
 
 	onMount(async () => {
 		if (!browser) return;
-
-		console.log('config received:', config);
 
 		// Dynamically import Shaka Player only in the browser (no SSR)
 		const shakaModule = await import('shaka-player/dist/shaka-player.ui');
 		await import('shaka-player/dist/controls.css');
 		const shaka = shakaModule.default;
 
+		if (destroyed || !videoElement) return;
+
 		shaka.polyfill.installAll();
 
 		if (!shaka.Player.isBrowserSupported()) {
 			console.error('Browser not supported!');
-			playerError = { category: 7, code: 0, severity: 2};
+			playerError = { category: 7, code: 0, severity: 2 };
 			return;
 		}
 
@@ -130,11 +137,7 @@
 
 			await player.attach(videoElement);
 
-			ui = new shaka.ui.Overlay(
-				player,
-				videoContainer,
-				videoElement
-			);
+			ui = new shaka.ui.Overlay(player, videoContainer, videoElement);
 
 			const config_ui: ShakaUIConfiguration = {
 				addSeekBar: true,
@@ -145,11 +148,11 @@
 					'mute',
 					'volume',
 					'spacer',
-					'quality',  
+					'quality',
 					'captions',
 					'overflow_menu',
 					'fullscreen'
-				],
+				]
 			};
 
 			ui.configure(config_ui);
@@ -162,30 +165,30 @@
 				networkingEngine.registerRequestFilter((type: number, request: ShakaRequest) => {
 					// Type 1 = SEGMENT, Type 2 = MANIFEST (also covers direct MP4 initial fetch)
 					// if (type === 1 || type === 2) {
-						const originalUrl = new URL(request.uris[0]);
+					const originalUrl = new URL(request.uris[0]);
 
-						if (originalUrl.host.endsWith('.googlevideo.com')) {
-							originalUrl.searchParams.set('host', originalUrl.host);
+					if (originalUrl.host.endsWith('.googlevideo.com')) {
+						originalUrl.searchParams.set('host', originalUrl.host);
 
-							// Parse proxy URL
-							const proxyBase = PROXY_URL.startsWith('/') 
-								? `${window.location.origin}${PROXY_URL}`
-								: PROXY_URL;
+						// Parse proxy URL
+						const proxyBase = PROXY_URL.startsWith('/')
+							? `${window.location.origin}${PROXY_URL}`
+							: PROXY_URL;
 
-							// Build the new proxied URL
-							const proxyUrl = new SvelteURL(proxyBase);
-							proxyUrl.pathname = new SvelteURL(proxyBase).pathname + originalUrl.pathname;
-							proxyUrl.search = originalUrl.search;
+						// Build the new proxied URL
+						const proxyUrl = new SvelteURL(proxyBase);
+						proxyUrl.pathname = new SvelteURL(proxyBase).pathname + originalUrl.pathname;
+						proxyUrl.search = originalUrl.search;
 
-							// Handle Range header conversion to query parameter
-							if (request.headers.Range) {
-								const rangeValue = request.headers.Range.split('=')[1];
-								proxyUrl.searchParams.set('range', rangeValue);
-								request.headers = {};
-							}
-
-							request.uris[0] = proxyUrl.toString();
+						// Handle Range header conversion to query parameter
+						if (request.headers.Range) {
+							const rangeValue = request.headers.Range.split('=')[1];
+							proxyUrl.searchParams.set('range', rangeValue);
+							request.headers = {};
 						}
+
+						request.uris[0] = proxyUrl.toString();
+					}
 					// }
 				});
 			}
@@ -220,8 +223,7 @@
 		poster={config.poster}
 		playsinline
 	>
-
-		<track kind="captions" label="Captions"/>
+		<track kind="captions" label="Captions" />
 	</video>
 
 	{#if playerError && !retrying}
@@ -245,13 +247,13 @@
 		height: auto;
 	}
 
-  .error-overlay {
-      position: absolute;
-      inset: 0;
-      z-index: 10;
-  }
+	.error-overlay {
+		position: absolute;
+		inset: 0;
+		z-index: 10;
+	}
 
-  :global(.shaka-overflow-menu) {
+	:global(.shaka-overflow-menu) {
 		background: rgba(35, 35, 35, 0.95);
 		border: 1px solid rgba(255, 255, 255, 0.1);
 	}

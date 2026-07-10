@@ -1,0 +1,104 @@
+{
+	"id": "glitch-playlist-id",
+	"serviceId": 1,
+	"sortFilter": "asc",
+	"url": "https://www.youtube.com/playlist?list=glitch-playlist-id",
+	"originalUrl": "https://www.youtube.com/playlist?list=glitch-playlist-id",
+	"name": "Murder Drones",
+	"uploaderUrl": "https://www.youtube.com/channel/glitch-channel-id",
+	"uploaderName": "GLITCH",
+	"uploaderVerified": true,
+	"description": {
+		"content": "Murder Drones is a show about cute little robots that murder eachother for reasons",
+		"type": 1
+	},
+	"thumbnails": [
+		{
+			"url": "https://i.ytimg.com/vi/glitch-video-1/hqdefault.jpg?sqp=sm",
+			"height": 94,
+			"width": 168
+		},
+		{
+			"url": "https://i.ytimg.com/vi/glitch-video-1/hqdefault.jpg?sqp=lg",
+			"height": 188,
+			"width": 336
+		}
+	],
+	"streamCount": 3,
+	"relatedItems": [
+		{
+			"infoType": "STREAM",
+			"url": "https://www.youtube.com/watch?v=glitch-video-1",
+			"name": "MURDER DRONES - Episode 1: PILOT",
+			"uploaderName": "GLITCH",
+			"uploaderUrl": "https://www.youtube.com/channel/glitch-channel-id",
+			"uploaderVerified": true,
+			"duration": 1616,
+			"viewCount": 86000000,
+			"textualUploadDate": "4 years ago",
+			"isShortFormContent": false,
+			"thumbnails": [
+				{
+					"url": "https://i.ytimg.com/vi/glitch-video-1/hqdefault.jpg?sqp=sm",
+					"height": 94,
+					"width": 168
+				},
+				{
+					"url": "https://i.ytimg.com/vi/glitch-video-1/hqdefault.jpg?sqp=lg",
+					"height": 188,
+					"width": 336
+				}
+			]
+		},
+		{
+			"infoType": "STREAM",
+			"url": "https://www.youtube.com/watch?v=glitch-video-2",
+			"name": "MURDER DRONES - Episode 2: Heartbeat",
+			"uploaderName": "GLITCH",
+			"uploaderUrl": "https://www.youtube.com/channel/glitch-channel-id",
+			"uploaderVerified": true,
+			"subChannelUrl": "https://www.youtube.com/channel/glitch-sub-channel-id",
+			"subChannelName": "GLITCH SUB CHANNEL",
+			"duration": 1049,
+			"viewCount": 44000000,
+			"textualUploadDate": "3 years ago",
+			"isShortFormContent": false,
+			"thumbnails": [
+				{
+					"url": "https://i.ytimg.com/vi/glitch-video-2/hqdefault.jpg?sqp=sm",
+					"height": 94,
+					"width": 168
+				},
+				{
+					"url": "https://i.ytimg.com/vi/glitch-video-2/hqdefault.jpg?sqp=lg",
+					"height": 188,
+					"width": 336
+				}
+			]
+		},
+		{
+			"infoType": "STREAM",
+			"url": "https://www.youtube.com/watch?v=glitch-video-3",
+			"name": "MURDER DRONES - Episode 3: The Promening",
+			"uploaderName": "GLITCH",
+			"uploaderUrl": "https://www.youtube.com/channel/glitch-channel-id",
+			"uploaderVerified": true,
+			"duration": 1138,
+			"viewCount": 48000000,
+			"textualUploadDate": "3 years ago",
+			"isShortFormContent": false,
+			"thumbnails": [
+				{
+					"url": "https://i.ytimg.com/vi/glitch-video-3/hqdefault.jpg?sqp=sm",
+					"height": 94,
+					"width": 168
+				},
+				{
+					"url": "https://i.ytimg.com/vi/glitch-video-3/hqdefault.jpg?sqp=lg",
+					"height": 188,
+					"width": 336
+				}
+			]
+		}
+	]
+}

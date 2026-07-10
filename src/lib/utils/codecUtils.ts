@@ -1,13 +1,13 @@
 /**
  * Codec and MIME Type Utilities
- * 
+ *
  * Utilities for normalizing codec strings and inferring MIME types
  * for DASH manifest generation.
  */
 
 /**
  * Normalizes codec strings to DASH-compatible format
- * 
+ *
  * @param codec - Raw codec string from stream metadata
  * @returns DASH-compatible codec string
  */
@@ -34,7 +34,7 @@ export function normalizeDashCodec(codec: string): string {
 /**
  * Infers MIME type from format string and codec
  * Handles backend format strings like "MPEG_4", "MP4", "WEBM", "M4A", etc.
- * 
+ *
  * @param format - Format string from stream metadata
  * @param codec - Codec string from stream metadata
  * @param isVideo - Whether this is a video stream (vs audio)

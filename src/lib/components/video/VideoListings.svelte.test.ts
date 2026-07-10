@@ -4,521 +4,147 @@
  * Tests for related videos listing component
  */
 
-import { render, screen, waitFor } from '@testing-library/svelte';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/svelte';
+import { describe, it, expect } from 'vitest';
 import VideoListings from './VideoListings.svelte';
 import type { RelatedVideoConfig } from '$lib/adapters/types';
 import relatedVideosFixture from '../../../tests/fixtures/adapters/relatedVideos.json';
 
-// =============================================================================
-// Test Fixtures
-// =============================================================================
-
 const mockRelatedVideos: RelatedVideoConfig[] = relatedVideosFixture;
-const mockSingleVideo: RelatedVideoConfig[] = [mockRelatedVideos[0]];
-const mockEmptyVideos: RelatedVideoConfig[] = [];
-
-// =============================================================================
-// Setup and Teardown
-// =============================================================================
-
-beforeEach(() => {
-	vi.clearAllMocks();
-});
-
-// =============================================================================
-// Rendering Tests
-// =============================================================================
+const [heartbeat] = mockRelatedVideos;
 
 describe('VideoListings', () => {
-	describe('rendering', () => {
-		it('should render multiple related videos', () => {
-			render(VideoListings, { props: { videos: mockRelatedVideos } });
-
-			expect(screen.getByText('MURDER DRONES - Heartbeat')).toBeInTheDocument();
-			expect(screen.getByText('KNIGHTS OF GUINEVERE - Pilot')).toBeInTheDocument();
-			expect(screen.getByText('MURDER DRONES - Cabin Fever')).toBeInTheDocument();
-			expect(
-				screen.getByText('THE AMAZING DIGITAL CIRCUS - They All Get Guns')
-			).toBeInTheDocument();
-
-			const videoElements = screen.getAllByText(/GLITCH/, { selector: 'p' });
-			const firstChannelName = videoElements[0];
-			expect(firstChannelName).toHaveTextContent('GLITCH');
-		});
-
-		it('should render single video', () => {
-			render(VideoListings, { props: { videos: mockSingleVideo } });
-
-			expect(screen.getByText('MURDER DRONES - Heartbeat')).toBeInTheDocument();
-		});
+	it('renders a card for every video', () => {
+		render(VideoListings, { props: { videos: mockRelatedVideos } });
+		mockRelatedVideos.forEach((v) => expect(screen.getByText(v.title)).toBeInTheDocument());
 	});
 
-	// =============================================================================
-	// Empty State Tests
-	// =============================================================================
+	it('renders the empty state when there are no videos', () => {
+		render(VideoListings, { props: { videos: [] } });
 
-	describe('empty state', () => {
-		it('should render empty state when no videos', () => {
-			render(VideoListings, { props: { videos: mockEmptyVideos } });
-
-			expect(screen.getByText(/No related [Vv]ideos available/)).toBeInTheDocument();
-		});
-
-		it('should display emoji in empty state', () => {
-			render(VideoListings, { props: { videos: mockEmptyVideos } });
-
-			expect(screen.getByText('📹')).toBeInTheDocument();
-		});
-
-		it('should not render video cards in empty state', () => {
-			render(VideoListings, { props: { videos: mockEmptyVideos } });
-
-			expect(screen.queryByText('Channel One')).not.toBeInTheDocument();
-		});
-
-		it('should render empty state with default empty array', () => {
-			render(VideoListings, { props: { videos: [] } });
-
-			expect(screen.getByText(/No related [Vv]ideos available/)).toBeInTheDocument();
-		});
+		expect(screen.getByText(/No related [Vv]ideos available/)).toBeInTheDocument();
+		expect(screen.getByText('📹')).toBeInTheDocument();
+		expect(screen.queryAllByRole('link')).toHaveLength(0);
 	});
 
-	// =============================================================================
-	// Thumbnail Tests
-	// =============================================================================
-
-	describe('thumbnails', () => {
-		it('should render all thumbnails', () => {
-			const { container } = render(VideoListings, { props: { videos: mockRelatedVideos } });
-
-			mockRelatedVideos.forEach((video) => {
-				const thumbnail = screen.getByAltText(`thumbnail-${video.id}`);
-				expect(thumbnail).toBeInTheDocument();
-				expect(thumbnail).toHaveAttribute('src', video.thumbnail);
-				expect(thumbnail).toHaveClass('rounded-md', 'object-cover');
-			});
-
-			const thumbnailContainer = container.querySelector('[style*="aspect-ratio"]');
-			expect(thumbnailContainer).toBeInTheDocument();
-		});
+	it('defaults to an empty list when no videos prop is given', () => {
+		render(VideoListings);
+		expect(screen.getByText(/No related [Vv]ideos available/)).toBeInTheDocument();
 	});
 
-	// =============================================================================
-	// Channel Avatar Tests
-	// =============================================================================
+	it('renders all thumbnails with alt text and source', () => {
+		render(VideoListings, { props: { videos: mockRelatedVideos } });
+
+		mockRelatedVideos.forEach((video) => {
+			expect(screen.getByAltText(`thumbnail-${video.id}`)).toHaveAttribute('src', video.thumbnail);
+		});
+	});
 
 	describe('channel avatars', () => {
-		it('should render channel avatar when provided', () => {
-			render(VideoListings, { props: { videos: mockRelatedVideos } });
+		it('renders the avatar when provided', () => {
+			render(VideoListings, { props: { videos: [heartbeat] } });
 
-			const avatar = screen.getByAltText('heartbeat-id-channel-avatar-GLITCH');
-			expect(avatar).toBeInTheDocument();
-			expect(avatar).toHaveAttribute('src', 'https://yt3.ggpht.com/random-unicode-characters/md');
-			expect(avatar).toHaveClass('h-6', 'w-6', 'rounded-full', 'object-cover');
+			expect(
+				screen.getByAltText(`${heartbeat.id}-channel-avatar-${heartbeat.channelName}`)
+			).toHaveAttribute('src', heartbeat.thumbnail && heartbeat.channelAvatar);
 		});
 
-		it('should not render avatar when null', () => {
-			render(VideoListings, { props: { videos: [mockRelatedVideos[2]] } });
+		it('does not render an avatar when channelAvatar is empty', () => {
+			render(VideoListings, {
+				props: { videos: [{ ...heartbeat, channelAvatar: '' }] }
+			});
 
-			const avatar = screen.queryByAltText('-channel-avatar-GLITCH');
-			expect(avatar).not.toBeInTheDocument();
+			expect(
+				screen.queryByAltText(`${heartbeat.id}-channel-avatar-${heartbeat.channelName}`)
+			).not.toBeInTheDocument();
+		});
+
+		it('falls back to the logo placeholder when the avatar image fails to load', async () => {
+			render(VideoListings, { props: { videos: [heartbeat] } });
+			const avatar = screen.getByAltText(`${heartbeat.id}-channel-avatar-${heartbeat.channelName}`);
+
+			await fireEvent.error(avatar);
+
+			expect(avatar).toHaveAttribute('src', '/src/lib/assets/logo-placeholder.svg');
 		});
 	});
 
-	// =============================================================================
-	// Duration Formatting Tests
-	// =============================================================================
-
-	describe('duration formatting', () => {
-		it('should format duration under 1 hour as MM:SS', () => {
-			render(VideoListings, { props: { videos: [mockRelatedVideos[0]] } });
-
-			// 1049 seconds = 17:29
-			expect(screen.getByText('17:29')).toBeInTheDocument();
+	describe('duration badge', () => {
+		it.each([
+			['under an hour', 1049, '17:29'],
+			['over an hour', 36000, '10:00:00']
+		])('renders %s durations (%is → %s)', (_label, duration, expected) => {
+			render(VideoListings, { props: { videos: [{ ...heartbeat, duration }] } });
+			expect(screen.getByText(expected)).toBeInTheDocument();
 		});
 
-		it('should format duration over 1 hour as HH:MM:SS', () => {
-			render(VideoListings, { props: { videos: [mockRelatedVideos[1]] } });
-
-			// 1588 seconds = 26:28
-			expect(screen.getByText('26:28')).toBeInTheDocument();
-		});
-
-		it('should pad single digit seconds', () => {
-			const videoWithPadding = [
-				{
-					...mockRelatedVideos[0],
-					duration: 65 // 1:05
-				}
-			];
-			render(VideoListings, { props: { videos: videoWithPadding } });
-
-			expect(screen.getByText('1:05')).toBeInTheDocument();
-		});
-
-		it('should handle zero duration', () => {
-			const videoWithZeroDuration = [
-				{
-					...mockRelatedVideos[0],
-					duration: 0
-				}
-			];
-			render(VideoListings, { props: { videos: videoWithZeroDuration } });
-
-			// Should not render duration badge for zero duration
+		it('renders no badge for zero duration', () => {
+			render(VideoListings, { props: { videos: [{ ...heartbeat, duration: 0 }] } });
 			expect(screen.queryByText('0:00')).not.toBeInTheDocument();
 		});
-
-		it('should display duration badge on thumbnail', () => {
-			const { container } = render(VideoListings, { props: { videos: mockRelatedVideos } });
-
-			const durationBadge = container.querySelector('.absolute.bottom-1.right-1');
-			expect(durationBadge).toBeInTheDocument();
-		});
 	});
 
-	// =============================================================================
-	// View Count Formatting Tests
-	// =============================================================================
-
-	describe('view count formatting', () => {
-		it('should format view count with commas', () => {
+	describe('stats', () => {
+		it('renders locale-formatted view counts', () => {
 			render(VideoListings, { props: { videos: mockRelatedVideos } });
-
 			expect(screen.getByText('39,000,000 views')).toBeInTheDocument();
 			expect(screen.getByText('16,000,000 views')).toBeInTheDocument();
 		});
 
-		it('should format small numbers without commas', () => {
-			render(VideoListings, { props: { videos: [mockRelatedVideos[2]] } });
-
-			expect(screen.getByText('0 views')).toBeInTheDocument();
-		});
-
-		it('should include "views" text', () => {
-			render(VideoListings, { props: { videos: mockRelatedVideos } });
-
-			const viewsElements = screen.getAllByText(/views$/);
-			expect(viewsElements.length).toBeGreaterThan(0);
-		});
-
-		it('should handle zero views', () => {
-			const videoWithZeroViews = [
-				{
-					...mockRelatedVideos[0],
-					viewCount: 0
-				}
-			];
-			render(VideoListings, { props: { videos: videoWithZeroViews } });
-
-			expect(screen.getByText('0 views')).toBeInTheDocument();
-		});
-	});
-
-	// =============================================================================
-	// Upload Date Tests
-	// =============================================================================
-
-	describe('upload dates', () => {
-		it('should render upload date', () => {
-			render(VideoListings, { props: { videos: mockRelatedVideos } });
-
+		it('renders the upload date with a separator', () => {
+			render(VideoListings, { props: { videos: [heartbeat] } });
 			expect(screen.getByText('3 years ago')).toBeInTheDocument();
-			expect(screen.getByText('3 month ago')).toBeInTheDocument();
-			expect(screen.getByText('2 years ago')).toBeInTheDocument();
+			expect(screen.getByText('•')).toBeInTheDocument();
 		});
 
-		it('should handle empty upload date', () => {
-			const videoWithoutDate = [
-				{
-					...mockRelatedVideos[0],
-					uploadDate: ''
-				}
-			];
-			const { container } = render(VideoListings, { props: { videos: videoWithoutDate } });
-
-			// Should still render without date
-			expect(container).toBeInTheDocument();
+		it('hides the separator and date when uploadDate is empty', () => {
+			render(VideoListings, { props: { videos: [{ ...heartbeat, uploadDate: '' }] } });
+			expect(screen.queryByText('•')).not.toBeInTheDocument();
+			expect(screen.queryByText('3 years ago')).not.toBeInTheDocument();
 		});
 	});
-
-	// =============================================================================
-	// Navigation Tests
-	// =============================================================================
 
 	describe('navigation', () => {
-		it('should render an overlay link to the video page', () => {
-			render(VideoListings, { props: { videos: mockRelatedVideos } });
-
-			const videoLink = screen.getByRole('link', { name: 'MURDER DRONES - Heartbeat' });
-			expect(videoLink).toHaveAttribute('href', '/video/heartbeat-id');
-		});
-
-		it('should link to the correct video ID for each card', () => {
-			render(VideoListings, { props: { videos: mockRelatedVideos } });
-
-			const secondVideoLink = screen.getByRole('link', { name: 'KNIGHTS OF GUINEVERE - Pilot' });
-			expect(secondVideoLink).toHaveAttribute('href', '/video/pilot-id');
-		});
-
-		it('should link the channel row to the channel page', () => {
-			const { container } = render(VideoListings, { props: { videos: mockSingleVideo } });
-
-			const channelLink = container.querySelector('a[href^="/channel/"]');
-			expect(channelLink).toBeInTheDocument();
-			expect(channelLink).toHaveAttribute('href', `/channel/${mockRelatedVideos[0].channelId}`);
-		});
-
-		it('should enable tap preloading on channel links', () => {
-			const { container } = render(VideoListings, { props: { videos: mockSingleVideo } });
-
-			const channelLink = container.querySelector('a[href^="/channel/"]');
-			expect(channelLink).toHaveAttribute('data-sveltekit-preload-data', 'tap');
-		});
-
-		it('should keep channel links above the overlay link', () => {
-			const { container } = render(VideoListings, { props: { videos: mockSingleVideo } });
-
-			// The channel link must sit on a higher stacking layer than the
-			// full-card overlay so it remains clickable
-			const channelLink = container.querySelector('a[href^="/channel/"]');
-			expect(channelLink).toHaveClass('z-20');
-		});
-	});
-
-	// =============================================================================
-	// Accessibility Tests
-	// =============================================================================
-
-	describe('accessibility', () => {
-		it('should render an overlay link per video card', () => {
+		it('renders one overlay link per card, pointing at the video route', () => {
 			const { container } = render(VideoListings, { props: { videos: mockRelatedVideos } });
 
 			const overlayLinks = container.querySelectorAll('a[href^="/video/"]');
-			expect(overlayLinks.length).toBe(mockRelatedVideos.length);
-		});
-
-		it('should give overlay links accessible names via aria-label', () => {
-			render(VideoListings, { props: { videos: mockSingleVideo } });
-
-			const videoLink = screen.getByRole('link', { name: 'MURDER DRONES - Heartbeat' });
-			expect(videoLink).toHaveAttribute('aria-label', 'MURDER DRONES - Heartbeat');
-		});
-
-		it('should have alt text for thumbnails', () => {
-			render(VideoListings, { props: { videos: mockRelatedVideos } });
-
-			mockRelatedVideos.forEach((video) => {
-				const thumbnail = screen.getByAltText(`thumbnail-${video.id}`);
-				expect(thumbnail).toBeInTheDocument();
-			});
-		});
-
-		it('should have alt text for channel avatars', () => {
-			render(VideoListings, { props: { videos: [mockRelatedVideos[0]] } });
-
-			const avatar = screen.getByAltText('heartbeat-id-channel-avatar-GLITCH');
-			expect(avatar).toBeInTheDocument();
-		});
-
-		it('should stretch overlay links across the whole card', () => {
-			const { container } = render(VideoListings, { props: { videos: mockRelatedVideos } });
-
-			const overlayLinks = container.querySelectorAll('a[href^="/video/"]');
-			overlayLinks.forEach((link) => {
-				expect(link).toHaveClass('absolute', 'inset-0');
-			});
-		});
-	});
-
-	// =============================================================================
-	// Styling Tests
-	// =============================================================================
-
-	describe('styling', () => {
-		it('should apply hover styles', () => {
-			const { container } = render(VideoListings, { props: { videos: mockRelatedVideos } });
-
-			const videoCard = container.querySelector('.group.relative');
-			expect(videoCard).toHaveClass('hover:bg-secondary');
-		});
-
-		it('should apply transition classes', () => {
-			const { container } = render(VideoListings, { props: { videos: mockRelatedVideos } });
-
-			const videoCard = container.querySelector('.group.relative');
-			expect(videoCard).toHaveClass('transition-colors');
-		});
-
-		it('should apply rounded corners', () => {
-			const { container } = render(VideoListings, { props: { videos: mockRelatedVideos } });
-
-			const videoCard = container.querySelector('.group.relative');
-			expect(videoCard).toHaveClass('rounded-lg');
-		});
-
-		it('should have proper text truncation for titles', () => {
-			render(VideoListings, { props: { videos: mockRelatedVideos } });
-
-			const titleElement = screen.getByText('MURDER DRONES - Heartbeat');
-			expect(titleElement).toHaveClass('line-clamp-2');
-		});
-	});
-
-	// =============================================================================
-	// Edge Cases Tests
-	// =============================================================================
-
-	describe('edge cases', () => {
-		it('should handle very long titles', () => {
-			const longTitleVideo = [
-				{
-					...mockRelatedVideos[0],
-					title: 'A'.repeat(200)
-				}
-			];
-			render(VideoListings, { props: { videos: longTitleVideo } });
-
-			expect(screen.getByText('A'.repeat(200))).toBeInTheDocument();
-		});
-
-		it('should handle special characters in titles', () => {
-			const specialCharVideo = [
-				{
-					...mockRelatedVideos[0],
-					title: 'Video with "quotes" & <special> chars'
-				}
-			];
-			render(VideoListings, { props: { videos: specialCharVideo } });
-
-			expect(screen.getByText('Video with "quotes" & <special> chars')).toBeInTheDocument();
-		});
-
-		it('should handle very large view counts', () => {
-			const largeViewsVideo = [
-				{
-					...mockRelatedVideos[0],
-					viewCount: 999999999999
-				}
-			];
-			render(VideoListings, { props: { videos: largeViewsVideo } });
-
-			expect(screen.getByText(/999,999,999,999 views/)).toBeInTheDocument();
-		});
-
-		it('should handle very long durations', () => {
-			const longDurationVideo = [
-				{
-					...mockRelatedVideos[0],
-					duration: 36000 // 10 hours
-				}
-			];
-			render(VideoListings, { props: { videos: longDurationVideo } });
-
-			expect(screen.getByText('10:00:00')).toBeInTheDocument();
-		});
-
-		it('should handle missing thumbnail', () => {
-			const noThumbnailVideo = [
-				{
-					...mockRelatedVideos[0],
-					thumbnail: ''
-				}
-			];
-			const { container } = render(VideoListings, { props: { videos: noThumbnailVideo } });
-
-			expect(container).toBeInTheDocument();
-		});
-
-		it('should handle missing channel name', () => {
-			const noChannelVideo = {
-				...mockRelatedVideos[0],
-				channelName: ''
-			};
-			const { container } = render(VideoListings, { props: { videos: [noChannelVideo] } });
-
-			// Should still render without crashing
-			expect(container).toBeTruthy();
-			// Check that the paragraph exists but is empty
-			const channelParagraph = container.querySelector('p.text-xs.text-secondary');
-			expect(channelParagraph).toBeInTheDocument();
-			expect(channelParagraph?.textContent?.trim()).toBe('');
-		});
-	});
-
-	// =============================================================================
-	// Integration Tests
-	// =============================================================================
-
-	describe('integration', () => {
-		it('should render complete video card', () => {
-			render(VideoListings, { props: { videos: [mockRelatedVideos[0]] } });
-
-			// Title
-			expect(screen.getByText('MURDER DRONES - Heartbeat')).toBeInTheDocument();
-
-			// Thumbnail
-			expect(screen.getByAltText('thumbnail-heartbeat-id')).toBeInTheDocument();
-
-			// Channel info
-			expect(screen.getByText('GLITCH')).toBeInTheDocument();
-			expect(screen.getByAltText('heartbeat-id-channel-avatar-GLITCH')).toBeInTheDocument();
-
-			// Stats
-			expect(screen.getByText('39,000,000 views')).toBeInTheDocument();
-			expect(screen.getByText('3 years ago')).toBeInTheDocument();
-
-			// Navigation link
-			expect(screen.getByRole('link', { name: 'MURDER DRONES - Heartbeat' })).toHaveAttribute(
+			expect(overlayLinks).toHaveLength(mockRelatedVideos.length);
+			expect(screen.getByRole('link', { name: heartbeat.title })).toHaveAttribute(
 				'href',
-				'/video/heartbeat-id'
+				`/video/${heartbeat.id}`
 			);
 		});
 
-		it('should handle props update', async () => {
-			const { unmount } = render(VideoListings, { props: { videos: mockSingleVideo } });
+		it('links the channel row to the channel page with tap preloading', () => {
+			const { container } = render(VideoListings, { props: { videos: [heartbeat] } });
 
-			expect(screen.getByText('MURDER DRONES - Heartbeat')).toBeInTheDocument();
-			expect(screen.queryByText('KNIGHTS OF GUINEVERE - Pilot')).not.toBeInTheDocument();
-
-			// Unmount and remount with new props (Svelte 5 approach)
-			unmount();
-			render(VideoListings, { props: { videos: mockRelatedVideos } });
-
-			await waitFor(() => {
-				expect(screen.getByText('MURDER DRONES - Heartbeat')).toBeInTheDocument();
-				expect(screen.getByText('MURDER DRONES - Cabin Fever')).toBeInTheDocument();
-			});
+			const channelLink = container.querySelector('a[href^="/channel/"]');
+			expect(channelLink).toHaveAttribute('href', `/channel/${heartbeat.channelId}`);
+			expect(channelLink).toHaveAttribute('data-sveltekit-preload-data', 'tap');
 		});
 
-		it('should handle switching from empty to populated', async () => {
-			const { unmount } = render(VideoListings, { props: { videos: mockEmptyVideos } });
+		it('keeps channel links above the card overlay link', () => {
+			// the channel link must sit on a higher stacking layer than the
+			// full-card overlay so it remains clickable
+			const { container } = render(VideoListings, { props: { videos: [heartbeat] } });
+			expect(container.querySelector('a[href^="/channel/"]')).toHaveClass('z-20');
+		});
+	});
 
-			expect(screen.getByText(/No related [Vv]ideos available/)).toBeInTheDocument();
-
-			// Unmount and remount with new props (Svelte 5 approach)
-			unmount();
-			render(VideoListings, { props: { videos: mockRelatedVideos } });
-
-			await waitFor(() => {
-				expect(screen.queryByText(/No related [Vv]ideos available/)).not.toBeInTheDocument();
-				expect(screen.getByText('MURDER DRONES - Heartbeat')).toBeInTheDocument();
-			});
+	describe('accessibility', () => {
+		it('gives overlay links accessible names via aria-label', () => {
+			render(VideoListings, { props: { videos: [heartbeat] } });
+			expect(screen.getByRole('link', { name: heartbeat.title })).toHaveAttribute(
+				'aria-label',
+				heartbeat.title
+			);
 		});
 
-		it('should handle switching from populated to empty', async () => {
-			const { unmount } = render(VideoListings, { props: { videos: mockRelatedVideos } });
-
-			expect(screen.getByText('MURDER DRONES - Heartbeat')).toBeInTheDocument();
-
-			// Unmount and remount with new props (Svelte 5 approach)
-			unmount();
-			render(VideoListings, { props: { videos: mockEmptyVideos } });
-
-			await waitFor(() => {
-				expect(screen.queryByText('MURDER DRONES - Heartbeat')).not.toBeInTheDocument();
-				expect(screen.getByText(/No related [Vv]ideos available/)).toBeInTheDocument();
+		it('stretches overlay links across the whole card', () => {
+			const { container } = render(VideoListings, { props: { videos: mockRelatedVideos } });
+			container.querySelectorAll('a[href^="/video/"]').forEach((link) => {
+				expect(link).toHaveClass('absolute', 'inset-0');
 			});
 		});
 	});

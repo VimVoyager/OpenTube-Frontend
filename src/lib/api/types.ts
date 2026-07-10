@@ -1,4 +1,4 @@
-import type { Avatar, Description, RelatedItem, Thumbnail } from '$lib/types';
+import type { Avatar, Description, Thumbnail } from '$lib/types';
 
 /**
  * API Response for Search
@@ -25,11 +25,11 @@ interface SearchResponseData {
 	uploaderName: string;
 	uploaderAvatarUrl: string;
 	uploaderVerified: boolean;
-	duration: number;
-	viewCount: number;
+	duration?: number;
+	viewCount?: number;
 	uploadDate?: string;
-	streamType: string;
-	isShortFormContent: boolean;
+	streamType?: string;
+	isShortFormContent?: boolean;
 	uploaderUrl?: string;
 	description?: string;
 }
@@ -43,7 +43,7 @@ export interface RelatedItemResponse {
 	url: string;
 	name: string;
 	thumbnails: Thumbnail[];
-	streamType: string;
+	streamType?: string;
 	uploaderName: string;
 	textualUploadDate: string;
 	uploadDate?: {
@@ -52,9 +52,9 @@ export interface RelatedItemResponse {
 	viewCount: number;
 	duration: number;
 	uploaderUrl: string;
-	uploaderAvatars: Avatar[];
+	uploaderAvatars?: Avatar[];
 	uploaderVerified: boolean;
-	shortFormContent: boolean;
+	isShortFormContent?: boolean;
 }
 
 /**
@@ -74,9 +74,9 @@ export interface CommentResponse {
 	serviceId: number;
 	id: string;
 	url: string;
-	originalUrl: string;
+	originalUrl?: string;
 	name: string;
-	errors: never[];
+	errors?: unknown[];
 	relatedItems: RelatedCommentItem[];
 }
 
@@ -117,7 +117,7 @@ export interface Image {
 	url: string;
 	height: number;
 	width: number;
-	estimatedResolution?: string;
+	estimatedResolutionLevel?: string;
 }
 
 export interface ChannelVideoItem {
@@ -130,7 +130,7 @@ export interface ChannelVideoItem {
 	viewCount: number;
 	textualUploadDate: string | null;
 	thumbnails: Thumbnail[];
-	isShortFormContent: boolean;
+	isShortFormContent?: boolean;
 }
 
 export interface ChannelInfoResponse {
@@ -160,16 +160,16 @@ export interface PlaylistResponse {
 	originalUrl: string;
 	name: string;
 	errors?: never[];
-	relatedItems: RelatedItem[];
+	relatedItems: RelatedItemResponse[];
 	contentFilters?: never[];
 	sortFilter: string;
 	uploaderUrl: string;
 	uploaderName: string;
-	subChannelUrl: string;
-	subChannelName: string;
+	subChannelUrl?: string;
+	subChannelName?: string;
 	description: Description;
-	banners?: never[];
-	subChannelAvatars?: never[];
+	banners?: Avatar[];
+	uploaderAvatars?: Avatar[];
+	subChannelAvatars?: Avatar[];
 	thumbnails: Thumbnail[];
-	uploaderAvatars: Avatar[];
 }

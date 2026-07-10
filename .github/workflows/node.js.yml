@@ -1,82 +1,70 @@
-# This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
-
+# test suite with coverage across the configured Node version(s).
+# See: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
 name: Node.js CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ['main']
   pull_request:
-    branches: [ "main" ]
+    branches: ['main']
+
+# Least-privilege token: the default grants far more than a build/test job needs.
+permissions:
+  contents: read
+
+# Cancel superseded runs on the same branch/PR instead of letting them stack up.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  build:
+  ci:
     runs-on: ubuntu-latest
-
+    timeout-minutes: 15
     strategy:
+      fail-fast: false
       matrix:
-        node-version: [25.2.1]
-
+        node-version: [24]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
+
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
 
+      - run: npm ci
+
+      # PUBLIC_* vars are baked into the client bundle at build time, so they
+      # must be set before `build`. They're public by design once shipped.
       - name: Set up environment variables
         run: |
-          echo "PUBLIC_API_URL=${{ secrets.PUBLIC_API_URL }}" >> $GITHUB_ENV
-          echo "PUBLIC_PROXY_URL=${{ secrets.PUBLIC_PROXY_URL }}" >> $GITHUB_ENV
+          echo "PUBLIC_API_URL=${{ secrets.PUBLIC_API_URL }}" >> "$GITHUB_ENV"
+          echo "PUBLIC_PROXY_URL=${{ secrets.PUBLIC_PROXY_URL }}" >> "$GITHUB_ENV"
 
-      - run: npm ci
-      - run: npm run build --if-present
+      # --if-present so the pipeline doesn't hard-fail if a script isn't defined.
+      # Add "lint" and "check" (svelte-check) scripts to package.json to enable.
+      - name: Lint
+        run: npm run lint --if-present
 
-  test:
-    runs-on: ubuntu-latest
-    needs: build
+      - name: Type check
+        run: npm run check --if-present
 
-    strategy:
-      matrix:
-        node-version: [25.2.1]
+      - name: Build
+        run: npm run build --if-present
 
-    steps:
-      - uses: actions/checkout@v4
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
+      # Runs the full suite AND collects coverage in one pass — no separate
+      # uninstrumented test step needed.
+      - name: Test with coverage
+        run: npm run test:coverage
+
+      # Keep the coverage report as a downloadable artifact. Swap/add a Codecov
+      # step here if you want PR-level coverage tracking and diffs.
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v7
         with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'npm'
-
-      - name: Set up environment variables
-        run: |
-          echo "PUBLIC_API_URL=${{ secrets.PUBLIC_API_URL }}" >> $GITHUB_ENV
-          echo "PUBLIC_PROXY_URL=${{ secrets.PUBLIC_PROXY_URL }}" >> $GITHUB_ENV
-
-      - run: npm ci
-      - run: npm test  # Run your tests here
-
-  coverage:
-    runs-on: ubuntu-latest
-    needs: test
-
-    strategy:
-      matrix:
-        node-version: [25.2.1]
-
-    steps:
-      - uses: actions/checkout@v4
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'npm'
-
-      - name: Set up environment variables
-        run: |
-          echo "PUBLIC_API_URL=${{ secrets.PUBLIC_API_URL }}" >> $GITHUB_ENV
-          echo "PUBLIC_PROXY_URL=${{ secrets.PUBLIC_PROXY_URL }}" >> $GITHUB_ENV
-
-      - run: npm ci
-      - run: npm run test:coverage  # Run coverage report generation
+          name: coverage-node-${{ matrix.node-version }}
+          path: coverage/
+          if-no-files-found: ignore

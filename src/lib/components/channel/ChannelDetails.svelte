@@ -40,13 +40,13 @@
 	}
 </script>
 
-<div class="flex flex-col w-full">
+<div class="flex w-full flex-col">
 	<!-- Banner -->
-	<div class="w-full overflow-hidden bg-secondary" style="aspect-ratio: 32/9; max-height: 200px;">
+	<div class="bg-secondary w-full overflow-hidden" style="aspect-ratio: 32/9; max-height: 200px;">
 		{#if channel.bannerUrl}
-			<img src={channel.bannerUrl} alt="Channel banner" class="w-full h-full object-cover" />
+			<img src={channel.bannerUrl} alt="Channel banner" class="h-full w-full object-cover" />
 		{:else}
-			<div class="w-full h-full bg-gradient-to-r from-secondary to-muted opacity-60"></div>
+			<div class="from-secondary to-muted h-full w-full bg-linear-to-r opacity-60"></div>
 		{/if}
 	</div>
 
@@ -54,23 +54,23 @@
 	<div class="px-6 pt-3 pb-4">
 		<div class="flex items-start gap-4">
 			<!-- Avatar — pulls up over the banner -->
-			<div class="shrink-0 -mt-10 z-10">
+			<div class="z-10 -mt-10 shrink-0">
 				<img
 					src={channel.avatarUrl || logoPlaceholder}
 					alt="{channel.name} avatar"
-					class="w-20 h-20 rounded-full object-cover border-4 border-[var(--color-bg,#fff)] shadow-sm"
+					class="h-20 w-20 rounded-full border-4 border-(--color-bg,#fff) object-cover shadow-sm"
 					onerror={handleAvatarError}
 				/>
 			</div>
 
 			<!-- Name / stats / description -->
-			<div class="flex flex-col min-w-0 mt-2 flex-1">
+			<div class="mt-2 flex min-w-0 flex-1 flex-col">
 				<!-- Channel name + verified badge -->
 				<div class="flex items-center gap-1.5">
-					<h1 class="text-xl font-bold text-primary leading-tight">{channel.name}</h1>
+					<h1 class="text-primary text-xl leading-tight font-bold">{channel.name}</h1>
 					{#if channel.verified}
 						<svg
-							class="w-4 h-4 text-secondary shrink-0"
+							class="text-secondary h-4 w-4 shrink-0"
 							viewBox="0 0 24 24"
 							fill="currentColor"
 							aria-label="Verified channel"
@@ -83,7 +83,7 @@
 				</div>
 
 				<!-- Handle · subscribers · video count -->
-				<div class="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-xs text-secondary mt-0.5">
+				<div class="text-secondary mt-0.5 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-xs">
 					{#if channel.handle}
 						<span>{channel.handle}</span>
 						<span class="text-muted">·</span>
@@ -97,12 +97,12 @@
 
 				<!-- Description with expand/collapse -->
 				{#if channel.description}
-					<div class="mt-2 text-xs text-secondary leading-relaxed max-w-2xl">
+					<div class="text-secondary mt-2 max-w-2xl text-xs leading-relaxed">
 						<span>{displayedDescription}</span>
 						{#if isDescriptionLong}
 							<button
 								onclick={() => (descriptionExpanded = !descriptionExpanded)}
-								class="ml-1 text-xs font-semibold text-accent hover:text-accent-hover transition-colors"
+								class="text-accent hover:text-accent-hover ml-1 text-xs font-semibold transition-colors"
 							>
 								{descriptionExpanded ? 'Show less' : '...more'}
 							</button>
@@ -114,21 +114,19 @@
 	</div>
 
 	<!-- Tab bar -->
-	<div class="border-b border-default px-6">
+	<div class="border-default border-b px-6">
 		<div class="flex" role="tablist" aria-label="Channel sections">
-			{#each tabs as tab}
+			{#each tabs as tab (tab.id)}
 				<button
 					role="tab"
 					aria-selected={activeTab === tab.id}
 					onclick={() => (activeTab = tab.id)}
-					class="relative px-4 py-3 text-sm font-medium transition-colors cursor-pointer
-						{activeTab === tab.id
-							? 'text-primary'
-							: 'text-secondary hover:text-primary'}"
+					class="relative cursor-pointer px-4 py-3 text-sm font-medium transition-colors
+						{activeTab === tab.id ? 'text-primary' : 'text-secondary hover:text-primary'}"
 				>
 					{tab.label}
 					{#if activeTab === tab.id}
-						<span class="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-t-sm"></span>
+						<span class="bg-primary absolute right-0 bottom-0 left-0 h-0.5 rounded-t-sm"></span>
 					{/if}
 				</button>
 			{/each}
@@ -141,27 +139,27 @@
 			{#if home}
 				{@render home()}
 			{:else}
-				<div class="flex flex-col items-center justify-center py-12 text-center px-6">
-					<div class="text-4xl mb-4">🏠</div>
-					<p class="text-sm text-secondary">Home content coming soon</p>
+				<div class="flex flex-col items-center justify-center px-6 py-12 text-center">
+					<div class="mb-4 text-4xl">🏠</div>
+					<p class="text-secondary text-sm">Home content coming soon</p>
 				</div>
 			{/if}
 		{:else if activeTab === 'videos'}
 			{#if videos}
 				{@render videos()}
 			{:else}
-				<div class="flex flex-col items-center justify-center py-12 text-center px-6">
-					<div class="text-4xl mb-4">📹</div>
-					<p class="text-sm text-secondary">No videos available</p>
+				<div class="flex flex-col items-center justify-center px-6 py-12 text-center">
+					<div class="mb-4 text-4xl">📹</div>
+					<p class="text-secondary text-sm">No videos available</p>
 				</div>
 			{/if}
 		{:else if activeTab === 'playlists'}
 			{#if playlists}
 				{@render playlists()}
 			{:else}
-				<div class="flex flex-col items-center justify-center py-12 text-center px-6">
-					<div class="text-4xl mb-4">📋</div>
-					<p class="text-sm text-secondary">No playlists available</p>
+				<div class="flex flex-col items-center justify-center px-6 py-12 text-center">
+					<div class="mb-4 text-4xl">📋</div>
+					<p class="text-secondary text-sm">No playlists available</p>
 				</div>
 			{/if}
 		{/if}

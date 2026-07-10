@@ -1,4 +1,3 @@
-
 /**
  * Default values for stream properties
  */
@@ -24,10 +23,10 @@ export const DEFAULT_AUDIO = {
  * Subtitle format to MIME type mapping
  */
 export const SUBTITLE_MIME_TYPES: Record<string, string> = {
-	'vtt': 'text/vtt',
-	'srv3': 'application/ttml+xml',
-	'srv2': 'application/ttml+xml',
-	'srv1': 'application/x-subrip',
-	'ttml': 'application/ttml+xml',
-	'srt': 'application/x-subrip'
+	vtt: 'text/vtt',
+	srv3: 'application/ttml+xml',
+	srv2: 'application/ttml+xml',
+	srv1: 'application/x-subrip',
+	ttml: 'application/ttml+xml',
+	srt: 'application/x-subrip'
 } as const;

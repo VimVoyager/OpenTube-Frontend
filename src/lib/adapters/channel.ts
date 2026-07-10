@@ -2,8 +2,6 @@ import type { ChannelConfig, ChannelVideoConfig } from '$lib/adapters/types';
 import { extractIdFromUrl } from '$lib/utils/streamSelection';
 import type { ChannelInfoResponse, ChannelVideoItem, ChannelVideosResponse } from '$lib/api/types';
 
-// ─── Subscriber count formatting ─────────────────────────────────────────────
-
 /**
  * Format a raw subscriber count into a compact display string.
  * e.g. 16_800_000 → "16.8M", 430_000 → "430K", 980 → "980"
@@ -21,8 +19,6 @@ export function formatSubscriberCount(count: number): string {
 	return count.toString();
 }
 
-// ─── Image selection helpers ──────────────────────────────────────────────────
-
 /**
  * Pick the best banner from the banners array — prefer the widest one,
  * falling back to the raw bannerUrl string on the response.
@@ -32,8 +28,10 @@ function selectBestBanner(
 	fallback: string | null
 ): string | null {
 	if (!banners || banners.length === 0) return fallback;
-	return [...banners].sort((a: { url: string; width: number }, b: { url: string; width: number }): number => b.width - a.width)[0]
-		.url;
+	return [...banners].sort(
+		(a: { url: string; width: number }, b: { url: string; width: number }): number =>
+			b.width - a.width
+	)[0].url;
 }
 
 /**
@@ -45,10 +43,11 @@ function selectBestAvatar(
 	fallback: string | null
 ): string | null {
 	if (!avatars || avatars.length === 0) return fallback;
-	return [...avatars].sort((a: {url: string, height: number}, b: {url: string, height: number}): number => b.height - a.height)[0].url;
+	return [...avatars].sort(
+		(a: { url: string; height: number }, b: { url: string; height: number }): number =>
+			b.height - a.height
+	)[0].url;
 }
-
-// ─── Channel info adapter ─────────────────────────────────────────────────────
 
 /**
  * Adapt raw channel info from the API into a display-ready ChannelConfig.
@@ -67,8 +66,6 @@ export function adaptChannelInfo(info: ChannelInfoResponse, videoCount: number =
 	};
 }
 
-// ─── Channel videos adapter ───────────────────────────────────────────────────
-
 /**
  * Adapt a single raw ChannelVideoItem into a ChannelVideoConfig.
  */
@@ -86,7 +83,7 @@ function adaptChannelVideo(
 		uploadedDate: video.textualUploadDate || '',
 		duration: Math.max(0, video.duration ?? 0),
 		viewCount: Math.max(0, video.viewCount ?? 0),
-		isShort: video.isShortFormContent
+		isShort: video.isShortFormContent ?? false
 	};
 }
 
@@ -99,7 +96,8 @@ export function adaptChannelVideos(
 	avatarFallback: string
 ): ChannelVideoConfig[] {
 	if (!response?.items) return [];
-	return response.items.map((v: ChannelVideoItem): ChannelVideoConfig =>
-		adaptChannelVideo(v, thumbnailFallback, avatarFallback)
+	return response.items.map(
+		(v: ChannelVideoItem): ChannelVideoConfig =>
+			adaptChannelVideo(v, thumbnailFallback, avatarFallback)
 	);
 }

@@ -1,13 +1,16 @@
-import { extractIdFromUrl } from "$lib/utils/streamSelection";
+import { extractIdFromUrl } from '$lib/utils/streamSelection';
 import { selectBestThumbnail, selectBestUploaderAvatar } from '$lib/utils/mediaUtils';
 import type { RelatedVideoConfig } from './types';
 import type { RelatedItemResponse } from '$lib/api/types';
 
-
 /**
  * Adapts a single related item to related video configuration
  */
-function adaptRelatedVideo(item: RelatedItemResponse, defaultThumbnail: string, defaultAvatar: string): RelatedVideoConfig {
+function adaptRelatedVideo(
+	item: RelatedItemResponse,
+	defaultThumbnail: string,
+	defaultAvatar: string
+): RelatedVideoConfig {
 	return {
 		id: extractIdFromUrl(item.url),
 		url: item.url || '',
@@ -36,10 +39,10 @@ export function adaptRelatedVideos(
 	}
 
 	return items
-		.filter(item => item && item.url && item.name) // Filter out invalid items
-		.map(item => adaptRelatedVideo(item, defaultThumbnail, defaultAvatar));
+		.filter((item) => item && item.url && item.name) // Filter out invalid items
+		.map((item) => adaptRelatedVideo(item, defaultThumbnail, defaultAvatar));
 }
 
 function handleNegativeCount(count: number): number {
-    return count < 0 ? 0 : count;
+	return count < 0 ? 0 : count;
 }

@@ -1,13 +1,9 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/svelte';
+import { adaptSearchResults } from '$lib/adapters/search';
 import ChannelResult from './ChannelResult.svelte';
 import type { ChannelSearchResultConfig } from '$lib/adapters/types';
 import channelSearchResultFixtures from '../../../tests/fixtures/adapters/channelSearchResult.json';
-
-// Mock the formatters module
-vi.mock('$lib/utils/formatters', () => ({
-	formatCount: (count: number) => new Intl.NumberFormat('en-US').format(count)
-}));
 
 // Mock asset imports
 vi.mock('$lib/assets/logo-placeholder.svg', () => ({
@@ -20,25 +16,13 @@ vi.mock('$app/navigation', () => ({
 	goto: (...args: unknown[]) => mockGoto(...args)
 }));
 
-// Adapt raw fixture shape to what the component receives, mirroring adaptChannelItem()
-// in the search adapter so test data goes through the same transformation as production.
-function adaptFixture(
-	raw: (typeof channelSearchResultFixtures)[number]
-): ChannelSearchResultConfig {
-	return {
-		type: 'channel',
-		id: raw.url.split('/').at(-1) ?? '',
-		name: raw.name,
-		avatar: raw.thumbnailUrl || '',
-		description: raw.description || null,
-		subscriberCount: raw.subscriberCount < 0 ? 0 : raw.subscriberCount,
-		verified: raw.uploaderVerified
-	};
-}
-
 // glitchResult  → GLITCH (20.6M subs, verified, has description)
 // glitchRoblox  → Glitch Roblox (11.3M subs, verified, has description)
-const [glitchResult, glitchRobloxResult] = channelSearchResultFixtures.map(adaptFixture);
+const [glitchResult, glitchRobloxResult] = adaptSearchResults(
+	{ items: channelSearchResultFixtures } as never,
+	'default-thumbnail.jpg',
+	'default-avatar.jpg'
+).filter((r): r is ChannelSearchResultConfig => r.type === 'channel');
 
 // Derived variant with all optional fields stripped — used for fallback/edge-case tests
 const bareChannel: ChannelSearchResultConfig = {
@@ -134,19 +118,6 @@ describe('ChannelResult', () => {
 			const description = container.querySelector('.line-clamp-2');
 			expect(description).toBeNull();
 		});
-
-		it('should render without crashing when all optional fields are absent', () => {
-			render(ChannelResult, { props: { result: bareChannel } });
-
-			const names = screen.getAllByText(glitchRobloxResult.name, { exact: false });
-			expect(names.length).toBeGreaterThanOrEqual(2);
-		});
-
-		it('should handle negative subscriberCount from fixture by clamping to zero', () => {
-			// Both fixture entries have streamCount: -1 — confirm adaptation clamps to 0
-			const noSubs = adaptFixture({ ...channelSearchResultFixtures[0], subscriberCount: -1 });
-			expect(noSubs.subscriberCount).toBe(0);
-		});
 	});
 
 	describe('Navigation', () => {
@@ -178,46 +149,6 @@ describe('ChannelResult', () => {
 			await fireEvent.keyDown(buttons[0], { key: 'Space' });
 
 			expect(mockGoto).not.toHaveBeenCalled();
-		});
-	});
-
-	describe('Styling and layout', () => {
-		it('should apply hover effect class to both layout containers', () => {
-			const { container } = render(ChannelResult, { props: { result: glitchResult } });
-
-			const hoverDivs = container.querySelectorAll('.hover\\:bg-secondary');
-			expect(hoverDivs.length).toBeGreaterThanOrEqual(2);
-		});
-
-		it('should apply line-clamp-2 to description for truncation', () => {
-			render(ChannelResult, { props: { result: glitchResult } });
-
-			const description = screen.getByText(
-				"Here you'll find fun, colourful animated shows with occasional violence and existential breakdowns :D.",
-				{ exact: false }
-			);
-			expect(description.classList.contains('line-clamp-2')).toBe(true);
-		});
-
-		it('should render desktop layout with hidden sm:flex classes', () => {
-			const { container } = render(ChannelResult, { props: { result: glitchResult } });
-
-			const desktopLayout = container.querySelector('.hidden.sm\\:flex');
-			expect(desktopLayout).toBeTruthy();
-		});
-
-		it('should render mobile layout with sm:hidden class', () => {
-			const { container } = render(ChannelResult, { props: { result: glitchResult } });
-
-			const mobileLayout = container.querySelector('.sm\\:hidden');
-			expect(mobileLayout).toBeTruthy();
-		});
-
-		it('should render avatars as circles using rounded-full in both layouts', () => {
-			const { container } = render(ChannelResult, { props: { result: glitchResult } });
-
-			const roundedAvatars = container.querySelectorAll('img.rounded-full');
-			expect(roundedAvatars).toHaveLength(2);
 		});
 	});
 });

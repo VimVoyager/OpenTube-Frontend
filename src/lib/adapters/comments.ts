@@ -5,10 +5,7 @@ import { selectBestAvatar } from '$lib/utils/mediaUtils';
 /**
  * Adapt raw comment data into a cleaner format for display
  */
-export function adaptComment(
-	comment: RelatedCommentItem,
-	defaultAvatar: string
-): CommentConfig {
+export function adaptComment(comment: RelatedCommentItem, defaultAvatar: string): CommentConfig {
 	return {
 		id: comment.commentId,
 		text: comment.commentText || '',

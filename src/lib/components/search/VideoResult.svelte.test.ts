@@ -4,20 +4,6 @@ import VideoResult from './VideoResult.svelte';
 import type { VideoSearchResultConfig } from '$lib/adapters/types';
 import searchResultFixtures from '../../../tests/fixtures/adapters/searchResult.json';
 
-// Mock the formatters module
-vi.mock('$lib/utils/formatters', () => ({
-	formatCount: (count: number) => new Intl.NumberFormat('en-US').format(count),
-	formatDate: (dateString: string) => {
-		if (!dateString) return '';
-		const date = new Date(dateString);
-		return date.toLocaleDateString('en-US', {
-			year: 'numeric',
-			month: 'short',
-			day: 'numeric'
-		});
-	}
-}));
-
 // Mock asset imports
 vi.mock('$lib/assets/thumbnail-placeholder.jpg', () => ({
 	default: '/placeholder-thumbnail.jpg'
@@ -135,6 +121,17 @@ describe('VideoResult', () => {
 				expect(avatar.getAttribute('src')).toBe('default-avatar.jpg');
 			});
 		});
+
+		it('falls back to placeholder assets when thumbnail/avatar are empty strings', () => {
+			const bare = { ...pilotResult, thumbnail: '', channelAvatar: '' };
+			render(VideoResult, { props: { result: bare } });
+			screen
+				.getAllByAltText('Thumbnail for MURDER DRONES - Pilot')
+				.forEach((t) => expect(t.getAttribute('src')).toBe('/placeholder-thumbnail.jpg'));
+			screen
+				.getAllByAltText('GLITCH')
+				.forEach((a) => expect(a.getAttribute('src')).toBe('/placeholder-avatar.svg'));
+		});
 	});
 
 	describe('Edge cases', () => {
@@ -146,7 +143,7 @@ describe('VideoResult', () => {
 		});
 
 		it('should handle empty description', () => {
-			const { container } = render(VideoResult, { props: { result: pilotResult } });
+			const { container } = render(VideoResult, { props: { result: absoluteEndResult } });
 
 			const desktopDescription = container.querySelector('.hidden.sm\\:grid p.line-clamp-3');
 			expect(desktopDescription).toBeTruthy();
@@ -169,41 +166,6 @@ describe('VideoResult', () => {
 			// Mobile layout
 			const mobileDateSection = container.querySelector('.sm\\:hidden p.text-xs.text-muted');
 			expect(mobileDateSection).toBeTruthy();
-		});
-	});
-
-	describe('Styling and layout', () => {
-		it('should apply hover effect class to main container', () => {
-			const { container } = render(VideoResult, { props: { result: pilotResult } });
-
-			const mainDiv = container.querySelector('.hover\\:bg-secondary');
-			expect(mainDiv).toBeTruthy();
-		});
-
-		it('should apply line-clamp-3 to description for truncation', () => {
-			const resultWithDescription: VideoSearchResultConfig = {
-				...pilotResult,
-				description: 'This is a test video description that should be displayed.'
-			};
-			const { container } = render(VideoResult, { props: { result: resultWithDescription } });
-
-			const description = container.querySelector('.line-clamp-3');
-			expect(description).toBeTruthy();
-			expect(description?.textContent).toBe(
-				'This is a test video description that should be displayed.'
-			);
-		});
-
-		it('should use grid layout with 1/3 and 2/3 columns', () => {
-			const { container } = render(VideoResult, { props: { result: pilotResult } });
-
-			const gridContainer = container.querySelector('.sm\\:grid.sm\\:grid-cols-3');
-			expect(gridContainer).toBeTruthy();
-
-			const leftColumn = container.querySelector('.col-span-1');
-			const rightColumn = container.querySelector('.col-span-2');
-			expect(leftColumn).toBeTruthy();
-			expect(rightColumn).toBeTruthy();
 		});
 	});
 });

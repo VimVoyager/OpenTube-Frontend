@@ -5,8 +5,10 @@
 >
 	<!-- Left side – thumbnail skeleton -->
 	<div class="col-span-1 flex items-start justify-center">
-		<div class="h-auto w-full animate-pulse rounded-md bg-gray-700" style="aspect-ratio: 16/9;">
-		</div>
+		<div
+			class="h-auto w-full animate-pulse rounded-md bg-gray-700"
+			style="aspect-ratio: 16/9;"
+		></div>
 	</div>
 
 	<!-- Right side – text skeleton (2/3 of the width) -->
@@ -18,7 +20,7 @@
 		</div>
 
 		<!-- View count and date skeleton -->
-		<div class="mb-2 mt-2 flex items-center gap-2">
+		<div class="mt-2 mb-2 flex items-center gap-2">
 			<div class="h-4 w-24 animate-pulse rounded bg-gray-700"></div>
 			<div class="h-2 w-2 animate-pulse rounded-full bg-gray-700"></div>
 			<div class="h-4 w-20 animate-pulse rounded bg-gray-700"></div>

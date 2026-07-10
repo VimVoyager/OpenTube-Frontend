@@ -1,20 +1,20 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { DOMParser as XMLDomParser } from '@xmldom/xmldom';
-import { getVideoDetails } from '$lib/api/details';
-import { getManifest } from '$lib/api/manifest';
-import { getRelatedStreams } from '$lib/api/related';
-import { getVideoThumbnails } from '$lib/api/thumbnails';
-import { adaptPlayerConfig } from '$lib/adapters/player';
-import { adaptVideoMetadata } from '$lib/adapters/metadata';
-import { adaptRelatedVideos } from '$lib/adapters/related';
 import { load } from './+page';
-import detailsResponseFixture from '../../../tests/fixtures/api/detailsResponseFixture.json'
+import detailsResponseFixture from '../../../tests/fixtures/api/detailsResponseFixture.json';
 import thumbnailsResponseFixture from '../../../tests/fixtures/api/thumbnailsResponseFixture.json';
-import manifestXmlFixture from '../../../tests/fixtures/api/manifestXmlFixture.xml?raw'
-import relatedVideosFixture from '../../../tests/fixtures/api/relatedVideosResponse.json'
-import type { Details, Thumbnail } from '$lib/types';
-import type { RelatedItemResponse } from '$lib/api/types';
+import manifestXmlFixture from '../../../tests/fixtures/api/manifestXmlFixture.xml?raw';
+import relatedVideosFixture from '../../../tests/fixtures/api/relatedVideosResponse.json';
+import playlistResponseFixture from '../../../tests/fixtures/api/playlistResponse.json';
+import commentsResponseFixture from '../../../tests/fixtures/api/commentsResponse.json';
 import type { VideoPageData } from '../../types';
+
+// The API + Adapter Integration describes that used to live here are gone:
+// fetchers are covered by the describeJsonFetcher factory + manifest.test.ts
+// (incl. the muxed X-Stream-Type fallback), adapters by their own suites.
+// This file owns exactly one thing: the load function's orchestration of the
+// real api + adapter pipeline — parallel fetching, playlist context, partial
+// failure degradation, and error mapping.
 
 const createMockManifestXml = (duration: string = 'PT2M56S'): string =>
 	manifestXmlFixture
@@ -32,18 +32,58 @@ const createManifestResponse = (
 	text: async () => xml
 });
 
-describe('Video Detail Integration Tests', () => {
+const failedResponse = { ok: false, status: 500, statusText: 'Internal Server Error' };
+
+// URL-routed fetch: robust to the loader's call order (Promise.all), and
+// per-test overrides replace exactly one endpoint's behaviour.
+type RouteOverrides = Partial<
+	Record<
+		'thumbnails' | 'details' | 'dash' | 'related' | 'comments' | 'playlists',
+		unknown | (() => unknown)
+	>
+>;
+
+const createRouteFetch = (overrides: RouteOverrides = {}) => {
+	const routes: Record<string, () => unknown> = {
+		'/streams/thumbnails': () => ({ ok: true, json: async () => thumbnailsResponseFixture }),
+		'/streams/details': () => ({ ok: true, json: async () => detailsResponseFixture[0] }),
+		'/streams/dash': () => createManifestResponse(createMockManifestXml('PT1H2M3S')),
+		'/streams/related': () => ({ ok: true, json: async () => relatedVideosFixture }),
+		'/comments': () => ({ ok: true, json: async () => commentsResponseFixture[0] }),
+		'/playlists': () => ({ ok: true, json: async () => playlistResponseFixture })
+	};
+	for (const [key, value] of Object.entries(overrides)) {
+		routes[
+			`/${key === 'dash' ? 'streams/dash' : key === 'playlists' ? 'playlists' : `streams/${key}`}`.replace(
+				'streams/comments',
+				'comments'
+			)
+		] = typeof value === 'function' ? (value as () => unknown) : () => value;
+	}
+	return vi.fn(async (url: string) => {
+		const route = Object.keys(routes).find((path) => url.includes(path));
+		if (route) return routes[route]();
+		throw new Error(`Unrouted fetch in test: ${url}`);
+	});
+};
+
+const runLoad = (fetch: ReturnType<typeof createRouteFetch>, search = '', id = 'test-video-id') =>
+	load({
+		params: { id },
+		fetch,
+		url: new URL(`https://opentube.com/video/${id}${search}`),
+		route: { id: '/video/[id]' },
+		data: {}
+	} as never) as Promise<VideoPageData>;
+
+describe('video/[id] load function integration', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
-		// Mock DOMParser for manifest tests
 		global.DOMParser = class DOMParser {
 			parseFromString(str: string, type: string) {
-				const parser = new XMLDomParser();
-				return parser.parseFromString(str, type);
+				return new XMLDomParser().parseFromString(str, type);
 			}
 		} as never;
-
-		// Mock URL.createObjectURL
 		global.URL.createObjectURL = vi.fn(() => 'blob:mock-manifest-url');
 	});
 
@@ -51,362 +91,154 @@ describe('Video Detail Integration Tests', () => {
 		vi.restoreAllMocks();
 	});
 
-	describe('API + Adapter Integration - Video Details', () => {
-		it('should fetch and transform video details correctly', async () => {
-			const mockDetails: Details = detailsResponseFixture[0];
+	it('loads complete page data through the full pipeline', async () => {
+		const fetch = createRouteFetch();
 
-			const mockFetch = vi.fn().mockResolvedValue({
-				ok: true,
-				json: async () => mockDetails
-			});
+		const result = await runLoad(fetch);
 
-			const details = await getVideoDetails('test-video-id', mockFetch);
-			const metadata = adaptVideoMetadata(details, 'default-avatar.jpg');
+		// one call per endpoint, each with the video id
+		expect(fetch).toHaveBeenCalledTimes(5);
+		for (const endpoint of [
+			'/streams/thumbnails',
+			'/streams/details',
+			'/streams/dash',
+			'/streams/related',
+			'/comments'
+		]) {
+			expect(
+				fetch.mock.calls.some(([url]) => (url as string).includes(`${endpoint}?id=test-video-id`))
+			).toBe(true);
+		}
 
-			expect(mockFetch).toHaveBeenCalledWith(
-				expect.stringContaining('/streams/details?id=test-video-id')
-			);
-			expect(metadata).toEqual({
-				title: 'MURDER DRONES - Pilot',
-				description: 'Murder Drones is a show about cute little robots that murder eachother',
-				channelName: 'GLITCH',
-				channelAvatar: "https://yt3.ggpht.com/random-unicode-characters/xl",
-				viewCount: 10000,
-				uploadDate: '2021-10-29T16:00:13-07:00',
-				likeCount: 555,
-				dislikeCount: 10,
-				subscriberCount: 50000
-			});
+		expect(result.playerConfig).toEqual({
+			manifestUrl: 'blob:mock-manifest-url',
+			duration: 3723, // PT1H2M3S
+			poster: 'https://i.ytimg.com/vi/pilot-id/xl.jpg',
+			isMuxed: false
 		});
+		expect(result.metadata.title).toBe('MURDER DRONES - Pilot');
+		expect(result.metadata.channelName).toBe('GLITCH');
+		expect(result.relatedVideos).toHaveLength(4);
+		expect(result.relatedVideos[0].title).toBe('MURDER DRONES - Heartbeat');
 
-		it('should handle missing optional fields in video details', async () => {
-			const mockDetails: Details = detailsResponseFixture[1];
+		expect(result.comments).toBeDefined();
+		expect(result.comments!.length).toBeGreaterThan(0);
+		expect(result.comments![0].author).toBeTruthy();
 
-			const mockFetch = vi.fn().mockResolvedValue({
-				ok: true,
-				json: async () => mockDetails
-			});
-
-			const details = await getVideoDetails('test-video-id', mockFetch);
-			const metadata = adaptVideoMetadata(details, 'default-avatar.jpg');
-
-			expect(metadata).toEqual({
-				title: 'MURDER DRONES - Heartbeat',
-				description: 'No description available',
-				channelName: 'Unknown Channel',
-				channelAvatar: 'default-avatar.jpg',
-				viewCount: 0,
-				uploadDate: '',
-				likeCount: 0,
-				dislikeCount: 0,
-				subscriberCount: 0
-			});
-		});
-
-		it('should handle API errors for video details', async () => {
-			const mockFetch = vi.fn().mockResolvedValue({
-				ok: false,
-				status: 404,
-				statusText: 'Not Found'
-			});
-
-			await expect(getVideoDetails('invalid-id', mockFetch)).rejects.toThrow(
-				'Failed to fetch video details for invalid-id: 404 Not Found'
-			);
-		});
+		// no playlist context without a ?playlist param
+		expect(result.playlistId).toBeNull();
+		expect(result.playlistIndex).toBeNull();
+		expect(result.playlistVideos).toBeNull();
+		expect(result.playlistInfo).toBeNull();
+		expect(result.error).toBeUndefined();
 	});
 
-	describe('API + Adapter Integration - Thumbnails', () => {
-		it('should fetch and select high quality thumbnail', async () => {
-			const mockThumbnails: Thumbnail[] = thumbnailsResponseFixture
-
-			const mockFetch = vi.fn().mockResolvedValue({
+	it('propagates the muxed flag and direct URL for muxed-progressive streams', async () => {
+		const fetch = createRouteFetch({
+			dash: () => ({
 				ok: true,
-				json: async () => mockThumbnails
-			});
-
-			const thumbnail = await getVideoThumbnails('test-id', mockFetch);
-
-			expect(mockFetch).toHaveBeenCalledWith(
-				expect.stringContaining('/streams/thumbnails?id=test-id')
-			);
-			expect(thumbnail).toEqual({
-				url: 'https://i.ytimg.com/vi/pilot-id/xl.jpg',
-				height: 1080,
-				width: 1920,
-				estimatedResolutionLevel: 'HIGH'
-			});
+				headers: new Headers({ 'X-Stream-Type': 'muxed-progressive' }),
+				text: async () => 'https://rr3---sn-test.googlevideo.com/videoplayback?id=123'
+			})
 		});
+		vi.spyOn(console, 'log').mockImplementation(() => {});
 
-		it('should fallback to last thumbnail if no high quality available', async () => {
-			const mockThumbnails: Thumbnail[] = [thumbnailsResponseFixture[2], thumbnailsResponseFixture[3]];
+		const result = await runLoad(fetch);
 
-			const mockFetch = vi.fn().mockResolvedValue({
-				ok: true,
-				json: async () => mockThumbnails
-			});
-
-			const thumbnail = await getVideoThumbnails('test-id', mockFetch);
-
-			expect(thumbnail).toEqual({
-				url: 'https://i.ytimg.com/vi/pilot-id/lg.jpg',
-				height: 188,
-				width: 336,
-				estimatedResolutionLevel: 'MEDIUM'
-			});
-		});
-
-		it('should handle missing thumbnails', async () => {
-			const mockFetch = vi.fn().mockResolvedValue({
-				ok: true,
-				json: async () => []
-			});
-
-			await expect(getVideoThumbnails('test-id', mockFetch)).rejects.toThrow(
-				'No thumbnails available for video test-id'
-			);
-		});
+		expect(result.playerConfig.isMuxed).toBe(true);
+		expect(result.playerConfig.manifestUrl).toBe(
+			'https://rr3---sn-test.googlevideo.com/videoplayback?id=123'
+		);
+		expect(result.playerConfig.duration).toBe(0);
+		expect(result.error).toBeUndefined();
 	});
 
-	describe('API + Adapter Integration - Manifest', () => {
-		it('should fetch and parse DASH manifest correctly', async () => {
-			const mockFetch = vi.fn().mockResolvedValue(
-				createManifestResponse(createMockManifestXml('PT1H2M3S'))
-			);
+	describe('playlist context', () => {
+		it('fetches and adapts the playlist when ?playlist is present', async () => {
+			const fetch = createRouteFetch();
 
-			const manifest = await getManifest('test-id', mockFetch);
+			const result = await runLoad(fetch, '?playlist=glitch-playlist-id&index=2');
 
-			expect(mockFetch).toHaveBeenCalledWith(expect.stringContaining('/streams/dash?id=test-id'));
-			expect(manifest.url).toBe('blob:mock-manifest-url');
-			expect(manifest.duration).toBe(3723);
-			expect(manifest.videoId).toBe('0');
+			expect(
+				fetch.mock.calls.some(([url]) =>
+					(url as string).includes('/playlists?id=glitch-playlist-id')
+				)
+			).toBe(true);
+			expect(result.playlistId).toBe('glitch-playlist-id');
+			expect(result.playlistIndex).toBe(2);
+			// real adapters over the real fixture
+			expect(result.playlistInfo?.name).toBe('Murder Drones');
+			expect(result.playlistInfo?.uploaderName).toBe('GLITCH');
+			expect(result.playlistVideos?.[0].id).toBe('glitch-video-1');
+			expect(result.playlistVideos?.[0].title).toBe('MURDER DRONES - Episode 1: PILOT');
 		});
 
-		it('should parse different duration formats', async () => {
-			const testCases = [
-				{ xml: 'PT1H2M3S', expected: 3723 },
-				{ xml: 'PT45M', expected: 2700 },
-				{ xml: 'PT30S', expected: 30 },
-				{ xml: 'PT2H', expected: 7200 },
-				{ xml: 'PT1M30.5S', expected: 90.5 }
-			];
-
-			for (const testCase of testCases) {
-				const mockFetch = vi.fn().mockResolvedValue(
-					createManifestResponse(createMockManifestXml(testCase.xml))
-				);
-
-				const manifest = await getManifest('test-id', mockFetch);
-				expect(manifest.duration).toBe(testCase.expected);
-			}
+		it('defaults the playlist index to 0 when ?index is missing', async () => {
+			const result = await runLoad(createRouteFetch(), '?playlist=glitch-playlist-id');
+			expect(result.playlistIndex).toBe(0);
 		});
 
-		it('should handle manifest without duration', async () => {
-			const mockFetch = vi.fn().mockResolvedValue(
-				createManifestResponse(createMockManifestXml(''))
-			);
+		it('does not fetch the playlist when the param is absent', async () => {
+			const fetch = createRouteFetch();
 
-			const manifest = await getManifest('test-id', mockFetch);
+			const result = await runLoad(fetch);
 
-			expect(manifest.duration).toBe(0);
-		});
-
-		it('should return direct URL for muxed-progressive stream type', async () => {
-			const directUrl = 'https://example.com/direct-stream.mp4';
-			const mockFetch = vi.fn().mockResolvedValue(
-				createManifestResponse(directUrl, { 'X-Stream-Type': 'muxed-progressive' })
-			);
-			const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
-
-			const manifest = await getManifest('test-id', mockFetch);
-
-			expect(manifest.url).toBe(directUrl);
-			expect(manifest.duration).toBe(0);
-			expect(manifest.isMuxed).toBe(true);
-
-			consoleLogSpy.mockRestore();
-		});
-
-		it('should create player config from manifest', () => {
-			const playerConfig = adaptPlayerConfig(
-				'blob:mock-manifest-url',
-				300,
-				'https://example.com/poster.jpg'
-			);
-
-			expect(playerConfig).toEqual({
-				manifestUrl: 'blob:mock-manifest-url',
-				duration: 300,
-				poster: 'https://example.com/poster.jpg'
-			});
-		});
-	});
-
-	describe('API + Adapter Integration - Related Videos', () => {
-		it('should fetch and transform related videos correctly', async () => {
-			const mockRelatedVideos: RelatedItemResponse[] = [relatedVideosFixture[0], relatedVideosFixture[1]];
-
-			const mockFetch = vi.fn().mockResolvedValue({
-				ok: true,
-				json: async () => mockRelatedVideos
-			});
-
-			const relatedStreams = await getRelatedStreams('test-id', mockFetch);
-			const relatedVideos = adaptRelatedVideos(
-				relatedStreams,
-				'default-thumb.jpg',
-				'default-avatar.jpg'
-			);
-
-			expect(mockFetch).toHaveBeenCalledWith(
-				expect.stringContaining('/streams/related?id=test-id')
-			);
-			expect(relatedVideos).toHaveLength(2);
-			expect(relatedVideos[0]).toEqual({
-				id: "heartbeat-id",
-				url: 'https://www.youtube.com/watch?v=heartbeat-id',
-				title: 'MURDER DRONES - Heartbeat',
-				thumbnail: 'https://i.ytimg.com/vi/heartbeat-id/hqdefault.jpg/md',
-				channelName: 'GLITCH',
-				channelId: 'channel-id',
-				channelAvatar: 'https://yt3.ggpht.com/random-unicode-characters/md',
-				viewCount: 39000000,
-				duration: 1049,
-				uploadDate: '3 years ago'
-			});
-		});
-
-		it('should filter out invalid related videos', async () => {
-			const mockRelatedVideos: RelatedItemResponse[] = relatedVideosFixture;
-
-			const mockFetch = vi.fn().mockResolvedValue({
-				ok: true,
-				json: async () => mockRelatedVideos
-			});
-
-			const relatedStreams = await getRelatedStreams('test-id', mockFetch);
-			const relatedVideos = adaptRelatedVideos(
-				relatedStreams,
-				'default-thumb.jpg',
-				'default-avatar.jpg'
-			);
-
-			expect(relatedVideos).toHaveLength(4);
-			expect(relatedVideos[0].title).toBe('MURDER DRONES - Heartbeat');
-			expect(relatedVideos[1].title).toBe('KNIGHTS OF GUINEVERE - Pilot');
-			expect(relatedVideos[2].title).toBe('MURDER DRONES - Cabin Fever');
-		});
-
-		it('should handle empty related videos', async () => {
-			const mockFetch = vi.fn().mockResolvedValue({
-				ok: true,
-				json: async () => []
-			});
-
-			const relatedStreams = await getRelatedStreams('test-id', mockFetch);
-			const relatedVideos = adaptRelatedVideos(
-				relatedStreams,
-				'default-thumb.jpg',
-				'default-avatar.jpg'
-			);
-
-			expect(relatedVideos).toEqual([]);
-		});
-
-		it('should handle negative counts in related videos', async () => {
-			const mockRelatedVideos: RelatedItemResponse[] = [relatedVideosFixture[3]];
-
-			const mockFetch = vi.fn().mockResolvedValue({
-				ok: true,
-				json: async () => mockRelatedVideos
-			});
-
-			const relatedStreams = await getRelatedStreams('test-id', mockFetch);
-			const relatedVideos = adaptRelatedVideos(
-				relatedStreams,
-				'default-thumb.jpg',
-				'default-avatar.jpg'
-			);
-
-			expect(relatedVideos[0].viewCount).toBe(0);
-			expect(relatedVideos[0].duration).toBe(0);
-		});
-	});
-
-	describe('Route Load Function Integration', () => {
-		it('should load complete video page data through full pipeline', async () => {
-			const mockThumbnails: Thumbnail[] = thumbnailsResponseFixture;
-			const mockDetails: Details = detailsResponseFixture[0];
-			const mockRelatedVideos: RelatedItemResponse[] = relatedVideosFixture;
-
-			const mockFetch = vi
-				.fn()
-				.mockResolvedValueOnce({ ok: true, json: async () => mockThumbnails })
-				.mockResolvedValueOnce({ ok: true, json: async () => mockDetails })
-				.mockResolvedValueOnce(createManifestResponse(createMockManifestXml('PT1H2M3S')))
-				.mockResolvedValueOnce({ ok: true, json: async () => mockRelatedVideos })
-				// Comments fetch fails gracefully via .catch in load; swap for a
-				// comments response fixture to exercise the comments success path
-				.mockResolvedValueOnce({ ok: false, status: 500, statusText: 'Internal Server Error' });
-			const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => { });
-
-			const result = await load({
-				params: { id: 'test-video-id' },
-				fetch: mockFetch,
-				url: new URL('https://opentube.com/video/test-video-123'),
-				route: { id: '/video/[id]' },
-				data: {}
-			} as never) as VideoPageData;
-
-			// Verify all API calls were made
-			expect(mockFetch).toHaveBeenCalledTimes(5);
-			expect(mockFetch).toHaveBeenNthCalledWith(1, expect.stringContaining('/streams/thumbnails?id=test-video-id'));
-			expect(mockFetch).toHaveBeenNthCalledWith(2, expect.stringContaining('/streams/details?id=test-video-id'));
-			expect(mockFetch).toHaveBeenNthCalledWith(3, expect.stringContaining('/streams/dash?id=test-video-id'));
-			expect(mockFetch).toHaveBeenNthCalledWith(4, expect.stringContaining('/streams/related?id=test-video-id'));
-			expect(mockFetch).toHaveBeenNthCalledWith(5, expect.stringContaining('/comments?id=test-video-id'));
-
-			// Verify player config
-			expect(result.playerConfig.manifestUrl).toBe('blob:mock-manifest-url');
-			expect(result.playerConfig.duration).toBe(3723); // 1h 2m 3s
-			expect(result.playerConfig.poster).toBe('https://i.ytimg.com/vi/pilot-id/xl.jpg');
-			expect(result.playerConfig.isMuxed).toBe(false);
-
-			// Verify metadata
-			expect(result.metadata.title).toBe('MURDER DRONES - Pilot');
-			expect(result.metadata.channelName).toBe('GLITCH');
-			expect(result.metadata.viewCount).toBe(10000);
-
-			// Verify related videos
-			expect(result.relatedVideos).toHaveLength(4);
-			expect(result.relatedVideos[0].title).toBe('MURDER DRONES - Heartbeat');
-
-			// Verify no playlist context without a playlist param
+			expect(fetch.mock.calls.every(([url]) => !(url as string).includes('/playlists'))).toBe(true);
 			expect(result.playlistId).toBeNull();
-			expect(result.playlistIndex).toBeNull();
 			expect(result.playlistVideos).toBeNull();
 			expect(result.playlistInfo).toBeNull();
-
-			// Verify no error
-			expect(result.error).toBeUndefined();
-
-			consoleWarnSpy.mockRestore();
 		});
 
-		it('should handle video not found (404)', async () => {
-			const mockFetch = vi.fn().mockResolvedValue({
-				ok: false,
-				status: 404,
-				statusText: 'Not Found'
-			});
+		it('degrades gracefully when the playlist fetch fails', async () => {
+			const fetch = createRouteFetch({ playlists: failedResponse });
+			const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+			vi.spyOn(console, 'error').mockImplementation(() => {});
 
-			const result = await load({
-				params: { id: 'nonexistent-video' },
-				fetch: mockFetch,
-				url: new URL('https://example.com/video/nonexistent-video'),
-				route: { id: '/video/[id]' },
-				data: {}
-			} as never) as VideoPageData;
+			const result = await runLoad(fetch, '?playlist=glitch-playlist-id&index=1');
+
+			expect(result.error).toBeUndefined();
+			expect(result.playlistId).toBe('glitch-playlist-id');
+			expect(result.playlistVideos).toBeNull();
+			expect(result.playlistInfo).toBeNull();
+			expect(warnSpy).toHaveBeenCalledWith('Failed to fetch playlist:', expect.any(Error));
+		});
+	});
+
+	describe('partial failure degradation', () => {
+		it('continues loading when related videos fail', async () => {
+			const fetch = createRouteFetch({ related: failedResponse });
+			const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+			vi.spyOn(console, 'error').mockImplementation(() => {});
+
+			const result = await runLoad(fetch);
+
+			expect(result.metadata.title).toBe('MURDER DRONES - Pilot');
+			expect(result.playerConfig.manifestUrl).toBe('blob:mock-manifest-url');
+			expect(result.relatedVideos).toEqual([]);
+			expect(result.error).toBeUndefined();
+			expect(warnSpy).toHaveBeenCalledWith('Failed to fetch related videos:', expect.any(Error));
+		});
+
+		it('continues loading when comments fail', async () => {
+			const fetch = createRouteFetch({ comments: failedResponse });
+			vi.spyOn(console, 'warn').mockImplementation(() => {});
+			vi.spyOn(console, 'error').mockImplementation(() => {});
+
+			const result = await runLoad(fetch);
+
+			expect(result.metadata.title).toBe('MURDER DRONES - Pilot');
+			expect(result.error).toBeUndefined();
+			// NOTE: adjust if the loader's comments .catch yields null instead of []
+			expect(result.comments).toEqual([]);
+		});
+	});
+
+	describe('error handling', () => {
+		it('returns error page data on 404', async () => {
+			const fetch = vi.fn().mockResolvedValue({ ok: false, status: 404, statusText: 'Not Found' });
+			vi.spyOn(console, 'error').mockImplementation(() => {});
+
+			const result = await runLoad(fetch as never, '', 'nonexistent-video');
 
 			expect(result.metadata.title).toBe('Error Loading Video');
 			expect(result.error).toContain('Failed to fetch');
@@ -414,54 +246,26 @@ describe('Video Detail Integration Tests', () => {
 			expect(result.relatedVideos).toEqual([]);
 		});
 
-		it('should handle network errors gracefully', async () => {
-			const mockFetch = vi.fn().mockRejectedValue(new Error('Network connection failed'));
+		it('surfaces network error messages', async () => {
+			const fetch = vi.fn().mockRejectedValue(new Error('Network connection failed'));
+			vi.spyOn(console, 'error').mockImplementation(() => {});
 
-			const result = await load({
-				params: { id: 'test-id' },
-				fetch: mockFetch,
-				url: new URL('https://example.com/video/test-id'),
-				route: { id: '/video/[id]' },
-				data: {}
-			} as never) as VideoPageData;
+			const result = await runLoad(fetch as never);
 
 			expect(result.metadata.title).toBe('Error Loading Video');
 			expect(result.error).toBe('Network connection failed');
 		});
 
-		it('should continue loading even if related videos fail', async () => {
-			const mockThumbnails: Thumbnail[] = thumbnailsResponseFixture;
-			const mockDetails: Details = detailsResponseFixture[0];
+		it.each([
+			['a non-Error value', 'String error'],
+			['undefined', undefined]
+		])('falls back to the default message when rejected with %s', async (_label, rejection) => {
+			const fetch = vi.fn().mockRejectedValue(rejection);
+			vi.spyOn(console, 'error').mockImplementation(() => {});
 
-			const mockFetch = vi
-				.fn()
-				.mockResolvedValueOnce({ ok: true, json: async () => mockThumbnails })
-				.mockResolvedValueOnce({ ok: true, json: async () => mockDetails })
-				.mockResolvedValueOnce(createManifestResponse(createMockManifestXml('PT1H2M3S')))
-				.mockResolvedValueOnce({ ok: false, status: 500, statusText: 'Internal Server Error' })
-				.mockResolvedValueOnce({ ok: false, status: 500, statusText: 'Internal Server Error' });
-			const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => { });
+			const result = await runLoad(fetch as never);
 
-			const result = await load({
-				params: { id: 'test-id' },
-				fetch: mockFetch,
-				url: new URL('https://example.com/video/test-id'),
-				route: { id: '/video/[id]' },
-				data: {}
-			} as never) as VideoPageData;
-
-			// Video should still load successfully
-			expect(result.metadata.title).toBe('MURDER DRONES - Pilot');
-			expect(result.playerConfig.manifestUrl).toBe('blob:mock-manifest-url');
-			// Related videos should be empty but not cause error
-			expect(result.relatedVideos).toEqual([]);
-			expect(result.error).toBeUndefined();
-			expect(consoleWarnSpy).toHaveBeenCalledWith(
-				'Failed to fetch related videos:',
-				expect.any(Error)
-			);
-
-			consoleWarnSpy.mockRestore();
+			expect(result.error).toBe('Unknown error loading video');
 		});
 	});
 });

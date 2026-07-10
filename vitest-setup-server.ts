@@ -1,58 +1,30 @@
 /**
  * Vitest Setup File - Server Tests
- * 
+ *
  * Setup for server-side tests (Node environment)
  * Runs before each server test suite.
  */
 
-import { expect, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { afterEach, beforeAll, vi } from 'vitest';
+import './src/tests/matchers';
 
 vi.mock('$env/static/public', () => ({
 	PUBLIC_API_URL: 'http://localhost:8000/api/v1',
 	PUBLIC_PROXY_URL: 'http://localhost:8888'
 }));
 
-// Cleanup after each test
+vi.mock('$lib/assets/logo-placeholder.svg', () => ({
+	default: 'mock-logo-placeholder.svg'
+}));
+
+vi.mock('$lib/assets/thumbnail-placeholder.svg', () => ({
+	default: 'mock-thumbnail-placeholder.svg'
+}));
+
 afterEach(() => {
-    vi.clearAllMocks();
+	vi.clearAllMocks();
 });
 
 beforeAll(() => {
-    process.env.NODE_ENV = 'test';
-});
-
-afterAll(() => {
-    // Cleanup
-});
-
-// Add custom matchers
-expect.extend({
-    toBeValidLanuageCode(received: string) {
-        const pass = /^[a-z]{2}(-[A-Z0-9]+)?$/.test(received);
-        return {
-            pass,
-            message: () =>
-                pass
-                    ? `expected ${received} not to be a valid language code`
-                    : `expected ${received} to be a valid language code (e.g., 'en', 'es-419')`
-        };
-    },
-
-    toBeValidUrl(received: string) {
-        let pass = false;
-        try {
-            new URL(received);
-            pass = true;
-        } catch {
-            // URL is invalid
-        }
-
-        return {
-            pass,
-            message: () =>
-                pass
-                    ? `expected ${received} not to be a valid URL`
-                    : `expected ${received} to be a valid URL`
-        };
-    }
+	process.env.NODE_ENV = 'test';
 });

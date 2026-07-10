@@ -1,13 +1,11 @@
 import { getSearchResults } from '$lib/api/search';
 import { adaptSearchResults } from '$lib/adapters/search';
-import thumbnailPlaceholder from '$lib/assets/thumbnail-placeholder.jpg'
+import thumbnailPlaceholder from '$lib/assets/thumbnail-placeholder.jpg';
 import avatarPlaceholder from '$lib/assets/logo-placeholder.svg';
 import type { PageLoad } from './$types';
 import type { SearchResultConfig } from '$lib/adapters/types';
 import type { LoadResponse } from '../types';
 import type { SearchResponse } from '$lib/api/types';
-
-
 
 export const load: PageLoad = async ({ url, fetch }): Promise<LoadResponse> => {
 	try {
@@ -34,7 +32,7 @@ export const load: PageLoad = async ({ url, fetch }): Promise<LoadResponse> => {
 			avatarPlaceholder
 		);
 
-		return { 
+		return {
 			results,
 			query,
 			sortFilter,
@@ -42,7 +40,7 @@ export const load: PageLoad = async ({ url, fetch }): Promise<LoadResponse> => {
 		};
 	} catch (error) {
 		console.error('Error loading search results:', error);
-		return { 
+		return {
 			results: [],
 			query: url.searchParams.get('query') ?? '',
 			sortFilter: url.searchParams.get('sort') ?? 'asc',

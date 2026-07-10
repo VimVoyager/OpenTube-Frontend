@@ -1,17 +1,13 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render } from '@testing-library/svelte';
+import { render, screen } from '@testing-library/svelte';
 import Page from './+page.svelte';
 import type { ChannelConfig, ChannelVideoConfig } from '$lib/adapters/types';
 import channelDetailsFixture from '../../../tests/fixtures/adapters/channelDetails.json';
 import channelVideosFixture from '../../../tests/fixtures/adapters/channelVideos.json';
 
-
-// =============================================================================
-// Mocks
-// =============================================================================
-
-vi.mock('$lib/components/channel/ChannelDetails.svelte', () => ({
-	default: vi.fn(() => null)
+// ChannelDetails passthrough stub so the page snippet bodies actually render
+vi.mock('$lib/components/channel/ChannelDetails.svelte', async () => ({
+	default: (await import('../../../tests/stubs/ChannelDetailsStub.svelte')).default
 }));
 
 vi.mock('$lib/components/channel/ChannelVideos.svelte', () => ({
@@ -22,12 +18,9 @@ vi.mock('$lib/components/ErrorCard.svelte', () => ({
 	default: vi.fn(() => null)
 }));
 
-import ChannelDetails from '$lib/components/channel/ChannelDetails.svelte';
+import ChannelVideos from '$lib/components/channel/ChannelVideos.svelte';
 import ErrorCard from '$lib/components/ErrorCard.svelte';
-
-// =============================================================================
-// Fixtures
-// =============================================================================
+import type { ChannelPageData } from '../../types';
 
 const mockChannel = channelDetailsFixture as ChannelConfig;
 const mockVideos = channelVideosFixture as ChannelVideoConfig[];
@@ -49,179 +42,114 @@ const errorChannel: ChannelConfig = {
 const createPageData = (overrides: Record<string, unknown> = {}) => ({
 	channel: mockChannel,
 	videos: mockVideos,
-	error: null,
+	error: undefined,
 	...overrides
 });
 
-// =============================================================================
-// Setup
-// =============================================================================
+const reloadMock = vi.fn();
 
 beforeEach(() => {
 	vi.clearAllMocks();
+	// jsdom's location.reload is not implemented (and location itself is not
+	// writable), so stub the whole global for tests that exercise onRetry
+	vi.stubGlobal('location', { ...window.location, reload: reloadMock });
 });
 
 afterEach(() => {
+	vi.unstubAllGlobals();
 	vi.restoreAllMocks();
 });
 
-// =============================================================================
-// Tests
-// =============================================================================
-
 describe('+page.svelte - Channel', () => {
-	describe('Normal state (channel loaded successfully)', () => {
-		it('should render without throwing', () => {
-			const { container } = render(Page, { props: { data: createPageData() } });
-			expect(container).toBeTruthy();
-		});
+	it('should render the normal channel composition when the channel loads successfully', () => {
+		// Act
+		const { container } = render(Page, { props: { data: createPageData() } });
 
-		it('should render the outer page wrapper', () => {
-			const { container } = render(Page, { props: { data: createPageData() } });
-			const wrapper = container.querySelector('.w-full.bg-primary.min-h-screen');
-			expect(wrapper).toBeTruthy();
-		});
-
-		it('should call ChannelDetails when channel loads successfully', () => {
-			render(Page, { props: { data: createPageData() } });
-			expect(vi.mocked(ChannelDetails)).toHaveBeenCalled();
-		});
-
-		it('should not render the full-page error wrapper when channel loaded', () => {
-			const { container } = render(Page, { props: { data: createPageData() } });
-			const errorWrapper = container.querySelector('.flex.min-h-screen.items-center');
-			expect(errorWrapper).toBeNull();
-		});
-
-		it('should not call ErrorCard when there is no error', () => {
-			render(Page, { props: { data: createPageData() } });
-			expect(vi.mocked(ErrorCard)).not.toHaveBeenCalled();
-		});
+		// Assert — styled root wrapper, details rendered with both snippets, no error UI
+		expect(container.querySelector('.w-full.bg-primary.min-h-screen')).toBeTruthy();
+		expect(screen.getByTestId('channel-details-stub')).toBeTruthy();
+		expect(container.querySelector('.flex.min-h-screen.items-center')).toBeNull();
+		expect(vi.mocked(ErrorCard)).not.toHaveBeenCalled();
 	});
 
-	describe('Full-page error state (error + no channel name)', () => {
-		it('should render the full-page error wrapper when error is set and channel name is empty', () => {
-			const data = createPageData({ channel: errorChannel, error: 'Channel not found' });
-			const { container } = render(Page, { props: { data } });
-			const errorWrapper = container.querySelector(
-				'.flex.min-h-screen.items-center.justify-center'
-			);
-			expect(errorWrapper).toBeTruthy();
-		});
+	it('should pass the adapted videos through the videos snippet to ChannelVideos', () => {
+		// Act
+		render(Page, { props: { data: createPageData() } });
 
-		it('should not call ChannelDetails in the full-page error state', () => {
-			const data = createPageData({ channel: errorChannel, error: 'Channel not found' });
-			render(Page, { props: { data } });
-			expect(vi.mocked(ChannelDetails)).not.toHaveBeenCalled();
-		});
+		// Assert — the videos snippet rendered and the channelVideos derived
+		// resolved to data.videos
+		expect(vi.mocked(ChannelVideos)).toHaveBeenCalledWith(
+			expect.anything(),
+			expect.objectContaining({ videos: mockVideos })
+		);
+	});
 
-		it('should call ErrorCard with the correct error message', () => {
-			const data = createPageData({ channel: errorChannel, error: 'Channel not found' });
-			render(Page, { props: { data } });
-			expect(vi.mocked(ErrorCard)).toHaveBeenCalledWith(
+	it('should render the playlists snippet placeholder', () => {
+		render(Page, { props: { data: createPageData() } });
+
+		expect(screen.getByText('Playlists coming soon')).toBeTruthy();
+	});
+
+	it('should render the full-page error composition when error is set and channel name is empty', () => {
+		const data = createPageData({ channel: errorChannel, error: 'Channel not found' });
+
+		const { container } = render(Page, { props: { data } });
+
+		// Centered error wrapper replaces the details view, and
+		// ErrorCard receives the complete prop contract in one call
+		expect(
+			container.querySelector('.flex.min-h-screen.items-center.justify-center.px-4')
+		).toBeTruthy();
+		expect(screen.queryByTestId('channel-details-stub')).toBeNull();
+		expect(vi.mocked(ErrorCard)).toHaveBeenCalledWith(
+			expect.anything(),
+			expect.objectContaining({
+				message: 'Channel not found',
+				title: 'Failed to Load Channel',
+				variant: 'error',
+				showRetry: true,
+				onRetry: expect.any(Function)
+			})
+		);
+	});
+
+	it('should reload the page when the ErrorCard retry callback is invoked', () => {
+		const data = createPageData({ channel: errorChannel, error: 'Channel not found' });
+		render(Page, { props: { data } });
+
+		// Pull onRetry off the props the page passed to ErrorCard and
+		// invoke it, exercising the () => window.location.reload() closure
+		const errorCardProps = vi.mocked(ErrorCard).mock.calls[0][1] as { onRetry: () => void };
+		errorCardProps.onRetry();
+
+		expect(reloadMock).toHaveBeenCalledTimes(1);
+	});
+
+	it('should fall through to the normal branch when error is set but channel name is populated', () => {
+		// Error && !channel.name is false when channel.name is truthy,
+		// so a partial error (e.g. videos unavailable) still renders the channel
+		const data = createPageData({ error: 'Videos unavailable' });
+
+		const { container } = render(Page, { props: { data } });
+
+		expect(screen.getByTestId('channel-details-stub')).toBeTruthy();
+		expect(container.querySelector('.flex.min-h-screen.items-center')).toBeNull();
+		expect(vi.mocked(ErrorCard)).not.toHaveBeenCalled();
+	});
+
+	it.each([
+		['data is entirely empty', {}, []],
+		['data.channel is undefined', { videos: mockVideos, error: undefined }, mockVideos],
+		['data.videos is undefined', { channel: mockChannel, error: undefined }, []]
+	])(
+		'should render the normal branch via $derived defaults when %s',
+		(_label, data, expectedVideos) => {
+			expect(() => render(Page, { props: { data: data as ChannelPageData } })).not.toThrow();
+			expect(screen.getByTestId('channel-details-stub')).toBeTruthy();
+			expect(vi.mocked(ChannelVideos)).toHaveBeenCalledWith(
 				expect.anything(),
-				expect.objectContaining({ message: 'Channel not found' })
+				expect.objectContaining({ videos: expectedVideos })
 			);
-		});
-
-		it('should call ErrorCard with the "Failed to Load Channel" title', () => {
-			const data = createPageData({ channel: errorChannel, error: 'Network failure' });
-			render(Page, { props: { data } });
-			expect(vi.mocked(ErrorCard)).toHaveBeenCalledWith(
-				expect.anything(),
-				expect.objectContaining({ title: 'Failed to Load Channel' })
-			);
-		});
-
-		it('should call ErrorCard with the "error" variant', () => {
-			const data = createPageData({ channel: errorChannel, error: 'Network failure' });
-			render(Page, { props: { data } });
-			expect(vi.mocked(ErrorCard)).toHaveBeenCalledWith(
-				expect.anything(),
-				expect.objectContaining({ variant: 'error' })
-			);
-		});
-
-		it('should call ErrorCard with showRetry enabled', () => {
-			const data = createPageData({ channel: errorChannel, error: 'Network failure' });
-			render(Page, { props: { data } });
-			expect(vi.mocked(ErrorCard)).toHaveBeenCalledWith(
-				expect.anything(),
-				expect.objectContaining({ showRetry: true })
-			);
-		});
-	});
-
-	describe('Partial error state (error set but channel name present)', () => {
-		it('should call ChannelDetails when error is set but channel name is populated', () => {
-			// error && !channel.name is false when channel.name is truthy — the page
-			// falls through to the normal branch even with a partial error.
-			const data = createPageData({ error: 'Videos unavailable' });
-			render(Page, { props: { data } });
-			expect(vi.mocked(ChannelDetails)).toHaveBeenCalled();
-		});
-
-		it('should not render the full-page error wrapper when channel name is populated', () => {
-			const data = createPageData({ error: 'Videos unavailable' });
-			const { container } = render(Page, { props: { data } });
-			const errorWrapper = container.querySelector('.flex.min-h-screen.items-center');
-			expect(errorWrapper).toBeNull();
-		});
-
-		it('should not call ErrorCard when channel name is populated', () => {
-			const data = createPageData({ error: 'Videos unavailable' });
-			render(Page, { props: { data } });
-			expect(vi.mocked(ErrorCard)).not.toHaveBeenCalled();
-		});
-	});
-
-	describe('Defensive defaults (missing or incomplete data)', () => {
-		it('should not throw when data.channel is undefined', () => {
-			const data = { videos: [], error: null };
-			expect(() => render(Page, { props: { data } })).not.toThrow();
-		});
-
-		it('should not throw when data.videos is undefined', () => {
-			const data = { channel: mockChannel, error: null };
-			expect(() => render(Page, { props: { data } })).not.toThrow();
-		});
-
-		it('should not throw when data is entirely empty', () => {
-			expect(() => render(Page, { props: { data: {} } })).not.toThrow();
-		});
-
-		it('should call ChannelDetails even when data is minimal', () => {
-			// With empty data the $derived defaults kick in — channel.name is ''
-			// and error is null, so error && !channel.name is false and the normal
-			// branch renders.
-			render(Page, { props: { data: {} } });
-			expect(vi.mocked(ChannelDetails)).toHaveBeenCalled();
-		});
-	});
-
-	describe('Styling and layout', () => {
-		it('should apply min-h-screen to the root wrapper', () => {
-			const { container } = render(Page, { props: { data: createPageData() } });
-			expect(container.querySelector('.min-h-screen')).toBeTruthy();
-		});
-
-		it('should apply bg-primary to the root wrapper', () => {
-			const { container } = render(Page, { props: { data: createPageData() } });
-			expect(container.querySelector('.bg-primary')).toBeTruthy();
-		});
-
-		it('should apply w-full to the root wrapper', () => {
-			const { container } = render(Page, { props: { data: createPageData() } });
-			expect(container.querySelector('.w-full')).toBeTruthy();
-		});
-
-		it('should apply centering classes to the full-page error container', () => {
-			const data = createPageData({ channel: errorChannel, error: 'Fatal error' });
-			const { container } = render(Page, { props: { data } });
-			const errorWrapper = container.querySelector(
-				'.flex.min-h-screen.items-center.justify-center.px-4'
-			);
-			expect(errorWrapper).toBeTruthy();
-		});
-	});
+		}
+	);
 });

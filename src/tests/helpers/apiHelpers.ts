@@ -1,10 +1,10 @@
 /**
  * Shared Test Helpers for API Tests
- * 
+ *
  * Contains reusable mock functions and utilities for API testing
  */
 
-import { vi } from 'vitest';
+import { type MockedFunction, vi } from 'vitest';
 
 // =============================================================================
 // Mock Fetch Helpers
@@ -14,28 +14,28 @@ import { vi } from 'vitest';
  * Creates a successful mock fetch response
  */
 export function createMockResponse<T>(
-    data: T,
-    options: { status?: number; statusText?: string } = {}
+	data: T,
+	options: { status?: number; statusText?: string } = {}
 ): Response {
-    const { status = 200, statusText = 'OK' } = options;
-    return {
-        ok: status >= 200 && status < 300,
-        status,
-        statusText,
-        json: vi.fn().mockResolvedValue(data),
-        headers: new Headers({ 'Content-Type': 'application/json' }),
-        text: vi.fn().mockResolvedValue(JSON.stringify(data)),
-        blob: vi.fn().mockResolvedValue(new Blob()),
-        arrayBuffer: vi.fn().mockResolvedValue(new ArrayBuffer(0)),
-        bytes: vi.fn().mockResolvedValue(new Uint8Array()),
-        formData: vi.fn().mockResolvedValue(new FormData()),
-        clone: vi.fn(),
-        body: null,
-        bodyUsed: false,
-        redirected: false,
-        type: 'basic',
-        url: ''
-    } as Response;
+	const { status = 200, statusText = 'OK' } = options;
+	return {
+		ok: status >= 200 && status < 300,
+		status,
+		statusText,
+		json: vi.fn().mockResolvedValue(data),
+		headers: new Headers({ 'Content-Type': 'application/json' }),
+		text: vi.fn().mockResolvedValue(JSON.stringify(data)),
+		blob: vi.fn().mockResolvedValue(new Blob()),
+		arrayBuffer: vi.fn().mockResolvedValue(new ArrayBuffer(0)),
+		bytes: vi.fn().mockResolvedValue(new Uint8Array()),
+		formData: vi.fn().mockResolvedValue(new FormData()),
+		clone: vi.fn(),
+		body: null,
+		bodyUsed: false,
+		redirected: false,
+		type: 'basic',
+		url: ''
+	} as Response;
 }
 
 /**
@@ -66,32 +66,28 @@ function createMockManifestResponse<T>(
 	} as Response;
 }
 
-
 /**
  * Creates a failed mock fetch response
  */
-export function createErrorResponse(
-    status: number,
-    statusText: string
-): Response {
-    return {
-        ok: false,
-        status,
-        statusText,
-        json: vi.fn().mockRejectedValue(new Error('Failed to parse JSON')),
-        headers: new Headers(),
-        text: vi.fn().mockResolvedValue(statusText),
-        blob: vi.fn().mockResolvedValue(new Blob()),
-        arrayBuffer: vi.fn().mockResolvedValue(new ArrayBuffer(0)),
-        bytes: vi.fn().mockResolvedValue(new Uint8Array()),
-        formData: vi.fn().mockResolvedValue(new FormData()),
-        clone: vi.fn(),
-        body: null,
-        bodyUsed: false,
-        redirected: false,
-        type: 'basic',
-        url: ''
-    } as Response;
+export function createErrorResponse(status: number, statusText: string): Response {
+	return {
+		ok: false,
+		status,
+		statusText,
+		json: vi.fn().mockRejectedValue(new Error('Failed to parse JSON')),
+		headers: new Headers(),
+		text: vi.fn().mockResolvedValue(statusText),
+		blob: vi.fn().mockResolvedValue(new Blob()),
+		arrayBuffer: vi.fn().mockResolvedValue(new ArrayBuffer(0)),
+		bytes: vi.fn().mockResolvedValue(new Uint8Array()),
+		formData: vi.fn().mockResolvedValue(new FormData()),
+		clone: vi.fn(),
+		body: null,
+		bodyUsed: false,
+		redirected: false,
+		type: 'basic',
+		url: ''
+	} as Response;
 }
 
 /**
@@ -100,40 +96,37 @@ export function createErrorResponse(
 export function createSuccessfulFetch<T>(
 	data: T,
 	options: { format?: 'json' | 'xml' } = {}
-): typeof fetch {
+): MockedFunction<typeof fetch> {
 	const { format = 'json' } = options;
-
 	if (format === 'xml') {
-		return vi.fn().mockResolvedValue(createMockManifestResponse(data)) as unknown as typeof fetch;
+		return vi.fn().mockResolvedValue(createMockManifestResponse(data)) as MockedFunction<
+			typeof fetch
+		>;
 	}
-
-	return vi.fn().mockResolvedValue(createMockResponse(data)) as unknown as typeof fetch;
+	return vi.fn().mockResolvedValue(createMockResponse(data)) as MockedFunction<typeof fetch>;
 }
 
 /**
  * Creates a mock fetch function that fails
  */
-export function createFailedFetch(
-    status: number,
-    statusText: string
-): typeof globalThis.fetch {
-    return vi.fn().mockResolvedValue(createErrorResponse(status, statusText));
+export function createFailedFetch(status: number, statusText: string): typeof globalThis.fetch {
+	return vi.fn().mockResolvedValue(createErrorResponse(status, statusText));
 }
 
 /**
  * Creates a mock fetch function that throws a network error
  */
 export function createNetworkErrorFetch(
-	message: string = 'Network Error',
+	message: string = 'Network Error'
 ): typeof globalThis.fetch {
-    return vi.fn().mockRejectedValue(new Error(message));
+	return vi.fn().mockRejectedValue(new Error(message));
 }
 
 /**
  * Creates a mock fetch function that throws an invalid JSON error
  */
 export function createInvalidJSONFetch(): typeof globalThis.fetch {
-		return vi.fn().mockRejectedValue(new Error('Invalid JSON'))
+	return vi.fn().mockRejectedValue(new Error('Invalid JSON'));
 }
 
 // =============================================================================
@@ -144,14 +137,14 @@ export function createInvalidJSONFetch(): typeof globalThis.fetch {
  * Extracts query parameters from a URL string
  */
 export function extractQueryParams(url: string): Record<string, string> {
-    const urlObj = new URL(url);
-    const params: Record<string, string> = {};
+	const urlObj = new URL(url);
+	const params: Record<string, string> = {};
 
-    urlObj.searchParams.forEach((value, key) => {
-        params[key] = value;
-    });
+	urlObj.searchParams.forEach((value, key) => {
+		params[key] = value;
+	});
 
-    return params;
+	return params;
 }
 
 // =============================================================================
@@ -162,7 +155,7 @@ export function extractQueryParams(url: string): Record<string, string> {
  * Gets the call count of a mock function
  */
 export function getCallCount(mockFn: ReturnType<typeof vi.fn>): number {
-    return mockFn.mock.calls.length;
+	return mockFn.mock.calls.length;
 }
 
 // =============================================================================
@@ -173,19 +166,19 @@ export function getCallCount(mockFn: ReturnType<typeof vi.fn>): number {
  * Creates a mock console.error function
  */
 export function createMockConsoleError(): {
-    mock: ReturnType<typeof vi.fn>;
-    restore: () => void;
+	mock: ReturnType<typeof vi.fn>;
+	restore: () => void;
 } {
-    const originalError = console.error;
-    const mock = vi.fn();
-    console.error = mock;
+	const originalError = console.error;
+	const mock = vi.fn();
+	console.error = mock;
 
-    return {
-        mock,
-        restore: () => {
-            console.error = originalError;
-        }
-    };
+	return {
+		mock,
+		restore: () => {
+			console.error = originalError;
+		}
+	};
 }
 
 // =============================================================================

@@ -19,7 +19,9 @@
 			if (!firstVideo?.url) throw new Error('Playlist has no videos');
 			const videoId = firstVideo.url.split('v=')[1]?.split('&')[0];
 			if (!videoId) throw new Error('Could not extract video ID');
-			await goto(`/video/${encodeURIComponent(videoId)}?playlist=${encodeURIComponent(result.id)}&index=0`);
+			await goto(
+				`/video/${encodeURIComponent(videoId)}?playlist=${encodeURIComponent(result.id)}&index=0`
+			);
 		} catch (e) {
 			console.error('Failed to load playlist:', e);
 		} finally {
@@ -33,29 +35,44 @@
 
 <div>
 	<!-- Desktop Layout (sm and above) - Horizontal grid matching VideoResult -->
-	<div class="hidden sm:grid sm:grid-cols-3 gap-4 rounded-lg p-4 shadow-sm transition-colors hover:bg-secondary">
+	<div
+		class="hover:bg-secondary hidden gap-4 rounded-lg p-4 shadow-sm transition-colors sm:grid sm:grid-cols-3"
+	>
 		<!-- Left side – stacked thumbnail (1/3) -->
-		<div class="col-span-1 flex items-start justify-center">/
+		<div class="col-span-1 flex items-start justify-center">
+			/
 			<div
 				role="button"
 				tabindex="0"
 				onclick={redirectToPlaylist}
 				onkeydown={handleKey}
-				class="cursor-pointer w-full"
+				class="w-full cursor-pointer"
 			>
 				<!-- Stacked thumbnail effect — two offset layers suggest a pile of videos -->
 				<div class="relative w-full">
-					<div class="absolute inset-x-0 top-0 h-full -translate-y-1.5 translate-x-1 rounded-md bg-muted opacity-40"></div>
-					<div class="absolute inset-x-0 top-0 h-full -translate-y-0.75 translate-x-0.5 rounded-md bg-muted opacity-60"></div>
+					<div
+						class="bg-muted absolute inset-x-0 top-0 h-full translate-x-1 -translate-y-1.5 rounded-md opacity-40"
+					></div>
+					<div
+						class="bg-muted absolute inset-x-0 top-0 h-full translate-x-0.5 -translate-y-0.75 rounded-md opacity-60"
+					></div>
 					<img
 						src={thumbnail}
 						alt={`Thumbnail for ${result.title}`}
-						class="relative w-full h-auto rounded-md object-cover"
+						class="relative h-auto w-full rounded-md object-cover"
 					/>
 					<!-- Video count badge -->
-					<div class="absolute bottom-2 right-2 flex items-center gap-1 rounded bg-black/80 px-1.5 py-0.5 text-xs font-semibold text-white">
-						<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-							<path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/>
+					<div
+						class="absolute right-2 bottom-2 flex items-center gap-1 rounded bg-black/80 px-1.5 py-0.5 text-xs font-semibold text-white"
+					>
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							class="h-3 w-3"
+							viewBox="0 0 24 24"
+							fill="currentColor"
+							aria-hidden="true"
+						>
+							<path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z" />
 						</svg>
 						{result.videoCount} videos
 					</div>
@@ -72,12 +89,12 @@
 				onkeydown={handleKey}
 				class="cursor-pointer hover:underline"
 			>
-				<h3 class="mb-1 text-lg font-semibold text-primary">{result.title}</h3>
+				<h3 class="text-primary mb-1 text-lg font-semibold">{result.title}</h3>
 			</div>
-			<p class="mb-1 text-sm text-muted">Playlist</p>
+			<p class="text-muted mb-1 text-sm">Playlist</p>
 			<a
 				href={result.uploaderUrl}
-				class="mt-1 flex items-center gap-1 text-sm text-secondary hover:underline w-fit"
+				class="text-secondary mt-1 flex w-fit items-center gap-1 text-sm hover:underline"
 				onclick={(e) => e.stopPropagation()}
 			>
 				{result.uploaderName}
@@ -91,21 +108,33 @@
 		tabindex="0"
 		onclick={redirectToPlaylist}
 		onkeydown={handleKey}
-		class="sm:hidden rounded-lg p-3 shadow-sm transition-colors hover:bg-secondary cursor-pointer"
+		class="hover:bg-secondary cursor-pointer rounded-lg p-3 shadow-sm transition-colors sm:hidden"
 	>
 		<!-- Stacked thumbnail - Full Width -->
-		<div class="relative w-full mb-3">
-			<div class="absolute inset-x-0 top-0 h-full -translate-y-1.25 translate-x-0.75 rounded-md bg-muted opacity-40"></div>
-			<div class="absolute inset-x-0 top-0 h-full translate-y-[-2.5px] translate-x-[1.5px] rounded-md bg-muted opacity-60"></div>
+		<div class="relative mb-3 w-full">
+			<div
+				class="bg-muted absolute inset-x-0 top-0 h-full translate-x-0.75 -translate-y-1.25 rounded-md opacity-40"
+			></div>
+			<div
+				class="bg-muted absolute inset-x-0 top-0 h-full translate-x-[1.5px] translate-y-[-2.5px] rounded-md opacity-60"
+			></div>
 			<img
 				src={thumbnail}
 				alt={`Thumbnail for ${result.title}`}
-				class="relative w-full h-auto rounded-md object-cover"
+				class="relative h-auto w-full rounded-md object-cover"
 			/>
 			<!-- Video count badge -->
-			<div class="absolute bottom-2 right-2 flex items-center gap-1 rounded bg-black/80 px-1.5 py-0.5 text-xs font-semibold text-white">
-				<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-					<path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/>
+			<div
+				class="absolute right-2 bottom-2 flex items-center gap-1 rounded bg-black/80 px-1.5 py-0.5 text-xs font-semibold text-white"
+			>
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					class="h-3 w-3"
+					viewBox="0 0 24 24"
+					fill="currentColor"
+					aria-hidden="true"
+				>
+					<path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z" />
 				</svg>
 				{result.videoCount} videos
 			</div>
@@ -113,9 +142,9 @@
 
 		<!-- Content below thumbnail -->
 		<div class="flex flex-col">
-			<p class="mb-0.5 text-xs text-muted uppercase tracking-wide">Playlist</p>
-			<h3 class="mb-1 text-base font-semibold text-primary line-clamp-2">{result.title}</h3>
-			<p class="text-sm text-secondary">{result.uploaderName}</p>
+			<p class="text-muted mb-0.5 text-xs tracking-wide uppercase">Playlist</p>
+			<h3 class="text-primary mb-1 line-clamp-2 text-base font-semibold">{result.title}</h3>
+			<p class="text-secondary text-sm">{result.uploaderName}</p>
 		</div>
 	</div>
 </div>

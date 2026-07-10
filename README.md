@@ -7,28 +7,19 @@ comprehensive search, and clean, responsive interface
 
 OpenTube Frontend provides privacy respecting alternative to the standard YouTube interface with
 
- 1. **No Tracking** - Zero analytics, no cookies, complete privacy
- 2. **Adaptive Streaming** - DASH video playback with quality selection
- 3. **Modern UI** - Clean, responsive design with SvelteKit
- 4. **Fast Performance** - Server-side rendering and optmized loading
- 4. **Full Features** - Search, video playback, related videos, metadata
+1.  **No Tracking** - Zero analytics, no cookies, complete privacy
+2.  **Adaptive Streaming** - DASH video playback with quality selection
+3.  **Modern UI** - Clean, responsive design with SvelteKit
+4.  **Fast Performance** - Server-side rendering and optmized loading
+5.  **Full Features** - Search, video playback, related videos, metadata
 
 ## Architecture Overview
 
-
-
 ## Three-Layer Architecture
-
-
 
 ## Data Flow Diagrams
 
-
-
-
 ## Key Features
-
-
 
 ## Getting Started
 
@@ -128,12 +119,12 @@ npm test -- --grep "search adapter"
 
 ## Technologies Used
 
-| Technology | Purpose | Version |
-|-----------|---------|---------|
-| SvelteKit | Framework | 2.x |
-| Svelte | UI Library | 5.x |
-| TypeScript | Language | 5.x |
-| Shaka Player | Video Player | 4.x |
-| Vite | Build Tool | 5.x |
-| Vitest | Testing | 1.x |
-| Playwright | E2E Testing | 1.x |
+| Technology   | Purpose      | Version |
+| ------------ | ------------ | ------- |
+| SvelteKit    | Framework    | 2.x     |
+| Svelte       | UI Library   | 5.x     |
+| TypeScript   | Language     | 5.x     |
+| Shaka Player | Video Player | 4.x     |
+| Vite         | Build Tool   | 5.x     |
+| Vitest       | Testing      | 1.x     |
+| Playwright   | E2E Testing  | 1.x     |

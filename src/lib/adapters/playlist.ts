@@ -4,15 +4,16 @@ import { selectBestThumbnail, selectBestUploaderAvatar } from '$lib/utils/mediaU
 import logoPlaceholder from '$lib/assets/logo-placeholder.svg';
 import thumbnailPlaceholder from '$lib/assets/thumbnail-placeholder.jpg';
 import type { PlaylistInfoConfig, RelatedVideoConfig } from '$lib/adapters/types';
-import type { RelatedItem } from '$lib/types';
 
 function selectBestBanner(
 	banners: { url: string; width: number }[] | undefined,
 	fallback: string | null
 ): string | null {
 	if (!banners || banners.length === 0) return fallback;
-	return [...banners].sort((a: { url: string; width: number }, b: { url: string; width: number }): number => b.width - a.width)[0]
-		.url;
+	return [...banners].sort(
+		(a: { url: string; width: number }, b: { url: string; width: number }): number =>
+			b.width - a.width
+	)[0].url;
 }
 
 export function adaptPlaylistInfo(info: PlaylistResponse): PlaylistInfoConfig {
@@ -26,7 +27,7 @@ export function adaptPlaylistInfo(info: PlaylistResponse): PlaylistInfoConfig {
 		bannerUrl: selectBestBanner(info.banners, null),
 		thumbnailUrl: selectBestThumbnail(info.thumbnails, thumbnailPlaceholder),
 		uploaderUrl: info.uploaderUrl,
-		description: info.description || null
+		description: info.description?.content || null
 	};
 }
 
@@ -47,7 +48,5 @@ function adaptPlaylistVideo(video: RelatedItemResponse): RelatedVideoConfig {
 
 export function adaptPlaylistVideos(response: PlaylistResponse): RelatedVideoConfig[] {
 	if (!response?.relatedItems) return [];
-	return response.relatedItems.map((item: RelatedItem): RelatedVideoConfig =>
-		adaptPlaylistVideo(item as RelatedItemResponse)
-	);
+	return response.relatedItems.map(adaptPlaylistVideo);
 }

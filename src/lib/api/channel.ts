@@ -16,7 +16,9 @@ export async function getChannelInfo(
 	} = fetchFn ?? globalThis.fetch;
 
 	try {
-		const res: Response = await fetcher(`${API_BASE_URL}/channels?id=${encodeURIComponent(channelId)}`);
+		const res: Response = await fetcher(
+			`${API_BASE_URL}/channels?id=${encodeURIComponent(channelId)}`
+		);
 
 		if (!res.ok) {
 			throw new Error(
@@ -39,14 +41,12 @@ export async function getChannelVideos(
 	fetchFn?: typeof globalThis.fetch
 ): Promise<ChannelVideosResponse> {
 	const fetcher: {
-		(input: (RequestInfo | URL), init?: RequestInit): Promise<Response>
-		(input: (string | URL | Request), init?: RequestInit): Promise<Response>
+		(input: RequestInfo | URL, init?: RequestInit): Promise<Response>;
+		(input: string | URL | Request, init?: RequestInit): Promise<Response>;
 	} = fetchFn ?? globalThis.fetch;
 
 	try {
-		const res = await fetcher(
-			`${API_BASE_URL}/channels/tab?id=${encodeURIComponent(channelId)}`
-		);
+		const res = await fetcher(`${API_BASE_URL}/channels/tab?id=${encodeURIComponent(channelId)}`);
 
 		if (!res.ok) {
 			throw new Error(

@@ -1,8 +1,15 @@
 import { extractIdFromUrl } from '$lib/utils/streamSelection';
 import type { SearchResult, SearchItem } from '$lib/types';
-import type { VideoSearchResultConfig, ChannelSearchResultConfig, PlaylistSearchResultConfig } from './types';
+import type {
+	VideoSearchResultConfig,
+	ChannelSearchResultConfig,
+	PlaylistSearchResultConfig
+} from './types';
 
-type SearchResultConfig = VideoSearchResultConfig | ChannelSearchResultConfig | PlaylistSearchResultConfig;
+type SearchResultConfig =
+	| VideoSearchResultConfig
+	| ChannelSearchResultConfig
+	| PlaylistSearchResultConfig;
 
 /**
  * Handles negative counts from the API (e.g., -1 for unknown values)

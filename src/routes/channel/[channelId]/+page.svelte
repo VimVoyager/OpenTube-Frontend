@@ -7,25 +7,27 @@
 
 	let { data }: { data: PageData } = $props();
 
-	let channel = $derived((data as any)?.channel ?? {
-		id: '',
-		name: '',
-		handle: '',
-		avatarUrl: null,
-		bannerUrl: null,
-		description: null,
-		subscriberCount: '0',
-		videoCount: 0,
-		verified: false
-	});
+	let channel = $derived(
+		data.channel ?? {
+			id: '',
+			name: '',
+			handle: '',
+			avatarUrl: null,
+			bannerUrl: null,
+			description: null,
+			subscriberCount: '0',
+			videoCount: 0,
+			verified: false
+		}
+	);
 
-	let channelVideos = $derived((data as any)?.videos ?? []);
-	let error = $derived((data as any)?.error ?? null);
+	let channelVideos = $derived(data.videos ?? []);
+	let error = $derived(data.error ?? null);
 
 	let activeTab = $state<ChannelTab>('videos');
 </script>
 
-<div class="w-full bg-primary min-h-screen">
+<div class="bg-primary min-h-screen w-full">
 	{#if error && !channel.name}
 		<!-- Full-page error if we couldn't load anything meaningful -->
 		<div class="flex min-h-screen items-center justify-center px-4">
@@ -44,12 +46,11 @@
 			{/snippet}
 
 			{#snippet playlists()}
-				<div class="flex flex-col items-center justify-center py-12 text-center px-6">
-					<div class="text-4xl mb-4">📋</div>
-					<p class="text-sm text-secondary">Playlists coming soon</p>
+				<div class="flex flex-col items-center justify-center px-6 py-12 text-center">
+					<div class="mb-4 text-4xl">📋</div>
+					<p class="text-secondary text-sm">Playlists coming soon</p>
 				</div>
 			{/snippet}
 		</ChannelDetails>
 	{/if}
 </div>
-

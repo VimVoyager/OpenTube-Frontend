@@ -1,10 +1,7 @@
-<script lang="ts">
-</script>
-
 <div class="loading-container">
 	<!-- Video player skeleton -->
 	<div class="video-skeleton">
-		<div class="aspect-video w-full bg-gray-800 rounded-lg flex items-center justify-center">
+		<div class="flex aspect-video w-full items-center justify-center rounded-lg bg-gray-800">
 			<!-- Loading spinner -->
 			<div class="spinner"></div>
 		</div>
@@ -13,22 +10,22 @@
 	<!-- Video details skeleton -->
 	<div class="details-skeleton mt-6">
 		<!-- Title skeleton -->
-		<div class="h-7 bg-gray-700 rounded w-3/4 mb-4 animate-pulse"></div>
-		
+		<div class="mb-4 h-7 w-3/4 animate-pulse rounded bg-gray-700"></div>
+
 		<!-- Channel info skeleton -->
-		<div class="flex items-center gap-3 mb-4">
-			<div class="h-12 w-12 bg-gray-700 rounded-full animate-pulse"></div>
+		<div class="mb-4 flex items-center gap-3">
+			<div class="h-12 w-12 animate-pulse rounded-full bg-gray-700"></div>
 			<div class="flex-1">
-				<div class="h-4 bg-gray-700 rounded w-40 mb-2 animate-pulse"></div>
-				<div class="h-3 bg-gray-700 rounded w-32 animate-pulse"></div>
+				<div class="mb-2 h-4 w-40 animate-pulse rounded bg-gray-700"></div>
+				<div class="h-3 w-32 animate-pulse rounded bg-gray-700"></div>
 			</div>
 		</div>
 
 		<!-- Description skeleton -->
 		<div class="space-y-2">
-			<div class="h-3 bg-gray-700 rounded w-full animate-pulse"></div>
-			<div class="h-3 bg-gray-700 rounded w-5/6 animate-pulse"></div>
-			<div class="h-3 bg-gray-700 rounded w-4/6 animate-pulse"></div>
+			<div class="h-3 w-full animate-pulse rounded bg-gray-700"></div>
+			<div class="h-3 w-5/6 animate-pulse rounded bg-gray-700"></div>
+			<div class="h-3 w-4/6 animate-pulse rounded bg-gray-700"></div>
 		</div>
 	</div>
 </div>
@@ -61,7 +58,7 @@
 	}
 
 	/* Pulse animation is handled by Tailwind's animate-pulse */
-	
+
 	@media (min-width: 640px) {
 		.loading-container {
 			padding: 1.5rem;

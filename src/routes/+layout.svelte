@@ -44,23 +44,23 @@
 </svelte:head>
 
 <div class="bg-primary min-h-screen">
-	<div class="max-w-480 mx-auto">
+	<div class="mx-auto max-w-480">
 		<div class="fixed inset-x-0 top-0 z-40">
 			<Navbar />
 		</div>
 		{#if isNavigatingToSearch}
-			<div class='pt-16'>
+			<div class="pt-16">
 				<SearchResultsLoading count={10} />
 			</div>
 		{:else if isNavigatingToVideo}
-			<div class="pt-16 mt-4 flex h-screen w-full">
+			<div class="mt-4 flex h-screen w-full pt-16">
 				<section class="flex w-2/3 flex-col items-start justify-start">
 					<div class="w-full p-4 sm:p-6 lg:p-8">
 						<!-- Show loading state during navigation -->
 						<VideoLoading />
 					</div>
 				</section>
-				<aside class="pt-16 mt-4 flex w-1/3 flex-col gap-5">
+				<aside class="mt-4 flex w-1/3 flex-col gap-5 pt-16">
 					<VideoListingsLoading />
 				</aside>
 			</div>
