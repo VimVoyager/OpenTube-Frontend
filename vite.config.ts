@@ -10,12 +10,8 @@ export default defineConfig({
 		port: parseInt(process.env.FRONTEND_PORT || '5173'),
 		strictPort: true
 	},
-	resolve: {
-		conditions: ['browser', 'import'],
-		alias: {
-			$lib: path.resolve('./src/lib'),
-			'$env/static/public': path.resolve(__dirname, './src/tests/env')
-		}
+	build: {
+		chunkSizeWarningLimit: 1000
 	},
 	test: {
 		// Global test settings

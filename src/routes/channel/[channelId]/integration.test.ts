@@ -1,5 +1,4 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { loadChannelData } from './+page';
 import type { ChannelConfig, ChannelVideoConfig } from '$lib/adapters/types';
 import channelDetailsResponseFixture from '../../../tests/fixtures/api/channelDetailsResponse.json';
 import channelVideosResponseFixture from '../../../tests/fixtures/api/channelVideosResponse.json';
@@ -32,6 +31,7 @@ vi.mock('$lib/utils/streamSelection', () => ({
 
 import { getChannelInfo, getChannelVideos } from '$lib/api/channel';
 import type { ChannelInfoResponse, ChannelVideosResponse } from '$lib/api/types';
+import { loadChannelData } from '$lib/loaders/channel';
 
 const infoResponse = channelDetailsResponseFixture as unknown as ChannelInfoResponse;
 const videosResponse = channelVideosResponseFixture as unknown as ChannelVideosResponse;
