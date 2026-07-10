@@ -20,6 +20,7 @@ vi.mock('$lib/components/ErrorCard.svelte', () => ({
 
 import ChannelVideos from '$lib/components/channel/ChannelVideos.svelte';
 import ErrorCard from '$lib/components/ErrorCard.svelte';
+import type { ChannelPageData } from '../../types';
 
 const mockChannel = channelDetailsFixture as ChannelConfig;
 const mockVideos = channelVideosFixture as ChannelVideoConfig[];
@@ -143,7 +144,7 @@ describe('+page.svelte - Channel', () => {
 	])(
 		'should render the normal branch via $derived defaults when %s',
 		(_label, data, expectedVideos) => {
-			expect(() => render(Page, { props: { data } })).not.toThrow();
+			expect(() => render(Page, { props: { data: data as ChannelPageData } })).not.toThrow();
 			expect(screen.getByTestId('channel-details-stub')).toBeTruthy();
 			expect(vi.mocked(ChannelVideos)).toHaveBeenCalledWith(
 				expect.anything(),

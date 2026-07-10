@@ -13,5 +13,5 @@ describeJsonFetcher({
 	name: 'getComments',
 	call: getVideoComments,
 	endpoint: '/comments',
-	fixture: commentFixture
+	fixture: commentFixture[0]
 });

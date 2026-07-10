@@ -4,7 +4,6 @@ import { adaptChannelInfo, adaptChannelVideos } from '$lib/adapters/channel';
 import thumbnailPlaceholder from '$lib/assets/thumbnail-placeholder.jpg';
 import logoPlaceholder from '$lib/assets/logo-placeholder.svg';
 import type { ChannelPageData } from '../../types';
-import type { ChannelConfig, ChannelVideoConfig } from '$lib/adapters/types';
 
 /**
  * Creates error page data with safe defaults
@@ -30,13 +29,11 @@ function createErrorPageData(error: unknown): ChannelPageData {
 	};
 }
 
-/**
- * Page load function - fetches channel info and videos in parallel :LoadEvent<RouteParams, null, {} '/'>
- */
-export const load: PageLoad = async ({ params, fetch }): Promise<ChannelPageData> => {
+export async function loadChannelData(
+	channelId: string,
+	fetch: typeof globalThis.fetch
+): Promise<ChannelPageData> {
 	try {
-		const channelId: string = (params as Record<string, string>).channelId;
-
 		const [info, videosResponse] = await Promise.all([
 			getChannelInfo(channelId, fetch),
 			getChannelVideos(channelId, fetch).catch((error) => {
@@ -45,20 +42,18 @@ export const load: PageLoad = async ({ params, fetch }): Promise<ChannelPageData
 			})
 		]);
 
-		const videos: ChannelVideoConfig[] = adaptChannelVideos(
-			videosResponse,
-			thumbnailPlaceholder,
-			logoPlaceholder
-		);
+		const videos = adaptChannelVideos(videosResponse, thumbnailPlaceholder, logoPlaceholder);
+		const channel = adaptChannelInfo(info);
 
-		const channel: ChannelConfig = adaptChannelInfo(info);
-
-		return {
-			channel,
-			videos
-		};
+		return { channel, videos };
 	} catch (error) {
 		console.error('Error loading channel data:', error);
 		return createErrorPageData(error);
 	}
-};
+}
+
+/**
+ * Page load function - fetches channel info and videos in parallel :LoadEvent<RouteParams, null, {} '/'>
+ */
+export const load: PageLoad = async ({ params, fetch }) =>
+	loadChannelData((params as Record<string, string>).channelId, fetch);

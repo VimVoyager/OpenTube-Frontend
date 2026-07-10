@@ -46,7 +46,7 @@
 		{#if channel.bannerUrl}
 			<img src={channel.bannerUrl} alt="Channel banner" class="h-full w-full object-cover" />
 		{:else}
-			<div class="from-secondary to-muted h-full w-full bg-gradient-to-r opacity-60"></div>
+			<div class="from-secondary to-muted h-full w-full bg-linear-to-r opacity-60"></div>
 		{/if}
 	</div>
 
@@ -58,7 +58,7 @@
 				<img
 					src={channel.avatarUrl || logoPlaceholder}
 					alt="{channel.name} avatar"
-					class="h-20 w-20 rounded-full border-4 border-[var(--color-bg,#fff)] object-cover shadow-sm"
+					class="h-20 w-20 rounded-full border-4 border-(--color-bg,#fff) object-cover shadow-sm"
 					onerror={handleAvatarError}
 				/>
 			</div>
@@ -116,7 +116,7 @@
 	<!-- Tab bar -->
 	<div class="border-default border-b px-6">
 		<div class="flex" role="tablist" aria-label="Channel sections">
-			{#each tabs as tab}
+			{#each tabs as tab (tab.id)}
 				<button
 					role="tab"
 					aria-selected={activeTab === tab.id}

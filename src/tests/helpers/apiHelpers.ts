@@ -4,7 +4,7 @@
  * Contains reusable mock functions and utilities for API testing
  */
 
-import { vi } from 'vitest';
+import { type MockedFunction, vi } from 'vitest';
 
 // =============================================================================
 // Mock Fetch Helpers
@@ -96,14 +96,14 @@ export function createErrorResponse(status: number, statusText: string): Respons
 export function createSuccessfulFetch<T>(
 	data: T,
 	options: { format?: 'json' | 'xml' } = {}
-): typeof fetch {
+): MockedFunction<typeof fetch> {
 	const { format = 'json' } = options;
-
 	if (format === 'xml') {
-		return vi.fn().mockResolvedValue(createMockManifestResponse(data)) as unknown as typeof fetch;
+		return vi.fn().mockResolvedValue(createMockManifestResponse(data)) as MockedFunction<
+			typeof fetch
+		>;
 	}
-
-	return vi.fn().mockResolvedValue(createMockResponse(data)) as unknown as typeof fetch;
+	return vi.fn().mockResolvedValue(createMockResponse(data)) as MockedFunction<typeof fetch>;
 }
 
 /**

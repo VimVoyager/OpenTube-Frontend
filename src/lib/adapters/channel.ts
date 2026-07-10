@@ -83,7 +83,7 @@ function adaptChannelVideo(
 		uploadedDate: video.textualUploadDate || '',
 		duration: Math.max(0, video.duration ?? 0),
 		viewCount: Math.max(0, video.viewCount ?? 0),
-		isShort: video.isShortFormContent
+		isShort: video.isShortFormContent ?? false
 	};
 }
 

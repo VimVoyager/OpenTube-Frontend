@@ -1,5 +1,3 @@
-import type { Description } from '$lib/types';
-
 /**
  * Subtitle stream configuration for the player
  */

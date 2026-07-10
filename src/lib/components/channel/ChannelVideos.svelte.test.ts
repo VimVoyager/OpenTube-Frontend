@@ -9,7 +9,7 @@ const videos = channelVideosFixture as ChannelVideoConfig[];
 // [0] Fitting In at School       — 210s (3:30), 3,984,544 views, 2 weeks ago
 // [1] Digital Circus Ep 9 Finale — 70s  (1:10), 28,449,488 views, 4 weeks ago
 // [2] Caine's Requiem             — 159s (2:39), 15,866,216 views, 1 month ago
-const [fittingIn, digitalCircus, cainesRequiem] = videos;
+const [fittingIn, , cainesRequiem] = videos;
 
 describe('ChannelVideos', () => {
 	describe('Empty state', () => {

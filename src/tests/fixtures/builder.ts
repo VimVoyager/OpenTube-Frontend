@@ -1,15 +1,6 @@
 /**
  * Shared test-data builders — one per API response type.
  * Defaults are modelled on the real fixtures in src/tests/fixtures/api/.
- *
- * Conventions:
- *  - Shallow merge only: { ...defaults, ...overrides }. Override whole fields.
- *  - Single-element thumbnail/avatar arrays by default, so which element the
- *    media selectors pick is never incidentally re-tested in adapter tests.
- *    Tests about selection pass multi-element arrays explicitly.
- *  - Real URL shapes (watch?v=, playlist?list=, /channel/) so the real
- *    extractIdFromUrl parses them once utils are un-mocked.
- *
  */
 
 import type {
@@ -112,25 +103,16 @@ export const buildPlaylistResponse = (
 
 export const buildChannelDetailsResponse = (
 	overrides: Partial<ChannelInfoResponse> = {}
-): {
-	id: string;
-	name: string;
-	handle: string | null;
-	subscriberCount: number;
-	description: string | null;
-	verified: boolean;
-	avatars: Avatar[];
-	banners: { url: string; height: number; width: number; estimatedResolution: string }[] | Image[];
-	avatarUrl?: string | null;
-	bannerUrl?: string | null;
-	tabs?: string[];
-} => ({
+): ChannelInfoResponse => ({
 	id: 'UCtest456',
 	name: 'Test Channel',
 	handle: 'TestChannel',
 	subscriberCount: 20_600_000,
 	description: 'A test channel description',
 	verified: true,
+	avatarUrl: null,
+	bannerUrl: null,
+	tabs: [],
 	avatars: [
 		buildAvatar({
 			url: 'https://example.com/channel-avatar.jpg',
@@ -144,7 +126,7 @@ export const buildChannelDetailsResponse = (
 			url: 'https://example.com/channel-banner.jpg',
 			height: 175,
 			width: 1060,
-			estimatedResolution: 'HIGH'
+			estimatedResolutionLevel: 'HIGH'
 		}
 	],
 	...overrides

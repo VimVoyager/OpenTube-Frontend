@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, type MockedFunction } from 'vitest';
 import {
 	createSuccessfulFetch,
 	createFailedFetch,
@@ -6,26 +6,24 @@ import {
 	extractQueryParams
 } from './apiHelpers';
 
-interface JsonFetcherSpec<T, R = T> {
+interface JsonFetcherSpec<R, T = R> {
 	name: string;
-	call: (id: string, fetchFn?: typeof fetch) => Promise<R>;
+	call: (id: string, fetchFn?: typeof globalThis.fetch) => Promise<R>;
 	endpoint: string;
 	idParam?: string;
 	fixture: T;
 	expected?: R;
 }
 
-export function describeJsonFetcher<T>(spec: JsonFetcherSpec<T>): void {
-	const idParam: string = spec.idParam ?? 'id';
+export function describeJsonFetcher<R, T = R>(spec: JsonFetcherSpec<R, T>): void {
 	const expected = (spec.expected ?? spec.fixture) as R;
+	const idParam: string = spec.idParam ?? 'id';
 
 	describe(`${spec.name} (fetcher contract)`, (): void => {
 		it('calls the endpoint once with the URL-encoded id', async (): Promise<void> => {
 			const id = 'abc 123&x=y';
-			const fetchFn: {
-				(input: RequestInfo | URL, init?: RequestInit): Promise<Response>;
-				(input: string | URL | Request, init?: RequestInit): Promise<Response>;
-			} = createSuccessfulFetch(spec.fixture);
+
+			const fetchFn: MockedFunction<typeof fetch> = createSuccessfulFetch(spec.fixture);
 			await spec.call(id, fetchFn as never);
 			expect(fetchFn).toHaveBeenCalledTimes(1);
 			const url: string = fetchFn.mock.calls[0][0] as string;

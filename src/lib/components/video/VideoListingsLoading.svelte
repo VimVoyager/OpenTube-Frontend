@@ -1,6 +1,6 @@
 <div class="flex w-full flex-col gap-4 px-6">
 	<!-- Related videos loading skeletons -->
-	{#each Array(5) as _, i}
+	{#each [...Array(5).keys()] as i (i)}
 		<div class="flex gap-2 p-2">
 			<!-- Thumbnail skeleton -->
 			<div class="relative w-40 shrink-0">

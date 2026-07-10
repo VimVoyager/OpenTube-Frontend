@@ -16,7 +16,7 @@
 
 	<!-- Loading skeleton items -->
 	<div class="space-y-4" role="status" aria-label="Loading search results">
-		{#each Array(count) as _, i}
+		{#each [...Array(count).keys()] as i (i)}
 			<VideoResultLoading />
 		{/each}
 	</div>

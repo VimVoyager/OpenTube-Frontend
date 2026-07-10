@@ -121,9 +121,9 @@ describe('video/[id] load function integration', () => {
 		expect(result.relatedVideos).toHaveLength(4);
 		expect(result.relatedVideos[0].title).toBe('MURDER DRONES - Heartbeat');
 
-		// comments success path (previously a TODO — comments route now succeeds)
-		expect(result.comments.length).toBeGreaterThan(0);
-		expect(result.comments[0].author).toBeTruthy();
+		expect(result.comments).toBeDefined();
+		expect(result.comments!.length).toBeGreaterThan(0);
+		expect(result.comments![0].author).toBeTruthy();
 
 		// no playlist context without a ?playlist param
 		expect(result.playlistId).toBeNull();

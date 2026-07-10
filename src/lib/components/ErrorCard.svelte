@@ -1,4 +1,6 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte';
+
 	type Variant = 'error' | 'warning' | 'info' | 'empty';
 
 	let {
@@ -12,11 +14,11 @@
 	}: {
 		variant?: Variant;
 		title: string;
-		message: string;
+		message: string | null;
 		icon?: string | null;
 		showRetry?: boolean;
 		onRetry?: (() => void) | null;
-		children?: any;
+		children?: Snippet;
 	} = $props();
 
 	// Default icons for each variant

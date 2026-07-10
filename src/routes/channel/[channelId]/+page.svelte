@@ -8,7 +8,7 @@
 	let { data }: { data: PageData } = $props();
 
 	let channel = $derived(
-		(data as any)?.channel ?? {
+		data.channel ?? {
 			id: '',
 			name: '',
 			handle: '',
@@ -21,8 +21,8 @@
 		}
 	);
 
-	let channelVideos = $derived((data as any)?.videos ?? []);
-	let error = $derived((data as any)?.error ?? null);
+	let channelVideos = $derived(data.videos ?? []);
+	let error = $derived(data.error ?? null);
 
 	let activeTab = $state<ChannelTab>('videos');
 </script>

@@ -2,6 +2,7 @@
 	import logoPlaceholder from '$lib/assets/logo-placeholder.svg';
 	import type { CommentConfig } from '$lib/adapters/types';
 	import { HeartIcon, ThumbsUpIcon, ChevronDownIcon, ChevronUpIcon } from 'lucide-svelte';
+	import { sanitizeHtml } from '$lib/sanitize';
 
 	interface Props {
 		comment: CommentConfig;
@@ -105,7 +106,8 @@
 
 			<!-- Comment Text -->
 			<div class="mb-2 text-sm wrap-break-word whitespace-pre-wrap">
-				{@html comment.text}
+				<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+				{@html sanitizeHtml(comment.text)}
 			</div>
 
 			<!-- Actions -->

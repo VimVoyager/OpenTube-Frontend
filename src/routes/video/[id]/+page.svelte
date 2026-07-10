@@ -13,7 +13,7 @@
 
 	// Reactive destructure - updates when data changes
 	let playerConfig = $derived(
-		(data as any)?.playerConfig ?? {
+		data.playerConfig ?? {
 			videoStream: null,
 			audioStream: null,
 			subtitles: [],
@@ -23,7 +23,7 @@
 	);
 
 	let metadata = $derived(
-		(data as any)?.metadata ?? {
+		data.metadata ?? {
 			title: '',
 			description: '',
 			channelName: '',
@@ -37,10 +37,10 @@
 	);
 
 	let relatedVideos = $derived(data.relatedVideos ?? []);
-	let comments = $derived((data as any)?.comments ?? []);
-	let error = $derived((data as any)?.error ?? null);
-	let playlistId = $derived((data as any)?.playlistId ?? null);
-	let playlistIndex = $derived((data as any)?.playlistIndex ?? 0);
+	let comments = $derived(data.comments ?? []);
+	let error = $derived(data.error ?? null);
+	let playlistId = $derived(data.playlistId ?? null);
+	let playlistIndex = $derived(data.playlistIndex ?? 0);
 
 	// Extract video ID for keying components
 	let videoId = $derived(playerConfig.manifestUrl || playerConfig.poster || Date.now().toString());
@@ -51,8 +51,8 @@
 
 	let isPlaylist = $derived(!!playlistId);
 
-	let playlistVideos = $derived((data as any)?.playlistVideos ?? null);
-	let playlistInfo = $derived((data as any)?.playlistInfo ?? null);
+	let playlistVideos = $derived(data.playlistVideos ?? null);
+	let playlistInfo = $derived(data.playlistInfo ?? null);
 
 	// Delay player initialisation until mounted (for Shaka Player)
 	let showPlayer = $state(false);
@@ -116,10 +116,10 @@
 			<aside class="mt-7.75 flex w-1/3 flex-col gap-5 px-6">
 				{#if isPlaylist}
 					<PlaylistQueue
-						videos={playlistVideos}
-						playlistName={playlistInfo?.name}
-						{playlistId}
-						currentIndex={playlistIndex}
+						videos={playlistVideos ?? []}
+						playlistName={playlistInfo?.name ?? ''}
+						playlistId={playlistId ?? ''}
+						currentIndex={playlistIndex ?? 0}
 					/>
 				{/if}
 				<VideoListings videos={relatedVideos} />
@@ -195,7 +195,7 @@
 						<VideoDetail {metadata} />
 					{/key}
 				{:else if activeTab === 'playlist' && isPlaylist}
-					<PlaylistQueue videos={relatedVideos} {playlistId} currentIndex={playlistIndex} />
+					<PlaylistQueue videos={relatedVideos} playlistId={playlistId ?? ''} currentIndex={playlistIndex} />
 				{:else if activeTab === 'related'}
 					<VideoListings videos={relatedVideos} />
 				{:else if comments.length > 0}

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { VideoMetadata } from '$lib/adapters/types';
 	import roundLogo from '$lib/assets/logo-placeholder.svg';
+	import { sanitizeHtml } from '$lib/sanitize';
 
 	let { metadata }: { metadata: VideoMetadata } = $props();
 
@@ -52,7 +53,8 @@
 						class="overflow-hidden transition-all duration-300 ease-in-out"
 						style={isExpanded ? '' : `max-height: ${COLLAPSED_HEIGHT}px;`}
 					>
-						<p>{@html metadata.description}</p>
+						<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+						<p>{@html sanitizeHtml(metadata.description)}</p>
 					</div>
 					{#if !isExpanded}
 						<div

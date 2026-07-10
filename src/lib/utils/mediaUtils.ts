@@ -15,7 +15,7 @@ export function selectBestThumbnail(thumbnails: Thumbnail[], fallback: string): 
  * Selects the best quality uploader avatar from available options
  * Uses the same pattern as selectBestAvatar but for uploader avatars
  */
-export function selectBestUploaderAvatar(avatars: Avatar[], fallback: string): string {
+export function selectBestUploaderAvatar(avatars: Avatar[] | undefined, fallback: string): string {
 	if (!avatars || avatars.length === 0) return fallback;
 
 	return avatars[avatars.length - 1]?.url || avatars[0]?.url || fallback;

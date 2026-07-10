@@ -39,7 +39,7 @@
 
 		<!-- No Results State -->
 	{:else if !hasResults}
-		<ErrorCard variant="info" title="No Results Found" message="No results found for "{query}"">
+		<ErrorCard variant="info" title="No Results Found" message={`No results found for "${query}"`}>
 			<p class="text-muted mt-4 text-sm">Try different keywords or check your spelling</p>
 		</ErrorCard>
 

@@ -49,7 +49,5 @@ function adaptPlaylistVideo(video: RelatedItemResponse): RelatedVideoConfig {
 
 export function adaptPlaylistVideos(response: PlaylistResponse): RelatedVideoConfig[] {
 	if (!response?.relatedItems) return [];
-	return response.relatedItems.map(
-		(item: RelatedItem): RelatedVideoConfig => adaptPlaylistVideo(item as RelatedItemResponse)
-	);
+	return response.relatedItems.map(adaptPlaylistVideo);
 }

@@ -10,7 +10,7 @@
 		videos,
 		playlists
 	}: {
-		channel?: unknown;
+		// channel?: unknown;
 		activeTab?: string;
 		videos?: Snippet;
 		playlists?: Snippet;

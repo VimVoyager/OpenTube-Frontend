@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor, within, fireEvent } from '@testing-library/svelte';
 import '@testing-library/jest-dom';
 import PageComponent from './+page.svelte';
+import type { CommentConfig, PlaylistInfoConfig, RelatedVideoConfig } from '$lib/adapters/types';
 
 describe('+page.svelte', () => {
 	const mockPlayerConfig = {
@@ -61,17 +62,80 @@ describe('+page.svelte', () => {
 		}
 	];
 
-	const mockComments = [
-		{ id: 'comment-1', author: 'Alice', text: 'Great video!' },
-		{ id: 'comment-2', author: 'Bob', text: 'Thanks for this.' }
+	const mockComments: CommentConfig[] = [
+		{
+			id: 'comment-1',
+			author: 'Alice',
+			text: 'Great video!',
+			authorAvatar: 'https://example.com/alice.jpg',
+			authorUrl: 'https://www.youtube.com/@alice',
+			isVerified: false,
+			isChannelOwner: false,
+			likeCount: 12,
+			likeCountText: "12",
+			replyCount: 0,
+			uploadDate: '1 day ago',
+			isPinned: false,
+			isHearted: false,
+			hasReplies: false
+		},
+		{
+			id: 'comment-2',
+			author: 'Bob',
+			text: 'Thanks for this.',
+			authorAvatar: 'https://example.com/bob.jpg',
+			authorUrl: 'https://www.youtube.com/@bob',
+			isVerified: true,
+			isChannelOwner: false,
+			likeCount: 5,
+			likeCountText: "5",
+			replyCount: 1,
+			uploadDate: '3 hours ago',
+			isPinned: false,
+			isHearted: true,
+			hasReplies: true
+		}
 	];
 
-	const mockPlaylistVideos = [
-		{ id: 'pl-1', title: 'Playlist Video One' },
-		{ id: 'pl-2', title: 'Playlist Video Two' }
+	const mockPlaylistVideos: RelatedVideoConfig[] = [
+		{
+			id: 'pl-1',
+			url: 'https://www.youtube.com/watch?v=pl-1',
+			title: 'Playlist Video One',
+			thumbnail: 'https://example.com/pl-thumb1.jpg',
+			channelName: 'Test Channel',
+			channelId: 'channel1',
+			channelAvatar: 'https://example.com/avatar.jpg',
+			viewCount: 100000,
+			duration: 300,
+			uploadDate: '2 days ago'
+		},
+		{
+			id: 'pl-2',
+			url: 'https://www.youtube.com/watch?v=pl-2',
+			title: 'Playlist Video Two',
+			thumbnail: 'https://example.com/pl-thumb2.jpg',
+			channelName: 'Test Channel',
+			channelId: 'channel1',
+			channelAvatar: 'https://example.com/avatar.jpg',
+			viewCount: 90000,
+			duration: 240,
+			uploadDate: '2 days ago'
+		}
 	];
 
-	const mockPlaylistInfo = { name: 'My Playlist' };
+	const mockPlaylistInfo: PlaylistInfoConfig = {
+		id: 'playlist-123',
+		name: 'My Playlist',
+		url: 'https://www.youtube.com/playlist?list=playlist-123',
+		uploaderName: 'Test Channel',
+		uploaderId: 'channel1',
+		uploaderAvatarUrl: 'https://example.com/avatar.jpg',
+		bannerUrl: null,
+		thumbnailUrl: 'https://example.com/thumb.jpg',
+		uploaderUrl: 'https://www.youtube.com/channel/channel1',
+		description: null
+	};
 
 	// Full dataset used to exercise every branch (playlist + comments + related videos all present)
 	const fullData = {

@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite';
+import { defineConfig } from 'vitest/config';
 import tailwindcss from '@tailwindcss/vite';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
@@ -10,15 +10,14 @@ export default defineConfig({
 		port: parseInt(process.env.FRONTEND_PORT || '5173'),
 		strictPort: true
 	},
+	resolve: {
+		conditions: ['browser', 'import'],
+		alias: {
+			$lib: path.resolve('./src/lib'),
+			'$env/static/public': path.resolve(__dirname, './src/tests/env')
+		}
+	},
 	test: {
-		resolve: {
-			conditions: ['browser', 'import'],
-			alias: {
-				$lib: path.resolve('./src/lib'),
-				'$env/static/public': path.resolve(__dirname, './src/tests/env')
-			}
-		},
-
 		// Global test settings
 		globals: true,
 		expect: { requireAssertions: true },

@@ -54,7 +54,7 @@ describe('ChannelDetails', () => {
 			const banner = container.querySelector('img[alt="Channel banner"]');
 			expect(banner).toBeNull();
 
-			const fallback = container.querySelector('.bg-gradient-to-r');
+			const fallback = container.querySelector('.bg-linear-to-r');
 			expect(fallback).toBeTruthy();
 		});
 	});

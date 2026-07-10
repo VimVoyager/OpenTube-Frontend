@@ -11,7 +11,8 @@ import { getVideoDetails } from '$lib/api/details';
 
 describeJsonFetcher({
 	name: 'getVideoDetails',
-	call: getVideoDetails,
+	// call: getVideoDetails,
+	call: (id, fetchFn) => getVideoDetails(id, fetchFn),
 	endpoint: '/streams/details',
-	fixture: detailsFixture
+	fixture: detailsFixture[0]
 });

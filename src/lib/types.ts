@@ -273,13 +273,23 @@ export interface ShakaNetworkingEngine {
 	unregisterRequestFilter(filter: (type: number, request: ShakaRequest) => void): void;
 }
 
+export interface ShakaRetryParameters {
+	maxAttempts: number;
+	baseDelay: number;
+	backoffFactor: number;
+	fuzzFactor: number;
+	timeout: number;
+	stallTimeout: number;
+	connectionTimeout: number;
+}
+
 export interface ShakaRequest {
 	uris: string[];
 	method: string;
 	body: ArrayBuffer | null;
 	headers: Record<string, string>;
 	allowCrossSiteCredentials: boolean;
-	retryParameters: any;
+	retryParameters: ShakaRetryParameters;
 }
 
 export interface ShakaPlayerInstance {
