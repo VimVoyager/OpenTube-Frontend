@@ -237,7 +237,7 @@
 					await localPlayer.destroy();
 				}
 			} catch (err) {
-				console.error("Error destroying video player:", err);
+				console.error('Error destroying video player:', err);
 			}
 		})();
 	});

@@ -114,7 +114,9 @@
 			</section>
 
 			<!-- Desktop: sidebar spanning both rows -->
-			<aside class="hidden lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:mt-7.75 lg:flex lg:flex-col lg:gap-5 lg:px-6">
+			<aside
+				class="hidden lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:mt-7.75 lg:flex lg:flex-col lg:gap-5 lg:px-6"
+			>
 				{#if isPlaylist}
 					<PlaylistQueue
 						videos={playlistVideos ?? []}
@@ -126,7 +128,7 @@
 				<VideoListings videos={relatedVideos} />
 			</aside>
 
-		<!-- Mobile/Tablet: content tabs below the player -->
+			<!-- Mobile/Tablet: content tabs below the player -->
 			<div class="lg:hidden">
 				<!-- Tab Navigation -->
 				<div class="bg-navbar border-default sticky top-14 z-30 border-b">
