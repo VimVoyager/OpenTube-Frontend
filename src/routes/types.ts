@@ -25,6 +25,7 @@ export interface VideoPageData {
 	playlistIndex?: number | null;
 	playlistVideos?: RelatedVideoConfig[] | null;
 	playlistInfo?: PlaylistInfoConfig | null;
+	videoId?: string | null;
 	error?: string;
 }
 

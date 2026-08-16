@@ -2,7 +2,6 @@
 	import type { PageData } from './$types';
 
 	import { onMount } from 'svelte';
-	import { page } from '$app/state';
 	import VideoPlayer from '$lib/components/video/VideoPlayer.svelte';
 	import VideoDetail from '$lib/components/video/VideoDetail.svelte';
 	import VideoListings from '$lib/components/video/VideoListings.svelte';
@@ -43,7 +42,7 @@
 	let playlistIndex = $derived(data.playlistIndex ?? 0);
 
 	// Extract video ID for keying components
-	let videoId = $derived(page.params.id);
+	let videoId = $derived(data.videoId);
 
 	// Computed states
 	let hasError = $derived(!!error);
