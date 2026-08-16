@@ -24,11 +24,12 @@ import { adaptCommentResponse } from '$lib/adapters/comments';
 /**
  * Creates error page data with default values
  */
-function createErrorPageData(error: unknown): VideoPageData {
+function createErrorPageData(error: unknown, videoId: string): VideoPageData {
 	const errorMessage: string =
 		error instanceof Error ? error.message : 'Unknown error loading video';
 
 	return {
+		videoId,
 		playerConfig: {
 			manifestUrl: '',
 			duration: 0,
@@ -136,6 +137,7 @@ export const load: PageLoad = async ({ params, url, fetch }): Promise<VideoPageD
 			: null;
 
 		return {
+			videoId: params.id,
 			playerConfig,
 			metadata,
 			relatedVideos,
@@ -147,6 +149,6 @@ export const load: PageLoad = async ({ params, url, fetch }): Promise<VideoPageD
 		};
 	} catch (error) {
 		console.error('Error loading video data:', error);
-		return createErrorPageData(error);
+		return createErrorPageData(error, params.id);
 	}
 };

@@ -11,7 +11,6 @@
 
 	let { data }: { data: PageData } = $props();
 
-	// Reactive destructure - updates when data changes
 	let playerConfig = $derived(
 		data.playerConfig ?? {
 			videoStream: null,
@@ -43,7 +42,7 @@
 	let playlistIndex = $derived(data.playlistIndex ?? 0);
 
 	// Extract video ID for keying components
-	let videoId = $derived(playerConfig.manifestUrl || playerConfig.poster || Date.now().toString());
+	let videoId = $derived(data.videoId);
 
 	// Computed states
 	let hasError = $derived(!!error);
@@ -88,32 +87,35 @@
 		</div>
 	{:else}
 		<!-- Desktop Layout (lg and above) - Two columns -->
-		<div class="mt-4 hidden min-h-screen lg:flex">
-			<section class="flex w-2/3 flex-col items-start justify-start">
-				<div class="w-full p-4 sm:p-6 lg:p-8">
-					{#if showPlayer}
-						{#key videoId}
-							<VideoPlayer config={playerConfig} />
-						{/key}
-					{/if}
+		<div class="min-h-screen lg:mt-4 lg:grid lg:grid-cols-[2fr_1fr] lg:items-start">
+			<div class="w-full lg:col-start-1 lg:row-start-1 lg:px-8 lg:pt-8">
+				{#if showPlayer}
+					<VideoPlayer config={playerConfig} />
+				{/if}
+			</div>
 
-					{#key videoId}
-						<VideoDetail {metadata} />
-						<!-- Comments Section -->
-						{#if comments.length > 0}
-							<div class="mt-6">
-								<h2 class="mb-4 text-lg font-semibold">{comments.length} Comments</h2>
-								<div class="divide-y divide-gray-200 dark:divide-gray-700">
-									{#each comments as comment (comment.id)}
-										<Comments {comment} />
-									{/each}
-								</div>
+			<!-- Desktop: details + comments under the player -->
+			<section class="hidden lg:col-start-1 lg:row-start-2 lg:block lg:px-8 lg:pb-8">
+				{#key videoId}
+					<VideoDetail {metadata} />
+
+					{#if comments.length > 0}
+						<div class="mt-6">
+							<h2 class="mb-4 text-lg font-semibold">{comments.length} Comments</h2>
+							<div class="divide-y divide-gray-200 dark:divide-gray-700">
+								{#each comments as comment (comment.id)}
+									<Comments {comment} />
+								{/each}
 							</div>
-						{/if}
-					{/key}
-				</div>
+						</div>
+					{/if}
+				{/key}
 			</section>
-			<aside class="mt-7.75 flex w-1/3 flex-col gap-5 px-6">
+
+			<!-- Desktop: sidebar spanning both rows -->
+			<aside
+				class="hidden lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:mt-7.75 lg:flex lg:flex-col lg:gap-5 lg:px-6"
+			>
 				{#if isPlaylist}
 					<PlaylistQueue
 						videos={playlistVideos ?? []}
@@ -124,94 +126,85 @@
 				{/if}
 				<VideoListings videos={relatedVideos} />
 			</aside>
-		</div>
 
-		<!-- Mobile/Tablet Layout (below lg) - Full width with tabs -->
-		<div class="min-h-screen lg:hidden">
-			<!-- Video Player - Full Width -->
-			<div class="w-full">
-				{#if showPlayer}
-					{#key videoId}
-						<VideoPlayer config={playerConfig} />
-					{/key}
-				{/if}
-			</div>
-
-			<!-- Tab Navigation -->
-			<div class="bg-navbar border-default sticky top-14 z-30 border-b">
-				<div class="flex">
-					<button
-						class="relative flex-1 py-3 text-sm font-medium transition-colors
-							{activeTab === 'details' ? 'text-primary' : 'text-secondary hover:text-primary'}"
-						onclick={() => (activeTab = 'details')}
-					>
-						Details
-						{#if activeTab === 'details'}
-							<div class="bg-accent absolute right-0 bottom-0 left-0 h-0.5"></div>
-						{/if}
-					</button>
-
-					{#if isPlaylist}
+			<!-- Mobile/Tablet: content tabs below the player -->
+			<div class="lg:hidden">
+				<!-- Tab Navigation -->
+				<div class="bg-navbar border-default sticky top-14 z-30 border-b">
+					<div class="flex">
 						<button
 							class="relative flex-1 py-3 text-sm font-medium transition-colors
-								{activeTab === 'playlist' ? 'text-primary' : 'text-secondary hover:text-primary'}"
-							onclick={() => (activeTab = 'playlist')}
+								{activeTab === 'details' ? 'text-primary' : 'text-secondary hover:text-primary'}"
+							onclick={() => (activeTab = 'details')}
 						>
-							Playlist
-							{#if activeTab === 'playlist'}
+							Details
+							{#if activeTab === 'details'}
 								<div class="bg-accent absolute right-0 bottom-0 left-0 h-0.5"></div>
 							{/if}
 						</button>
-					{/if}
 
-					<button
-						class="relative flex-1 py-3 text-sm font-medium transition-colors
-							{activeTab === 'related' ? 'text-primary' : 'text-secondary hover:text-primary'}"
-						onclick={() => (activeTab = 'related')}
-					>
-						Related Videos
-						{#if activeTab === 'related'}
-							<div class="bg-accent absolute right-0 bottom-0 left-0 h-0.5"></div>
+						{#if isPlaylist}
+							<button
+								class="relative flex-1 py-3 text-sm font-medium transition-colors
+									{activeTab === 'playlist' ? 'text-primary' : 'text-secondary hover:text-primary'}"
+								onclick={() => (activeTab = 'playlist')}
+							>
+								Playlist
+								{#if activeTab === 'playlist'}
+									<div class="bg-accent absolute right-0 bottom-0 left-0 h-0.5"></div>
+								{/if}
+							</button>
 						{/if}
-					</button>
 
-					<button
-						class="relative flex-1 py-3 text-sm font-medium transition-colors
-							{activeTab === 'comments' ? 'text-primary' : 'text-secondary hover:text-primary'}"
-						onclick={() => (activeTab = 'comments')}
-					>
-						Comments
-						{#if activeTab === 'comments'}
-							<div class="bg-accent absolute right-0 bottom-0 left-0 h-0.5"></div>
-						{/if}
-					</button>
-				</div>
-			</div>
+						<button
+							class="relative flex-1 py-3 text-sm font-medium transition-colors
+								{activeTab === 'related' ? 'text-primary' : 'text-secondary hover:text-primary'}"
+							onclick={() => (activeTab = 'related')}
+						>
+							Related Videos
+							{#if activeTab === 'related'}
+								<div class="bg-accent absolute right-0 bottom-0 left-0 h-0.5"></div>
+							{/if}
+						</button>
 
-			<!-- Tab Content -->
-			<div class="p-4">
-				{#if activeTab === 'details'}
-					{#key videoId}
-						<VideoDetail {metadata} />
-					{/key}
-				{:else if activeTab === 'playlist' && isPlaylist}
-					<PlaylistQueue
-						videos={relatedVideos}
-						playlistId={playlistId ?? ''}
-						currentIndex={playlistIndex}
-					/>
-				{:else if activeTab === 'related'}
-					<VideoListings videos={relatedVideos} />
-				{:else if comments.length > 0}
-					<div class="mt-6">
-						<h2 class="mb-4 text-lg font-semibold">{comments.length} Comments</h2>
-						<div class="divide-y divide-gray-200 dark:divide-gray-700">
-							{#each comments as comment (comment.id)}
-								<Comments {comment} />
-							{/each}
-						</div>
+						<button
+							class="relative flex-1 py-3 text-sm font-medium transition-colors
+								{activeTab === 'comments' ? 'text-primary' : 'text-secondary hover:text-primary'}"
+							onclick={() => (activeTab = 'comments')}
+						>
+							Comments
+							{#if activeTab === 'comments'}
+								<div class="bg-accent absolute right-0 bottom-0 left-0 h-0.5"></div>
+							{/if}
+						</button>
 					</div>
-				{/if}
+				</div>
+
+				<!-- Tab Content -->
+				<div class="p-4">
+					{#if activeTab === 'details'}
+						{#key videoId}
+							<VideoDetail {metadata} />
+						{/key}
+					{:else if activeTab === 'playlist' && isPlaylist}
+						<PlaylistQueue
+							videos={relatedVideos}
+							playlistId={playlistId ?? ''}
+							currentIndex={playlistIndex}
+						/>
+					{:else if activeTab === 'related'}
+						<VideoListings videos={relatedVideos} />
+					{:else if comments.length > 0}
+						<div class="mt-6">
+							<h2 class="mb-4 text-lg font-semibold">{comments.length} Comments</h2>
+							<div class="divide-y divide-gray-200 dark:divide-gray-700">
+								{#each comments as comment (comment.id)}
+									<Comments {comment} />
+								{/each}
+							</div>
+						</div>
+					{/if}
+				</div>
 			</div>
 		</div>
 	{/if}

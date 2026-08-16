@@ -4,8 +4,12 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 
 # Declare build args
-ARG PUBLIC_API_URL
-ARG PUBLIC_PROXY_URL
+#ARG PUBLIC_API_URL
+#ARG PUBLIC_PROXY_URL
+
+ARG PUBLIC_API_URL=/api
+ARG PUBLIC_PROXY_URL=/proxy
+
 
 # Make API URL available during build
 ENV PUBLIC_API_URL=$PUBLIC_API_URL
