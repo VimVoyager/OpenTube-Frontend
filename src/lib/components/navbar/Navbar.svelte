@@ -30,7 +30,7 @@
 			<!-- Logo -->
 			<div class="flex shrink-0 px-2 lg:px-0">
 				<div class="flex items-center">
-					<a href="{resolve('/')}">
+					<a href={resolve('/')}>
 						<img src={logo} alt="OpenTube" class="h-11 w-auto dark:hidden" />
 						<img src={logo} alt="OpenTube" class="h-11 w-auto not-dark:hidden" />
 					</a>
