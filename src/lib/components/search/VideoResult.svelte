@@ -4,6 +4,7 @@
 	import thumbnailPlaceholder from '$lib/assets/thumbnail-placeholder.jpg';
 	import avatarPlaceholder from '$lib/assets/logo-placeholder.svg';
 	import { extractIdFromUrl } from '$lib/utils/streamSelection';
+	import { resolve } from '$app/paths';
 
 	let { result }: { result: VideoSearchResultConfig } = $props();
 
@@ -18,7 +19,7 @@
 		class="hover:bg-secondary hidden gap-4 rounded-lg p-4 shadow-sm transition-colors sm:grid sm:grid-cols-3"
 	>
 		<div class="col-span-1 flex items-start justify-center">
-			<a href={`/video/${encodeURIComponent(result.id)}`} class="w-full">
+			<a href={resolve('/video/[id]', { id: result.id })} class="w-full">
 				<img
 					src={thumbnail}
 					alt={`Thumbnail for ${result.title}`}
@@ -28,7 +29,7 @@
 		</div>
 
 		<div class="col-span-2 flex flex-col">
-			<a href={`/video/${encodeURIComponent(result.id)}`} class="hover:underline">
+			<a href={resolve('/video/[id]', { id: result.id })} class="hover:underline">
 				<h3 class="text-primary mb-1 text-lg font-semibold">{result.title}</h3>
 			</a>
 			<p class="text-muted mb-2 text-sm">
@@ -37,7 +38,7 @@
 				<span>{formatDate(result.uploadDate)}</span>
 			</p>
 			<a
-				href={`/channel/${extractIdFromUrl(result.channelUrl)}`}
+				href={resolve('/channel/[channelId]', { channelId: extractIdFromUrl(result.channelUrl) })}
 				class="col-space-2 my-3 flex items-center space-x-3 hover:opacity-80"
 			>
 				<img src={avatar} alt={result.channelName} class="h-8 w-8 rounded-full object-cover" />
@@ -54,7 +55,7 @@
 
 	<!-- Mobile Layout -->
 	<div class="hover:bg-secondary rounded-lg p-3 shadow-sm transition-colors sm:hidden">
-		<a href={`/video/${encodeURIComponent(result.id)}`} class="mb-3 block w-full">
+		<a href={resolve('/video/[id]', { id: result.id })} class="mb-3 block w-full">
 			<img
 				src={thumbnail}
 				alt={`Thumbnail for ${result.title}`}
@@ -63,11 +64,11 @@
 		</a>
 
 		<div class="flex flex-col">
-			<a href={`/video/${encodeURIComponent(result.id)}`} class="hover:underline">
+			<a href={resolve('/video/[id]', { id: result.id })} class="hover:underline">
 				<h3 class="text-primary mb-2 line-clamp-2 text-base font-semibold">{result.title}</h3>
 			</a>
 			<a
-				href={`/channel/${extractIdFromUrl(result.channelUrl)}`}
+				href={resolve('/channel/[channelId]', { channelId: extractIdFromUrl(result.channelUrl) })}
 				class="mb-2 flex items-center space-x-2 hover:opacity-80"
 			>
 				<img src={avatar} alt={result.channelName} class="h-6 w-6 rounded-full object-cover" />

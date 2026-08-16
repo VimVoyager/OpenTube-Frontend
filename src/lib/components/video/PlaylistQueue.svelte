@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { RelatedVideoConfig } from '$lib/adapters/types';
 	import { formatDuration } from '$lib/utils/formatters';
+	import { resolve } from '$app/paths';
 	import { tick } from 'svelte';
 
 	interface Props {
@@ -49,7 +50,7 @@
 
 			<a
 				use:scrollActiveIntoView={isActive}
-				href="/video/{encodeURIComponent(video.id)}?playlist={encodeURIComponent(
+				href="{resolve('/video/[id]', { id: video.id })}?playlist={encodeURIComponent(
 					playlistId
 				)}&index={i}"
 				class="hover:bg-secondary relative flex gap-3 px-3 py-2 transition-colors

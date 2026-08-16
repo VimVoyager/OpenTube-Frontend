@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { formatCount, formatDuration } from '$lib/utils/formatters';
 	import type { ChannelVideoConfig } from '$lib/adapters/types';
+	import { resolve } from '$app/paths';
 
 	let { videos }: { videos: ChannelVideoConfig[] } = $props();
 </script>
@@ -15,7 +16,7 @@
 		<div class="grid grid-cols-1 gap-4 px-6 pb-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 			{#each videos as video (video.id)}
 				<a
-					href="/video/{video.id}"
+					href={resolve('/video/[id]', { id: video.id })}
 					data-sveltekit-preload-data="tap"
 					class="group hover:bg-secondary flex cursor-pointer flex-col gap-2 rounded-lg p-2 transition-colors"
 				>

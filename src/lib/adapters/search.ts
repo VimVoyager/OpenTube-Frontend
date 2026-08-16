@@ -7,9 +7,7 @@ import type {
 } from './types';
 
 type SearchResultConfig =
-	| VideoSearchResultConfig
-	| ChannelSearchResultConfig
-	| PlaylistSearchResultConfig;
+	VideoSearchResultConfig | ChannelSearchResultConfig | PlaylistSearchResultConfig;
 
 /**
  * Handles negative counts from the API (e.g., -1 for unknown values)

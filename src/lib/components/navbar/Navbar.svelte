@@ -2,6 +2,7 @@
 	import { goto } from '$app/navigation';
 	import logo from '../../assets/streaming-logo.png';
 	import ThemeToggle from './ThemeToggle.svelte';
+	import { resolve } from '$app/paths';
 
 	let query = $state('');
 	let showMobileSearch = $state(false);
@@ -9,7 +10,8 @@
 	function executeSearch() {
 		if (!query.trim()) return;
 
-		goto(`/results?query=${encodeURIComponent(query.trim())}`);
+		// eslint-disable-next-line svelte/no-navigation-without-resolve
+		goto(`${resolve('/results')}?query=${encodeURIComponent(query.trim())}`);
 		showMobileSearch = false; // Close mobile search after search
 	}
 
@@ -28,7 +30,7 @@
 			<!-- Logo -->
 			<div class="flex shrink-0 px-2 lg:px-0">
 				<div class="flex items-center">
-					<a href="/">
+					<a href={resolve('/')}>
 						<img src={logo} alt="OpenTube" class="h-11 w-auto dark:hidden" />
 						<img src={logo} alt="OpenTube" class="h-11 w-auto not-dark:hidden" />
 					</a>

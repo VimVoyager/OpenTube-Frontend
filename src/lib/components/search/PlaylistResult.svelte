@@ -3,6 +3,7 @@
 	import thumbnailPlaceholder from '$lib/assets/thumbnail-placeholder.jpg';
 	import { goto } from '$app/navigation';
 	import { getPlaylist } from '$lib/api/playlist';
+	import { resolve } from '$app/paths';
 
 	let { result }: { result: PlaylistSearchResultConfig } = $props();
 
@@ -20,7 +21,8 @@
 			const videoId = firstVideo.url.split('v=')[1]?.split('&')[0];
 			if (!videoId) throw new Error('Could not extract video ID');
 			await goto(
-				`/video/${encodeURIComponent(videoId)}?playlist=${encodeURIComponent(result.id)}&index=0`
+				// eslint-disable-next-line svelte/no-navigation-without-resolve
+				`${resolve('/video/[id]', { id: videoId })}?playlist=${encodeURIComponent(result.id)}&index=0`
 			);
 		} catch (e) {
 			console.error('Failed to load playlist:', e);
@@ -92,13 +94,17 @@
 				<h3 class="text-primary mb-1 text-lg font-semibold">{result.title}</h3>
 			</div>
 			<p class="text-muted mb-1 text-sm">Playlist</p>
+			<!-- eslint-disable svelte/no-navigation-without-resolve -->
 			<a
 				href={result.uploaderUrl}
+				target="_blank"
+				rel="noopener noreferrer"
 				class="text-secondary mt-1 flex w-fit items-center gap-1 text-sm hover:underline"
 				onclick={(e) => e.stopPropagation()}
 			>
 				{result.uploaderName}
 			</a>
+			<!-- eslint-enable svelte/no-navigation-without-resolve -->
 		</div>
 	</div>
 

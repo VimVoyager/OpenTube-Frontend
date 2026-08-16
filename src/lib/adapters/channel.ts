@@ -96,8 +96,7 @@ export function adaptChannelVideos(
 	avatarFallback: string
 ): ChannelVideoConfig[] {
 	if (!response?.items) return [];
-	return response.items.map(
-		(v: ChannelVideoItem): ChannelVideoConfig =>
-			adaptChannelVideo(v, thumbnailFallback, avatarFallback)
+	return response.items.map((v: ChannelVideoItem): ChannelVideoConfig =>
+		adaptChannelVideo(v, thumbnailFallback, avatarFallback)
 	);
 }

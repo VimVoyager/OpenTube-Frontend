@@ -46,6 +46,7 @@
 	<div class="flex gap-3 py-4">
 		<!-- Avatar -->
 		<div class="shrink-0">
+			<!-- eslint-disable svelte/no-navigation-without-resolve -->
 			<a href={comment.authorUrl} target="_blank" rel="noopener noreferrer">
 				<img
 					src={comment.authorAvatar || logoPlaceholder}
@@ -54,11 +55,13 @@
 					onerror={handleAvatarError}
 				/>
 			</a>
+			<!-- eslint-enable svelte/no-navigation-without-resolve -->
 		</div>
 
 		<!-- Comment Content -->
 		<div class="min-w-0 flex-1">
 			<!-- Author and Date -->
+			<!-- eslint-disable svelte/no-navigation-without-resolve -->
 			<div class="mb-1 flex flex-wrap items-center gap-2">
 				<a
 					href={comment.authorUrl}
@@ -68,6 +71,7 @@
 				>
 					{comment.author}
 				</a>
+				<!-- eslint-enable svelte/no-navigation-without-resolve -->
 
 				{#if comment.isVerified}
 					<svg
