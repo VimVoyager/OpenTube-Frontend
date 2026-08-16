@@ -21,6 +21,12 @@
 	let player: ShakaPlayerInstance | null = null;
 	let ui: ShakaUIOverlayInstance | null = null;
 
+	// True once the player is attached and the first manifest load has completed
+	let playerReady = $state(false);
+
+	// Last manifest URL handed to player.load()
+	let loadedUrl: string | null = null;
+
 	// Error State
 	let playerError = $state<ShakaErrorDetail | null>(null);
 	let retrying = $state(false);
@@ -53,7 +59,10 @@
 			return;
 		}
 
+		const url = config.manifestUrl;
 		const mimeType: string = config.isMuxed ? 'video/mp4' : 'application/dash+xml';
+
+		loadedUrl = url;
 
 		try {
 			console.log('isMuxed:', config.isMuxed, 'mimeType:', mimeType);
@@ -80,6 +89,12 @@
 		}
 	}
 
+	$effect(() => {
+		const url = config.manifestUrl;
+		if (!playerReady || !url || url === loadedUrl) return;
+		void loadManifest();
+	});
+
 	/**
 	 * Shaka event error handler
 	 */
@@ -105,14 +120,16 @@
 		await tick();
 		setShakaControlsVisible(false);
 
+		loadedUrl = null;
 		await loadManifest();
 		retrying = false;
 	}
 
 	let destroyed = false;
-	onDestroy(() => {
-		destroyed = true;
-	});
+
+	// onDestroy(() => {
+	// 	destroyed = true;
+	// });
 
 	onMount(async () => {
 		if (!browser) return;
@@ -136,6 +153,8 @@
 			player = new shaka.Player();
 
 			await player.attach(videoElement);
+
+			if (destroyed) return;
 
 			ui = new shaka.ui.Overlay(player, videoContainer, videoElement);
 
@@ -164,7 +183,6 @@
 			if (networkingEngine) {
 				networkingEngine.registerRequestFilter((type: number, request: ShakaRequest) => {
 					// Type 1 = SEGMENT, Type 2 = MANIFEST (also covers direct MP4 initial fetch)
-					// if (type === 1 || type === 2) {
 					const originalUrl = new URL(request.uris[0]);
 
 					if (originalUrl.host.endsWith('.googlevideo.com')) {
@@ -203,14 +221,25 @@
 	});
 
 	onDestroy(() => {
-		if (ui) {
-			ui.destroy();
-			ui = null;
-		}
-		if (player) {
-			player.destroy();
-			player = null;
-		}
+		destroyed = true;
+		playerReady = false;
+
+		const localUi = ui;
+		const localPlayer = player;
+		ui = null;
+		player = null;
+
+		void (async () => {
+			try {
+				if (localUi) {
+					await localUi.destroy();
+				} else if (localPlayer) {
+					await localPlayer.destroy();
+				}
+			} catch (err) {
+				console.error("Error destroying video player:", err);
+			}
+		})();
 	});
 </script>
 
