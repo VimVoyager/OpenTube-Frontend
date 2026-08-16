@@ -3,12 +3,13 @@
 	import { formatCount } from '$lib/utils/formatters';
 	import avatarPlaceholder from '$lib/assets/logo-placeholder.svg';
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 
 	let { result }: { result: ChannelSearchResultConfig } = $props();
 
 	let avatar = $derived(result.avatar || avatarPlaceholder);
 
-	const redirectToChannel = () => goto(`/channel/${result.id}`);
+	const redirectToChannel = () => goto(resolve('/channel/[channelId]', { channelId: result.id }));
 	function handleKey(event: KeyboardEvent) {
 		if (event.key === 'Enter') redirectToChannel();
 	}

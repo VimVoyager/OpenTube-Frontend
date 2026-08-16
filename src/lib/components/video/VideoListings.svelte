@@ -2,6 +2,7 @@
 	import logoPlaceholder from '$lib/assets/logo-placeholder.svg';
 	import type { RelatedVideoConfig } from '$lib/adapters/types';
 	import { formatCount, formatDuration } from '$lib/utils/formatters';
+	import { resolve } from '$app/paths';
 
 	let { videos = [] }: { videos?: RelatedVideoConfig[] } = $props();
 
@@ -24,7 +25,7 @@
 			>
 				<!-- Stretched invisible link covering the whole card -->
 				<a
-					href="/video/{encodeURIComponent(video.id)}"
+					href={resolve('/video/[id]', { id: video.id })}
 					class="absolute inset-0 rounded-lg"
 					aria-label={video.title}
 				></a>
@@ -60,7 +61,7 @@
 					<!-- Channel Info -->
 					<div class="mt-1 flex items-center">
 						<a
-							href="/channel/{video.channelId}"
+							href={resolve('/channel/[channelId]', { channelId: video.channelId })}
 							data-sveltekit-preload-data="tap"
 							class="relative z-20 flex items-center gap-2"
 						>

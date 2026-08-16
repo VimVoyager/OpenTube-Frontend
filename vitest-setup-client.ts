@@ -42,6 +42,18 @@ vi.mock('$app/navigation', () => ({
 	goto: vi.fn()
 }));
 
+vi.mock('$app/paths', () => ({
+	resolve: (route: string, params?: Record<string, string>) =>
+		params
+			? Object.entries(params).reduce(
+					(path, [key, value]) => path.replace(`[${key}]`, encodeURIComponent(value)),
+					route
+				)
+			: route,
+	base: '',
+	assets: ''
+}));
+
 // Cleanup after each test
 afterEach(() => {
 	vi.clearAllMocks();
