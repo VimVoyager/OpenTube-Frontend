@@ -8,7 +8,7 @@ The format is based on [keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
- - Base image moved from Node 20 to Node 24 LTS. Node 20 reached end of life in April 2026.
+- Base image moved from Node 20 to Node 24 LTS. Node 20 reached end of life in April 2026.
 
 ## [0.1.1] - 2026-08-16
 
