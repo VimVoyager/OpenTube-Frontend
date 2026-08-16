@@ -21,7 +21,9 @@ const mockPlayerInstance = {
 
 const mockUIInstance = {
 	configure: vi.fn(),
-	destroy: vi.fn(),
+	destroy: vi.fn(async () => {
+		await mockPlayerInstance.destroy();
+	}),
 	getControls: vi.fn(() => ({}))
 };
 
@@ -385,6 +387,7 @@ describe('VideoPlayer.svelte', () => {
 			// Give it time to cleanup
 			await new Promise((resolve) => setTimeout(resolve, 100));
 
+			expect(mockUIInstance.destroy).toHaveBeenCalled();
 			expect(mockPlayerInstance.destroy).toHaveBeenCalled();
 		});
 	});
