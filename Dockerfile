@@ -3,10 +3,6 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Declare build args
-#ARG PUBLIC_API_URL
-#ARG PUBLIC_PROXY_URL
-
 ARG PUBLIC_API_URL=/api
 ARG PUBLIC_PROXY_URL=/proxy
 
@@ -25,13 +21,7 @@ RUN npm ci
 COPY . .
 
 # Build the application in production mode
-# This will use .env.production
-RUN npm run build
-
-# Verify what was built
-RUN echo "=== Build output ===" && \
-    ls -la .svelte-kit/output && \
-    ls -la .svelte-kit/output/server
+RUN npm run build:ci
 
 # Remove dev dependencies
 RUN npm prune --omit=dev
