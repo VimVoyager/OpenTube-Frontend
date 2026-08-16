@@ -6,6 +6,8 @@ The format is based on [keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-08-16
+
 ### Fixed
 
 - Video playback now continues across desktop, mobile, and fullscreen layouts. The watch route mounted two players and only hid one with CSS, so each layout could be started independently.
@@ -13,4 +15,5 @@ The format is based on [keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Navigating between videos reloads the player in place instead of rebuilding it.
 - Fixed a teardown race condition that could produce intermittent errors when navigating away from a video.
 
-[Unreleased]: https://github.com/VimVoyager/OpenTube-Frontend/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/VimVoyager/OpenTube-Frontend/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/VimVoyager/OpenTube-Frontend/compare/v0.1.0...v0.1.1
