@@ -101,9 +101,7 @@ export interface ChannelSearchResultConfig {
 }
 
 export type SearchResultConfig =
-	| VideoSearchResultConfig
-	| ChannelSearchResultConfig
-	| PlaylistSearchResultConfig;
+	VideoSearchResultConfig | ChannelSearchResultConfig | PlaylistSearchResultConfig;
 
 /**
  * Comments result configuration for Comments component display
