@@ -12,33 +12,33 @@ Git tags are `vX.Y.Z` — annotated, never lightweight. The tag is the source of
 
 The question that decides the number is **"does the person deploying this have to do anything?"**
 
-| Bump | Trigger |
-|---|---|
+| Bump      | Trigger                                                                                                                                                                                               |
+| --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **MAJOR** | An environment variable is renamed or newly required; the compose file must change; an API response shape changes such that the frontend or proxy must be updated in step; a data migration is needed |
-| **MINOR** | A new endpoint or feature; new optional configuration; anything additive that older clients can ignore |
-| **PATCH** | Bug fix, dependency bump, internal refactor, test changes — no observable change to anything consuming the service |
+| **MINOR** | A new endpoint or feature; new optional configuration; anything additive that older clients can ignore                                                                                                |
+| **PATCH** | Bug fix, dependency bump, internal refactor, test changes — no observable change to anything consuming the service                                                                                    |
 
-If a change needs a matching release in another service, say so in the release notes: *"requires frontend >= 2.1.0"*. Semver within one service cannot express cross-service compatibility, and with three services a sentence in the notes is enough.
+If a change needs a matching release in another service, say so in the release notes: _"requires frontend >= 2.1.0"_. Semver within one service cannot express cross-service compatibility, and with three services a sentence in the notes is enough.
 
 Pre-1.0 rules are deliberately not used here. Once a version is deployed, breaking changes get a MAJOR bump regardless of how small the number is.
 
 ## Where the version lives
 
-| Location | Purpose |
-|---|---|
-| Git tag `vX.Y.Z` | Source of truth. Triggers the publish workflow. |
-| `pom.xml` `<version>` | Build metadata. Verified against the tag by CI. |
-| `CHANGELOG.md` | Human-readable history of what changed and why. |
-| Docker image tags | Derived from the git tag by CI — never set by hand. |
+| Location              | Purpose                                             |
+| --------------------- | --------------------------------------------------- |
+| Git tag `vX.Y.Z`      | Source of truth. Triggers the publish workflow.     |
+| `pom.xml` `<version>` | Build metadata. Verified against the tag by CI.     |
+| `CHANGELOG.md`        | Human-readable history of what changed and why.     |
+| Docker image tags     | Derived from the git tag by CI — never set by hand. |
 
 ## Docker Hub tags
 
 The image tag is the git tag without the leading `v`. CI derives every tag below; none are pushed manually.
 
-| Git tag | Image tags pushed |
-|---|---|
-| `v1.2.3` | `1.2.3`, `1.2`, `1`, `latest` |
-| `v1.3.0-rc.1` | `1.3.0-rc.1` only |
+| Git tag       | Image tags pushed             |
+| ------------- | ----------------------------- |
+| `v1.2.3`      | `1.2.3`, `1.2`, `1`, `latest` |
+| `v1.3.0-rc.1` | `1.3.0-rc.1` only             |
 
 Pre-releases never receive `latest` or the rolling `1.3` / `1` tags, so nothing pinned to a major or minor line will pick one up by accident.
 

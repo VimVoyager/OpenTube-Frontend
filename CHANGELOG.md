@@ -8,9 +8,9 @@ The format is based on [keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Fixed
 
- - Video playback now continues across desktop, mobile, and fullscreen layouts. The watch route mounted two players and only hid one with CSS, so each layout could be started independently.
- - Watch pages no longer fetch the DASH manifest and buffer segments twice - a side effect of the duplicate player.
- - Navigating between videos reloads the player in place instead of rebuilding it.
- - Fixed a teardown race condition that could produce intermittent errors when navigating away from a video.
+- Video playback now continues across desktop, mobile, and fullscreen layouts. The watch route mounted two players and only hid one with CSS, so each layout could be started independently.
+- Watch pages no longer fetch the DASH manifest and buffer segments twice - a side effect of the duplicate player.
+- Navigating between videos reloads the player in place instead of rebuilding it.
+- Fixed a teardown race condition that could produce intermittent errors when navigating away from a video.
 
 [Unreleased]: https://github.com/VimVoyager/OpenTube-Frontend/compare/v0.1.0...HEAD
