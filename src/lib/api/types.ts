@@ -181,7 +181,7 @@ export interface KioskInfoResponse {
 	items: KioskResponseItem[];
 }
 
-interface KioskResponseItem {
+export interface KioskResponseItem {
 	name: string;
 	url: string;
 	uploaderName: string;

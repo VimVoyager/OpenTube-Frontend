@@ -10,7 +10,8 @@ import type {
 	CommentResponse,
 	RelatedCommentItem,
 	SearchResponse,
-	ChannelInfoResponse
+	ChannelInfoResponse,
+	KioskResponseItem
 } from '$lib/api/types';
 import type { Thumbnail, Avatar, Details } from '$lib/types';
 
@@ -269,3 +270,26 @@ export const buildSearchResponse = (overrides: Partial<SearchResponse> = {}): Se
 		hasNextPage: true,
 		...overrides
 	}) as SearchResponse;
+
+
+// ---------------------------------------------------------------------------
+// Streams / related items
+// ---------------------------------------------------------------------------
+
+export const buildKioskItem = (
+	overrides: Partial<KioskResponseItem> = {}
+): KioskResponseItem =>
+	({
+		url: 'https://www.youtube.com/watch?v=video1',
+		name: 'Test Video',
+		thumbnails: [buildThumbnail({ url: 'https://example.com/v1.jpg' })],
+		streamType: 'VIDEO_STREAM',
+		uploaderName: 'Test Channel',
+		uploaderUrl: 'https://www.youtube.com/channel/UCtest456',
+		duration: 120,
+		viewCount: 1000,
+		textualUploadDate: '2 weeks ago',
+		uploadDate: { approximation: true },
+		uploaderVerified: true,
+		...overrides
+	}) as KioskResponseItem;
