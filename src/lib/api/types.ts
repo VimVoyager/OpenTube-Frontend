@@ -173,3 +173,24 @@ export interface PlaylistResponse {
 	subChannelAvatars?: Avatar[];
 	thumbnails: Thumbnail[];
 }
+
+export interface KioskInfoResponse {
+	id: string;
+	name: string;
+	url: string;
+	items: KioskResponseItem[];
+}
+
+interface KioskResponseItem {
+	name: string;
+	url: string;
+	uploaderName: string;
+	uploaderUrl: string;
+	uploaderVerified: boolean;
+	duration: number;
+	viewCount: number;
+	uploadDate: string;
+	textualUploadDate: string;
+	streamType: string;
+	thumbnails: Thumbnail[];
+}
