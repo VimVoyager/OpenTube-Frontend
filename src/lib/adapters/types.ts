@@ -169,3 +169,17 @@ export interface PlaylistInfoConfig {
 	thumbnailUrl: string | null;
 	description?: string | null;
 }
+
+/**
+ * Related video configuration for listings display
+ */
+export interface KioskVideoConfig {
+	id: string;
+	url: string;
+	title: string;
+	thumbnail: string;
+	channelName: string;
+	viewCount: number;
+	uploadDate: string;
+	duration: number;
+}

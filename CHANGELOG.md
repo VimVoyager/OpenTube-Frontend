@@ -11,6 +11,7 @@ The format is based on [keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Base image moved from Node 20 to Node 24 LTS. Node 20 reached end of life in April 2026.
 - Updated dependencies, including major versions of Vite, ESLint, jsdom, and the test tooling.
 - Removed the unused `@sveltejs/adapter-auto` dependency.
+- Video thumbnails now use the highest resolution the source provides.
 
 ## [0.1.1] - 2026-08-16
 

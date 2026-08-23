@@ -10,6 +10,7 @@ interface JsonFetcherSpec<R, T = R> {
 	name: string;
 	call: (id: string, fetchFn?: typeof globalThis.fetch) => Promise<R>;
 	endpoint: string;
+	idIn?: 'query' | 'path';
 	idParam?: string;
 	fixture: T;
 	expected?: R;
@@ -18,6 +19,7 @@ interface JsonFetcherSpec<R, T = R> {
 export function describeJsonFetcher<R, T = R>(spec: JsonFetcherSpec<R, T>): void {
 	const expected = (spec.expected ?? spec.fixture) as R;
 	const idParam: string = spec.idParam ?? 'id';
+	const idIn: 'query' | 'path' = spec.idIn ?? 'query';
 
 	describe(`${spec.name} (fetcher contract)`, (): void => {
 		it('calls the endpoint once with the URL-encoded id', async (): Promise<void> => {
@@ -27,8 +29,16 @@ export function describeJsonFetcher<R, T = R>(spec: JsonFetcherSpec<R, T>): void
 			await spec.call(id, fetchFn as never);
 			expect(fetchFn).toHaveBeenCalledTimes(1);
 			const url: string = fetchFn.mock.calls[0][0] as string;
-			expect(url).toContain(spec.endpoint);
-			expect(extractQueryParams(url)[idParam]).toBe(id);
+			if (idIn === 'path') {
+				// Trailing slash matters: '/kiosk' would otherwise pass against '/kiosks/abc'.
+				expect(url).toContain(`${spec.endpoint}/`);
+				const path: string = url.split('?')[0];
+				const segment: string = path.slice(path.lastIndexOf('/') + 1);
+				expect(segment).toBe(encodeURIComponent(id));
+			} else {
+				expect(url).toContain(spec.endpoint);
+				expect(extractQueryParams(url)[idParam]).toBe(id);
+			}
 		});
 
 		it('returns the parsed JSON body unmodified', async (): Promise<void> => {
