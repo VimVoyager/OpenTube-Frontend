@@ -6,10 +6,7 @@ import type { KioskVideoConfig } from '$lib/adapters/types';
 /**
  * Adapts a single kiosk item ot kiosk video config
  */
-function adaptKioskVideo(
-	item: KioskResponseItem,
-	defaultThumbnail: string,
-): KioskVideoConfig {
+function adaptKioskVideo(item: KioskResponseItem, defaultThumbnail: string): KioskVideoConfig {
 	return {
 		id: extractIdFromUrl(item.url),
 		url: item.url || '',
@@ -18,7 +15,7 @@ function adaptKioskVideo(
 		channelName: item.uploaderName || 'Unknown Channel',
 		viewCount: handleNegativeCount(item.viewCount) || 0,
 		duration: handleNegativeCount(item.duration) || 0,
-		uploadDate: item.textualUploadDate || '',
+		uploadDate: item.textualUploadDate || ''
 	};
 }
 
@@ -26,8 +23,8 @@ function adaptKioskVideo(
  * Adapts an array of kiosk items into related video configurations
  */
 export function adaptKioskVideos(
-	items : KioskResponseItem[] | undefined,
-	defaultThumbnail: string,
+	items: KioskResponseItem[] | undefined,
+	defaultThumbnail: string
 ): KioskVideoConfig[] {
 	if (!items || items.length === 0) {
 		return [];
@@ -36,7 +33,6 @@ export function adaptKioskVideos(
 	return items
 		.filter((item) => item && item.url && item.name) // Filter out invalid items
 		.map((item) => adaptKioskVideo(item, defaultThumbnail));
-
 }
 
 function handleNegativeCount(count: number): number {

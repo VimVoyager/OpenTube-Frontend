@@ -7,15 +7,14 @@
 import { describe, it, expect } from 'vitest';
 import { buildKioskItem } from '../../tests/fixtures/builder';
 import kioskVideosResponseFixture from '../../tests/fixtures/api/kioskResponse.json';
-import KioskVideosFixture from '../../tests/fixtures/adapters/kioskVideos.json'
+import KioskVideosFixture from '../../tests/fixtures/adapters/kioskVideos.json';
 import type { KioskResponseItem } from '$lib/api/types';
 import type { KioskVideoConfig } from '$lib/adapters/types';
 import { adaptKioskVideos } from '$lib/adapters/kiosk';
 
 const defaultThumbnail = 'fallback-thumb.jpg';
 
-const adapt = (items: KioskResponseItem[] | undefined) =>
-	adaptKioskVideos(items, defaultThumbnail);
+const adapt = (items: KioskResponseItem[] | undefined) => adaptKioskVideos(items, defaultThumbnail);
 
 describe('adaptKioskVideos', () => {
 	it('adapts a single item with all fields mapped', () => {
@@ -30,7 +29,7 @@ describe('adaptKioskVideos', () => {
 			channelName: 'Test Channel',
 			viewCount: 1000,
 			duration: 120,
-			uploadDate: '2 weeks ago',
+			uploadDate: '2 weeks ago'
 		});
 	});
 

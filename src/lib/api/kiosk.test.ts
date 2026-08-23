@@ -4,9 +4,9 @@
  * Tests for kiosk fetching
  */
 
-import { describeJsonFetcher} from '../../tests/helpers/describeJsonFetcher';
+import { describeJsonFetcher } from '../../tests/helpers/describeJsonFetcher';
 import kioskInfoResponseFixture from '../../tests/fixtures/api/kioskResponse.json';
-import { getKioskInfo } from '$lib/api/kiosk'
+import { getKioskInfo } from '$lib/api/kiosk';
 import { describe, it, expect, vi } from 'vitest';
 
 describeJsonFetcher({

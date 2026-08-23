@@ -19,9 +19,7 @@ export async function getKioskInfo(
 		const res: Response = await fetcher(`${API_BASE_URL}/kiosks/${encodeURIComponent(kioskId)}`);
 
 		if (!res.ok) {
-			throw new Error(
-				`Failed to fetch ${kioskId} kiosk info: ${res.status} ${res.statusText}`
-			);
+			throw new Error(`Failed to fetch ${kioskId} kiosk info: ${res.status} ${res.statusText}`);
 		}
 
 		return await res.json();

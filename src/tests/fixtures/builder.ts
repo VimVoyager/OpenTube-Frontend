@@ -271,14 +271,11 @@ export const buildSearchResponse = (overrides: Partial<SearchResponse> = {}): Se
 		...overrides
 	}) as SearchResponse;
 
-
 // ---------------------------------------------------------------------------
 // Streams / related items
 // ---------------------------------------------------------------------------
 
-export const buildKioskItem = (
-	overrides: Partial<KioskResponseItem> = {}
-): KioskResponseItem =>
+export const buildKioskItem = (overrides: Partial<KioskResponseItem> = {}): KioskResponseItem =>
 	({
 		url: 'https://www.youtube.com/watch?v=video1',
 		name: 'Test Video',
