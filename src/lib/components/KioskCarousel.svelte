@@ -43,7 +43,7 @@
 		<div class="flex items-center gap-2">
 			<button
 				type="button"
-				class="hidden size-8 items-center justify-center rounded-full bg-neutral-800 text-neutral-100 disabled:opacity-30 lg:flex"
+				class="hidden size-8 items-center justify-center rounded-full bg-neutral-800 text-neutral-100 disabled:opacity-30 sm:flex"
 				aria-label="Scroll {title} left"
 				disabled={atStart}
 				onclick={() => page(-1)}
@@ -52,7 +52,7 @@
 			</button>
 			<button
 				type="button"
-				class="hidden size-8 items-center justify-center rounded-full bg-neutral-800 text-neutral-100 disabled:opacity-30 lg:flex"
+				class="hidden size-8 items-center justify-center rounded-full bg-neutral-800 text-neutral-100 disabled:opacity-30 sm:flex"
 				aria-label="Scroll {title} right"
 				disabled={atEnd}
 				onclick={() => page(1)}
