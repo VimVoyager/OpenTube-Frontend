@@ -6,6 +6,10 @@ The format is based on [keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- Landing page showing trending videos from gaming, music, movies and shows, and podcast feeds.
+
 ### Changed
 
 - Base image moved from Node 20 to Node 24 LTS. Node 20 reached end of life in April 2026.
