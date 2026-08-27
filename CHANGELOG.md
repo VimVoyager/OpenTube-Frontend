@@ -6,6 +6,8 @@ The format is based on [keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-08-27
+
 ### Added
 
 - Landing page showing trending videos from gaming, music, movies and shows, and podcast feeds.
@@ -26,5 +28,6 @@ The format is based on [keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Navigating between videos reloads the player in place instead of rebuilding it.
 - Fixed a teardown race condition that could produce intermittent errors when navigating away from a video.
 
-[Unreleased]: https://github.com/VimVoyager/OpenTube-Frontend/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/VimVoyager/OpenTube-Frontend/compare/v0.2.0...HEAD
+[0.1.1]: https://github.com/VimVoyager/OpenTube-Frontend/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/VimVoyager/OpenTube-Frontend/compare/v0.1.0...v0.1.1
