@@ -52,8 +52,8 @@ describe('adaptPlaylistInfo', () => {
 				[{ url: 'https://example.com/only.jpg', width: 1060, height: 640 }],
 				'https://example.com/only.jpg'
 			],
-			['empty array', [], null],
-			['undefined', undefined, null]
+			['empty array', [], '/src/lib/assets/banner-fallback.jpg'],
+			['undefined', undefined, '/src/lib/assets/banner-fallback.jpg']
 		])('%s → %j', (_label, banners, expected) => {
 			const result = adaptPlaylistInfo(buildPlaylistResponse({ banners }));
 			expect(result.bannerUrl).toBe(expected);

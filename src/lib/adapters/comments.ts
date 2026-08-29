@@ -1,6 +1,6 @@
 import type { CommentResponse, RelatedCommentItem } from '../api/types';
 import type { CommentConfig } from './types';
-import { selectBestAvatar } from '$lib/utils/mediaUtils';
+import { selectBestImage } from '$lib/utils/mediaUtils';
 
 /**
  * Adapt raw comment data into a cleaner format for display
@@ -10,7 +10,7 @@ export function adaptComment(comment: RelatedCommentItem, defaultAvatar: string)
 		id: comment.commentId,
 		text: comment.commentText || '',
 		author: comment.uploaderName || 'Unknown User',
-		authorAvatar: selectBestAvatar(comment.uploaderAvatars, defaultAvatar),
+		authorAvatar: selectBestImage(comment.uploaderAvatars, defaultAvatar),
 		authorUrl: comment.uploaderUrl || '',
 		isVerified: comment.uploaderVerified || false,
 		isChannelOwner: comment.channelOwner || false,

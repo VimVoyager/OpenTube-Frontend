@@ -1,4 +1,4 @@
-import type { Avatar, Description, Thumbnail } from '$lib/types';
+import type { Avatar, Description } from '$lib/types';
 
 /**
  * API Response for Search
@@ -42,7 +42,7 @@ export interface RelatedItemResponse {
 	serviceId: number;
 	url: string;
 	name: string;
-	thumbnails: Thumbnail[];
+	thumbnails: Image[];
 	streamType?: string;
 	uploaderName: string;
 	textualUploadDate: string;
@@ -52,7 +52,7 @@ export interface RelatedItemResponse {
 	viewCount: number;
 	duration: number;
 	uploaderUrl: string;
-	uploaderAvatars?: Avatar[];
+	uploaderAvatars: Image[];
 	uploaderVerified: boolean;
 	isShortFormContent?: boolean;
 }
@@ -85,11 +85,11 @@ export interface RelatedCommentItem {
 	serviceId: number;
 	url: string;
 	name: string;
-	thumbnails: Thumbnail[];
+	thumbnails: Image[];
 	commentId: string;
 	commentText: string;
 	uploaderName: string;
-	uploaderAvatars: Avatar[];
+	uploaderAvatars: Image[];
 	uploaderUrl: string;
 	uploaderVerified: boolean;
 	textualUploadDate: string;
@@ -129,22 +129,22 @@ export interface ChannelVideoItem {
 	duration: number;
 	viewCount: number;
 	textualUploadDate: string | null;
-	thumbnails: Thumbnail[];
+	thumbnails: Image[];
 	isShortFormContent?: boolean;
 }
 
 export interface ChannelInfoResponse {
 	id: string;
 	name: string;
-	avatarUrl: string | null;
-	bannerUrl: string | null;
-	description: string | null;
+	avatarUrl: string;
+	bannerUrl: string;
+	description: string;
 	subscriberCount: number;
 	handle: string | null;
 	verified: boolean;
 	tabs: string[];
-	avatars?: Avatar[];
-	banners?: Image[];
+	avatars: Image[];
+	banners: Image[];
 }
 
 export interface ChannelVideosResponse {
@@ -168,10 +168,10 @@ export interface PlaylistResponse {
 	subChannelUrl?: string;
 	subChannelName?: string;
 	description: Description;
-	banners?: Avatar[];
-	uploaderAvatars?: Avatar[];
-	subChannelAvatars?: Avatar[];
-	thumbnails: Thumbnail[];
+	banners: Image[];
+	uploaderAvatars: Image[];
+	subChannelAvatars: Image[];
+	thumbnails: Image[];
 }
 
 export interface KioskInfoResponse {
@@ -192,5 +192,5 @@ export interface KioskResponseItem {
 	uploadDate: string;
 	textualUploadDate: string;
 	streamType: string;
-	thumbnails: Thumbnail[];
+	thumbnails: Image[];
 }

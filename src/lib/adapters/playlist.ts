@@ -1,20 +1,10 @@
 import type { PlaylistResponse, RelatedItemResponse } from '$lib/api/types';
 import { extractIdFromUrl } from '$lib/utils/streamSelection';
-import { selectBestThumbnail, selectBestUploaderAvatar } from '$lib/utils/mediaUtils';
+import { selectBestImage } from '$lib/utils/mediaUtils';
 import logoPlaceholder from '$lib/assets/logo-placeholder.svg';
+import bannerPlaceholder from '$lib/assets/banner-fallback.jpg';
 import thumbnailPlaceholder from '$lib/assets/thumbnail-placeholder.jpg';
 import type { PlaylistInfoConfig, RelatedVideoConfig } from '$lib/adapters/types';
-
-function selectBestBanner(
-	banners: { url: string; width: number }[] | undefined,
-	fallback: string | null
-): string | null {
-	if (!banners || banners.length === 0) return fallback;
-	return [...banners].sort(
-		(a: { url: string; width: number }, b: { url: string; width: number }): number =>
-			b.width - a.width
-	)[0].url;
-}
 
 export function adaptPlaylistInfo(info: PlaylistResponse): PlaylistInfoConfig {
 	return {
@@ -23,9 +13,9 @@ export function adaptPlaylistInfo(info: PlaylistResponse): PlaylistInfoConfig {
 		url: info.url,
 		uploaderName: info.uploaderName,
 		uploaderId: extractIdFromUrl(info.uploaderUrl),
-		uploaderAvatarUrl: selectBestUploaderAvatar(info.uploaderAvatars, logoPlaceholder),
-		bannerUrl: selectBestBanner(info.banners, null),
-		thumbnailUrl: selectBestThumbnail(info.thumbnails, thumbnailPlaceholder),
+		uploaderAvatarUrl: selectBestImage(info.uploaderAvatars, logoPlaceholder),
+		bannerUrl: selectBestImage(info.banners, bannerPlaceholder),
+		thumbnailUrl: selectBestImage(info.thumbnails, thumbnailPlaceholder),
 		uploaderUrl: info.uploaderUrl,
 		description: info.description?.content || null
 	};
@@ -36,10 +26,10 @@ function adaptPlaylistVideo(video: RelatedItemResponse): RelatedVideoConfig {
 		id: extractIdFromUrl(video.url),
 		url: video.url,
 		title: video.name || 'Untitled',
-		thumbnail: selectBestThumbnail(video.thumbnails, thumbnailPlaceholder),
+		thumbnail: selectBestImage(video.thumbnails, thumbnailPlaceholder),
 		channelName: video.uploaderName || 'Unknown',
 		channelId: extractIdFromUrl(video.uploaderUrl),
-		channelAvatar: selectBestUploaderAvatar(video.uploaderAvatars, logoPlaceholder),
+		channelAvatar: selectBestImage(video.uploaderAvatars, logoPlaceholder),
 		duration: Math.max(0, video.duration ?? 0),
 		viewCount: Math.max(0, video.viewCount ?? 0),
 		uploadDate: video.textualUploadDate

@@ -34,7 +34,7 @@ export function formatDate(dateString: string): string {
  * Formats duration from number of seconds to H:M:S format
  * Example: 860 -> "14:20"
  */
-export const formatDuration = (seconds: number): string => {
+export const formatDuration: (seconds: number) => string = (seconds: number): string => {
 	const hours: number = Math.floor(seconds / 3600);
 	const minutes: number = Math.floor((seconds % 3600) / 60);
 	const secs: number = seconds % 60;
@@ -48,8 +48,6 @@ export const formatDuration = (seconds: number): string => {
 /**
  * Parses an ISO 8601 duration (e.g. "PT2M56S") into seconds.
  * Extracted from manifest.ts — used for DASH mediaPresentationDuration.
- * Unparseable or missing input returns 0. Day components (P1DT...) are not
- * supported; YouTube manifests only emit the PT form.
  * Examples: "PT1H2M3S" -> 3723, "PT1M30.5S" -> 90.5, "" -> 0
  */
 export function parseIsoDuration(duration: string | null | undefined): number {

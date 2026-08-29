@@ -136,8 +136,8 @@ describe('adaptChannelInfo', () => {
 	describe('fallbacks', () => {
 		it.each([
 			['empty name', { name: '' }, 'name', 'Unknown Channel'],
-			['empty description → null', { description: '' }, 'description', null],
-			['missing description → null', { description: undefined }, 'description', null],
+			['empty description', { description: '' }, 'description', ''],
+			['missing description → undefined', { description: undefined }, 'description', undefined],
 			['missing subscriberCount → "0"', { subscriberCount: undefined }, 'subscriberCount', '0'],
 			['missing verified → false', { verified: undefined }, 'verified', false]
 		])('%s', (_label, overrides, field, expected) => {

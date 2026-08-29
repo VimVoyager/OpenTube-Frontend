@@ -38,9 +38,9 @@ describe('adaptComment', () => {
 		const result = adaptComment(
 			buildCommentItem({
 				uploaderAvatars: [
-					buildAvatar({ url: 'a0.jpg' }),
-					buildAvatar({ url: 'a1.jpg' }),
-					buildAvatar({ url: 'a2.jpg' })
+					buildAvatar({ url: 'a0.jpg', height: 48, width: 48, estimatedResolutionLevel: 'LOW' }),
+					buildAvatar({ url: 'a1.jpg', height: 88, width: 88, estimatedResolutionLevel: 'MEDIUM' }),
+					buildAvatar({ url: 'a2.jpg', height: 176, width: 176, estimatedResolutionLevel: 'HIGH' })
 				]
 			}),
 			defaultAvatar

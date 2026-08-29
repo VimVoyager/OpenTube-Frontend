@@ -1,5 +1,5 @@
 import { PUBLIC_API_URL } from '$env/static/public';
-import type { Thumbnail } from '$lib/types';
+import type { Image } from '$lib/types';
 
 const API_BASE_URL = PUBLIC_API_URL;
 
@@ -9,7 +9,7 @@ const API_BASE_URL = PUBLIC_API_URL;
 export async function getVideoThumbnails(
 	id: string,
 	fetchFn?: typeof globalThis.fetch
-): Promise<Thumbnail> {
+): Promise<Image> {
 	const fetcher = fetchFn ?? globalThis.fetch;
 
 	try {
@@ -19,7 +19,7 @@ export async function getVideoThumbnails(
 			throw new Error(`Failed to fetch thumbnails for ${id}: ${res.status} ${res.statusText}`);
 		}
 
-		const thumbnails: Thumbnail[] = await res.json();
+		const thumbnails: Image[] = await res.json();
 
 		const highQualityThumbnail =
 			thumbnails.find((t) => t.estimatedResolutionLevel === 'HIGH') ||

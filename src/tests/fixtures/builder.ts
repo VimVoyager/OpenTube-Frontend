@@ -110,8 +110,8 @@ export const buildChannelDetailsResponse = (
 	subscriberCount: 20_600_000,
 	description: 'A test channel description',
 	verified: true,
-	avatarUrl: null,
-	bannerUrl: null,
+	avatarUrl: '',
+	bannerUrl: '',
 	tabs: [],
 	avatars: [
 		buildAvatar({
