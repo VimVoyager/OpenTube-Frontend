@@ -36,7 +36,10 @@ describe('VideoListings', () => {
 		render(VideoListings, { props: { videos: mockRelatedVideos } });
 
 		mockRelatedVideos.forEach((video) => {
-			expect(screen.getByAltText(`${video.title} thumbnail`)).toHaveAttribute('src', video.thumbnail);
+			expect(screen.getByAltText(`${video.title} thumbnail`)).toHaveAttribute(
+				'src',
+				video.thumbnail
+			);
 		});
 	});
 

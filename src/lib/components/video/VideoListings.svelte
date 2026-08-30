@@ -32,7 +32,7 @@
 				></a>
 
 				<div class="relative w-40 shrink-0">
-					<a href={resolve('/video/[id]', { id: video.id })} class="block w-full absolute inset-0">
+					<a href={resolve('/video/[id]', { id: video.id })} class="absolute inset-0 block w-full">
 						<VideoThumbnail
 							src={video.thumbnail}
 							alt={`${video.title} thumbnail`}
