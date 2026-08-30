@@ -121,7 +121,7 @@ describe('ChannelDetails', () => {
 		it('should render subscriber count', () => {
 			render(ChannelDetails, { props: { channel: glitchChannel } });
 
-			expect(screen.getByText('20.6M subscribers')).toBeTruthy();
+			expect(screen.getByText('20,600,000 subscribers')).toBeTruthy();
 		});
 
 		it('should render video count with locale formatting when videoCount is greater than zero', () => {

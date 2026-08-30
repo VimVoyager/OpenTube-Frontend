@@ -1,5 +1,5 @@
 import type { Details } from '$lib/types';
-import { selectBestAvatar } from '$lib/utils/mediaUtils';
+import { selectBestImage } from '$lib/utils/mediaUtils';
 import type { VideoMetadata } from './types';
 
 /**
@@ -10,7 +10,7 @@ export function adaptVideoMetadata(details: Details, defaultAvatar: string): Vid
 		title: details.videoTitle || 'Untitled Video',
 		description: details.description?.content || 'No description available',
 		channelName: details.channelName || 'Unknown Channel',
-		channelAvatar: selectBestAvatar(details.uploaderAvatars, defaultAvatar),
+		channelAvatar: selectBestImage(details.uploaderAvatars, defaultAvatar),
 		viewCount: handleNegativeCount(details.viewCount) || 0,
 		uploadDate: details.uploadDate || '',
 		likeCount: handleNegativeCount(details.likeCount) || 0,

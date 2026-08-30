@@ -6,7 +6,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { adaptComment, adaptComments, adaptCommentResponse } from './comments';
-import { buildCommentItem, buildCommentResponse, buildAvatar } from '../../tests/fixtures/builder';
+import { buildCommentItem, buildCommentResponse, buildImage } from '../../tests/fixtures/builder';
 import commentsResponse from '../../tests/fixtures/api/commentsResponse.json';
 import commentsResultFixture from '../../tests/fixtures/adapters/commentsResult.json';
 import type { CommentResponse, RelatedCommentItem } from '$lib/api/types';
@@ -38,9 +38,9 @@ describe('adaptComment', () => {
 		const result = adaptComment(
 			buildCommentItem({
 				uploaderAvatars: [
-					buildAvatar({ url: 'a0.jpg' }),
-					buildAvatar({ url: 'a1.jpg' }),
-					buildAvatar({ url: 'a2.jpg' })
+					buildImage({ url: 'a0.jpg', height: 48, width: 48, estimatedResolutionLevel: 'LOW' }),
+					buildImage({ url: 'a1.jpg', height: 88, width: 88, estimatedResolutionLevel: 'MEDIUM' }),
+					buildImage({ url: 'a2.jpg', height: 176, width: 176, estimatedResolutionLevel: 'HIGH' })
 				]
 			}),
 			defaultAvatar

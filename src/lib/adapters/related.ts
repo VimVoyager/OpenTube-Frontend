@@ -1,5 +1,5 @@
 import { extractIdFromUrl } from '$lib/utils/streamSelection';
-import { selectBestThumbnail, selectBestUploaderAvatar } from '$lib/utils/mediaUtils';
+import { selectBestImage } from '$lib/utils/mediaUtils';
 import type { RelatedVideoConfig } from './types';
 import type { RelatedItemResponse } from '$lib/api/types';
 
@@ -15,9 +15,9 @@ function adaptRelatedVideo(
 		id: extractIdFromUrl(item.url),
 		url: item.url || '',
 		title: item.name || 'Untitled Video',
-		thumbnail: selectBestThumbnail(item.thumbnails, defaultThumbnail),
+		thumbnail: selectBestImage(item.thumbnails, defaultThumbnail),
 		channelName: item.uploaderName || 'Unknown Channel',
-		channelAvatar: selectBestUploaderAvatar(item.uploaderAvatars, defaultAvatar),
+		channelAvatar: selectBestImage(item.uploaderAvatars, defaultAvatar),
 		viewCount: handleNegativeCount(item.viewCount) || 0,
 		duration: handleNegativeCount(item.duration) || 0,
 		uploadDate: item.textualUploadDate || '',
@@ -39,8 +39,10 @@ export function adaptRelatedVideos(
 	}
 
 	return items
-		.filter((item) => item && item.url && item.name) // Filter out invalid items
-		.map((item) => adaptRelatedVideo(item, defaultThumbnail, defaultAvatar));
+		.filter((item: RelatedItemResponse): string => item && item.url && item.name) // Filter out invalid items
+		.map((item: RelatedItemResponse): RelatedVideoConfig =>
+			adaptRelatedVideo(item, defaultThumbnail, defaultAvatar)
+		);
 }
 
 function handleNegativeCount(count: number): number {

@@ -5,6 +5,7 @@
 	import avatarPlaceholder from '$lib/assets/logo-placeholder.svg';
 	import { extractIdFromUrl } from '$lib/utils/streamSelection';
 	import { resolve } from '$app/paths';
+	import VideoThumbnail from '$lib/components/VideoThumbnail.svelte';
 
 	let { result }: { result: VideoSearchResultConfig } = $props();
 
@@ -19,11 +20,11 @@
 		class="hover:bg-secondary hidden gap-4 rounded-lg p-4 shadow-sm transition-colors sm:grid sm:grid-cols-3"
 	>
 		<div class="col-span-1 flex items-start justify-center">
-			<a href={resolve('/video/[id]', { id: result.id })} class="w-full">
-				<img
+			<a href={resolve('/video/[id]', { id: result.id })} class="group w-full">
+				<VideoThumbnail
 					src={thumbnail}
-					alt={`Thumbnail for ${result.title}`}
-					class="h-auto w-full rounded-md object-cover"
+					alt={`${result.title} thumbnail`}
+					duration={result.duration}
 				/>
 			</a>
 		</div>
@@ -54,12 +55,12 @@
 	</div>
 
 	<!-- Mobile Layout -->
-	<div class="hover:bg-secondary rounded-lg p-3 shadow-sm transition-colors sm:hidden">
-		<a href={resolve('/video/[id]', { id: result.id })} class="mb-3 block w-full">
-			<img
+	<div class="rounded-lg p-3 shadow-sm transition-colors sm:hidden">
+		<a href={resolve('/video/[id]', { id: result.id })} class="group w-full">
+			<VideoThumbnail
 				src={thumbnail}
-				alt={`Thumbnail for ${result.title}`}
-				class="h-auto w-full rounded-md object-cover"
+				alt={`${result.title} thumbnail`}
+				duration={result.duration}
 			/>
 		</a>
 

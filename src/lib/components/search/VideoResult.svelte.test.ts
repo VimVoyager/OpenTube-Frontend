@@ -28,7 +28,7 @@ describe('VideoResult', () => {
 		it('should render video thumbnail from result prop in both layouts', () => {
 			render(VideoResult, { props: { result: pilotResult } });
 
-			const thumbnails = screen.getAllByAltText('Thumbnail for MURDER DRONES - Pilot');
+			const thumbnails = screen.getAllByAltText('MURDER DRONES - Pilot thumbnail');
 			expect(thumbnails).toHaveLength(2);
 			thumbnails.forEach((thumbnail) => {
 				expect(thumbnail).toBeTruthy();
@@ -105,7 +105,7 @@ describe('VideoResult', () => {
 		it('should use placeholder thumbnail when thumbnail is empty', () => {
 			render(VideoResult, { props: { result: absoluteEndResult } });
 
-			const thumbnails = screen.getAllByAltText('Thumbnail for MURDER DRONES - Absolute End');
+			const thumbnails = screen.getAllByAltText('MURDER DRONES - Absolute End thumbnail');
 			expect(thumbnails).toHaveLength(2);
 			thumbnails.forEach((thumbnail) => {
 				expect(thumbnail.getAttribute('src')).toBe('default-thumbnail.jpg');
@@ -126,7 +126,7 @@ describe('VideoResult', () => {
 			const bare = { ...pilotResult, thumbnail: '', channelAvatar: '' };
 			render(VideoResult, { props: { result: bare } });
 			screen
-				.getAllByAltText('Thumbnail for MURDER DRONES - Pilot')
+				.getAllByAltText('MURDER DRONES - Pilot thumbnail')
 				.forEach((t) => expect(t.getAttribute('src')).toBe('/placeholder-thumbnail.jpg'));
 			screen
 				.getAllByAltText('GLITCH')

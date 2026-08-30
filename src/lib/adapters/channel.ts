@@ -1,6 +1,8 @@
 import type { ChannelConfig, ChannelVideoConfig } from '$lib/adapters/types';
 import { extractIdFromUrl } from '$lib/utils/streamSelection';
 import type { ChannelInfoResponse, ChannelVideoItem, ChannelVideosResponse } from '$lib/api/types';
+import { selectBestImage } from '$lib/utils/mediaUtils';
+import { formatCount } from '$lib/utils/formatters';
 
 /**
  * Format a raw subscriber count into a compact display string.
@@ -20,36 +22,6 @@ export function formatSubscriberCount(count: number): string {
 }
 
 /**
- * Pick the best banner from the banners array — prefer the widest one,
- * falling back to the raw bannerUrl string on the response.
- */
-function selectBestBanner(
-	banners: { url: string; width: number }[] | undefined,
-	fallback: string | null
-): string | null {
-	if (!banners || banners.length === 0) return fallback;
-	return [...banners].sort(
-		(a: { url: string; width: number }, b: { url: string; width: number }): number =>
-			b.width - a.width
-	)[0].url;
-}
-
-/**
- * Pick the best avatar from the avatars array — prefer the largest one,
- * falling back to the raw avatarUrl string on the response.
- */
-function selectBestAvatar(
-	avatars: { url: string; height: number }[] | undefined,
-	fallback: string | null
-): string | null {
-	if (!avatars || avatars.length === 0) return fallback;
-	return [...avatars].sort(
-		(a: { url: string; height: number }, b: { url: string; height: number }): number =>
-			b.height - a.height
-	)[0].url;
-}
-
-/**
  * Adapt raw channel info from the API into a display-ready ChannelConfig.
  */
 export function adaptChannelInfo(info: ChannelInfoResponse, videoCount: number = 0): ChannelConfig {
@@ -57,10 +29,10 @@ export function adaptChannelInfo(info: ChannelInfoResponse, videoCount: number =
 		id: info.id,
 		name: info.name || 'Unknown Channel',
 		handle: info.handle ? `@${info.handle.replace(/^@/, '')}` : `@${info.id}`,
-		avatarUrl: selectBestAvatar(info.avatars, info.avatarUrl),
-		bannerUrl: selectBestBanner(info.banners, info.bannerUrl),
-		description: info.description || null,
-		subscriberCount: formatSubscriberCount(info.subscriberCount ?? 0),
+		avatarUrl: selectBestImage(info.avatars, info.avatarUrl),
+		bannerUrl: selectBestImage(info.banners, info.bannerUrl),
+		description: info.description,
+		subscriberCount: formatCount(info.subscriberCount ?? 0),
 		videoCount,
 		verified: info.verified ?? false
 	};

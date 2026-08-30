@@ -49,7 +49,7 @@ describe('adaptChannelInfo', () => {
 			avatarUrl: 'https://example.com/channel-avatar.jpg',
 			bannerUrl: 'https://example.com/channel-banner.jpg',
 			description: 'A test channel description',
-			subscriberCount: '20.6M',
+			subscriberCount: '20,600,000',
 			videoCount: 0,
 			verified: true
 		});
@@ -136,8 +136,8 @@ describe('adaptChannelInfo', () => {
 	describe('fallbacks', () => {
 		it.each([
 			['empty name', { name: '' }, 'name', 'Unknown Channel'],
-			['empty description → null', { description: '' }, 'description', null],
-			['missing description → null', { description: undefined }, 'description', null],
+			['empty description', { description: '' }, 'description', ''],
+			['missing description → undefined', { description: undefined }, 'description', undefined],
 			['missing subscriberCount → "0"', { subscriberCount: undefined }, 'subscriberCount', '0'],
 			['missing verified → false', { verified: undefined }, 'verified', false]
 		])('%s', (_label, overrides, field, expected) => {
@@ -206,8 +206,6 @@ describe('adaptChannelVideos', () => {
 			['missing thumbnails', { thumbnails: undefined }, 'thumbnail', thumbnailFallback],
 			['empty thumbnails', { thumbnails: [] }, 'thumbnail', thumbnailFallback],
 			['empty uploaderName', { uploaderName: '' }, 'uploaderName', 'Unknown'],
-			// NB: uploaderUrl falling back to the AVATAR fallback is current
-			// behavior, pinned here — flagged as a probable prod bug
 			['empty uploaderUrl → avatar fallback', { uploaderUrl: '' }, 'uploaderUrl', avatarFallback],
 			['empty upload date', { textualUploadDate: '' }, 'uploadedDate', ''],
 			['negative duration', { duration: -1 }, 'duration', 0],

@@ -13,23 +13,25 @@ import type {
 	ChannelInfoResponse,
 	KioskResponseItem
 } from '$lib/api/types';
-import type { Thumbnail, Avatar, Details } from '$lib/types';
+import type { Avatar, Details, Image } from '$lib/types';
 
 // ---------------------------------------------------------------------------
 // Media primitives (exported — handy for mediaUtils/thumbnail tests too)
 // ---------------------------------------------------------------------------
 
-export const buildThumbnail = (overrides: Partial<Thumbnail> = {}): Thumbnail =>
+export const buildImage = (overrides: Partial<Image> = {}): Image =>
 	({
 		url: 'https://i.ytimg.com/vi/test-id/hqdefault.jpg',
 		width: 336,
 		height: 188,
 		estimatedResolutionLevel: 'MEDIUM',
 		...overrides
-	}) as Thumbnail;
+	}) as Image;
 
-export const buildAvatar = (overrides: Partial<Avatar> = {}): Avatar =>
-	({
+export const buildThumbnail = (overrides: Partial<Image> = {}): Image => buildImage(overrides);
+
+export const buildAvatar = (overrides: Partial<Image> = {}): Avatar =>
+	buildImage({
 		url: 'https://yt3.ggpht.com/test-avatar.jpg',
 		width: 88,
 		height: 88,
@@ -110,8 +112,8 @@ export const buildChannelDetailsResponse = (
 	subscriberCount: 20_600_000,
 	description: 'A test channel description',
 	verified: true,
-	avatarUrl: null,
-	bannerUrl: null,
+	avatarUrl: '',
+	bannerUrl: '',
 	tabs: [],
 	avatars: [
 		buildAvatar({
