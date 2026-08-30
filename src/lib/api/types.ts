@@ -1,4 +1,4 @@
-import type { Avatar, Description } from '$lib/types';
+import type { Description } from '$lib/types';
 
 /**
  * API Response for Search

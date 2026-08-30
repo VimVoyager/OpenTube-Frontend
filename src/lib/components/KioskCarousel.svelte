@@ -2,7 +2,8 @@
 	import type { Snippet } from 'svelte';
 	import type { KioskVideoConfig } from '$lib/adapters/types';
 	import { resolve } from '$app/paths';
-	import { formatCount, formatDuration } from '$lib/utils/formatters';
+	import { formatCount } from '$lib/utils/formatters';
+	import VideoThumbnail from '$lib/components/VideoThumbnail.svelte';
 
 	interface Props {
 		title: string;
@@ -77,25 +78,13 @@
 					<a
 						href={resolve('/video/[id]', { id: video.id })}
 						aria-label={video.title}
-						class="group block"
+						class="group block rounded-lg"
 					>
-						<div class="relative aspect-video overflow-hidden rounded-xl bg-neutral-800">
-							<img
-								src={video.thumbnail}
-								alt=""
-								loading="lazy"
-								decoding="async"
-								class="size-full object-cover transition-transform group-hover:scale-105"
-							/>
-							{#if video.duration > 0}
-								<span
-									class="absolute right-1.5 bottom-1.5 rounded bg-black/80 px-1.5 py-0.5 text-xs font-medium text-white"
-								>
-									{formatDuration(video.duration)}
-								</span>
-							{/if}
-						</div>
-
+						<VideoThumbnail
+							src={video.thumbnail}
+							alt={`${video.title} thumbnail`}
+							duration={video.duration}
+						/>
 						<h3 class="text-primary mt-2 line-clamp-2 text-sm leading-snug font-semibold">
 							{video.title}
 						</h3>

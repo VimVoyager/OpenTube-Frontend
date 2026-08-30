@@ -1,7 +1,8 @@
 <script lang="ts">
-	import { formatCount, formatDuration } from '$lib/utils/formatters';
+	import { formatCount } from '$lib/utils/formatters';
 	import type { ChannelVideoConfig } from '$lib/adapters/types';
 	import { resolve } from '$app/paths';
+	import VideoThumbnail from '$lib/components/VideoThumbnail.svelte';
 
 	let { videos }: { videos: ChannelVideoConfig[] } = $props();
 </script>
@@ -21,20 +22,11 @@
 					class="group hover:bg-secondary flex cursor-pointer flex-col gap-2 rounded-lg p-2 transition-colors"
 				>
 					<!-- Thumbnail -->
-					<div class="relative w-full" style="aspect-ratio: 16/9;">
-						<img
-							src={video.thumbnail}
-							alt={video.title}
-							class="h-full w-full rounded-md object-cover"
-						/>
-						{#if video.duration > 0}
-							<span
-								class="bg-opacity-80 absolute right-1 bottom-1 rounded bg-black px-1 py-0.5 text-xs text-white"
-							>
-								{formatDuration(video.duration)}
-							</span>
-						{/if}
-					</div>
+					<VideoThumbnail
+						src={video.thumbnail}
+						alt={`${video.title} thumbnail`}
+						duration={video.duration}
+					/>
 
 					<!-- Info -->
 					<div class="flex flex-col">

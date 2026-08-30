@@ -2,6 +2,7 @@ import type { ChannelConfig, ChannelVideoConfig } from '$lib/adapters/types';
 import { extractIdFromUrl } from '$lib/utils/streamSelection';
 import type { ChannelInfoResponse, ChannelVideoItem, ChannelVideosResponse } from '$lib/api/types';
 import { selectBestImage } from '$lib/utils/mediaUtils';
+import { formatCount } from '$lib/utils/formatters';
 
 /**
  * Format a raw subscriber count into a compact display string.
@@ -31,7 +32,7 @@ export function adaptChannelInfo(info: ChannelInfoResponse, videoCount: number =
 		avatarUrl: selectBestImage(info.avatars, info.avatarUrl),
 		bannerUrl: selectBestImage(info.banners, info.bannerUrl),
 		description: info.description,
-		subscriberCount: formatSubscriberCount(info.subscriberCount ?? 0),
+		subscriberCount: formatCount(info.subscriberCount ?? 0),
 		videoCount,
 		verified: info.verified ?? false
 	};

@@ -1,8 +1,9 @@
 <script lang="ts">
 	import logoPlaceholder from '$lib/assets/logo-placeholder.svg';
 	import type { RelatedVideoConfig } from '$lib/adapters/types';
-	import { formatCount, formatDuration } from '$lib/utils/formatters';
+	import { formatCount } from '$lib/utils/formatters';
 	import { resolve } from '$app/paths';
+	import VideoThumbnail from '$lib/components/VideoThumbnail.svelte';
 
 	let { videos = [] }: { videos?: RelatedVideoConfig[] } = $props();
 
@@ -30,35 +31,23 @@
 					aria-label={video.title}
 				></a>
 
-				<!-- Thumbnail -->
 				<div class="relative w-40 shrink-0">
-					<div class="relative" style="aspect-ratio: 16/9;">
-						<img
+					<a href={resolve('/video/[id]', { id: video.id })} class="block w-full absolute inset-0">
+						<VideoThumbnail
 							src={video.thumbnail}
-							alt={`thumbnail-${video.id}`}
-							class="h-full w-full rounded-md object-cover"
+							alt={`${video.title} thumbnail`}
+							duration={video.duration}
 						/>
-						<!-- Duration badge -->
-						{#if video.duration > 0}
-							<span
-								class="bg-opacity-80 absolute right-1 bottom-1 rounded bg-black px-1 py-0.5 text-xs text-white"
-							>
-								{formatDuration(video.duration)}
-							</span>
-						{/if}
-					</div>
+					</a>
 				</div>
 
-				<!-- Video Info -->
 				<div class="flex min-w-0 flex-1 flex-col">
-					<!-- Title -->
 					<h3
 						class="text-primary group-hover:text-accent line-clamp-2 text-sm font-semibold transition-colors"
 					>
 						{video.title}
 					</h3>
 
-					<!-- Channel Info -->
 					<div class="mt-1 flex items-center">
 						<a
 							href={resolve('/channel/[channelId]', { channelId: video.channelId })}
@@ -79,7 +68,6 @@
 						</a>
 					</div>
 
-					<!-- Video Stats -->
 					<div class="text-muted mt-1 flex flex-row text-xs">
 						<span>{formatCount(video.viewCount)} views</span>
 						{#if video.uploadDate}

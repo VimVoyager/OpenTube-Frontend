@@ -47,7 +47,7 @@ describe('ChannelVideos', () => {
 		it('should render each video thumbnail with correct src and alt', () => {
 			render(ChannelVideos, { props: { videos } });
 
-			const thumbnail = screen.getByAltText('Fitting In at School');
+			const thumbnail = screen.getByAltText('Fitting In at School thumbnail');
 			expect(thumbnail.getAttribute('src')).toBe(
 				'https://i.ytimg.com/vi/glitch-video-1/hqdefault.jpg?sqp=lg'
 			);

@@ -36,7 +36,7 @@ describe('VideoListings', () => {
 		render(VideoListings, { props: { videos: mockRelatedVideos } });
 
 		mockRelatedVideos.forEach((video) => {
-			expect(screen.getByAltText(`thumbnail-${video.id}`)).toHaveAttribute('src', video.thumbnail);
+			expect(screen.getByAltText(`${video.title} thumbnail`)).toHaveAttribute('src', video.thumbnail);
 		});
 	});
 
@@ -109,7 +109,7 @@ describe('VideoListings', () => {
 			const { container } = render(VideoListings, { props: { videos: mockRelatedVideos } });
 
 			const overlayLinks = container.querySelectorAll('a[href^="/video/"]');
-			expect(overlayLinks).toHaveLength(mockRelatedVideos.length);
+			expect(overlayLinks).toHaveLength(mockRelatedVideos.length * 2);
 			expect(screen.getByRole('link', { name: heartbeat.title })).toHaveAttribute(
 				'href',
 				`/video/${heartbeat.id}`
