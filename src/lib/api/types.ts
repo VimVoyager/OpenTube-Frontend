@@ -1,6 +1,6 @@
 import type { Description } from '$lib/types';
 
-interface NextPage {
+export interface NextPage {
 	url: string;
 	id: string;
 }
@@ -39,6 +39,8 @@ export interface SearchResponseData {
 	uploaderVerified: boolean;
 	duration?: number;
 	viewCount?: number;
+	subscriberCount?: number
+	videoCount?: number
 	uploadDate?: string;
 	streamType?: string;
 	isShortFormContent?: boolean;

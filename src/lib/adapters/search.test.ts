@@ -13,20 +13,20 @@ import {
 } from '../../tests/fixtures/builder';
 import searchResponseFixture from '../../tests/fixtures/api/searchResponseFixture.json';
 import searchResultFixture from '../../tests/fixtures/adapters/searchResult.json';
-import type { SearchResult } from '$lib/types';
+import type { SearchResponse } from '$lib/api/types';
 
 const defaultThumbnail = 'default-thumbnail.jpg';
 const defaultAvatar = 'default-avatar.jpg';
 
 const adapt = (input: unknown) =>
-	adaptSearchResults(input as SearchResult, defaultThumbnail, defaultAvatar);
+	adaptSearchResults(input as SearchResponse, defaultThumbnail, defaultAvatar);
 
 describe('adaptSearchResults', () => {
 	it('adapts a stream item with all fields mapped', () => {
 		const result = adapt(buildSearchResponse({ items: [buildSearchStreamItem()] } as never));
 
-		expect(result).toHaveLength(1);
-		expect(result[0]).toEqual({
+		expect(result.items).toHaveLength(1);
+		expect(result.items[0]).toEqual({
 			type: 'stream',
 			description: 'A test video description',
 			id: 'video1',
@@ -46,7 +46,7 @@ describe('adaptSearchResults', () => {
 	it('adapts a channel item with all fields mapped', () => {
 		const result = adapt(buildSearchResponse({ items: [buildSearchChannelItem()] } as never));
 
-		expect(result[0]).toEqual({
+		expect(result.items[0]).toEqual({
 			type: 'channel',
 			id: 'UCtest456',
 			name: 'Test Channel',
@@ -60,7 +60,7 @@ describe('adaptSearchResults', () => {
 	it('adapts a playlist item with all fields mapped', () => {
 		const result = adapt(buildSearchResponse({ items: [buildSearchPlaylistItem()] } as never));
 
-		expect(result[0]).toEqual({
+		expect(result.items[0]).toEqual({
 			type: 'playlist',
 			id: 'PLtest123',
 			url: 'https://www.youtube.com/playlist?list=PLtest123',
@@ -78,14 +78,14 @@ describe('adaptSearchResults', () => {
 				items: [buildSearchStreamItem(), buildSearchChannelItem(), buildSearchPlaylistItem()]
 			} as never)
 		);
-		expect(result.map((r) => r.type)).toEqual(['stream', 'channel', 'playlist']);
+		expect(result.items.map((r) => r.type)).toEqual(['stream', 'channel', 'playlist']);
 	});
 
 	it('treats an empty type as a stream', () => {
 		const result = adapt(
 			buildSearchResponse({ items: [buildSearchStreamItem({ type: '' })] } as never)
 		);
-		expect(result[0].type).toBe('stream');
+		expect(result.items[0].type).toBe('stream');
 	});
 
 	it('matches the searchResult round-trip fixture (includes filtering the invalid row)', () => {
@@ -103,7 +103,7 @@ describe('adaptSearchResults', () => {
 					items: [invalidItem, buildSearchStreamItem({ name: 'Survivor' })]
 				} as never)
 			);
-			expect(result).toHaveLength(1);
+			expect(result.items).toHaveLength(1);
 		});
 
 		it('drops null entries in the items array', () => {
@@ -112,7 +112,7 @@ describe('adaptSearchResults', () => {
 					items: [null, buildSearchStreamItem()]
 				} as never)
 			);
-			expect(result).toHaveLength(1);
+			expect(result.items).toHaveLength(1);
 		});
 	});
 
@@ -214,16 +214,58 @@ describe('adaptSearchResults', () => {
 				0
 			]
 		])('%s', (_label, item, field, expected) => {
-			const [result] = adapt(buildSearchResponse({ items: [item] } as never));
+			const [result] = adapt(buildSearchResponse({ items: [item] } as never)).items;
 			expect(result[field as keyof typeof result]).toBe(expected);
 		});
 	});
 
 	it.each([
-		['undefined searchResult', undefined],
-		['missing items', buildSearchResponse({ items: undefined } as never)],
-		['empty items', buildSearchResponse({ items: [] } as never)]
-	])('returns [] for %s', (_label, input) => {
-		expect(adapt(input)).toEqual([]);
+		['undefined searchResult', undefined, undefined],
+		['missing items', buildSearchResponse({ items: undefined } as never), true],
+		['empty items', buildSearchResponse({ items: [] } as never), true]
+	])('returns items: [] for %s', (_label, input, expectedHasNextPage) => {
+		expect(adapt(input)).toEqual({
+			items: [],
+			nextPage: null,
+			hasNextPage: expectedHasNextPage
+		});
+	});
+
+	describe('adaptNextPage', () => {
+		it('returns the next page url and id when hasNextPage is true', () => {
+			const result = adapt(
+				buildSearchResponse({
+					items: [buildSearchStreamItem()],
+					hasNextPage: true,
+					nextPage: { url: 'https://www.youtube.com/search?prettyPrint=false', id: 'next-page-id' }
+				} as never)
+			);
+			expect(result.nextPage).toEqual({
+				url: 'https://www.youtube.com/search?prettyPrint=false',
+				id: 'next-page-id'
+			});
+		});
+
+		it('returns null when hasNextPage is false', () => {
+			const result = adapt(
+				buildSearchResponse({
+					items: [buildSearchStreamItem()],
+					hasNextPage: false,
+					nextPage: { url: 'https://www.youtube.com/search?prettyPrint=false', id: 'next-page-id' }
+				} as never)
+			);
+			expect(result.nextPage).toBeNull();
+		});
+
+		it('returns null when hasNextPage is true but nextPage is missing', () => {
+			const result = adapt(
+				buildSearchResponse({
+					items: [buildSearchStreamItem()],
+					hasNextPage: true,
+					nextPage: undefined
+				} as never)
+			);
+			expect(result.nextPage).toBeNull();
+		});
 	});
 });
