@@ -82,6 +82,9 @@
 			"videoCount": 8
 		}
 	],
-	"nextPageUrl": "https://www.youtube.com/search?prettyPrint=false",
+	"nextPage": {
+		"url": "https://www.youtube.com/search?prettyPrint=false",
+		"id": "Eq4DEgNsdHQapgNTQlNDQVF0NVJrc"
+	},
 	"hasNextPage": true
 }

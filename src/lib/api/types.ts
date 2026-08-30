@@ -1,5 +1,10 @@
 import type { Description } from '$lib/types';
 
+interface NextPage {
+	url: string;
+	id: string;
+}
+
 /**
  * API Response for Search
  */
@@ -12,11 +17,18 @@ export interface SearchResponse {
 	searchSuggestion: string;
 	isCorrectedSearch: boolean;
 	items: SearchResponseData[];
-	nextPageUrl: string;
+	nextPage: NextPage;
 	hasNextPage: boolean;
 }
 
-interface SearchResponseData {
+export interface NextPageSearchApiResponse {
+	items: SearchResponseData[];
+	nextPage: NextPage;
+	hasNextPage: boolean;
+	itemCount: number;
+}
+
+export interface SearchResponseData {
 	shortFormContent: boolean;
 	type: string;
 	name: string;

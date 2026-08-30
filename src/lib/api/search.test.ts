@@ -7,9 +7,20 @@
 
 import { describeJsonFetcher } from '../../tests/helpers/describeJsonFetcher';
 import searchResultsFixture from '../../tests/fixtures/api/searchResponseFixture.json';
-import { getSearchResults } from '$lib/api/search';
+import { getSearchResults, getSearchResultsNextPage } from '$lib/api/search';
 import { describe, it, expect, vi } from 'vitest';
 import { createSuccessfulFetch, extractQueryParams } from '../../tests/helpers/apiHelpers';
+import type { NextPageSearchApiResponse, SearchResponseData } from '$lib/api/types';
+
+export const nextPageSearchResultsFixture: NextPageSearchApiResponse = {
+	items: searchResultsFixture.items as SearchResponseData[],
+	nextPage: {
+		url: 'https://www.youtube.com/youtubei/v1/search?prettyPrint=false',
+		id: 'EqADEgNsdHQamANTQ2lDQVF0TVdVMTJTbGMxY2xsTlJZSUJDMjlsY1ZWSVJYQTB'
+	},
+	hasNextPage: true,
+	itemCount: 20
+};
 
 describeJsonFetcher({
 	name: 'getSearchResults',
@@ -17,6 +28,21 @@ describeJsonFetcher({
 	endpoint: '/search',
 	idParam: 'searchString',
 	fixture: searchResultsFixture
+});
+
+describeJsonFetcher({
+	name: 'getSearchResultsNextPage',
+	call: (id, fetchFn) =>
+		getSearchResultsNextPage(
+			id,
+			'https://www.youtube.com/youtubei/v1/search?prettyPrint=false',
+			'EqADEgNsdHQamANTQ2lDQVF0TVdVMTJTbGMxY2xsTlJZSUJDMjlsY1ZWSVJYQTB',
+			'relevance',
+			fetchFn
+		),
+	endpoint: '/search/page',
+	idParam: 'searchString',
+	fixture: nextPageSearchResultsFixture
 });
 
 describe('getSearchResults sort filter', () => {
