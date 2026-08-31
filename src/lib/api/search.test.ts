@@ -6,7 +6,7 @@
  */
 
 import { describeJsonFetcher } from '../../tests/helpers/describeJsonFetcher';
-import searchResultsFixture from '../../tests/fixtures/api/searchResponseFixture.json';
+import searchResultsFixture from '../../tests/fixtures/api/searchApiResponse.json';
 import { getSearchResults, getSearchResultsNextPage } from '$lib/api/search';
 import { describe, it, expect, vi } from 'vitest';
 import { createSuccessfulFetch, extractQueryParams } from '../../tests/helpers/apiHelpers';

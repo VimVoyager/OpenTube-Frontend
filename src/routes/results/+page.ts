@@ -5,18 +5,17 @@ import avatarPlaceholder from '$lib/assets/logo-placeholder.svg';
 import type { PageLoad } from './$types';
 import type { SearchResultConfig } from '$lib/adapters/types';
 import type { LoadResponse } from '../types';
-import type { SearchResponse } from '$lib/api/types';
+import type { NextPage, SearchResponse } from '$lib/api/types';
+import type { SearchResultResponseConfig } from '$lib/types';
 
 export const load: PageLoad = async ({ url, fetch }): Promise<LoadResponse> => {
 	try {
-		// Extract search parameter
 		const query: string = url.searchParams.get('query') ?? '';
 		const sortFilter: string = url.searchParams.get('sort') ?? 'asc';
 
-		// Validate query
 		if (!query.trim()) {
 			return {
-				results: [],
+				results: { items: [], nextPage: null, hasNextPage: undefined },
 				query: '',
 				error: null
 			};
@@ -26,11 +25,7 @@ export const load: PageLoad = async ({ url, fetch }): Promise<LoadResponse> => {
 		const searchData: SearchResponse = await getSearchResults(query, sortFilter, fetch);
 
 		// Transform data using adapter
-		const results: SearchResultConfig[] = adaptSearchResults(
-			searchData,
-			thumbnailPlaceholder,
-			avatarPlaceholder
-		);
+		const results: SearchResultResponseConfig = adaptSearchResults(searchData, thumbnailPlaceholder, avatarPlaceholder);
 
 		return {
 			results,

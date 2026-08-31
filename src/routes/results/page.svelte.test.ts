@@ -3,79 +3,25 @@ import { render, screen } from '@testing-library/svelte';
 import Page from './+page.svelte';
 import type { PageData } from './$types';
 import type { SearchResultConfig } from '$lib/adapters/types';
+import searchAdaptedFixture from '../../tests/fixtures/adapters/searchAdaptedResponse.json';
+
+type Results = PageData['results'];
 
 describe('+page.svelte - Search Results', () => {
-	const mockSearchResults: SearchResultConfig[] = [
-		{
-			id: 'video-1',
-			url: '/watch?v=video-1',
-			title: 'First Video Title',
-			thumbnail: 'https://example.com/thumb1.jpg',
-			channelName: 'Test Channel 1',
-			channelUrl: '/channel/test1',
-			channelAvatar: 'https://example.com/avatar1.jpg',
-			verified: true,
-			viewCount: 1000000,
-			duration: 600,
-			uploadDate: '2024-01-01',
-			description: 'First video description',
-			type: 'stream'
-		},
-		{
-			id: 'video-2',
-			url: '/watch?v=video-2',
-			title: 'Second Video Title',
-			thumbnail: 'https://example.com/thumb2.jpg',
-			channelName: 'Test Channel 2',
-			channelUrl: '/channel/test2',
-			channelAvatar: 'https://example.com/avatar2.jpg',
-			verified: false,
-			viewCount: 500000,
-			duration: 300,
-			uploadDate: '2024-01-02',
-			description: 'Second video description',
-			type: 'stream'
-		},
-		{
-			id: 'video-3',
-			url: '/watch?v=video-3',
-			title: 'Third Video Title',
-			thumbnail: 'https://example.com/thumb3.jpg',
-			channelName: 'Test Channel 3',
-			channelUrl: '/channel/test3',
-			channelAvatar: 'https://example.com/avatar3.jpg',
-			verified: true,
-			viewCount: 250000,
-			duration: 450,
-			uploadDate: '2024-01-03',
-			description: 'Third video description',
-			type: 'stream'
-		}
-	];
+	const [pilotResult, absoluteEndResult, channelResult, playlistResult] =
+		searchAdaptedFixture.items;
 
-	const mockChannelResult: SearchResultConfig = {
-		type: 'channel',
-		id: 'channel-1',
-		name: 'Test Channel',
-		avatar: 'https://example.com/avatar.jpg',
-		description: 'A test channel',
-		subscriberCount: 1000000,
-		verified: true
-	};
+	const streamResults = [pilotResult, absoluteEndResult];
+	const allResults = searchAdaptedFixture.items;
 
-	const mockPlaylistResult: SearchResultConfig = {
-		type: 'playlist',
-		id: 'playlist-1',
-		url: 'https://www.youtube.com/playlist?list=playlist-1',
-		title: 'Test Playlist',
-		thumbnail: 'https://example.com/thumb.jpg',
-		uploaderName: 'Test Uploader',
-		uploaderUrl: 'https://www.youtube.com/channel/test',
-		videoCount: 12
-	};
+	const withItems = (items: typeof searchAdaptedFixture.items): Results => ({
+		items,
+		nextPage: null,
+		hasNextPage: false
+	});
 
 	const createMockPageData = (overrides: Partial<PageData> = {}): PageData => ({
-		results: mockSearchResults,
+		results: withItems(allResults),
 		query: 'test query',
 		sortFilter: 'relevance',
 		error: null,
@@ -121,7 +67,7 @@ describe('+page.svelte - Search Results', () => {
 		const data = createMockPageData({
 			error: 'Network error occurred',
 			query: 'test query',
-			results: mockSearchResults
+			results: withItems(allResults)
 		});
 		const { container } = render(Page, { props: { data } });
 
@@ -167,7 +113,7 @@ describe('+page.svelte - Search Results', () => {
 	});
 
 	it.each([
-		{ name: 'multiple results exist', results: mockSearchResults, expectPresent: true },
+		{ name: 'multiple results exist', results: withItems(allResults), expectPresent: true },
 		{ name: 'results array is empty', results: [], expectPresent: false },
 		{
 			name: 'results is null',
@@ -194,27 +140,33 @@ describe('+page.svelte - Search Results', () => {
 	it.each([
 		{
 			name: 'a single stream result',
-			results: [mockSearchResults[0]],
+			results: withItems([pilotResult]),
 			expectedText: 'Showing 1 result'
 		},
-		{ name: 'three stream results', results: mockSearchResults, expectedText: 'Showing 3 results' },
+		{
+			name: 'two stream results',
+			results: withItems(streamResults),
+			expectedText: 'Showing 2 results'
+		},
 		{
 			name: 'a mixed-type result list',
-			results: [mockSearchResults[0], mockChannelResult, mockPlaylistResult],
-			expectedText: 'Showing 3 results'
+			results: withItems(allResults),
+			expectedText: 'Showing 4 results'
 		},
 		{
 			name: 'a single playlist result',
-			results: [mockPlaylistResult],
+			results: withItems([playlistResult]),
 			expectedText: 'Showing 1 result'
 		},
 		{
 			name: 'a large results array',
-			results: Array.from({ length: 50 }, (_, i) => ({
-				...mockSearchResults[0],
-				id: `video-${i}`,
-				title: `Video ${i}`
-			})),
+			results: withItems(
+				Array.from({ length: 50 }, (_, i) => ({
+					...pilotResult,
+					id: `video-${i}`,
+					title: `Video ${i}`
+				}))
+			),
 			expectedText: 'Showing 50 results'
 		}
 	])('should display the correct pluralised count for $name', ({ results, expectedText }) => {
@@ -229,7 +181,7 @@ describe('+page.svelte - Search Results', () => {
 	it.each([
 		{
 			name: 'error over results',
-			data: { error: 'Test error', results: mockSearchResults },
+			data: { error: 'Test error', results: withItems(allResults) },
 			expectText: 'Test error',
 			notText: 'Showing 3 results'
 		},
@@ -255,9 +207,13 @@ describe('+page.svelte - Search Results', () => {
 
 	describe('Result type routing', () => {
 		it.each([
-			{ name: 'stream', results: [mockSearchResults[0]], expectedText: 'First Video Title' },
-			{ name: 'channel', results: [mockChannelResult], expectedText: 'Test Channel' },
-			{ name: 'playlist', results: [mockPlaylistResult], expectedText: 'Test Playlist' }
+			{
+				name: 'stream',
+				results: withItems([pilotResult]),
+				expectedText: 'MURDER DRONES - Pilot'
+			},
+			{ name: 'channel', results: withItems([channelResult]), expectedText: 'GLITCH' },
+			{ name: 'playlist', results: withItems([playlistResult]), expectedText: 'Murder Drones' }
 		])('should route $name results to the correct child component', ({ results, expectedText }) => {
 			const data = createMockPageData({ results });
 			render(Page, { props: { data } });
@@ -266,24 +222,24 @@ describe('+page.svelte - Search Results', () => {
 		});
 
 		it('should render playlist-specific label and video count badge', () => {
-			const data = createMockPageData({ results: [mockPlaylistResult] });
+			const data = createMockPageData({ results: withItems([playlistResult]) });
 			render(Page, { props: { data } });
 
 			expect(screen.getAllByText('Playlist').length).toBeGreaterThanOrEqual(1);
-			expect(screen.getAllByText('12 videos').length).toBeGreaterThanOrEqual(1);
+			expect(screen.getAllByText('8 videos').length).toBeGreaterThanOrEqual(1);
 		});
 
 		it('should render one child component per result in a mixed-type list, in order', () => {
 			const data = createMockPageData({
-				results: [mockSearchResults[0], mockChannelResult, mockPlaylistResult]
+				results: withItems([pilotResult, channelResult, playlistResult])
 			});
 			const { container } = render(Page, { props: { data } });
 
 			const resultsContainer = container.querySelector('.space-y-4');
 			expect(resultsContainer?.children.length).toBe(3);
-			expect(screen.getAllByText('First Video Title').length).toBeGreaterThan(0);
-			expect(screen.getAllByText('Test Channel').length).toBeGreaterThan(0);
-			expect(screen.getAllByText('Test Playlist').length).toBeGreaterThan(0);
+			expect(screen.getAllByText('MURDER DRONES - Pilot').length).toBeGreaterThan(0);
+			expect(screen.getAllByText('GLITCH').length).toBeGreaterThan(0);
+			expect(screen.getAllByText('Murder Drones').length).toBeGreaterThan(0);
 		});
 	});
 });

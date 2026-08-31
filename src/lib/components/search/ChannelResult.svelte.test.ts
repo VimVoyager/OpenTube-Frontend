@@ -5,26 +5,21 @@ import ChannelResult from './ChannelResult.svelte';
 import type { ChannelSearchResultConfig } from '$lib/adapters/types';
 import channelSearchResultFixtures from '../../../tests/fixtures/adapters/channelSearchResult.json';
 
-// Mock asset imports
 vi.mock('$lib/assets/logo-placeholder.svg', () => ({
 	default: '/placeholder-avatar.svg'
 }));
 
-// Mock SvelteKit navigation
 const mockGoto = vi.fn();
 vi.mock('$app/navigation', () => ({
 	goto: (...args: unknown[]) => mockGoto(...args)
 }));
 
-// glitchResult  → GLITCH (20.6M subs, verified, has description)
-// glitchRoblox  → Glitch Roblox (11.3M subs, verified, has description)
 const [glitchResult, glitchRobloxResult] = adaptSearchResults(
 	{ items: channelSearchResultFixtures } as never,
 	'default-thumbnail.jpg',
 	'default-avatar.jpg'
-).filter((r): r is ChannelSearchResultConfig => r.type === 'channel');
+).items.filter((r): r is ChannelSearchResultConfig => r.type === 'channel');
 
-// Derived variant with all optional fields stripped — used for fallback/edge-case tests
 const bareChannel: ChannelSearchResultConfig = {
 	...glitchRobloxResult,
 	avatar: '',
@@ -95,7 +90,6 @@ describe('ChannelResult', () => {
 		it('should use placeholder avatar when avatar is empty', () => {
 			render(ChannelResult, { props: { result: bareChannel } });
 
-			// bareChannel derives name from glitchRobloxResult
 			const avatars = screen.getAllByAltText(glitchRobloxResult.name);
 			expect(avatars).toHaveLength(2);
 			avatars.forEach((avatar) => {

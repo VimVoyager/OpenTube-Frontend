@@ -1,10 +1,15 @@
 import { describe, it, expect, vi } from 'vitest';
 import { load } from './+page';
-import searchResponseFixture from '../../tests/fixtures/api/searchResponseFixture.json';
+import searchResponseFixture from '../../tests/fixtures/api/searchApiResponse.json';
 import type { SearchResultConfig, VideoSearchResultConfig } from '$lib/adapters/types';
+import type { NextPage } from '$lib/api/types';
 
 interface LoadResponse {
-	results: SearchResultConfig[];
+	results: {
+		items: SearchResultConfig[];
+		nextPage: NextPage | null;
+		hasNextPage: boolean | undefined;
+	};
 	query: string;
 	sortFilter: string;
 	error: string | null;
@@ -33,12 +38,12 @@ describe('results load function integration', () => {
 		);
 
 		// fixture: 5 items, 1 invalid (filtered) → 2 streams + 1 channel + 1 playlist
-		expect(search.results).toHaveLength(4);
-		expect(search.results.filter((r) => r.type === 'stream')).toHaveLength(2);
-		expect(search.results.filter((r) => r.type === 'channel')).toHaveLength(1);
-		expect(search.results.filter((r) => r.type === 'playlist')).toHaveLength(1);
+		expect(search.results.items).toHaveLength(4);
+		expect(search.results.items.filter((r) => r.type === 'stream')).toHaveLength(2);
+		expect(search.results.items.filter((r) => r.type === 'channel')).toHaveLength(1);
+		expect(search.results.items.filter((r) => r.type === 'playlist')).toHaveLength(1);
 
-		const pilot = search.results.find(
+		const pilot = search.results.items.find(
 			(r): r is VideoSearchResultConfig =>
 				r.type === 'stream' && (r as VideoSearchResultConfig).title === 'MURDER DRONES - Pilot'
 		);
@@ -72,7 +77,11 @@ describe('results load function integration', () => {
 			const search = await runLoad(fetch, params);
 
 			expect(fetch).not.toHaveBeenCalled();
-			expect(search).toEqual({ results: [], query: '', error: null });
+			expect(search).toEqual({
+				results: { items: [], nextPage: null, hasNextPage: undefined },
+				query: '',
+				error: null
+			});
 		});
 	});
 

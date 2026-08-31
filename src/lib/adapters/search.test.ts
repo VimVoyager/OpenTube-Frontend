@@ -11,8 +11,8 @@ import {
 	buildSearchChannelItem,
 	buildSearchPlaylistItem
 } from '../../tests/fixtures/builder';
-import searchResponseFixture from '../../tests/fixtures/api/searchResponseFixture.json';
-import searchResultFixture from '../../tests/fixtures/adapters/searchResult.json';
+import searchResponseFixture from '../../tests/fixtures/api/searchApiResponse.json';
+import searchResultFixture from '../../tests/fixtures/adapters/searchAdaptedResponse.json';
 import type { SearchResponse } from '$lib/api/types';
 
 const defaultThumbnail = 'default-thumbnail.jpg';

@@ -2,7 +2,7 @@ import { extractIdFromUrl } from '$lib/utils/streamSelection';
 import type {
 	VideoSearchResultConfig,
 	ChannelSearchResultConfig,
-	PlaylistSearchResultConfig,
+	PlaylistSearchResultConfig
 } from './types';
 import type { NextPage, SearchResponse, SearchResponseData } from '$lib/api/types';
 
@@ -39,7 +39,10 @@ function adaptVideoItem(
 	};
 }
 
-function adaptChannelItem(item: SearchResponseData, defaultAvatar: string): ChannelSearchResultConfig {
+function adaptChannelItem(
+	item: SearchResponseData,
+	defaultAvatar: string
+): ChannelSearchResultConfig {
 	return {
 		type: 'channel',
 		id: extractIdFromUrl(item.url),
@@ -51,7 +54,10 @@ function adaptChannelItem(item: SearchResponseData, defaultAvatar: string): Chan
 	};
 }
 
-function adaptPlaylistItem(item: SearchResponseData, defaultThumbnail: string): PlaylistSearchResultConfig {
+function adaptPlaylistItem(
+	item: SearchResponseData,
+	defaultThumbnail: string
+): PlaylistSearchResultConfig {
 	return {
 		type: 'playlist',
 		id: extractIdFromUrl(item.url),
@@ -64,16 +70,18 @@ function adaptPlaylistItem(item: SearchResponseData, defaultThumbnail: string): 
 	};
 }
 
-function adaptNextPage(searchResult: SearchResponse | undefined): NextPage | null {
+type SearchResultsSource = Pick<SearchResponse, 'items' | 'hasNextPage' | 'nextPage'>;
+
+function adaptNextPage(searchResult: SearchResultsSource | undefined): NextPage | null {
 	if (!searchResult?.hasNextPage || !searchResult.nextPage) return null;
 	return {
 		url: searchResult.nextPage.url,
 		id: searchResult.nextPage.id
-	}
+	};
 }
 
 export function adaptSearchResults(
-	searchResult: SearchResponse | undefined,
+	searchResult: SearchResultsSource | undefined,
 	defaultThumbnail: string,
 	defaultAvatar: string
 ): {
@@ -85,16 +93,16 @@ export function adaptSearchResults(
 		!searchResult?.items || searchResult.items.length === 0
 			? []
 			: searchResult.items
-				.filter((item: SearchResponseData): string => item && item.url && item.name)
-				.map((item: SearchResponseData): SearchResultConfig => {
-					if (item.type === 'channel') return adaptChannelItem(item, defaultAvatar);
-					if (item.type === 'playlist') return adaptPlaylistItem(item, defaultThumbnail);
-					return adaptVideoItem(item, defaultThumbnail, defaultAvatar);
-				})
+					.filter((item: SearchResponseData): string => item && item.url && item.name)
+					.map((item: SearchResponseData): SearchResultConfig => {
+						if (item.type === 'channel') return adaptChannelItem(item, defaultAvatar);
+						if (item.type === 'playlist') return adaptPlaylistItem(item, defaultThumbnail);
+						return adaptVideoItem(item, defaultThumbnail, defaultAvatar);
+					});
 
 	return {
 		items,
 		nextPage: adaptNextPage(searchResult),
 		hasNextPage: searchResult?.hasNextPage
-	}
+	};
 }
