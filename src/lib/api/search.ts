@@ -1,5 +1,5 @@
 import { PUBLIC_API_URL } from '$env/static/public';
-import type { NextPageSearchApiResponse, SearchResponse } from '$lib/api/types';
+import type { NextPageSearchApiResponse, SearchApiResponse } from '$lib/api/types';
 
 const API_BASE_URL = PUBLIC_API_URL;
 
@@ -10,7 +10,7 @@ export async function getSearchResults(
 	query: string,
 	sortFilter: string,
 	fetchFn?: typeof globalThis.fetch
-): Promise<SearchResponse> {
+): Promise<SearchApiResponse> {
 	const fetcher: {
 		(input: RequestInfo | URL, init?: RequestInit): Promise<Response>;
 		(input: string | URL | Request, init?: RequestInit): Promise<Response>;

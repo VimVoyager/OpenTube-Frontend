@@ -4,10 +4,16 @@ import type {
 	ChannelSearchResultConfig,
 	PlaylistSearchResultConfig
 } from './types';
-import type { NextPage, SearchResponse, SearchResponseData } from '$lib/api/types';
+import type { NextPage, SearchApiResponse, SearchApiResponseData } from '$lib/api/types';
 
 type SearchResultConfig =
 	VideoSearchResultConfig | ChannelSearchResultConfig | PlaylistSearchResultConfig;
+
+export interface SearchResultsPage {
+	items: SearchResultConfig[];
+	nextPage: NextPage | null;
+	hasNextPage: boolean | undefined;
+}
 
 /**
  * Handles negative counts from the API (e.g., -1 for unknown values)
@@ -18,7 +24,7 @@ function handleNegativeCount(count: number | undefined): number {
 }
 
 function adaptVideoItem(
-	item: SearchResponseData,
+	item: SearchApiResponseData,
 	defaultThumbnail: string,
 	defaultAvatar: string
 ): VideoSearchResultConfig {
@@ -40,7 +46,7 @@ function adaptVideoItem(
 }
 
 function adaptChannelItem(
-	item: SearchResponseData,
+	item: SearchApiResponseData,
 	defaultAvatar: string
 ): ChannelSearchResultConfig {
 	return {
@@ -55,7 +61,7 @@ function adaptChannelItem(
 }
 
 function adaptPlaylistItem(
-	item: SearchResponseData,
+	item: SearchApiResponseData,
 	defaultThumbnail: string
 ): PlaylistSearchResultConfig {
 	return {
@@ -70,7 +76,7 @@ function adaptPlaylistItem(
 	};
 }
 
-type SearchResultsSource = Pick<SearchResponse, 'items' | 'hasNextPage' | 'nextPage'>;
+type SearchResultsSource = Pick<SearchApiResponse, 'items' | 'hasNextPage' | 'nextPage'>;
 
 function adaptNextPage(searchResult: SearchResultsSource | undefined): NextPage | null {
 	if (!searchResult?.hasNextPage || !searchResult.nextPage) return null;
@@ -93,8 +99,8 @@ export function adaptSearchResults(
 		!searchResult?.items || searchResult.items.length === 0
 			? []
 			: searchResult.items
-					.filter((item: SearchResponseData): string => item && item.url && item.name)
-					.map((item: SearchResponseData): SearchResultConfig => {
+					.filter((item: SearchApiResponseData): string => item && item.url && item.name)
+					.map((item: SearchApiResponseData): SearchResultConfig => {
 						if (item.type === 'channel') return adaptChannelItem(item, defaultAvatar);
 						if (item.type === 'playlist') return adaptPlaylistItem(item, defaultThumbnail);
 						return adaptVideoItem(item, defaultThumbnail, defaultAvatar);

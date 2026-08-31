@@ -4,13 +4,13 @@ import type {
 	CommentConfig,
 	PlaylistInfoConfig,
 	RelatedVideoConfig,
-	SearchResultConfig,
 	VideoMetadata,
 	VideoPlayerConfig
 } from '$lib/adapters/types';
+import type { SearchResultsPage } from '$lib/adapters/search';
 
-export interface LoadResponse {
-	results: SearchResultConfig[];
+export interface LoadSearchResponse {
+	results: SearchResultsPage;
 	query: string;
 	sortFilter?: string;
 	error: string | null;

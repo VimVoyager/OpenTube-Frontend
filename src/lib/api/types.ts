@@ -6,9 +6,9 @@ export interface NextPage {
 }
 
 /**
- * API Response for Search
+ * Raw API Response for initial search request
  */
-export interface SearchResponse {
+export interface SearchApiResponse {
 	correctedSearch?: boolean;
 	url: string;
 	originalUrl: string;
@@ -16,19 +16,22 @@ export interface SearchResponse {
 	searchString: string;
 	searchSuggestion: string;
 	isCorrectedSearch: boolean;
-	items: SearchResponseData[];
+	items: SearchApiResponseData[];
 	nextPage: NextPage;
 	hasNextPage: boolean;
 }
 
+/**
+ * Raw API response for a subsequent (load more) search page
+ */
 export interface NextPageSearchApiResponse {
-	items: SearchResponseData[];
+	items: SearchApiResponseData[];
 	nextPage: NextPage;
 	hasNextPage: boolean;
 	itemCount: number;
 }
 
-export interface SearchResponseData {
+export interface SearchApiResponseData {
 	shortFormContent: boolean;
 	type: string;
 	name: string;
@@ -39,8 +42,8 @@ export interface SearchResponseData {
 	uploaderVerified: boolean;
 	duration?: number;
 	viewCount?: number;
-	subscriberCount?: number
-	videoCount?: number
+	subscriberCount?: number;
+	videoCount?: number;
 	uploadDate?: string;
 	streamType?: string;
 	isShortFormContent?: boolean;

@@ -13,13 +13,13 @@ import {
 } from '../../tests/fixtures/builder';
 import searchResponseFixture from '../../tests/fixtures/api/searchApiResponse.json';
 import searchResultFixture from '../../tests/fixtures/adapters/searchAdaptedResponse.json';
-import type { SearchResponse } from '$lib/api/types';
+import type { SearchApiResponse } from '$lib/api/types';
 
 const defaultThumbnail = 'default-thumbnail.jpg';
 const defaultAvatar = 'default-avatar.jpg';
 
 const adapt = (input: unknown) =>
-	adaptSearchResults(input as SearchResponse, defaultThumbnail, defaultAvatar);
+	adaptSearchResults(input as SearchApiResponse, defaultThumbnail, defaultAvatar);
 
 describe('adaptSearchResults', () => {
 	it('adapts a stream item with all fields mapped', () => {

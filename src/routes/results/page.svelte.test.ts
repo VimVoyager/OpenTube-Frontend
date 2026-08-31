@@ -2,10 +2,11 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen } from '@testing-library/svelte';
 import Page from './+page.svelte';
 import type { PageData } from './$types';
-import type { SearchResultConfig } from '$lib/adapters/types';
-import searchAdaptedFixture from '../../tests/fixtures/adapters/searchAdaptedResponse.json';
+import searchAdaptedFixtureRaw from '../../tests/fixtures/adapters/searchAdaptedResponse.json';
+import type { SearchResultsPage } from '$lib/adapters/search';
 
 type Results = PageData['results'];
+const searchAdaptedFixture = searchAdaptedFixtureRaw as SearchResultsPage;
 
 describe('+page.svelte - Search Results', () => {
 	const [pilotResult, absoluteEndResult, channelResult, playlistResult] =
@@ -13,6 +14,8 @@ describe('+page.svelte - Search Results', () => {
 
 	const streamResults = [pilotResult, absoluteEndResult];
 	const allResults = searchAdaptedFixture.items;
+
+	const emptyResults: SearchResultsPage = { items: [], nextPage: null, hasNextPage: false };
 
 	const withItems = (items: typeof searchAdaptedFixture.items): Results => ({
 		items,
@@ -90,7 +93,7 @@ describe('+page.svelte - Search Results', () => {
 	});
 
 	it('should show the empty-query prompt and hide results when query is empty', () => {
-		const data = createMockPageData({ query: '', results: [] });
+		const data = createMockPageData({ query: '', results: emptyResults });
 		const { container } = render(Page, { props: { data } });
 
 		const message = screen.getByText('Enter a search query to find videos');
@@ -100,7 +103,7 @@ describe('+page.svelte - Search Results', () => {
 	});
 
 	it('should show the no-results message and hide the results list when a query has no matches', () => {
-		const data = createMockPageData({ query: 'nonexistent query', results: [] });
+		const data = createMockPageData({ query: 'nonexistent query', results: emptyResults });
 		const { container } = render(Page, { props: { data } });
 
 		expect(screen.getByText(/No results found for "nonexistent query"/)).toBeTruthy();
@@ -114,17 +117,9 @@ describe('+page.svelte - Search Results', () => {
 
 	it.each([
 		{ name: 'multiple results exist', results: withItems(allResults), expectPresent: true },
-		{ name: 'results array is empty', results: [], expectPresent: false },
-		{
-			name: 'results is null',
-			results: null as unknown as SearchResultConfig[],
-			expectPresent: false
-		},
-		{
-			name: 'results is undefined',
-			results: undefined as unknown as SearchResultConfig[],
-			expectPresent: false
-		}
+		{ name: 'results array is empty', results: withItems([]), expectPresent: false },
+		{ name: 'results is null', results: null as unknown as Results, expectPresent: false },
+		{ name: 'results is undefined', results: undefined as unknown as Results, expectPresent: false }
 	])('should show/hide the results list correctly when $name', ({ results, expectPresent }) => {
 		const data = createMockPageData({ results });
 		const { container } = render(Page, { props: { data } });
@@ -187,13 +182,13 @@ describe('+page.svelte - Search Results', () => {
 		},
 		{
 			name: 'empty-query prompt over no-results message',
-			data: { query: '', results: [] },
+			data: { query: '', results: withItems([]) },
 			expectText: 'Enter a search query to find videos',
 			notText: 'No results found'
 		},
 		{
 			name: 'no-results message over empty-query prompt',
-			data: { query: 'test', results: [] },
+			data: { query: 'test', results: withItems([]) },
 			expectText: 'No results found for "test"',
 			notText: 'Enter a search query'
 		}

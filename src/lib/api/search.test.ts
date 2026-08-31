@@ -10,10 +10,10 @@ import searchResultsFixture from '../../tests/fixtures/api/searchApiResponse.jso
 import { getSearchResults, getSearchResultsNextPage } from '$lib/api/search';
 import { describe, it, expect, vi } from 'vitest';
 import { createSuccessfulFetch, extractQueryParams } from '../../tests/helpers/apiHelpers';
-import type { NextPageSearchApiResponse, SearchResponseData } from '$lib/api/types';
+import type { NextPageSearchApiResponse, SearchApiResponseData } from '$lib/api/types';
 
 export const nextPageSearchResultsFixture: NextPageSearchApiResponse = {
-	items: searchResultsFixture.items as SearchResponseData[],
+	items: searchResultsFixture.items as SearchApiResponseData[],
 	nextPage: {
 		url: 'https://www.youtube.com/youtubei/v1/search?prettyPrint=false',
 		id: 'EqADEgNsdHQamANTQ2lDQVF0TVdVMTJTbGMxY2xsTlJZSUJDMjlsY1ZWSVJYQTB'

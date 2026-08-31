@@ -1,3 +1,6 @@
+import type { SearchResultConfig } from '$lib/adapters/types';
+import type { NextPage } from '$lib/api/types';
+
 export type VendorDoc = Document & {
 	webkitExitFullscreen?: () => void;
 	msExitFullscreen?: () => void;

@@ -24,8 +24,8 @@
 	let loadMoreError = $state<string | null>(null);
 
 	$effect(() => {
-		items = data.results?.items ?? [];
-		nextPage = data.results?.nextPage ?? null;
+		items = items ?? [];
+		nextPage = nextPage ?? null;
 		loadMoreError = null;
 	});
 
