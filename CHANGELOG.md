@@ -6,6 +6,10 @@ The format is based on [keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- "Load more" button on search results, using the search API's next-page endpoint to fetch and append additional results without a full page reload.
+
 ## [0.2.0] - 2026-08-27
 
 ### Added
@@ -29,5 +33,5 @@ The format is based on [keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Fixed a teardown race condition that could produce intermittent errors when navigating away from a video.
 
 [Unreleased]: https://github.com/VimVoyager/OpenTube-Frontend/compare/v0.2.0...HEAD
-[0.1.1]: https://github.com/VimVoyager/OpenTube-Frontend/compare/v0.1.1...v0.2.0
+[0.2.0]: https://github.com/VimVoyager/OpenTube-Frontend/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/VimVoyager/OpenTube-Frontend/compare/v0.1.0...v0.1.1
