@@ -1,9 +1,14 @@
 import type { Description } from '$lib/types';
 
+export interface NextPage {
+	url: string;
+	id: string;
+}
+
 /**
- * API Response for Search
+ * Raw API Response for initial search request
  */
-export interface SearchResponse {
+export interface SearchApiResponse {
 	correctedSearch?: boolean;
 	url: string;
 	originalUrl: string;
@@ -11,12 +16,22 @@ export interface SearchResponse {
 	searchString: string;
 	searchSuggestion: string;
 	isCorrectedSearch: boolean;
-	items: SearchResponseData[];
-	nextPageUrl: string;
+	items: SearchApiResponseData[];
+	nextPage: NextPage;
 	hasNextPage: boolean;
 }
 
-interface SearchResponseData {
+/**
+ * Raw API response for a subsequent (load more) search page
+ */
+export interface NextPageSearchApiResponse {
+	items: SearchApiResponseData[];
+	nextPage: NextPage;
+	hasNextPage: boolean;
+	itemCount: number;
+}
+
+export interface SearchApiResponseData {
 	shortFormContent: boolean;
 	type: string;
 	name: string;
@@ -27,6 +42,8 @@ interface SearchResponseData {
 	uploaderVerified: boolean;
 	duration?: number;
 	viewCount?: number;
+	subscriberCount?: number;
+	videoCount?: number;
 	uploadDate?: string;
 	streamType?: string;
 	isShortFormContent?: boolean;

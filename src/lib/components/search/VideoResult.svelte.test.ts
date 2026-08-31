@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/svelte';
 import VideoResult from './VideoResult.svelte';
 import type { VideoSearchResultConfig } from '$lib/adapters/types';
-import searchResultFixtures from '../../../tests/fixtures/adapters/searchResult.json';
+import searchResultFixtures from '../../../tests/fixtures/adapters/searchAdaptedResponse.json';
 
 // Mock asset imports
 vi.mock('$lib/assets/thumbnail-placeholder.jpg', () => ({
@@ -14,7 +14,7 @@ vi.mock('$lib/assets/logo-placeholder.svg', () => ({
 }));
 
 describe('VideoResult', () => {
-	const [pilotResult, absoluteEndResult] = searchResultFixtures as VideoSearchResultConfig[];
+	const [pilotResult, absoluteEndResult] = searchResultFixtures.items as VideoSearchResultConfig[];
 
 	describe('Rendering with real data', () => {
 		it('should render video title from result prop in both layouts', () => {

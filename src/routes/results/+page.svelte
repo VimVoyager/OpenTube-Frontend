@@ -4,18 +4,58 @@
 	import ErrorCard from '$lib/components/ErrorCard.svelte';
 	import ChannelResult from '$lib/components/search/ChannelResult.svelte';
 	import PlaylistResult from '$lib/components/search/PlaylistResult.svelte';
+	import type { SearchResultConfig } from '$lib/adapters/types';
+	import type { NextPage } from '$lib/api/types';
+	import { getSearchResultsNextPage } from '$lib/api/search';
+	import { adaptSearchResults } from '$lib/adapters/search';
+	import thumbnailPlaceholder from '$lib/assets/thumbnail-placeholder.jpg';
+	import avatarPlaceholder from '$lib/assets/logo-placeholder.svg';
 
 	let { data }: { data: PageData } = $props();
 
 	let results = $derived(data.results);
 	let query = $derived(data.query);
 	let error = $derived(data.error);
-	let hasResults = $derived(results && results.length > 0);
+	let sortFilter = $derived(data.sortFilter ?? 'asc');
+
+	let items = $state<SearchResultConfig[]>([]);
+	let nextPage = $state<NextPage | null>(null);
+	let loadingMore = $state(false);
+	let loadMoreError = $state<string | null>(null);
+
+	$effect(() => {
+		items = data.results?.items ?? [];
+		nextPage = data.results?.nextPage ?? null;
+		loadMoreError = null;
+	});
+
+	let hasResults = $derived(results && items.length > 0);
+
+	async function loadMore(): Promise<void> {
+		if (!nextPage || loadingMore) return;
+
+		loadingMore = true;
+		loadMoreError = null;
+		try {
+			const nextPageData = await getSearchResultsNextPage(
+				query,
+				nextPage.url,
+				nextPage.id,
+				sortFilter
+			);
+			const adapted = adaptSearchResults(nextPageData, thumbnailPlaceholder, avatarPlaceholder);
+			items = [...items, ...adapted.items];
+			nextPage = adapted.nextPage;
+		} catch (err) {
+			loadMoreError = err instanceof Error ? err.message : 'Failed to load more results';
+		} finally {
+			loadingMore = false;
+		}
+	}
 </script>
 
 <!-- Content States -->
 <div class="container mx-auto w-full max-w-7xl px-4 py-8">
-	<!-- Search Query Header -->
 	{#if query}
 		<h1 class="text-primary mb-6 text-xl font-bold sm:text-2xl">
 			Search Results for "{query}"
@@ -46,7 +86,7 @@
 		<!-- Results List -->
 	{:else}
 		<div class="space-y-4">
-			{#each results as result (result.id)}
+			{#each items as result (result.id)}
 				{#if result.type === 'channel'}
 					<ChannelResult {result} />
 				{:else if result.type === 'playlist'}
@@ -60,8 +100,23 @@
 		<!-- Results Count -->
 		<div class="mt-8 text-center">
 			<p class="text-secondary text-sm">
-				Showing {results.length} result{results.length !== 1 ? 's' : ''}
+				Showing {items.length} result{items.length !== 1 ? 's' : ''}
 			</p>
+
+			{#if loadMoreError}
+				<p class="text-sm text-red-500">{loadMoreError}</p>
+			{/if}
+
+			{#if nextPage}
+				<button
+					type="button"
+					class="btn-primary rounded px-4 py-2 text-sm disabled:opacity-50"
+					onclick={loadMore}
+					disabled={loadingMore}
+				>
+					{loadingMore ? 'Loading…' : 'Load more'}
+				</button>
+			{/if}
 		</div>
 	{/if}
 </div>

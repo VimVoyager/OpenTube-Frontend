@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/svelte';
 import PlaylistResult from './PlaylistResult.svelte';
 import type { PlaylistSearchResultConfig } from '$lib/adapters/types';
-import searchResultFixture from '../../../tests/fixtures/adapters/searchResult.json';
+import searchResultFixture from '../../../tests/fixtures/adapters/searchAdaptedResponse.json';
 
 // Mock asset imports
 vi.mock('$lib/assets/thumbnail-placeholder.jpg', () => ({
@@ -21,7 +21,7 @@ vi.mock('$lib/api/playlist');
 import { getPlaylist } from '$lib/api/playlist';
 const mockGetPlaylist = vi.mocked(getPlaylist);
 
-const playlistFixture = searchResultFixture[3] as PlaylistSearchResultConfig;
+const playlistFixture = searchResultFixture.items[3] as PlaylistSearchResultConfig;
 
 // Derived variant with no thumbnail — triggers placeholder fallback
 const noThumbnailResult: PlaylistSearchResultConfig = {

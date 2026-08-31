@@ -1,32 +1,31 @@
 import { getSearchResults } from '$lib/api/search';
-import { adaptSearchResults } from '$lib/adapters/search';
+import { adaptSearchResults, type SearchResultsPage } from '$lib/adapters/search';
 import thumbnailPlaceholder from '$lib/assets/thumbnail-placeholder.jpg';
 import avatarPlaceholder from '$lib/assets/logo-placeholder.svg';
 import type { PageLoad } from './$types';
-import type { SearchResultConfig } from '$lib/adapters/types';
-import type { LoadResponse } from '../types';
-import type { SearchResponse } from '$lib/api/types';
+import type { LoadSearchResponse } from '../types';
+import type { SearchApiResponse } from '$lib/api/types';
 
-export const load: PageLoad = async ({ url, fetch }): Promise<LoadResponse> => {
+const emptyResults: SearchResultsPage = { items: [], nextPage: null, hasNextPage: false };
+
+export const load: PageLoad = async ({ url, fetch }): Promise<LoadSearchResponse> => {
 	try {
-		// Extract search parameter
 		const query: string = url.searchParams.get('query') ?? '';
 		const sortFilter: string = url.searchParams.get('sort') ?? 'asc';
 
-		// Validate query
 		if (!query.trim()) {
 			return {
-				results: [],
+				results: emptyResults,
 				query: '',
 				error: null
 			};
 		}
 
 		// Fetch raw search data from API
-		const searchData: SearchResponse = await getSearchResults(query, sortFilter, fetch);
+		const searchData: SearchApiResponse = await getSearchResults(query, sortFilter, fetch);
 
 		// Transform data using adapter
-		const results: SearchResultConfig[] = adaptSearchResults(
+		const results: SearchResultsPage = adaptSearchResults(
 			searchData,
 			thumbnailPlaceholder,
 			avatarPlaceholder
@@ -41,7 +40,7 @@ export const load: PageLoad = async ({ url, fetch }): Promise<LoadResponse> => {
 	} catch (error) {
 		console.error('Error loading search results:', error);
 		return {
-			results: [],
+			results: emptyResults,
 			query: url.searchParams.get('query') ?? '',
 			sortFilter: url.searchParams.get('sort') ?? 'asc',
 			error: error instanceof Error ? error.message : 'Failed to load search results'

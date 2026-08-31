@@ -1,13 +1,19 @@
 import { extractIdFromUrl } from '$lib/utils/streamSelection';
-import type { SearchResult, SearchItem } from '$lib/types';
 import type {
 	VideoSearchResultConfig,
 	ChannelSearchResultConfig,
 	PlaylistSearchResultConfig
 } from './types';
+import type { NextPage, SearchApiResponse, SearchApiResponseData } from '$lib/api/types';
 
 type SearchResultConfig =
 	VideoSearchResultConfig | ChannelSearchResultConfig | PlaylistSearchResultConfig;
+
+export interface SearchResultsPage {
+	items: SearchResultConfig[];
+	nextPage: NextPage | null;
+	hasNextPage: boolean | undefined;
+}
 
 /**
  * Handles negative counts from the API (e.g., -1 for unknown values)
@@ -18,7 +24,7 @@ function handleNegativeCount(count: number | undefined): number {
 }
 
 function adaptVideoItem(
-	item: SearchItem,
+	item: SearchApiResponseData,
 	defaultThumbnail: string,
 	defaultAvatar: string
 ): VideoSearchResultConfig {
@@ -39,7 +45,10 @@ function adaptVideoItem(
 	};
 }
 
-function adaptChannelItem(item: SearchItem, defaultAvatar: string): ChannelSearchResultConfig {
+function adaptChannelItem(
+	item: SearchApiResponseData,
+	defaultAvatar: string
+): ChannelSearchResultConfig {
 	return {
 		type: 'channel',
 		id: extractIdFromUrl(item.url),
@@ -51,7 +60,10 @@ function adaptChannelItem(item: SearchItem, defaultAvatar: string): ChannelSearc
 	};
 }
 
-function adaptPlaylistItem(item: SearchItem, defaultThumbnail: string): PlaylistSearchResultConfig {
+function adaptPlaylistItem(
+	item: SearchApiResponseData,
+	defaultThumbnail: string
+): PlaylistSearchResultConfig {
 	return {
 		type: 'playlist',
 		id: extractIdFromUrl(item.url),
@@ -64,22 +76,39 @@ function adaptPlaylistItem(item: SearchItem, defaultThumbnail: string): Playlist
 	};
 }
 
+type SearchResultsSource = Pick<SearchApiResponse, 'items' | 'hasNextPage' | 'nextPage'>;
+
+function adaptNextPage(searchResult: SearchResultsSource | undefined): NextPage | null {
+	if (!searchResult?.hasNextPage || !searchResult.nextPage) return null;
+	return {
+		url: searchResult.nextPage.url,
+		id: searchResult.nextPage.id
+	};
+}
+
 export function adaptSearchResults(
-	searchResult: SearchResult | undefined,
+	searchResult: SearchResultsSource | undefined,
 	defaultThumbnail: string,
 	defaultAvatar: string
-): SearchResultConfig[] {
-	if (!searchResult?.items || searchResult.items.length === 0) return [];
+): {
+	items: SearchResultConfig[];
+	nextPage: NextPage | null;
+	hasNextPage: boolean | undefined;
+} {
+	const items: SearchResultConfig[] =
+		!searchResult?.items || searchResult.items.length === 0
+			? []
+			: searchResult.items
+					.filter((item: SearchApiResponseData): string => item && item.url && item.name)
+					.map((item: SearchApiResponseData): SearchResultConfig => {
+						if (item.type === 'channel') return adaptChannelItem(item, defaultAvatar);
+						if (item.type === 'playlist') return adaptPlaylistItem(item, defaultThumbnail);
+						return adaptVideoItem(item, defaultThumbnail, defaultAvatar);
+					});
 
-	return searchResult.items
-		.filter((item: SearchItem): string => item && item.url && item.name)
-		.map((item: SearchItem): SearchResultConfig => {
-			if (item.type === 'channel') {
-				return adaptChannelItem(item, defaultAvatar);
-			}
-			if (item.type === 'playlist') {
-				return adaptPlaylistItem(item, defaultThumbnail);
-			}
-			return adaptVideoItem(item, defaultThumbnail, defaultAvatar);
-		});
+	return {
+		items,
+		nextPage: adaptNextPage(searchResult),
+		hasNextPage: searchResult?.hasNextPage
+	};
 }

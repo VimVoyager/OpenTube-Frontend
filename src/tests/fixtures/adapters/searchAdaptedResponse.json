@@ -1,0 +1,58 @@
+{
+	"items": [
+		{
+			"id": "pilot-id",
+			"url": "https://www.youtube.com/watch?v=pilot-id",
+			"title": "MURDER DRONES - Pilot",
+			"thumbnail": "https://i.ytimg.com/vi/pilot-id/hq720.jpg",
+			"channelName": "GLITCH",
+			"channelUrl": "https://www.youtube.com/channel/channel-id",
+			"channelAvatar": "https://yt3.ggpht.com/random-unicode-characters",
+			"description": "description here",
+			"verified": true,
+			"viewCount": 10717139,
+			"duration": 86,
+			"uploadDate": "2025-11-13T16:00Z",
+			"type": "stream"
+		},
+		{
+			"id": "absolute-end-id",
+			"url": "https://www.youtube.com/watch?v=absolute-end-id",
+			"title": "MURDER DRONES - Absolute End",
+			"thumbnail": "default-thumbnail.jpg",
+			"channelName": "Unknown Channel",
+			"channelUrl": "https://www.youtube.com/channel/channel-id",
+			"description": "",
+			"channelAvatar": "default-avatar.jpg",
+			"verified": false,
+			"viewCount": 0,
+			"duration": 0,
+			"uploadDate": "",
+			"type": "stream"
+		},
+		{
+			"type": "channel",
+			"id": "glitch-channel-id",
+			"name": "GLITCH",
+			"avatar": "https://yt.ggpht.com/channel-avatar",
+			"description": "Here you'll find fun, colourful animated shows with occasional violence and existential breakdowns :D.",
+			"subscriberCount": 20600000,
+			"verified": true
+		},
+		{
+			"type": "playlist",
+			"id": "md-playlist-id",
+			"url": "https://www.youtube.com/playlist?list=md-playlist-id",
+			"title": "Murder Drones",
+			"thumbnail": "https://i.ytimg.com/vi/md-playlist-id/hq720.jpg",
+			"uploaderName": "GLITCH",
+			"uploaderUrl": "https://www.youtube.com/channel/glitch-channel-id",
+			"videoCount": 8
+		}
+	],
+	"nextPage": {
+		"url": "https://www.youtube.com/search?prettyPrint=false",
+		"id": "Eq4DEgNsdHQapgNTQlNDQVF0NVJrc"
+	},
+	"hasNextPage": true
+}

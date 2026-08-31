@@ -9,7 +9,7 @@ import type {
 	ChannelVideosResponse,
 	CommentResponse,
 	RelatedCommentItem,
-	SearchResponse,
+	SearchApiResponse,
 	ChannelInfoResponse,
 	KioskResponseItem
 } from '$lib/api/types';
@@ -258,7 +258,9 @@ export const buildSearchPlaylistItem = (overrides: Record<string, unknown> = {})
 	...overrides
 });
 
-export const buildSearchResponse = (overrides: Partial<SearchResponse> = {}): SearchResponse =>
+export const buildSearchResponse = (
+	overrides: Partial<SearchApiResponse> = {}
+): SearchApiResponse =>
 	({
 		correctedSearch: false,
 		isCorrectedSearch: false,
@@ -271,7 +273,7 @@ export const buildSearchResponse = (overrides: Partial<SearchResponse> = {}): Se
 		nextPageUrl: 'https://www.youtube.com/search?prettyPrint=false',
 		hasNextPage: true,
 		...overrides
-	}) as SearchResponse;
+	}) as SearchApiResponse;
 
 // ---------------------------------------------------------------------------
 // Streams / related items
