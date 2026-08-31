@@ -78,7 +78,7 @@ describe('results load function integration', () => {
 
 			expect(fetch).not.toHaveBeenCalled();
 			expect(search).toEqual({
-				results: { items: [], nextPage: null, hasNextPage: undefined },
+				results: { items: [], nextPage: null, hasNextPage: false },
 				query: '',
 				error: null
 			});
@@ -92,7 +92,7 @@ describe('results load function integration', () => {
 
 			const search = await runLoad(fetch, '?query=error%20test&sort=asc');
 
-			expect(search.results).toEqual([]);
+			expect(search.results).toEqual({ items: [], nextPage: null, hasNextPage: false });
 			expect(search.query).toBe('error test');
 			expect(search.sortFilter).toBe('asc');
 			expect(search.error).toContain('Could not load search results');
@@ -104,7 +104,7 @@ describe('results load function integration', () => {
 
 			const search = await runLoad(fetch, '?query=network%20error');
 
-			expect(search.results).toEqual([]);
+			expect(search.results).toEqual({ items: [], nextPage: null, hasNextPage: false });
 			expect(search.query).toBe('network error');
 			expect(search.error).toBe('Failed to fetch');
 		});
@@ -115,7 +115,7 @@ describe('results load function integration', () => {
 
 			const search = await runLoad(fetch, '?query=test');
 
-			expect(search.results).toEqual([]);
+			expect(search.results).toEqual({ items: [], nextPage: null, hasNextPage: false });
 			expect(search.error).toBe('Failed to load search results');
 		});
 	});
