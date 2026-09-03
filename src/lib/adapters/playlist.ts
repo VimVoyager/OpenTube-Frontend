@@ -3,9 +3,22 @@ import { selectBestImage } from '$lib/utils/mediaUtils';
 import logoPlaceholder from '$lib/assets/logo-placeholder.svg';
 import bannerPlaceholder from '$lib/assets/banner-fallback.jpg';
 import thumbnailPlaceholder from '$lib/assets/thumbnail-placeholder.jpg';
-import type { PlaylistInfoConfig, RelatedVideoConfig } from '$lib/adapters/types';
 import type { RelatedItemApiResponse } from '$lib/api/related';
 import type { PlaylistApiResponse } from '$lib/api/playlist';
+import type { RelatedVideoConfig } from '$lib/adapters/related';
+
+export interface PlaylistInfoConfig {
+	id: string;
+	name: string;
+	url: string;
+	uploaderName: string;
+	uploaderId: string;
+	uploaderUrl: string | null;
+	uploaderAvatarUrl: string | null;
+	bannerUrl?: string | null;
+	thumbnailUrl: string | null;
+	description?: string | null;
+}
 
 export function adaptPlaylistInfo(info: PlaylistApiResponse): PlaylistInfoConfig {
 	return {

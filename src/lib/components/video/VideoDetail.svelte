@@ -1,7 +1,7 @@
 <script lang="ts">
-	import type { VideoMetadata } from '$lib/adapters/types';
 	import roundLogo from '$lib/assets/logo-placeholder.svg';
 	import { sanitizeHtml } from '$lib/sanitize';
+	import type { VideoMetadata } from '$lib/adapters/metadata';
 
 	let { metadata }: { metadata: VideoMetadata } = $props();
 

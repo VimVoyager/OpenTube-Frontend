@@ -4,10 +4,9 @@
 	import ErrorCard from '$lib/components/ErrorCard.svelte';
 	import ChannelResult from '$lib/components/search/ChannelResult.svelte';
 	import PlaylistResult from '$lib/components/search/PlaylistResult.svelte';
-	import type { SearchResultConfig } from '$lib/adapters/types';
 	import type { NextPage } from '$lib/api/types';
 	import { getSearchResultsNextPage } from '$lib/api/search';
-	import { adaptSearchResults } from '$lib/adapters/search';
+	import { adaptSearchResults, type SearchResultConfig } from '$lib/adapters/search';
 	import thumbnailPlaceholder from '$lib/assets/thumbnail-placeholder.jpg';
 	import avatarPlaceholder from '$lib/assets/logo-placeholder.svg';
 

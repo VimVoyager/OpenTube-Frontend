@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/svelte';
 import ChannelVideos from './ChannelVideos.svelte';
-import type { ChannelVideoConfig } from '$lib/adapters/types';
 import channelVideosFixture from '../../../tests/fixtures/adapters/channelVideos.json';
+import type { ChannelVideoConfig } from '$lib/adapters/channel';
 
 const videos = channelVideosFixture as ChannelVideoConfig[];
 

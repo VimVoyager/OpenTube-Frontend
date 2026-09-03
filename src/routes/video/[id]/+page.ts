@@ -1,10 +1,10 @@
 import type { PageLoad } from './$types';
 import { getVideoDetails } from '$lib/api/details';
 import { getRelatedStreams } from '$lib/api/related';
-import { adaptPlayerConfig } from '$lib/adapters/player';
-import { adaptVideoMetadata } from '$lib/adapters/metadata';
-import { adaptRelatedVideos } from '$lib/adapters/related';
-import { adaptPlaylistInfo, adaptPlaylistVideos } from '$lib/adapters/playlist';
+import { adaptPlayerConfig, VideoPlayerConfig } from '$lib/adapters/player';
+import { adaptVideoMetadata, VideoMetadata } from '$lib/adapters/metadata';
+import { adaptRelatedVideos, RelatedVideoConfig } from '$lib/adapters/related';
+import { adaptPlaylistInfo, adaptPlaylistVideos, PlaylistInfoConfig } from '$lib/adapters/playlist';
 import thumbnailPlaceholder from '$lib/assets/thumbnail-placeholder.jpg';
 import logoPlaceholder from '$lib/assets/logo-placeholder.svg';
 import { getManifest } from '$lib/api/manifest';
@@ -12,14 +12,7 @@ import { getVideoThumbnails } from '$lib/api/thumbnails';
 import { getPlaylist } from '$lib/api/playlist';
 import type { VideoPageData } from '../../types';
 import { getVideoComments } from '$lib/api/comments';
-import type {
-	CommentConfig,
-	RelatedVideoConfig,
-	VideoMetadata,
-	VideoPlayerConfig,
-	PlaylistInfoConfig
-} from '$lib/adapters/types';
-import { adaptCommentResponse } from '$lib/adapters/comments';
+import { adaptCommentResponse, CommentConfig } from '$lib/adapters/comments';
 
 /**
  * Creates error page data with default values

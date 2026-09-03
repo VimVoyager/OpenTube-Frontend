@@ -8,8 +8,8 @@ import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/svelte';
 import Page from './+page.svelte';
 import type { PageData } from './$types';
-import type { KioskVideoConfig } from '$lib/adapters/types';
 import kioskVideosFixture from '../tests/fixtures/adapters/kioskVideos.json';
+import type { KioskVideoConfig } from '$lib/adapters/kiosk';
 
 const kioskVideos: KioskVideoConfig[] = kioskVideosFixture;
 

@@ -1,8 +1,8 @@
 <script lang="ts">
 	import logoPlaceholder from '$lib/assets/logo-placeholder.svg';
-	import type { CommentConfig } from '$lib/adapters/types';
 	import { HeartIcon, ThumbsUpIcon, ChevronDownIcon, ChevronUpIcon } from 'lucide-svelte';
 	import { sanitizeHtml } from '$lib/sanitize';
+	import type { CommentConfig } from '$lib/adapters/comments';
 
 	interface Props {
 		comment: CommentConfig;

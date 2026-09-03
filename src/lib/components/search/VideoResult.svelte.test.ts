@@ -1,8 +1,8 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/svelte';
 import VideoResult from './VideoResult.svelte';
-import type { VideoSearchResultConfig } from '$lib/adapters/types';
 import searchResultFixtures from '../../../tests/fixtures/adapters/searchAdaptedResponse.json';
+import type { VideoSearchResultConfig } from '$lib/adapters/search';
 
 // Mock asset imports
 vi.mock('$lib/assets/thumbnail-placeholder.jpg', () => ({

@@ -1,9 +1,9 @@
 <script lang="ts">
 	import logoPlaceholder from '$lib/assets/logo-placeholder.svg';
-	import type { RelatedVideoConfig } from '$lib/adapters/types';
 	import { formatCount } from '$lib/utils/formatters';
 	import { resolve } from '$app/paths';
 	import VideoThumbnail from '$lib/components/VideoThumbnail.svelte';
+	import type { RelatedVideoConfig } from '$lib/adapters/related';
 
 	let { videos = [] }: { videos?: RelatedVideoConfig[] } = $props();
 

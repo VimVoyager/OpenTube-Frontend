@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, waitFor, fireEvent } from '@testing-library/svelte';
 import '@testing-library/jest-dom';
-import type { VideoPlayerConfig } from '$lib/adapters/types';
 
 let mockRegisterRequestFilter = vi.fn();
 
@@ -93,6 +92,7 @@ vi.mock('shaka-player/dist/controls.css', () => ({}));
 
 import VideoPlayer from './VideoPlayer.svelte';
 import type { ShakaErrorEvent, ShakaUIConfiguration } from '$lib/types';
+import type { VideoPlayerConfig } from '$lib/adapters/player';
 
 describe('VideoPlayer.svelte', () => {
 	let consoleErrorSpy: ReturnType<typeof vi.spyOn>;

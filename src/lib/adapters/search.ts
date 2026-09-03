@@ -1,13 +1,56 @@
 import { extractIdFromUrl } from '$lib/utils/streamSelection';
-import type {
-	VideoSearchResultConfig,
-	ChannelSearchResultConfig,
-	PlaylistSearchResultConfig
-} from './types';
 import type { NextPage } from '$lib/api/types';
 import type { SearchApiResponse, SearchApiResponseData } from '$lib/api/search';
 
-type SearchResultConfig =
+/**
+ * Search result configuration for VideoResult component display
+ */
+export interface VideoSearchResultConfig {
+	id: string;
+	url: string;
+	title: string;
+	thumbnail: string;
+	channelName: string;
+	channelUrl: string;
+	channelAvatar: string;
+	verified: boolean;
+	viewCount: number;
+	duration: number;
+	uploadDate: string;
+	description: string;
+	type: 'VIDEO_STREAM' | 'stream';
+}
+
+/**
+ * Playlist video result configuration
+ */
+export interface PlaylistSearchResultConfig {
+	id: string;
+	url: string;
+	title: string;
+	thumbnail: string;
+	uploaderName: string;
+	uploaderUrl: string | null;
+	videoCount: number;
+	type: 'playlist';
+}
+
+/**
+ * Search result configuration for Channel result component display
+ */
+export interface ChannelSearchResultConfig {
+	id: string;
+	url?: string;
+	name: string;
+	avatar: string;
+	verified: boolean;
+	subscriberCount: number;
+	streamCount?: number;
+	description: string | null;
+	type: 'channel';
+}
+
+export type SearchResultConfig =
 	VideoSearchResultConfig | ChannelSearchResultConfig | PlaylistSearchResultConfig;
 
 export interface SearchResultsPage {

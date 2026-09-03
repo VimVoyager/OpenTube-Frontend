@@ -6,10 +6,10 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { adaptPlaylistInfo, adaptPlaylistVideos } from './playlist';
+import { adaptPlaylistInfo, adaptPlaylistVideos, PlaylistInfoConfig } from './playlist';
 import { buildPlaylistResponse, buildRelatedItem } from '../../tests/fixtures/builder';
-import type { PlaylistInfoConfig, RelatedVideoConfig } from './types';
 import type { PlaylistApiResponse } from '$lib/api/playlist';
+import type { RelatedVideoConfig } from '$lib/adapters/related';
 
 describe('adaptPlaylistInfo', () => {
 	it('adapts a full playlist response to PlaylistInfoConfig', () => {

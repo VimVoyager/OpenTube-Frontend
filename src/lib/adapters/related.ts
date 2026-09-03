@@ -1,8 +1,23 @@
 import { extractIdFromUrl } from '$lib/utils/streamSelection';
 import { selectBestImage } from '$lib/utils/mediaUtils';
-import type { RelatedVideoConfig } from './types';
 
 import type { RelatedItemApiResponse } from '$lib/api/related';
+
+/**
+ * Related video configuration for listings display
+ */
+export interface RelatedVideoConfig {
+	id: string;
+	url: string;
+	title: string;
+	thumbnail: string;
+	channelName: string;
+	channelId: string;
+	channelAvatar: string | null;
+	viewCount: number;
+	uploadDate: string;
+	duration: number;
+}
 
 /**
  * Adapts a single related item to related video configuration

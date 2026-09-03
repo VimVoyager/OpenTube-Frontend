@@ -5,7 +5,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { formatSubscriberCount, adaptChannelInfo, adaptChannelVideos } from './channel';
+import { formatSubscriberCount, adaptChannelInfo, adaptChannelVideos, ChannelVideoConfig } from './channel';
 import {
 	buildChannelDetailsResponse,
 	buildChannelVideosResponse,
@@ -15,7 +15,6 @@ import channelDetailsResponseFixture from '../../tests/fixtures/api/channelDetai
 import channelVideosResponseFixture from '../../tests/fixtures/api/channelVideosResponse.json';
 import channelDetailsFixture from '../../tests/fixtures/adapters/channelDetails.json';
 import channelVideosFixture from '../../tests/fixtures/adapters/channelVideos.json';
-import type { ChannelVideoConfig } from '$lib/adapters/types';
 import type { ChannelInfoApiResponse, ChannelVideosApiResponse } from '$lib/api/channel';
 
 const thumbnailFallback = 'fallback-thumb.jpg';

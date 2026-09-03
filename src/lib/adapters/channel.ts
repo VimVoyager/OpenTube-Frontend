@@ -1,4 +1,3 @@
-import type { ChannelConfig, ChannelVideoConfig } from '$lib/adapters/types';
 import { extractIdFromUrl } from '$lib/utils/streamSelection';
 import { selectBestImage } from '$lib/utils/mediaUtils';
 import { formatCount } from '$lib/utils/formatters';
@@ -19,6 +18,30 @@ export function formatSubscriberCount(count: number): string {
 		return `${parseFloat(val.toFixed(1))}K`;
 	}
 	return count.toString();
+}
+
+export interface ChannelConfig {
+	id: string;
+	name: string;
+	handle: string;
+	avatarUrl: string | null;
+	bannerUrl: string | null;
+	description: string | null;
+	subscriberCount: string;
+	videoCount: number;
+	verified: boolean;
+}
+
+export interface ChannelVideoConfig {
+	id: string;
+	title: string;
+	thumbnail: string;
+	uploaderName: string;
+	uploaderUrl: string | null;
+	uploadedDate: string;
+	duration: number;
+	viewCount: number;
+	isShort: boolean;
 }
 
 /**

@@ -1,13 +1,10 @@
-import type {
-	ChannelConfig,
-	ChannelVideoConfig,
-	CommentConfig,
-	PlaylistInfoConfig,
-	RelatedVideoConfig,
-	VideoMetadata,
-	VideoPlayerConfig
-} from '$lib/adapters/types';
 import type { SearchResultsPage } from '$lib/adapters/search';
+import type { VideoPlayerConfig } from '$lib/adapters/player';
+import type { VideoMetadata } from '$lib/adapters/metadata';
+import type { RelatedVideoConfig } from '$lib/adapters/related';
+import type { ChannelConfig, ChannelVideoConfig } from '$lib/adapters/channel';
+import type { CommentConfig } from '$lib/adapters/comments';
+import type { PlaylistInfoConfig } from '$lib/adapters/playlist';
 
 export interface LoadSearchResponse {
 	results: SearchResultsPage;

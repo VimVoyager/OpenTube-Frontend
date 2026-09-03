@@ -1,7 +1,17 @@
 import { extractIdFromUrl } from '$lib/utils/streamSelection';
 import { selectBestImage } from '$lib/utils/mediaUtils';
-import type { KioskVideoConfig } from '$lib/adapters/types';
 import type { KioskApiResponseItem } from '$lib/api/kiosk';
+
+export interface KioskVideoConfig {
+	id: string;
+	url: string;
+	title: string;
+	thumbnail: string;
+	channelName: string;
+	viewCount: number;
+	uploadDate: string;
+	duration: number;
+}
 
 /**
  * Adapts a single kiosk item ot kiosk video config

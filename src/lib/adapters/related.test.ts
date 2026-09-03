@@ -5,11 +5,10 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { adaptRelatedVideos } from './related';
+import { adaptRelatedVideos, RelatedVideoConfig } from './related';
 import { buildRelatedItem } from '../../tests/fixtures/builder';
 import relatedVideosResponseFixture from '../../tests/fixtures/api/relatedVideosResponse.json';
 import relatedVideosFixture from '../../tests/fixtures/adapters/relatedVideos.json';
-import type { RelatedVideoConfig } from '$lib/adapters/types';
 import type { RelatedItemApiResponse } from '$lib/api/related';
 
 const defaultThumbnail = 'fallback-thumb.jpg';

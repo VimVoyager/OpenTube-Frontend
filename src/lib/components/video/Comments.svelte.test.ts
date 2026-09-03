@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, fireEvent, waitFor } from '@testing-library/svelte';
 import '@testing-library/jest-dom';
-import type { CommentConfig } from '$lib/adapters/types';
 import Comments from './Comments.svelte';
+import type { CommentConfig } from '$lib/adapters/comments';
 
 vi.mock('$lib/assets/logo-placeholder.svg', () => ({ default: '/logo-placeholder.svg' }));
 

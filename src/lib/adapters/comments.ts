@@ -1,6 +1,26 @@
-import type { CommentConfig } from './types';
 import { selectBestImage } from '$lib/utils/mediaUtils';
 import type { CommentApiResponse, RelatedCommentApiResponseItem } from '$lib/api/comments';
+
+/**
+ * Comments result configuration for Comments component display
+ */
+export interface CommentConfig {
+	id: string;
+	text: string;
+	author: string;
+	authorAvatar: string;
+	authorUrl: string;
+	isVerified: boolean;
+	isChannelOwner: boolean;
+	uploadDate: string;
+	likeCount: number;
+	likeCountText: string;
+	isPinned: boolean;
+	isHearted: boolean;
+	replyCount: number;
+	hasReplies: boolean;
+	repliesUrl?: string;
+}
 
 /**
  * Adapt raw comment data into a cleaner format for display

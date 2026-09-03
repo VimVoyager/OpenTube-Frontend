@@ -3,7 +3,6 @@
 	import { SvelteURL } from 'svelte/reactivity';
 	import { browser } from '$app/environment';
 	import { PUBLIC_PROXY_URL } from '$env/static/public';
-	import type { VideoPlayerConfig } from '$lib/adapters/types';
 	import type {
 		ShakaPlayerInstance,
 		ShakaRequest,
@@ -13,6 +12,7 @@
 	import VideoPlayerError, {
 		type ShakaErrorDetail
 	} from '$lib/components/video/VideoPlayerError.svelte';
+	import type { VideoPlayerConfig } from '$lib/adapters/player';
 
 	let { config }: { config: VideoPlayerConfig } = $props();
 
