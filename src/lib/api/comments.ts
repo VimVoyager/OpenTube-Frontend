@@ -1,7 +1,44 @@
-import type { CommentResponse } from './types';
 import { PUBLIC_API_URL } from '$env/static/public';
+import type { Image, Replies, UploadDate } from '$lib/api/types';
 
 const API_BASE_URL = PUBLIC_API_URL;
+
+/**
+ * API response for comments
+ */
+export interface CommentApiResponse {
+	serviceId: number;
+	id: string;
+	url: string;
+	originalUrl?: string;
+	name: string;
+	errors?: unknown[];
+	relatedItems: RelatedCommentApiResponseItem[];
+}
+
+export interface RelatedCommentApiResponseItem {
+	infoType: string;
+	serviceId: number;
+	url: string;
+	name: string;
+	thumbnails: Image[];
+	commentId: string;
+	commentText: string;
+	uploaderName: string;
+	uploaderAvatars: Image[];
+	uploaderUrl: string;
+	uploaderVerified: boolean;
+	textualUploadDate: string;
+	uploadDate: UploadDate;
+	likeCount: number;
+	textualLikeCount: string;
+	heartedByUploader: boolean;
+	pinned: boolean;
+	streamPosition: number;
+	replyCount: number;
+	replies: Replies;
+	channelOwner: boolean;
+}
 
 /**
  * Fetch comments for a given video ID
@@ -9,7 +46,7 @@ const API_BASE_URL = PUBLIC_API_URL;
 export async function getVideoComments(
 	id: string,
 	fetchFn?: typeof globalThis.fetch
-): Promise<CommentResponse | null> {
+): Promise<CommentApiResponse | null> {
 	const fetcher = fetchFn ?? globalThis.fetch;
 
 	try {

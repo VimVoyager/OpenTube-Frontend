@@ -9,13 +9,13 @@ import { adaptRelatedVideos } from './related';
 import { buildRelatedItem } from '../../tests/fixtures/builder';
 import relatedVideosResponseFixture from '../../tests/fixtures/api/relatedVideosResponse.json';
 import relatedVideosFixture from '../../tests/fixtures/adapters/relatedVideos.json';
-import type { RelatedItemResponse } from '$lib/api/types';
 import type { RelatedVideoConfig } from '$lib/adapters/types';
+import type { RelatedItemApiResponse } from '$lib/api/related';
 
 const defaultThumbnail = 'fallback-thumb.jpg';
 const defaultAvatar = 'fallback-avatar.jpg';
 
-const adapt = (items: RelatedItemResponse[] | undefined) =>
+const adapt = (items: RelatedItemApiResponse[] | undefined) =>
 	adaptRelatedVideos(items, defaultThumbnail, defaultAvatar);
 
 describe('adaptRelatedVideos', () => {
@@ -38,7 +38,7 @@ describe('adaptRelatedVideos', () => {
 	});
 
 	it('matches the relatedVideos round-trip fixture (includes filtering the invalid row)', () => {
-		const result = adapt(relatedVideosResponseFixture as RelatedItemResponse[]);
+		const result = adapt(relatedVideosResponseFixture as RelatedItemApiResponse[]);
 		expect(result).toEqual(relatedVideosFixture);
 	});
 

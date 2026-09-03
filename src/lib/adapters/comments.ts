@@ -1,11 +1,11 @@
-import type { CommentResponse, RelatedCommentItem } from '../api/types';
 import type { CommentConfig } from './types';
 import { selectBestImage } from '$lib/utils/mediaUtils';
+import type { CommentApiResponse, RelatedCommentApiResponseItem } from '$lib/api/comments';
 
 /**
  * Adapt raw comment data into a cleaner format for display
  */
-export function adaptComment(comment: RelatedCommentItem, defaultAvatar: string): CommentConfig {
+export function adaptComment(comment: RelatedCommentApiResponseItem, defaultAvatar: string): CommentConfig {
 	return {
 		id: comment.commentId,
 		text: comment.commentText || '',
@@ -29,7 +29,7 @@ export function adaptComment(comment: RelatedCommentItem, defaultAvatar: string)
  * Adapt an array of comments
  */
 export function adaptComments(
-	comments: RelatedCommentItem[],
+	comments: RelatedCommentApiResponseItem[],
 	defaultAvatar: string
 ): CommentConfig[] {
 	return comments.map((comment) => adaptComment(comment, defaultAvatar));
@@ -40,7 +40,7 @@ export function adaptComments(
  * This is a convenience function that extracts relatedItems and adapts them
  */
 export function adaptCommentResponse(
-	response: CommentResponse | null,
+	response: CommentApiResponse | null,
 	defaultAvatar: string
 ): CommentConfig[] {
 	if (!response) return [];

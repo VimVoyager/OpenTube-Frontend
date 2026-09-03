@@ -7,10 +7,9 @@
 
 import { describeJsonFetcher } from '../../tests/helpers/describeJsonFetcher';
 import searchResultsFixture from '../../tests/fixtures/api/searchApiResponse.json';
-import { getSearchResults, getSearchResultsNextPage } from '$lib/api/search';
+import { getSearchResults, getSearchResultsNextPage, NextPageSearchApiResponse, SearchApiResponseData } from '$lib/api/search';
 import { describe, it, expect, vi } from 'vitest';
 import { createSuccessfulFetch, extractQueryParams } from '../../tests/helpers/apiHelpers';
-import type { NextPageSearchApiResponse, SearchApiResponseData } from '$lib/api/types';
 
 export const nextPageSearchResultsFixture: NextPageSearchApiResponse = {
 	items: searchResultsFixture.items as SearchApiResponseData[],

@@ -1,7 +1,30 @@
-import type { RelatedItemResponse } from '$lib/api/types';
 import { PUBLIC_API_URL } from '$env/static/public';
+import type { Image } from '$lib/api/types';
 
 const API_BASE_URL = PUBLIC_API_URL;
+
+/**
+ * API response for related videos
+ */
+export interface RelatedItemApiResponse {
+	infoType: string;
+	serviceId: number;
+	url: string;
+	name: string;
+	thumbnails: Image[];
+	streamType?: string;
+	uploaderName: string;
+	textualUploadDate: string;
+	uploadDate?: {
+		approximation: boolean;
+	};
+	viewCount: number;
+	duration: number;
+	uploaderUrl: string;
+	uploaderAvatars: Image[];
+	uploaderVerified: boolean;
+	isShortFormContent?: boolean;
+}
 
 /**
  * Fetch related video streams for a given video ID
@@ -9,7 +32,7 @@ const API_BASE_URL = PUBLIC_API_URL;
 export async function getRelatedStreams(
 	id: string,
 	fetchFn?: typeof globalThis.fetch
-): Promise<RelatedItemResponse[]> {
+): Promise<RelatedItemApiResponse[]> {
 	const fetcher = fetchFn ?? globalThis.fetch;
 
 	try {
@@ -28,9 +51,9 @@ export async function getRelatedStreams(
 
 		// Handle different response formats
 		if (Array.isArray(data)) {
-			return data as RelatedItemResponse[];
+			return data as RelatedItemApiResponse[];
 		} else if (data.streams && Array.isArray(data.streams)) {
-			return data.streams as RelatedItemResponse[];
+			return data.streams as RelatedItemApiResponse[];
 		} else {
 			throw new Error('Unexpected response format for related streams');
 		}

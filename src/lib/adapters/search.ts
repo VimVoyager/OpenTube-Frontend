@@ -4,7 +4,8 @@ import type {
 	ChannelSearchResultConfig,
 	PlaylistSearchResultConfig
 } from './types';
-import type { NextPage, SearchApiResponse, SearchApiResponseData } from '$lib/api/types';
+import type { NextPage } from '$lib/api/types';
+import type { SearchApiResponse, SearchApiResponseData } from '$lib/api/search';
 
 type SearchResultConfig =
 	VideoSearchResultConfig | ChannelSearchResultConfig | PlaylistSearchResultConfig;

@@ -8,8 +8,8 @@
 import { describe, it, expect } from 'vitest';
 import { adaptPlaylistInfo, adaptPlaylistVideos } from './playlist';
 import { buildPlaylistResponse, buildRelatedItem } from '../../tests/fixtures/builder';
-import type { PlaylistResponse } from '$lib/api/types';
 import type { PlaylistInfoConfig, RelatedVideoConfig } from './types';
+import type { PlaylistApiResponse } from '$lib/api/playlist';
 
 describe('adaptPlaylistInfo', () => {
 	it('adapts a full playlist response to PlaylistInfoConfig', () => {
@@ -161,8 +161,8 @@ describe('adaptPlaylistVideos', () => {
 		it.each([
 			['relatedItems undefined', buildPlaylistResponse({ relatedItems: undefined })],
 			['relatedItems empty', buildPlaylistResponse({ relatedItems: [] })],
-			['response null', null as unknown as PlaylistResponse],
-			['response undefined', undefined as unknown as PlaylistResponse]
+			['response null', null as unknown as PlaylistApiResponse],
+			['response undefined', undefined as unknown as PlaylistApiResponse]
 		])('returns [] for %s', (_label, input) => {
 			expect(adaptPlaylistVideos(input)).toEqual([]);
 		});

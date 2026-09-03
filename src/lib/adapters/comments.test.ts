@@ -9,7 +9,7 @@ import { adaptComment, adaptComments, adaptCommentResponse } from './comments';
 import { buildCommentItem, buildCommentResponse, buildImage } from '../../tests/fixtures/builder';
 import commentsResponse from '../../tests/fixtures/api/commentsResponse.json';
 import commentsResultFixture from '../../tests/fixtures/adapters/commentsResult.json';
-import type { CommentResponse, RelatedCommentItem } from '$lib/api/types';
+import type { CommentApiResponse, RelatedCommentApiResponseItem } from '$lib/api/comments';
 
 const defaultAvatar = 'https://example.com/default-avatar.jpg';
 
@@ -108,7 +108,7 @@ describe('adaptComments', () => {
 	});
 
 	it('matches the commentsResult round-trip fixture on real-shaped data', () => {
-		const items = (commentsResponse[0] as CommentResponse).relatedItems as RelatedCommentItem[];
+		const items = (commentsResponse[0] as CommentApiResponse).relatedItems as RelatedCommentApiResponseItem[];
 		expect(adaptComments(items, defaultAvatar)).toEqual(commentsResultFixture);
 	});
 });

@@ -1,12 +1,35 @@
 import { PUBLIC_API_URL } from '$env/static/public';
-import type { PlaylistResponse } from '$lib/api/types';
+import type { RelatedItemApiResponse } from '$lib/api/related';
+import type { Description } from '$lib/types';
+import type { Image } from '$lib/api/types';
 
 const API_BASE_URL: string = PUBLIC_API_URL;
+
+export interface PlaylistApiResponse {
+	serviceId: number;
+	id: string;
+	url: string;
+	originalUrl: string;
+	name: string;
+	errors?: never[];
+	relatedItems: RelatedItemApiResponse[];
+	contentFilters?: never[];
+	sortFilter: string;
+	uploaderUrl: string;
+	uploaderName: string;
+	subChannelUrl?: string;
+	subChannelName?: string;
+	description: Description;
+	banners: Image[];
+	uploaderAvatars: Image[];
+	subChannelAvatars: Image[];
+	thumbnails: Image[];
+}
 
 export async function getPlaylist(
 	playlistId: string,
 	fetchFn?: typeof globalThis.fetch
-): Promise<PlaylistResponse> {
+): Promise<PlaylistApiResponse> {
 	const fetcher: {
 		(input: RequestInfo | URL, init?: RequestInit): Promise<Response>;
 		(input: string | URL | Request, init?: RequestInit): Promise<Response>;

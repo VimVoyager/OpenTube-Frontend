@@ -1,7 +1,47 @@
 import { PUBLIC_API_URL } from '$env/static/public';
-import type { NextPageSearchApiResponse, SearchApiResponse } from '$lib/api/types';
+import type { NextPage } from '$lib/api/types';
 
 const API_BASE_URL = PUBLIC_API_URL;
+
+export interface SearchApiResponse {
+	correctedSearch?: boolean;
+	url: string;
+	originalUrl: string;
+	name: string;
+	searchString: string;
+	searchSuggestion: string;
+	isCorrectedSearch: boolean;
+	items: SearchApiResponseData[];
+	nextPage: NextPage;
+	hasNextPage: boolean;
+}
+
+export interface NextPageSearchApiResponse {
+	items: SearchApiResponseData[];
+	nextPage: NextPage;
+	hasNextPage: boolean;
+	itemCount: number;
+}
+
+export interface SearchApiResponseData {
+	shortFormContent: boolean;
+	type: string;
+	name: string;
+	url: string;
+	thumbnailUrl: string;
+	uploaderName: string;
+	uploaderAvatarUrl: string;
+	uploaderVerified: boolean;
+	duration?: number;
+	viewCount?: number;
+	subscriberCount?: number;
+	videoCount?: number;
+	uploadDate?: string;
+	streamType?: string;
+	isShortFormContent?: boolean;
+	uploaderUrl?: string;
+	description?: string;
+}
 
 /**
  * Fetch search results for a given search query

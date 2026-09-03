@@ -1,7 +1,28 @@
 import { PUBLIC_API_URL } from '$env/static/public';
-import type { KioskInfoResponse } from '$lib/api/types';
+import type { Image } from '$lib/api/types';
 
 const API_BASE_URL: string = PUBLIC_API_URL;
+
+export interface KioskInfoApiResponse {
+	id: string;
+	name: string;
+	url: string;
+	items: KioskApiResponseItem[];
+}
+
+export interface KioskApiResponseItem {
+	name: string;
+	url: string;
+	uploaderName: string;
+	uploaderUrl: string;
+	uploaderVerified: boolean;
+	duration: number;
+	viewCount: number;
+	uploadDate: string;
+	textualUploadDate: string;
+	streamType: string;
+	thumbnails: Image[];
+}
 
 /**
  * Fetch kiosk info for a specified kiosk ID
@@ -9,7 +30,7 @@ const API_BASE_URL: string = PUBLIC_API_URL;
 export async function getKioskInfo(
 	kioskId: string,
 	fetchFn?: typeof globalThis.fetch
-): Promise<KioskInfoResponse> {
+): Promise<KioskInfoApiResponse> {
 	const fetcher: {
 		(input: RequestInfo | URL, init?: RequestInit): Promise<Response>;
 		(input: string | URL | Request, init?: RequestInit): Promise<Response>;
