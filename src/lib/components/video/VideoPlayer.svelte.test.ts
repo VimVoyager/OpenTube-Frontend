@@ -91,8 +91,8 @@ vi.mock('shaka-player/dist/shaka-player.ui', () => ({
 vi.mock('shaka-player/dist/controls.css', () => ({}));
 
 import VideoPlayer from './VideoPlayer.svelte';
-import type { ShakaErrorEvent, ShakaUIConfiguration } from '$lib/types';
 import type { VideoPlayerConfig } from '$lib/adapters/player';
+import type { ShakaErrorEvent, ShakaUIConfiguration } from '$lib/player/shaka';
 
 describe('VideoPlayer.svelte', () => {
 	let consoleErrorSpy: ReturnType<typeof vi.spyOn>;

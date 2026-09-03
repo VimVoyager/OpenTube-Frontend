@@ -1,12 +1,6 @@
 declare module 'shaka-player' {
-	import type {
-		ShakaPlayerClass,
-		ShakaUIOverlayClass,
-		ShakaPolyfill,
-		ShakaPlayerConfiguration,
-		ShakaUIConfiguration,
-		ShakaErrorEvent
-	} from '$lib/types';
+	import type { ShakaErrorEvent, ShakaPlayerClass,
+		ShakaPlayerConfiguration, ShakaPolyfill, ShakaUIConfiguration, ShakaUIOverlayClass } from '$lib/player/shaka';
 
 	export const Player: ShakaPlayerClass;
 	export const ui: {
@@ -20,14 +14,8 @@ declare module 'shaka-player' {
 }
 
 declare module 'shaka-player/dist/shaka-player.ui' {
-	import type {
-		ShakaPlayerClass,
-		ShakaUIOverlayClass,
-		ShakaPolyfill,
-		ShakaPlayerConfiguration,
-		ShakaUIConfiguration,
-		ShakaErrorEvent
-	} from '$lib/types';
+	import type { ShakaErrorEvent, ShakaPlayerClass,
+		ShakaPlayerConfiguration, ShakaPolyfill, ShakaUIConfiguration, ShakaUIOverlayClass } from '$lib/player/shaka';
 
 	const shaka: {
 		Player: ShakaPlayerClass;
