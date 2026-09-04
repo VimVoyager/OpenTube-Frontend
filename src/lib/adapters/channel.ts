@@ -1,8 +1,11 @@
-import type { ChannelConfig, ChannelVideoConfig } from '$lib/adapters/types';
 import { extractIdFromUrl } from '$lib/utils/streamSelection';
-import type { ChannelInfoResponse, ChannelVideoItem, ChannelVideosResponse } from '$lib/api/types';
 import { selectBestImage } from '$lib/utils/mediaUtils';
 import { formatCount } from '$lib/utils/formatters';
+import type {
+	ChannelInfoApiResponse,
+	ChannelVideoApiResponseItem,
+	ChannelVideosApiResponse
+} from '$lib/api/channel';
 
 /**
  * Format a raw subscriber count into a compact display string.
@@ -21,10 +24,37 @@ export function formatSubscriberCount(count: number): string {
 	return count.toString();
 }
 
+export interface ChannelConfig {
+	id: string;
+	name: string;
+	handle: string;
+	avatarUrl: string | null;
+	bannerUrl: string | null;
+	description: string | null;
+	subscriberCount: string;
+	videoCount: number;
+	verified: boolean;
+}
+
+export interface ChannelVideoConfig {
+	id: string;
+	title: string;
+	thumbnail: string;
+	uploaderName: string;
+	uploaderUrl: string | null;
+	uploadedDate: string;
+	duration: number;
+	viewCount: number;
+	isShort: boolean;
+}
+
 /**
  * Adapt raw channel info from the API into a display-ready ChannelConfig.
  */
-export function adaptChannelInfo(info: ChannelInfoResponse, videoCount: number = 0): ChannelConfig {
+export function adaptChannelInfo(
+	info: ChannelInfoApiResponse,
+	videoCount: number = 0
+): ChannelConfig {
 	return {
 		id: info.id,
 		name: info.name || 'Unknown Channel',
@@ -42,7 +72,7 @@ export function adaptChannelInfo(info: ChannelInfoResponse, videoCount: number =
  * Adapt a single raw ChannelVideoItem into a ChannelVideoConfig.
  */
 function adaptChannelVideo(
-	video: ChannelVideoItem,
+	video: ChannelVideoApiResponseItem,
 	thumbnailFallback: string,
 	avatarFallback: string
 ): ChannelVideoConfig {
@@ -63,12 +93,12 @@ function adaptChannelVideo(
  * Adapt a full ChannelVideosResponse into an array of ChannelVideoConfig.
  */
 export function adaptChannelVideos(
-	response: ChannelVideosResponse | null,
+	response: ChannelVideosApiResponse | null,
 	thumbnailFallback: string,
 	avatarFallback: string
 ): ChannelVideoConfig[] {
 	if (!response?.items) return [];
-	return response.items.map((v: ChannelVideoItem): ChannelVideoConfig =>
+	return response.items.map((v: ChannelVideoApiResponseItem): ChannelVideoConfig =>
 		adaptChannelVideo(v, thumbnailFallback, avatarFallback)
 	);
 }

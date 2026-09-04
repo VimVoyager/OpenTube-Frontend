@@ -1,9 +1,9 @@
 <script lang="ts">
-	import type { ChannelSearchResultConfig } from '$lib/adapters/types';
 	import { formatCount } from '$lib/utils/formatters';
 	import avatarPlaceholder from '$lib/assets/logo-placeholder.svg';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
+	import type { ChannelSearchResultConfig } from '$lib/adapters/search';
 
 	let { result }: { result: ChannelSearchResultConfig } = $props();
 

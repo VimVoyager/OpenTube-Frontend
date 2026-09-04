@@ -1,12 +1,26 @@
-import type { PlaylistResponse, RelatedItemResponse } from '$lib/api/types';
 import { extractIdFromUrl } from '$lib/utils/streamSelection';
 import { selectBestImage } from '$lib/utils/mediaUtils';
 import logoPlaceholder from '$lib/assets/logo-placeholder.svg';
 import bannerPlaceholder from '$lib/assets/banner-fallback.jpg';
 import thumbnailPlaceholder from '$lib/assets/thumbnail-placeholder.jpg';
-import type { PlaylistInfoConfig, RelatedVideoConfig } from '$lib/adapters/types';
+import type { RelatedItemApiResponse } from '$lib/api/related';
+import type { PlaylistApiResponse } from '$lib/api/playlist';
+import type { RelatedVideoConfig } from '$lib/adapters/related';
 
-export function adaptPlaylistInfo(info: PlaylistResponse): PlaylistInfoConfig {
+export interface PlaylistInfoConfig {
+	id: string;
+	name: string;
+	url: string;
+	uploaderName: string;
+	uploaderId: string;
+	uploaderUrl: string | null;
+	uploaderAvatarUrl: string | null;
+	bannerUrl?: string | null;
+	thumbnailUrl: string | null;
+	description?: string | null;
+}
+
+export function adaptPlaylistInfo(info: PlaylistApiResponse): PlaylistInfoConfig {
 	return {
 		id: info.id,
 		name: info.name,
@@ -21,7 +35,7 @@ export function adaptPlaylistInfo(info: PlaylistResponse): PlaylistInfoConfig {
 	};
 }
 
-function adaptPlaylistVideo(video: RelatedItemResponse): RelatedVideoConfig {
+function adaptPlaylistVideo(video: RelatedItemApiResponse): RelatedVideoConfig {
 	return {
 		id: extractIdFromUrl(video.url),
 		url: video.url,
@@ -36,7 +50,7 @@ function adaptPlaylistVideo(video: RelatedItemResponse): RelatedVideoConfig {
 	};
 }
 
-export function adaptPlaylistVideos(response: PlaylistResponse): RelatedVideoConfig[] {
+export function adaptPlaylistVideos(response: PlaylistApiResponse): RelatedVideoConfig[] {
 	if (!response?.relatedItems) return [];
 	return response.relatedItems.map(adaptPlaylistVideo);
 }

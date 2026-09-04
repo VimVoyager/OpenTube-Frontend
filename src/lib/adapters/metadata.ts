@@ -1,6 +1,17 @@
 import type { Details } from '$lib/types';
 import { selectBestImage } from '$lib/utils/mediaUtils';
-import type { VideoMetadata } from './types';
+
+export interface VideoMetadata {
+	title: string;
+	description: string;
+	channelName: string;
+	channelAvatar: string | null;
+	viewCount: number;
+	uploadDate: string;
+	likeCount: number;
+	dislikeCount: number;
+	subscriberCount: number;
+}
 
 /**
  * Adapt video details into metadata for display

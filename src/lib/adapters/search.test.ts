@@ -13,7 +13,8 @@ import {
 } from '../../tests/fixtures/builder';
 import searchResponseFixture from '../../tests/fixtures/api/searchApiResponse.json';
 import searchResultFixture from '../../tests/fixtures/adapters/searchAdaptedResponse.json';
-import type { SearchApiResponse } from '$lib/api/types';
+
+import type { SearchApiResponse } from '$lib/api/search';
 
 const defaultThumbnail = 'default-thumbnail.jpg';
 const defaultAvatar = 'default-avatar.jpg';

@@ -1,12 +1,22 @@
-import type { KioskResponseItem } from '$lib/api/types';
 import { extractIdFromUrl } from '$lib/utils/streamSelection';
 import { selectBestImage } from '$lib/utils/mediaUtils';
-import type { KioskVideoConfig } from '$lib/adapters/types';
+import type { KioskApiResponseItem } from '$lib/api/kiosk';
+
+export interface KioskVideoConfig {
+	id: string;
+	url: string;
+	title: string;
+	thumbnail: string;
+	channelName: string;
+	viewCount: number;
+	uploadDate: string;
+	duration: number;
+}
 
 /**
  * Adapts a single kiosk item ot kiosk video config
  */
-function adaptKioskVideo(item: KioskResponseItem, defaultThumbnail: string): KioskVideoConfig {
+function adaptKioskVideo(item: KioskApiResponseItem, defaultThumbnail: string): KioskVideoConfig {
 	return {
 		id: extractIdFromUrl(item.url),
 		url: item.url || '',
@@ -23,7 +33,7 @@ function adaptKioskVideo(item: KioskResponseItem, defaultThumbnail: string): Kio
  * Adapts an array of kiosk items into related video configurations
  */
 export function adaptKioskVideos(
-	items: KioskResponseItem[] | undefined,
+	items: KioskApiResponseItem[] | undefined,
 	defaultThumbnail: string
 ): KioskVideoConfig[] {
 	if (!items || items.length === 0) {
@@ -31,8 +41,8 @@ export function adaptKioskVideos(
 	}
 
 	return items
-		.filter((item: KioskResponseItem): string => item && item.url && item.name)
-		.map((item: KioskResponseItem): KioskVideoConfig => adaptKioskVideo(item, defaultThumbnail));
+		.filter((item: KioskApiResponseItem): string => item && item.url && item.name)
+		.map((item: KioskApiResponseItem): KioskVideoConfig => adaptKioskVideo(item, defaultThumbnail));
 }
 
 function handleNegativeCount(count: number): number {

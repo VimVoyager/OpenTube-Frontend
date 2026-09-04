@@ -1,13 +1,12 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { DOMParser as XMLDomParser } from '@xmldom/xmldom';
-import { load } from './+page';
+import { load, type VideoPageData } from './+page';
 import detailsResponseFixture from '../../../tests/fixtures/api/detailsResponseFixture.json';
 import thumbnailsResponseFixture from '../../../tests/fixtures/api/thumbnailsResponseFixture.json';
 import manifestXmlFixture from '../../../tests/fixtures/api/manifestXmlFixture.xml?raw';
 import relatedVideosFixture from '../../../tests/fixtures/api/relatedVideosResponse.json';
 import playlistResponseFixture from '../../../tests/fixtures/api/playlistResponse.json';
 import commentsResponseFixture from '../../../tests/fixtures/api/commentsResponse.json';
-import type { VideoPageData } from '../../types';
 
 // The API + Adapter Integration describes that used to live here are gone:
 // fetchers are covered by the describeJsonFetcher factory + manifest.test.ts

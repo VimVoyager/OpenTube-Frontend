@@ -1,4 +1,12 @@
-import type { VideoPlayerConfig } from './types';
+/**
+ * Video player configuration derived from selected streams
+ */
+export interface VideoPlayerConfig {
+	manifestUrl: string;
+	duration: number;
+	poster: string;
+	isMuxed?: boolean;
+}
 
 /**
  * Adapt video and audio streams into player configuration

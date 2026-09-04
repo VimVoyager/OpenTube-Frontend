@@ -1,9 +1,9 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import type { KioskVideoConfig } from '$lib/adapters/types';
 	import { resolve } from '$app/paths';
 	import { formatCount } from '$lib/utils/formatters';
 	import VideoThumbnail from '$lib/components/VideoThumbnail.svelte';
+	import type { KioskVideoConfig } from '$lib/adapters/kiosk';
 
 	interface Props {
 		title: string;

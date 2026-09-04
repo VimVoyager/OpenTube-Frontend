@@ -1,7 +1,40 @@
 import { PUBLIC_API_URL } from '$env/static/public';
-import type { ChannelInfoResponse, ChannelVideosResponse } from '$lib/api/types';
+import type { Image } from '$lib/api/types';
 
 const API_BASE_URL: string = PUBLIC_API_URL;
+
+export interface ChannelVideoApiResponseItem {
+	url: string;
+	name: string;
+	uploaderName: string;
+	uploaderUrl: string | null;
+	uploaderVerified: boolean;
+	duration: number;
+	viewCount: number;
+	textualUploadDate: string | null;
+	thumbnails: Image[];
+	isShortFormContent?: boolean;
+}
+
+export interface ChannelInfoApiResponse {
+	id: string;
+	name: string;
+	avatarUrl: string;
+	bannerUrl: string;
+	description: string;
+	subscriberCount: number;
+	handle: string | null;
+	verified: boolean;
+	tabs: string[];
+	avatars: Image[];
+	banners: Image[];
+}
+
+export interface ChannelVideosApiResponse {
+	channelId: string;
+	items: ChannelVideoApiResponseItem[];
+	nextPageToken: string | null;
+}
 
 /**
  * Fetch channel info (banner, avatar, name, description, etc.)
@@ -9,7 +42,7 @@ const API_BASE_URL: string = PUBLIC_API_URL;
 export async function getChannelInfo(
 	channelId: string,
 	fetchFn?: typeof globalThis.fetch
-): Promise<ChannelInfoResponse> {
+): Promise<ChannelInfoApiResponse> {
 	const fetcher: {
 		(input: RequestInfo | URL, init?: RequestInit): Promise<Response>;
 		(input: string | URL | Request, init?: RequestInit): Promise<Response>;
@@ -39,7 +72,7 @@ export async function getChannelInfo(
 export async function getChannelVideos(
 	channelId: string,
 	fetchFn?: typeof globalThis.fetch
-): Promise<ChannelVideosResponse> {
+): Promise<ChannelVideosApiResponse> {
 	const fetcher: {
 		(input: RequestInfo | URL, init?: RequestInit): Promise<Response>;
 		(input: string | URL | Request, init?: RequestInit): Promise<Response>;

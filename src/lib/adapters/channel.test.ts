@@ -5,7 +5,12 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { formatSubscriberCount, adaptChannelInfo, adaptChannelVideos } from './channel';
+import {
+	formatSubscriberCount,
+	adaptChannelInfo,
+	adaptChannelVideos,
+	type ChannelVideoConfig
+} from './channel';
 import {
 	buildChannelDetailsResponse,
 	buildChannelVideosResponse,
@@ -15,8 +20,7 @@ import channelDetailsResponseFixture from '../../tests/fixtures/api/channelDetai
 import channelVideosResponseFixture from '../../tests/fixtures/api/channelVideosResponse.json';
 import channelDetailsFixture from '../../tests/fixtures/adapters/channelDetails.json';
 import channelVideosFixture from '../../tests/fixtures/adapters/channelVideos.json';
-import type { ChannelInfoResponse, ChannelVideosResponse } from '$lib/api/types';
-import type { ChannelVideoConfig } from '$lib/adapters/types';
+import type { ChannelInfoApiResponse, ChannelVideosApiResponse } from '$lib/api/channel';
 
 const thumbnailFallback = 'fallback-thumb.jpg';
 const avatarFallback = 'fallback-avatar.jpg';
@@ -57,7 +61,7 @@ describe('adaptChannelInfo', () => {
 
 	it('matches the channelDetails round-trip fixture', () => {
 		const result = adaptChannelInfo(
-			channelDetailsResponseFixture as unknown as ChannelInfoResponse,
+			channelDetailsResponseFixture as unknown as ChannelInfoApiResponse,
 			42
 		);
 		expect(result).toEqual({ ...channelDetailsFixture, videoCount: 42 });
@@ -177,7 +181,7 @@ describe('adaptChannelVideos', () => {
 
 	it('matches the channelVideos round-trip fixture', () => {
 		const result = adaptChannelVideos(
-			channelVideosResponseFixture as unknown as ChannelVideosResponse,
+			channelVideosResponseFixture as unknown as ChannelVideosApiResponse,
 			thumbnailFallback,
 			avatarFallback
 		);

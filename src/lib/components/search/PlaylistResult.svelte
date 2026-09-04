@@ -1,9 +1,9 @@
 <script lang="ts">
-	import type { PlaylistSearchResultConfig } from '$lib/adapters/types';
 	import thumbnailPlaceholder from '$lib/assets/thumbnail-placeholder.jpg';
 	import { goto } from '$app/navigation';
 	import { getPlaylist } from '$lib/api/playlist';
 	import { resolve } from '$app/paths';
+	import type { PlaylistSearchResultConfig } from '$lib/adapters/search';
 
 	let { result }: { result: PlaylistSearchResultConfig } = $props();
 

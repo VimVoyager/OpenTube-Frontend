@@ -1,5 +1,4 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import type { ChannelConfig, ChannelVideoConfig } from '$lib/adapters/types';
 import channelDetailsResponseFixture from '../../../tests/fixtures/api/channelDetailsResponse.json';
 import channelVideosResponseFixture from '../../../tests/fixtures/api/channelVideosResponse.json';
 import channelDetailsFixture from '../../../tests/fixtures/adapters/channelDetails.json';
@@ -29,12 +28,17 @@ vi.mock('$lib/utils/streamSelection', () => ({
 	})
 }));
 
-import { getChannelInfo, getChannelVideos } from '$lib/api/channel';
-import type { ChannelInfoResponse, ChannelVideosResponse } from '$lib/api/types';
+import {
+	type ChannelInfoApiResponse,
+	type ChannelVideosApiResponse,
+	getChannelInfo,
+	getChannelVideos
+} from '$lib/api/channel';
 import { loadChannelData } from '$lib/loaders/channel';
+import type { ChannelConfig, ChannelVideoConfig } from '$lib/adapters/channel';
 
-const infoResponse = channelDetailsResponseFixture as unknown as ChannelInfoResponse;
-const videosResponse = channelVideosResponseFixture as unknown as ChannelVideosResponse;
+const infoResponse = channelDetailsResponseFixture as unknown as ChannelInfoApiResponse;
+const videosResponse = channelVideosResponseFixture as unknown as ChannelVideosApiResponse;
 const expectedChannel = channelDetailsFixture as ChannelConfig;
 const expectedVideos = channelVideosFixture as ChannelVideoConfig[];
 
@@ -74,7 +78,7 @@ describe('Channel +page.ts — integration', () => {
 			// First item has no thumbnails, forcing the fallback path.
 			// This pins the load function's wiring of the asset imports, which the
 			// adapter suite can't see (it receives placeholders as plain arguments).
-			const responseWithNoThumbnails: ChannelVideosResponse = {
+			const responseWithNoThumbnails: ChannelVideosApiResponse = {
 				...videosResponse,
 				items: [{ ...videosResponse.items[0], thumbnails: [] }]
 			};
@@ -133,7 +137,7 @@ describe('Channel +page.ts — integration', () => {
 		it('should return error page data instead of throwing when the adapter throws', async () => {
 			// Null info response makes adaptChannelInfo throw on info.id,
 			// exercising the outer catch around the adapter stage (not just the fetch)
-			vi.mocked(getChannelInfo).mockResolvedValue(null as unknown as ChannelInfoResponse);
+			vi.mocked(getChannelInfo).mockResolvedValue(null as unknown as ChannelInfoApiResponse);
 
 			const result = await loadChannel();
 

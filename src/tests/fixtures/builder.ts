@@ -3,17 +3,13 @@
  * Defaults are modelled on the real fixtures in src/tests/fixtures/api/.
  */
 
-import type {
-	PlaylistResponse,
-	RelatedItemResponse,
-	ChannelVideosResponse,
-	CommentResponse,
-	RelatedCommentItem,
-	SearchApiResponse,
-	ChannelInfoResponse,
-	KioskResponseItem
-} from '$lib/api/types';
 import type { Avatar, Details, Image } from '$lib/types';
+import type { SearchApiResponse } from '$lib/api/search';
+import type { RelatedItemApiResponse } from '$lib/api/related';
+import type { CommentApiResponse, RelatedCommentApiResponseItem } from '$lib/api/comments';
+import type { ChannelInfoApiResponse, ChannelVideosApiResponse } from '$lib/api/channel';
+import type { PlaylistApiResponse } from '$lib/api/playlist';
+import type { KioskApiResponseItem } from '$lib/api/kiosk';
 
 // ---------------------------------------------------------------------------
 // Media primitives (exported — handy for mediaUtils/thumbnail tests too)
@@ -44,8 +40,8 @@ export const buildAvatar = (overrides: Partial<Image> = {}): Avatar =>
 // ---------------------------------------------------------------------------
 
 export const buildRelatedItem = (
-	overrides: Partial<RelatedItemResponse> = {}
-): RelatedItemResponse =>
+	overrides: Partial<RelatedItemApiResponse> = {}
+): RelatedItemApiResponse =>
 	({
 		infoType: 'STREAM',
 		serviceId: 0,
@@ -66,15 +62,15 @@ export const buildRelatedItem = (
 		shortFormContent: false,
 		isShortFormContent: false,
 		...overrides
-	}) as RelatedItemResponse;
+	}) as RelatedItemApiResponse;
 
 // ---------------------------------------------------------------------------
 // Playlist
 // ---------------------------------------------------------------------------
 
 export const buildPlaylistResponse = (
-	overrides: Partial<PlaylistResponse> = {}
-): PlaylistResponse =>
+	overrides: Partial<PlaylistApiResponse> = {}
+): PlaylistApiResponse =>
 	({
 		id: 'PLtest123',
 		serviceId: 1,
@@ -97,15 +93,15 @@ export const buildPlaylistResponse = (
 		streamCount: 0,
 		relatedItems: [],
 		...overrides
-	}) as PlaylistResponse;
+	}) as PlaylistApiResponse;
 
 // ---------------------------------------------------------------------------
 // Channel — details + videos tab
 // ---------------------------------------------------------------------------
 
 export const buildChannelDetailsResponse = (
-	overrides: Partial<ChannelInfoResponse> = {}
-): ChannelInfoResponse => ({
+	overrides: Partial<ChannelInfoApiResponse> = {}
+): ChannelInfoApiResponse => ({
 	id: 'UCtest456',
 	name: 'Test Channel',
 	handle: 'TestChannel',
@@ -135,20 +131,22 @@ export const buildChannelDetailsResponse = (
 });
 
 export const buildChannelVideosResponse = (
-	overrides: Partial<ChannelVideosResponse> = {}
-): ChannelVideosResponse =>
+	overrides: Partial<ChannelVideosApiResponse> = {}
+): ChannelVideosApiResponse =>
 	({
 		tab: 'videos',
 		channelId: 'UCtest456',
 		items: [buildRelatedItem()],
 		...overrides
-	}) as ChannelVideosResponse;
+	}) as ChannelVideosApiResponse;
 
 // ---------------------------------------------------------------------------
 // Comments
 // ---------------------------------------------------------------------------
 
-export const buildCommentItem = (overrides: Partial<RelatedCommentItem> = {}): RelatedCommentItem =>
+export const buildCommentItem = (
+	overrides: Partial<RelatedCommentApiResponseItem> = {}
+): RelatedCommentApiResponseItem =>
 	({
 		infoType: 'COMMENT',
 		serviceId: 0,
@@ -174,9 +172,11 @@ export const buildCommentItem = (overrides: Partial<RelatedCommentItem> = {}): R
 		replies: undefined,
 		channelOwner: false,
 		...overrides
-	}) as RelatedCommentItem;
+	}) as RelatedCommentApiResponseItem;
 
-export const buildCommentResponse = (overrides: Partial<CommentResponse> = {}): CommentResponse =>
+export const buildCommentResponse = (
+	overrides: Partial<CommentApiResponse> = {}
+): CommentApiResponse =>
 	({
 		serviceId: 0,
 		id: 'video1',
@@ -186,7 +186,7 @@ export const buildCommentResponse = (overrides: Partial<CommentResponse> = {}): 
 		errors: [],
 		relatedItems: [buildCommentItem()],
 		...overrides
-	}) as CommentResponse;
+	}) as CommentApiResponse;
 
 // ---------------------------------------------------------------------------
 // Video details
@@ -279,7 +279,9 @@ export const buildSearchResponse = (
 // Streams / related items
 // ---------------------------------------------------------------------------
 
-export const buildKioskItem = (overrides: Partial<KioskResponseItem> = {}): KioskResponseItem =>
+export const buildKioskItem = (
+	overrides: Partial<KioskApiResponseItem> = {}
+): KioskApiResponseItem =>
 	({
 		url: 'https://www.youtube.com/watch?v=video1',
 		name: 'Test Video',
@@ -293,4 +295,4 @@ export const buildKioskItem = (overrides: Partial<KioskResponseItem> = {}): Kios
 		uploadDate: { approximation: true },
 		uploaderVerified: true,
 		...overrides
-	}) as KioskResponseItem;
+	}) as KioskApiResponseItem;

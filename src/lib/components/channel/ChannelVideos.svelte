@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { formatCount } from '$lib/utils/formatters';
-	import type { ChannelVideoConfig } from '$lib/adapters/types';
 	import { resolve } from '$app/paths';
 	import VideoThumbnail from '$lib/components/VideoThumbnail.svelte';
+	import type { ChannelVideoConfig } from '$lib/adapters/channel';
 
 	let { videos }: { videos: ChannelVideoConfig[] } = $props();
 </script>

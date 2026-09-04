@@ -7,8 +7,8 @@
 import { render, screen, fireEvent } from '@testing-library/svelte';
 import { describe, it, expect } from 'vitest';
 import VideoListings from './VideoListings.svelte';
-import type { RelatedVideoConfig } from '$lib/adapters/types';
 import relatedVideosFixture from '../../../tests/fixtures/adapters/relatedVideos.json';
+import type { RelatedVideoConfig } from '$lib/adapters/related';
 
 const mockRelatedVideos: RelatedVideoConfig[] = relatedVideosFixture;
 const [heartbeat] = mockRelatedVideos;

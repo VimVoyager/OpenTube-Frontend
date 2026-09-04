@@ -3,16 +3,16 @@
 	import { SvelteURL } from 'svelte/reactivity';
 	import { browser } from '$app/environment';
 	import { PUBLIC_PROXY_URL } from '$env/static/public';
-	import type { VideoPlayerConfig } from '$lib/adapters/types';
+	import VideoPlayerError, {
+		type ShakaErrorDetail
+	} from '$lib/components/video/VideoPlayerError.svelte';
+	import type { VideoPlayerConfig } from '$lib/adapters/player';
 	import type {
 		ShakaPlayerInstance,
 		ShakaRequest,
 		ShakaUIConfiguration,
 		ShakaUIOverlayInstance
-	} from '$lib/types';
-	import VideoPlayerError, {
-		type ShakaErrorDetail
-	} from '$lib/components/video/VideoPlayerError.svelte';
+	} from '$lib/player/shaka';
 
 	let { config }: { config: VideoPlayerConfig } = $props();
 

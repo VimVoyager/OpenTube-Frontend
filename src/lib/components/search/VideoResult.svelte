@@ -1,11 +1,11 @@
 <script lang="ts">
-	import type { VideoSearchResultConfig } from '$lib/adapters/types';
 	import { formatCount, formatDate } from '$lib/utils/formatters';
 	import thumbnailPlaceholder from '$lib/assets/thumbnail-placeholder.jpg';
 	import avatarPlaceholder from '$lib/assets/logo-placeholder.svg';
 	import { extractIdFromUrl } from '$lib/utils/streamSelection';
 	import { resolve } from '$app/paths';
 	import VideoThumbnail from '$lib/components/VideoThumbnail.svelte';
+	import type { VideoSearchResultConfig } from '$lib/adapters/search';
 
 	let { result }: { result: VideoSearchResultConfig } = $props();
 

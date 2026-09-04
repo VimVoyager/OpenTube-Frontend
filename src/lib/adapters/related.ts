@@ -1,13 +1,29 @@
 import { extractIdFromUrl } from '$lib/utils/streamSelection';
 import { selectBestImage } from '$lib/utils/mediaUtils';
-import type { RelatedVideoConfig } from './types';
-import type { RelatedItemResponse } from '$lib/api/types';
+
+import type { RelatedItemApiResponse } from '$lib/api/related';
+
+/**
+ * Related video configuration for listings display
+ */
+export interface RelatedVideoConfig {
+	id: string;
+	url: string;
+	title: string;
+	thumbnail: string;
+	channelName: string;
+	channelId: string;
+	channelAvatar: string | null;
+	viewCount: number;
+	uploadDate: string;
+	duration: number;
+}
 
 /**
  * Adapts a single related item to related video configuration
  */
 function adaptRelatedVideo(
-	item: RelatedItemResponse,
+	item: RelatedItemApiResponse,
 	defaultThumbnail: string,
 	defaultAvatar: string
 ): RelatedVideoConfig {
@@ -30,7 +46,7 @@ function adaptRelatedVideo(
  * Filters out invalid items (missing required fields) and transforms remaining items
  */
 export function adaptRelatedVideos(
-	items: RelatedItemResponse[] | undefined,
+	items: RelatedItemApiResponse[] | undefined,
 	defaultThumbnail: string,
 	defaultAvatar: string
 ): RelatedVideoConfig[] {
@@ -39,8 +55,8 @@ export function adaptRelatedVideos(
 	}
 
 	return items
-		.filter((item: RelatedItemResponse): string => item && item.url && item.name) // Filter out invalid items
-		.map((item: RelatedItemResponse): RelatedVideoConfig =>
+		.filter((item: RelatedItemApiResponse): string => item && item.url && item.name) // Filter out invalid items
+		.map((item: RelatedItemApiResponse): RelatedVideoConfig =>
 			adaptRelatedVideo(item, defaultThumbnail, defaultAvatar)
 		);
 }

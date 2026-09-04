@@ -1,6 +1,7 @@
 <script lang="ts">
 	import logoPlaceholder from '$lib/assets/logo-placeholder.svg';
-	import type { ChannelConfig } from '$lib/adapters/types';
+
+	import type { ChannelConfig } from '$lib/adapters/channel';
 
 	export type ChannelTab = 'home' | 'videos' | 'playlists';
 

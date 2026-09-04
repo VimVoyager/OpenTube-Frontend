@@ -8,13 +8,13 @@ import { describe, it, expect } from 'vitest';
 import { buildKioskItem } from '../../tests/fixtures/builder';
 import kioskVideosResponseFixture from '../../tests/fixtures/api/kioskResponse.json';
 import KioskVideosFixture from '../../tests/fixtures/adapters/kioskVideos.json';
-import type { KioskResponseItem } from '$lib/api/types';
-import type { KioskVideoConfig } from '$lib/adapters/types';
-import { adaptKioskVideos } from '$lib/adapters/kiosk';
+import { adaptKioskVideos, type KioskVideoConfig } from '$lib/adapters/kiosk';
+import type { KioskApiResponseItem } from '$lib/api/kiosk';
 
 const defaultThumbnail = 'fallback-thumb.jpg';
 
-const adapt = (items: KioskResponseItem[] | undefined) => adaptKioskVideos(items, defaultThumbnail);
+const adapt = (items: KioskApiResponseItem[] | undefined) =>
+	adaptKioskVideos(items, defaultThumbnail);
 
 describe('adaptKioskVideos', () => {
 	it('adapts a single item with all fields mapped', () => {
@@ -34,7 +34,7 @@ describe('adaptKioskVideos', () => {
 	});
 
 	it('matches the kiosk video round-trip fixture', () => {
-		const result = adapt(kioskVideosResponseFixture.items as KioskResponseItem[]);
+		const result = adapt(kioskVideosResponseFixture.items as KioskApiResponseItem[]);
 		expect(result).toEqual(KioskVideosFixture);
 	});
 

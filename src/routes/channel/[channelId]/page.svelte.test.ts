@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen } from '@testing-library/svelte';
 import Page from './+page.svelte';
-import type { ChannelConfig, ChannelVideoConfig } from '$lib/adapters/types';
 import channelDetailsFixture from '../../../tests/fixtures/adapters/channelDetails.json';
 import channelVideosFixture from '../../../tests/fixtures/adapters/channelVideos.json';
 
@@ -20,7 +19,8 @@ vi.mock('$lib/components/ErrorCard.svelte', () => ({
 
 import ChannelVideos from '$lib/components/channel/ChannelVideos.svelte';
 import ErrorCard from '$lib/components/ErrorCard.svelte';
-import type { ChannelPageData } from '../../types';
+import type { ChannelConfig, ChannelVideoConfig } from '$lib/adapters/channel';
+import type { ChannelPageData } from './+page';
 
 const mockChannel = channelDetailsFixture as ChannelConfig;
 const mockVideos = channelVideosFixture as ChannelVideoConfig[];
