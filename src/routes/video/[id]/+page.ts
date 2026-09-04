@@ -1,27 +1,45 @@
 import type { PageLoad } from './$types';
 import { getVideoDetails } from '$lib/api/details';
 import { getRelatedStreams } from '$lib/api/related';
-import { adaptPlayerConfig, VideoPlayerConfig } from '$lib/adapters/player';
-import { adaptVideoMetadata, VideoMetadata } from '$lib/adapters/metadata';
-import { adaptRelatedVideos, RelatedVideoConfig } from '$lib/adapters/related';
-import { adaptPlaylistInfo, adaptPlaylistVideos, PlaylistInfoConfig } from '$lib/adapters/playlist';
+import { adaptPlayerConfig, type VideoPlayerConfig } from '$lib/adapters/player';
+import { adaptVideoMetadata, type VideoMetadata } from '$lib/adapters/metadata';
+import { adaptRelatedVideos, type RelatedVideoConfig } from '$lib/adapters/related';
+import { adaptPlaylistInfo, adaptPlaylistVideos, type PlaylistInfoConfig } from '$lib/adapters/playlist';
 import thumbnailPlaceholder from '$lib/assets/thumbnail-placeholder.jpg';
 import logoPlaceholder from '$lib/assets/logo-placeholder.svg';
 import { getManifest } from '$lib/api/manifest';
 import { getVideoThumbnails } from '$lib/api/thumbnails';
 import { getPlaylist } from '$lib/api/playlist';
-import type { VideoPageData } from '../../types';
 import { getVideoComments } from '$lib/api/comments';
-import { adaptCommentResponse, CommentConfig } from '$lib/adapters/comments';
+import { adaptCommentResponse, type CommentConfig } from '$lib/adapters/comments';
+
+
+interface ErrorPageData {
+	videoId: string;
+	playerConfig: { manifestUrl: string; duration: number; poster: string };
+	metadata: {
+		title: string;
+		description: string;
+		channelName: string;
+		channelAvatar: null;
+		viewCount: number;
+		uploadDate: string;
+		likeCount: number;
+		dislikeCount: number;
+		subscriberCount: number;
+	};
+	relatedVideos: RelatedVideoConfig[];
+	error: string;
+}
 
 /**
  * Creates error page data with default values
  */
-function createErrorPageData(error: unknown, videoId: string): VideoPageData {
+function createErrorPageData(error: unknown, videoId: string): ErrorPageData {
 	const errorMessage: string =
 		error instanceof Error ? error.message : 'Unknown error loading video';
 
-	return {
+	return <ErrorPageData>{
 		videoId,
 		playerConfig: {
 			manifestUrl: '',
@@ -44,36 +62,18 @@ function createErrorPageData(error: unknown, videoId: string): VideoPageData {
 	};
 }
 
-/**
- * Fetches and processes video data
- */
-// async function fetchVideoData(
-// 	videoId: string,
-// 	fetch: typeof globalThis.fetch
-// ): Promise<{
-// 	thumbnails: Awaited<ReturnType<typeof getVideoThumbnails>>;
-// 	details: Awaited<ReturnType<typeof getVideoDetails>>;
-// 	manifest: Awaited<ReturnType<typeof getManifest>>;
-// 	relatedStreams: Awaited<ReturnType<typeof getRelatedStreams>>;
-// 	comments: Awaited<ReturnType<typeof getVideoComments>>;
-// }> {
-// 	// Fetch video metadata, manifest, related videos and comments in parallel
-// 	const [thumbnails, details, manifest, relatedStreams, comments] = await Promise.all([
-// 		getVideoThumbnails(videoId, fetch),
-// 		getVideoDetails(videoId, fetch),
-// 		getManifest(videoId, fetch),
-// 		getRelatedStreams(videoId, fetch).catch((error) => {
-// 			console.warn('Failed to fetch related videos:', error);
-// 			return [];
-// 		}),
-// 		getVideoComments(videoId, fetch).catch((error) => {
-// 			console.warn('Failed to fetch comments:', error);
-// 			return null;
-// 		})
-// 	]);
-//
-// 	return { thumbnails, details, manifest, relatedStreams, comments };
-// }
+export interface VideoPageData {
+	playerConfig: VideoPlayerConfig;
+	metadata: VideoMetadata;
+	relatedVideos: RelatedVideoConfig[];
+	comments?: CommentConfig[];
+	playlistId?: string | null;
+	playlistIndex?: number | null;
+	playlistVideos?: RelatedVideoConfig[] | null;
+	playlistInfo?: PlaylistInfoConfig | null;
+	videoId?: string | null;
+	error?: string;
+}
 
 /**
  * Page load function - fetches and transforms data
