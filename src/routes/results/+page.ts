@@ -1,4 +1,4 @@
-import { getSearchResults, SearchApiResponse } from '$lib/api/search';
+import { getSearchResults, type SearchApiResponse } from '$lib/api/search';
 import { adaptSearchResults, type SearchResultsPage } from '$lib/adapters/search';
 import thumbnailPlaceholder from '$lib/assets/thumbnail-placeholder.jpg';
 import avatarPlaceholder from '$lib/assets/logo-placeholder.svg';

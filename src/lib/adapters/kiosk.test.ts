@@ -8,7 +8,7 @@ import { describe, it, expect } from 'vitest';
 import { buildKioskItem } from '../../tests/fixtures/builder';
 import kioskVideosResponseFixture from '../../tests/fixtures/api/kioskResponse.json';
 import KioskVideosFixture from '../../tests/fixtures/adapters/kioskVideos.json';
-import { adaptKioskVideos, KioskVideoConfig } from '$lib/adapters/kiosk';
+import { adaptKioskVideos, type KioskVideoConfig } from '$lib/adapters/kiosk';
 import type { KioskApiResponseItem } from '$lib/api/kiosk';
 
 const defaultThumbnail = 'fallback-thumb.jpg';
