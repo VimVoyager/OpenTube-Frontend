@@ -28,4 +28,3 @@ export interface Avatar {
 	width: number;
 	estimatedResolutionLevel?: string;
 }
-

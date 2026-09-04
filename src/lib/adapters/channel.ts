@@ -1,7 +1,11 @@
 import { extractIdFromUrl } from '$lib/utils/streamSelection';
 import { selectBestImage } from '$lib/utils/mediaUtils';
 import { formatCount } from '$lib/utils/formatters';
-import type { ChannelInfoApiResponse, ChannelVideoApiResponseItem, ChannelVideosApiResponse } from '$lib/api/channel';
+import type {
+	ChannelInfoApiResponse,
+	ChannelVideoApiResponseItem,
+	ChannelVideosApiResponse
+} from '$lib/api/channel';
 
 /**
  * Format a raw subscriber count into a compact display string.
@@ -47,7 +51,10 @@ export interface ChannelVideoConfig {
 /**
  * Adapt raw channel info from the API into a display-ready ChannelConfig.
  */
-export function adaptChannelInfo(info: ChannelInfoApiResponse, videoCount: number = 0): ChannelConfig {
+export function adaptChannelInfo(
+	info: ChannelInfoApiResponse,
+	videoCount: number = 0
+): ChannelConfig {
 	return {
 		id: info.id,
 		name: info.name || 'Unknown Channel',

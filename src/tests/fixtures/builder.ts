@@ -144,7 +144,9 @@ export const buildChannelVideosResponse = (
 // Comments
 // ---------------------------------------------------------------------------
 
-export const buildCommentItem = (overrides: Partial<RelatedCommentApiResponseItem> = {}): RelatedCommentApiResponseItem =>
+export const buildCommentItem = (
+	overrides: Partial<RelatedCommentApiResponseItem> = {}
+): RelatedCommentApiResponseItem =>
 	({
 		infoType: 'COMMENT',
 		serviceId: 0,
@@ -172,7 +174,9 @@ export const buildCommentItem = (overrides: Partial<RelatedCommentApiResponseIte
 		...overrides
 	}) as RelatedCommentApiResponseItem;
 
-export const buildCommentResponse = (overrides: Partial<CommentApiResponse> = {}): CommentApiResponse =>
+export const buildCommentResponse = (
+	overrides: Partial<CommentApiResponse> = {}
+): CommentApiResponse =>
 	({
 		serviceId: 0,
 		id: 'video1',
@@ -275,7 +279,9 @@ export const buildSearchResponse = (
 // Streams / related items
 // ---------------------------------------------------------------------------
 
-export const buildKioskItem = (overrides: Partial<KioskApiResponseItem> = {}): KioskApiResponseItem =>
+export const buildKioskItem = (
+	overrides: Partial<KioskApiResponseItem> = {}
+): KioskApiResponseItem =>
 	({
 		url: 'https://www.youtube.com/watch?v=video1',
 		name: 'Test Video',

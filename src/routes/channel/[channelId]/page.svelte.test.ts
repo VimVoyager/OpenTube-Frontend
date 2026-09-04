@@ -19,8 +19,8 @@ vi.mock('$lib/components/ErrorCard.svelte', () => ({
 
 import ChannelVideos from '$lib/components/channel/ChannelVideos.svelte';
 import ErrorCard from '$lib/components/ErrorCard.svelte';
-import type { ChannelPageData } from '../../types';
 import type { ChannelConfig, ChannelVideoConfig } from '$lib/adapters/channel';
+import type { ChannelPageData } from './+page';
 
 const mockChannel = channelDetailsFixture as ChannelConfig;
 const mockVideos = channelVideosFixture as ChannelVideoConfig[];

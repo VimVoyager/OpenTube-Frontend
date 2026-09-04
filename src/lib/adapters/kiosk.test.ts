@@ -13,7 +13,8 @@ import type { KioskApiResponseItem } from '$lib/api/kiosk';
 
 const defaultThumbnail = 'fallback-thumb.jpg';
 
-const adapt = (items: KioskApiResponseItem[] | undefined) => adaptKioskVideos(items, defaultThumbnail);
+const adapt = (items: KioskApiResponseItem[] | undefined) =>
+	adaptKioskVideos(items, defaultThumbnail);
 
 describe('adaptKioskVideos', () => {
 	it('adapts a single item with all fields mapped', () => {

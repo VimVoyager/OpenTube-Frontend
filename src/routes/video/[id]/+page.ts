@@ -4,7 +4,11 @@ import { getRelatedStreams } from '$lib/api/related';
 import { adaptPlayerConfig, type VideoPlayerConfig } from '$lib/adapters/player';
 import { adaptVideoMetadata, type VideoMetadata } from '$lib/adapters/metadata';
 import { adaptRelatedVideos, type RelatedVideoConfig } from '$lib/adapters/related';
-import { adaptPlaylistInfo, adaptPlaylistVideos, type PlaylistInfoConfig } from '$lib/adapters/playlist';
+import {
+	adaptPlaylistInfo,
+	adaptPlaylistVideos,
+	type PlaylistInfoConfig
+} from '$lib/adapters/playlist';
 import thumbnailPlaceholder from '$lib/assets/thumbnail-placeholder.jpg';
 import logoPlaceholder from '$lib/assets/logo-placeholder.svg';
 import { getManifest } from '$lib/api/manifest';
@@ -12,7 +16,6 @@ import { getVideoThumbnails } from '$lib/api/thumbnails';
 import { getPlaylist } from '$lib/api/playlist';
 import { getVideoComments } from '$lib/api/comments';
 import { adaptCommentResponse, type CommentConfig } from '$lib/adapters/comments';
-
 
 interface ErrorPageData {
 	videoId: string;

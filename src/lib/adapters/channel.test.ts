@@ -5,7 +5,12 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { formatSubscriberCount, adaptChannelInfo, adaptChannelVideos, type ChannelVideoConfig } from './channel';
+import {
+	formatSubscriberCount,
+	adaptChannelInfo,
+	adaptChannelVideos,
+	type ChannelVideoConfig
+} from './channel';
 import {
 	buildChannelDetailsResponse,
 	buildChannelVideosResponse,

@@ -108,7 +108,8 @@ describe('adaptComments', () => {
 	});
 
 	it('matches the commentsResult round-trip fixture on real-shaped data', () => {
-		const items = (commentsResponse[0] as CommentApiResponse).relatedItems as RelatedCommentApiResponseItem[];
+		const items = (commentsResponse[0] as CommentApiResponse)
+			.relatedItems as RelatedCommentApiResponseItem[];
 		expect(adaptComments(items, defaultAvatar)).toEqual(commentsResultFixture);
 	});
 });

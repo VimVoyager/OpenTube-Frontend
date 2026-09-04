@@ -18,4 +18,3 @@ export interface Image {
 	width: number;
 	estimatedResolutionLevel?: string;
 }
-

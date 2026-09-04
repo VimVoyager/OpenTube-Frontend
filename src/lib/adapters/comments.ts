@@ -25,7 +25,10 @@ export interface CommentConfig {
 /**
  * Adapt raw comment data into a cleaner format for display
  */
-export function adaptComment(comment: RelatedCommentApiResponseItem, defaultAvatar: string): CommentConfig {
+export function adaptComment(
+	comment: RelatedCommentApiResponseItem,
+	defaultAvatar: string
+): CommentConfig {
 	return {
 		id: comment.commentId,
 		text: comment.commentText || '',

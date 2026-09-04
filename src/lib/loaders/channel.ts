@@ -1,8 +1,8 @@
-import type { ChannelPageData } from '../../routes/types';
 import { getChannelInfo, getChannelVideos } from '$lib/api/channel';
 import { adaptChannelInfo, adaptChannelVideos } from '$lib/adapters/channel';
 import thumbnailPlaceholder from '$lib/assets/thumbnail-placeholder.jpg';
 import logoPlaceholder from '$lib/assets/logo-placeholder.svg';
+import type { ChannelPageData } from '../../routes/channel/[channelId]/+page';
 
 /**
  * Creates error page data with safe defaults

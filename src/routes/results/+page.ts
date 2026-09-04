@@ -3,9 +3,15 @@ import { adaptSearchResults, type SearchResultsPage } from '$lib/adapters/search
 import thumbnailPlaceholder from '$lib/assets/thumbnail-placeholder.jpg';
 import avatarPlaceholder from '$lib/assets/logo-placeholder.svg';
 import type { PageLoad } from './$types';
-import type { LoadSearchResponse } from '../types';
 
 const emptyResults: SearchResultsPage = { items: [], nextPage: null, hasNextPage: false };
+
+export interface LoadSearchResponse {
+	results: SearchResultsPage;
+	query: string;
+	sortFilter?: string;
+	error: string | null;
+}
 
 export const load: PageLoad = async ({ url, fetch }): Promise<LoadSearchResponse> => {
 	try {

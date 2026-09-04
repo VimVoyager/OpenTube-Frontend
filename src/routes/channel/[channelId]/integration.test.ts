@@ -28,7 +28,12 @@ vi.mock('$lib/utils/streamSelection', () => ({
 	})
 }));
 
-import { type ChannelInfoApiResponse, type ChannelVideosApiResponse, getChannelInfo, getChannelVideos } from '$lib/api/channel';
+import {
+	type ChannelInfoApiResponse,
+	type ChannelVideosApiResponse,
+	getChannelInfo,
+	getChannelVideos
+} from '$lib/api/channel';
 import { loadChannelData } from '$lib/loaders/channel';
 import type { ChannelConfig, ChannelVideoConfig } from '$lib/adapters/channel';
 
