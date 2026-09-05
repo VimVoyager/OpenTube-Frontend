@@ -36,7 +36,7 @@ describeJsonFetcher({
 
 describeJsonFetcher({
 	name: 'getSearchResultsNextPage',
-	call: (id, fetchFn) =>
+	call: (id: string, fetchFn) =>
 		getSearchResultsNextPage(
 			id,
 			'https://www.youtube.com/youtubei/v1/search?prettyPrint=false',
