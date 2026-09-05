@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import channelDetailsResponseFixture from '../../../tests/fixtures/api/channelDetailsResponse.json';
-import channelVideosResponseFixture from '../../../tests/fixtures/api/channelVideosResponse.json';
+import channelDetailsResponseFixture from '../../../tests/fixtures/api/channelDetailsApiResponse.json';
+import channelVideosResponseFixture from '../../../tests/fixtures/api/channelVideosApiResponse.json';
 import channelDetailsFixture from '../../../tests/fixtures/adapters/channelDetails.json';
 import channelVideosFixture from '../../../tests/fixtures/adapters/channelVideos.json';
 

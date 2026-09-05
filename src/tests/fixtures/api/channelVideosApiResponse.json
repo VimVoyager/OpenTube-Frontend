@@ -71,5 +71,14 @@
 				}
 			]
 		}
-	]
+	],
+	"nextPage": {
+		"url": "https://www.youtube.com/youtubei/v1/browse?prettyPrint=false",
+		"body": "EqADEgNsdHQamANTQ2lDQVF0TVdVMTJTbGMxY2xsTlJZSUJDMjlsY1ZWSVJYQTB",
+		"ids": [
+			"GLITCH",
+			"https://www.youtube.com/channel/glitch-channel-id",
+			"VERIFIED"
+		]
+	}
 }
