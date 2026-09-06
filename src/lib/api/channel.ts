@@ -31,9 +31,14 @@ export interface ChannelInfoApiResponse {
 }
 
 export interface ChannelVideosApiResponse {
+	tab: string;
 	channelId: string;
 	items: ChannelVideoApiResponseItem[];
-	nextPageToken: string | null;
+	nextPage: {
+		url: string;
+		body: string;
+		ids: string[];
+	};
 }
 
 /**

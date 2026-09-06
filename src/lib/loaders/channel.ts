@@ -1,8 +1,13 @@
 import { getChannelInfo, getChannelVideos } from '$lib/api/channel';
-import { adaptChannelInfo, adaptChannelVideos } from '$lib/adapters/channel';
+import {
+	adaptChannelInfo,
+	adaptChannelVideos,
+	type ChannelConfig,
+	type ChannelVideoPage
+} from '$lib/adapters/channel';
 import thumbnailPlaceholder from '$lib/assets/thumbnail-placeholder.jpg';
 import logoPlaceholder from '$lib/assets/logo-placeholder.svg';
-import type { ChannelPageData } from '../../routes/channel/[channelId]/+page';
+import { type ChannelPageData } from '../../routes/channel/[channelId]/+page';
 
 /**
  * Creates error page data with safe defaults
@@ -24,6 +29,7 @@ function createErrorPageData(error: unknown): ChannelPageData {
 			verified: false
 		},
 		videos: [],
+		nextPage: null,
 		error: errorMessage
 	};
 }
@@ -41,10 +47,15 @@ export async function loadChannelData(
 			})
 		]);
 
-		const videos = adaptChannelVideos(videosResponse, thumbnailPlaceholder, logoPlaceholder);
-		const channel = adaptChannelInfo(info);
+		const videoPage: ChannelVideoPage = adaptChannelVideos(
+			videosResponse,
+			thumbnailPlaceholder,
+			logoPlaceholder
+		);
 
-		return { channel, videos };
+		const channel: ChannelConfig = adaptChannelInfo(info, videoPage.items.length);
+
+		return { channel, videos: videoPage.items, nextPage: videoPage.nextPage };
 	} catch (error) {
 		console.error('Error loading channel data:', error);
 		return createErrorPageData(error);
