@@ -39,7 +39,7 @@
 			const nextPageData = await getSearchResultsNextPage(
 				query,
 				nextPage.url,
-				nextPage.id,
+				nextPage.id ?? '',
 				sortFilter
 			);
 			const adapted = adaptSearchResults(nextPageData, thumbnailPlaceholder, avatarPlaceholder);

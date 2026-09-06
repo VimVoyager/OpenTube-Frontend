@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import channelDetailsResponseFixture from '../../../tests/fixtures/api/channelDetailsResponse.json';
-import channelVideosResponseFixture from '../../../tests/fixtures/api/channelVideosResponse.json';
-import channelDetailsFixture from '../../../tests/fixtures/adapters/channelDetails.json';
-import channelVideosFixture from '../../../tests/fixtures/adapters/channelVideos.json';
+import channelDetailsResponseFixture from '../../../tests/fixtures/api/channelDetailsApiResponse.json';
+import channelVideosResponseFixture from '../../../tests/fixtures/api/channelVideosApiResponse.json';
+import channelDetailsFixture from '../../../tests/fixtures/adapters/channelDetailsAdaptedResponse.json';
+import channelVideosFixture from '../../../tests/fixtures/adapters/channelVideosAdaptedResponse.json';
 
 // Mock only the HTTP boundary — real adapters run so the full pipeline
 // (API response → adapter → page data) is exercised end-to-end.
@@ -35,12 +35,12 @@ import {
 	getChannelVideos
 } from '$lib/api/channel';
 import { loadChannelData } from '$lib/loaders/channel';
-import type { ChannelConfig, ChannelVideoConfig } from '$lib/adapters/channel';
+import type { ChannelConfig, ChannelVideoPage } from '$lib/adapters/channel';
 
 const infoResponse = channelDetailsResponseFixture as unknown as ChannelInfoApiResponse;
 const videosResponse = channelVideosResponseFixture as unknown as ChannelVideosApiResponse;
 const expectedChannel = channelDetailsFixture as ChannelConfig;
-const expectedVideos = channelVideosFixture as ChannelVideoConfig[];
+const expectedVideos = channelVideosFixture as ChannelVideoPage;
 
 const mockFetch = vi.fn() as unknown as typeof globalThis.fetch;
 
@@ -57,10 +57,12 @@ describe('Channel +page.ts — integration', () => {
 		it('should return adapted channel and videos matching the known-good fixtures', async () => {
 			const result = await loadChannel();
 
-			// Real adapters produce output matching the fixture files;
-			// per-field adaptation detail is asserted in the adapter suite
-			expect(result.channel).toEqual(expectedChannel);
-			expect(result.videos).toEqual(expectedVideos);
+			expect(result.channel).toEqual({
+				...expectedChannel,
+				videoCount: expectedVideos.items.length
+			});
+			expect(result.videos).toEqual(expectedVideos.items);
+			expect(result.nextPage).toEqual(expectedVideos.nextPage);
 			expect(result.error).toBeUndefined();
 		});
 
@@ -75,9 +77,6 @@ describe('Channel +page.ts — integration', () => {
 		});
 
 		it('should pass the asset placeholder fallbacks through to the videos adapter', async () => {
-			// First item has no thumbnails, forcing the fallback path.
-			// This pins the load function's wiring of the asset imports, which the
-			// adapter suite can't see (it receives placeholders as plain arguments).
 			const responseWithNoThumbnails: ChannelVideosApiResponse = {
 				...videosResponse,
 				items: [{ ...videosResponse.items[0], thumbnails: [] }]
@@ -101,6 +100,7 @@ describe('Channel +page.ts — integration', () => {
 			expect(result.channel).toEqual(expectedChannel);
 			expect(result.videos).toEqual([]);
 			expect(result.error).toBeUndefined();
+			expect(result.error).toBeUndefined();
 		});
 	});
 
@@ -110,7 +110,6 @@ describe('Channel +page.ts — integration', () => {
 
 			const result = await loadChannel();
 
-			// Full createErrorPageData shape in one place
 			expect(result.error).toBe('Channel not found');
 			expect(result.channel).toEqual({
 				id: '',
@@ -124,6 +123,7 @@ describe('Channel +page.ts — integration', () => {
 				verified: false
 			});
 			expect(result.videos).toEqual([]);
+			expect(result.nextPage).toBeNull();
 		});
 
 		it('should use "Unknown error loading channel" for non-Error rejections', async () => {
@@ -135,14 +135,13 @@ describe('Channel +page.ts — integration', () => {
 		});
 
 		it('should return error page data instead of throwing when the adapter throws', async () => {
-			// Null info response makes adaptChannelInfo throw on info.id,
-			// exercising the outer catch around the adapter stage (not just the fetch)
 			vi.mocked(getChannelInfo).mockResolvedValue(null as unknown as ChannelInfoApiResponse);
 
 			const result = await loadChannel();
 
 			expect(result.channel.name).toBe('Error Loading Channel');
 			expect(result.videos).toEqual([]);
+			expect(result.nextPage).toBeNull();
 		});
 	});
 });

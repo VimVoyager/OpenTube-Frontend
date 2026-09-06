@@ -9,6 +9,7 @@ The format is based on [keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Added
 
 - "Load more" button on search results, using the search API's next-page endpoint to fetch and append additional results without a full page reload.
+- "Load more" button on channel pages, using the channel API's next-page endpoint to fetch and append further uploads without a full page reload.
 
 ## [0.2.0] - 2026-08-27
 

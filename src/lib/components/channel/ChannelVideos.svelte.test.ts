@@ -1,10 +1,11 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/svelte';
 import ChannelVideos from './ChannelVideos.svelte';
-import channelVideosFixture from '../../../tests/fixtures/adapters/channelVideos.json';
-import type { ChannelVideoConfig } from '$lib/adapters/channel';
+import channelVideosFixture from '../../../tests/fixtures/adapters/channelVideosAdaptedResponse.json';
+import type { ChannelVideoConfig, ChannelVideoPage } from '$lib/adapters/channel';
 
-const videos = channelVideosFixture as ChannelVideoConfig[];
+const videoPage = channelVideosFixture as ChannelVideoPage;
+const videos = videoPage.items;
 
 // [0] Fitting In at School       — 210s (3:30), 3,984,544 views, 2 weeks ago
 // [1] Digital Circus Ep 9 Finale — 70s  (1:10), 28,449,488 views, 4 weeks ago
@@ -88,7 +89,7 @@ describe('ChannelVideos', () => {
 		});
 
 		it('separates views and date with a dot when both are present', () => {
-			render(ChannelVideos, { props: { videos: [channelVideosFixture[0]] } });
+			render(ChannelVideos, { props: { videos: [channelVideosFixture.items[0]] } });
 			expect(screen.getByText('·')).toBeInTheDocument();
 		});
 	});

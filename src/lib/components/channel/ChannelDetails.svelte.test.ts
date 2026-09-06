@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/svelte';
 import ChannelDetails from './ChannelDetails.svelte';
-import channelDetailsFixture from '../../../tests/fixtures/adapters/channelDetails.json';
+import channelDetailsFixture from '../../../tests/fixtures/adapters/channelDetailsAdaptedResponse.json';
 import type { ChannelConfig } from '$lib/adapters/channel';
 
 // Mock asset imports

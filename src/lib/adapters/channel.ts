@@ -6,6 +6,7 @@ import type {
 	ChannelVideoApiResponseItem,
 	ChannelVideosApiResponse
 } from '$lib/api/channel';
+import type { NextPage } from '$lib/api/types';
 
 /**
  * Format a raw subscriber count into a compact display string.
@@ -22,6 +23,11 @@ export function formatSubscriberCount(count: number): string {
 		return `${parseFloat(val.toFixed(1))}K`;
 	}
 	return count.toString();
+}
+
+export interface ChannelVideoPage {
+	items: ChannelVideoConfig[];
+	nextPage: NextPage | null;
 }
 
 export interface ChannelConfig {
@@ -96,9 +102,13 @@ export function adaptChannelVideos(
 	response: ChannelVideosApiResponse | null,
 	thumbnailFallback: string,
 	avatarFallback: string
-): ChannelVideoConfig[] {
-	if (!response?.items) return [];
-	return response.items.map((v: ChannelVideoApiResponseItem): ChannelVideoConfig =>
-		adaptChannelVideo(v, thumbnailFallback, avatarFallback)
-	);
+): ChannelVideoPage {
+	if (!response?.items) return { items: [], nextPage: null };
+
+	return {
+		items: response.items.map((v: ChannelVideoApiResponseItem): ChannelVideoConfig =>
+			adaptChannelVideo(v, thumbnailFallback, avatarFallback)
+		),
+		nextPage: response.nextPage?.url || response.nextPage?.body ? response.nextPage : null
+	};
 }

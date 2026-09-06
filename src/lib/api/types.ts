@@ -1,6 +1,8 @@
 export interface NextPage {
 	url: string;
-	id: string;
+	id?: string;
+	ids?: string[];
+	body?: string;
 }
 
 export interface Replies {

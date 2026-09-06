@@ -9,17 +9,18 @@ import {
 	formatSubscriberCount,
 	adaptChannelInfo,
 	adaptChannelVideos,
-	type ChannelVideoConfig
+	type ChannelVideoConfig,
+	type ChannelVideoPage
 } from './channel';
 import {
 	buildChannelDetailsResponse,
 	buildChannelVideosResponse,
 	buildRelatedItem
 } from '../../tests/fixtures/builder';
-import channelDetailsResponseFixture from '../../tests/fixtures/api/channelDetailsResponse.json';
-import channelVideosResponseFixture from '../../tests/fixtures/api/channelVideosResponse.json';
-import channelDetailsFixture from '../../tests/fixtures/adapters/channelDetails.json';
-import channelVideosFixture from '../../tests/fixtures/adapters/channelVideos.json';
+import channelDetailsResponseFixture from '../../tests/fixtures/api/channelDetailsApiResponse.json';
+import channelVideosResponseFixture from '../../tests/fixtures/api/channelVideosApiResponse.json';
+import channelDetailsFixture from '../../tests/fixtures/adapters/channelDetailsAdaptedResponse.json';
+import channelVideosFixture from '../../tests/fixtures/adapters/channelVideosAdaptedResponse.json';
 import type { ChannelInfoApiResponse, ChannelVideosApiResponse } from '$lib/api/channel';
 
 const thumbnailFallback = 'fallback-thumb.jpg';
@@ -159,14 +160,14 @@ describe('adaptChannelVideos', () => {
 	it('adapts a single item with all fields mapped', () => {
 		const response = buildChannelVideosResponse({ items: [buildRelatedItem()] });
 
-		const result: ChannelVideoConfig[] = adaptChannelVideos(
+		const result: ChannelVideoPage = adaptChannelVideos(
 			response,
 			thumbnailFallback,
 			avatarFallback
 		);
 
-		expect(result).toHaveLength(1);
-		expect(result[0]).toEqual({
+		expect(result.items).toHaveLength(1);
+		expect(result.items[0]).toEqual({
 			id: 'video1',
 			title: 'Test Video',
 			thumbnail: 'https://example.com/v1.jpg',
@@ -199,7 +200,7 @@ describe('adaptChannelVideos', () => {
 				})
 			]
 		});
-		expect(adaptChannelVideos(response, thumbnailFallback, avatarFallback)[0].thumbnail).toBe(
+		expect(adaptChannelVideos(response, thumbnailFallback, avatarFallback).items[0].thumbnail).toBe(
 			'lg.jpg'
 		);
 	});
@@ -217,8 +218,29 @@ describe('adaptChannelVideos', () => {
 			['negative viewCount', { viewCount: -50 }, 'viewCount', 0]
 		])('%s', (_label, override, field, expected) => {
 			const response = buildChannelVideosResponse({ items: [buildRelatedItem(override)] });
-			const [video] = adaptChannelVideos(response, thumbnailFallback, avatarFallback);
+			const { items } = adaptChannelVideos(response, thumbnailFallback, avatarFallback);
+			const [video] = items;
 			expect(video[field as keyof ChannelVideoConfig]).toBe(expected);
+		});
+	});
+
+	describe('continuation', () => {
+		it('passes the continuation page through', () => {
+			const result = adaptChannelVideos(
+				channelVideosResponseFixture as unknown as ChannelVideosApiResponse,
+				thumbnailFallback,
+				avatarFallback
+			);
+			expect(result.nextPage?.ids).toEqual([
+				'GLITCH',
+				'https://www.youtube.com/channel/glitch-channel-id',
+				'VERIFIED'
+			]);
+		});
+
+		it('returns null nextPage when the continuation is exhausted', () => {
+			const response = buildChannelVideosResponse({ nextPage: { url: '', body: '', ids: [] } });
+			expect(adaptChannelVideos(response, thumbnailFallback, avatarFallback).nextPage).toBeNull();
 		});
 	});
 
@@ -226,6 +248,9 @@ describe('adaptChannelVideos', () => {
 		['null response', null],
 		['missing items', buildChannelVideosResponse({ items: undefined })]
 	])('returns [] for %s', (_label, input) => {
-		expect(adaptChannelVideos(input as never, thumbnailFallback, avatarFallback)).toEqual([]);
+		expect(adaptChannelVideos(input as never, thumbnailFallback, avatarFallback)).toEqual({
+			items: [],
+			nextPage: null
+		});
 	});
 });
