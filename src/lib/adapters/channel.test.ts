@@ -19,8 +19,8 @@ import {
 } from '../../tests/fixtures/builder';
 import channelDetailsResponseFixture from '../../tests/fixtures/api/channelDetailsApiResponse.json';
 import channelVideosResponseFixture from '../../tests/fixtures/api/channelVideosApiResponse.json';
-import channelDetailsFixture from '../../tests/fixtures/adapters/channelDetails.json';
-import channelVideosFixture from '../../tests/fixtures/adapters/channelVideos.json';
+import channelDetailsFixture from '../../tests/fixtures/adapters/channelDetailsAdaptedResponse.json';
+import channelVideosFixture from '../../tests/fixtures/adapters/channelVideosAdaptedResponse.json';
 import type { ChannelInfoApiResponse, ChannelVideosApiResponse } from '$lib/api/channel';
 
 const thumbnailFallback = 'fallback-thumb.jpg';
@@ -242,7 +242,7 @@ describe('adaptChannelVideos', () => {
 			const response = buildChannelVideosResponse({ nextPage: { url: '', body: '', ids: [] } });
 			expect(adaptChannelVideos(response, thumbnailFallback, avatarFallback).nextPage).toBeNull();
 		});
-	})
+	});
 
 	it.each([
 		['null response', null],

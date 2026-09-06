@@ -1,7 +1,7 @@
 import { describeJsonFetcher } from '../../tests/helpers/describeJsonFetcher';
 import { getChannelInfo, getChannelVideos, getChannelVideosNextPage } from '$lib/api/channel';
-import channelDetailsApiResponseFixture from '../../tests/fixtures/api/channelDetailsApiResponse.json'
-import channelVideosApiResponseFixture from '../../tests/fixtures/api/channelVideosApiResponse.json'
+import channelDetailsApiResponseFixture from '../../tests/fixtures/api/channelDetailsApiResponse.json';
+import channelVideosApiResponseFixture from '../../tests/fixtures/api/channelVideosApiResponse.json';
 
 describeJsonFetcher({
 	name: 'getChannelInfo',
@@ -9,7 +9,7 @@ describeJsonFetcher({
 	endpoint: '/channels',
 	idParam: 'id',
 	fixture: channelDetailsApiResponseFixture
-})
+});
 
 describeJsonFetcher({
 	name: 'getChannelVideos',
@@ -33,4 +33,4 @@ describeJsonFetcher({
 	endpoint: '/channels/tab/page',
 	idParam: 'channelId',
 	fixture: channelDetailsApiResponseFixture
-})
+});

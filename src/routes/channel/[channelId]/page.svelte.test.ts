@@ -1,10 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen } from '@testing-library/svelte';
 import Page from './+page.svelte';
-import channelDetailsFixture from '../../../tests/fixtures/adapters/channelDetails.json';
-import channelVideosFixture from '../../../tests/fixtures/adapters/channelVideos.json';
+import channelDetailsFixture from '../../../tests/fixtures/adapters/channelDetailsAdaptedResponse.json';
+import channelVideosFixture from '../../../tests/fixtures/adapters/channelVideosAdaptedResponse.json';
 
-// ChannelDetails passthrough stub so the page snippet bodies actually render
 vi.mock('$lib/components/channel/ChannelDetails.svelte', async () => ({
 	default: (await import('../../../tests/stubs/ChannelDetailsStub.svelte')).default
 }));
@@ -19,14 +18,13 @@ vi.mock('$lib/components/ErrorCard.svelte', () => ({
 
 import ChannelVideos from '$lib/components/channel/ChannelVideos.svelte';
 import ErrorCard from '$lib/components/ErrorCard.svelte';
-import type { ChannelConfig, ChannelVideoConfig } from '$lib/adapters/channel';
+import type { ChannelConfig, ChannelVideoPage } from '$lib/adapters/channel';
 import type { ChannelPageData } from './+page';
 
 const mockChannel = channelDetailsFixture as ChannelConfig;
-const mockVideos = channelVideosFixture as ChannelVideoConfig[];
+const videoPage = channelVideosFixture as ChannelVideoPage;
+const mockVideos = videoPage.items;
 
-// Bare channel produced by createErrorPageData — name is empty, which triggers
-// the full-page error branch: `{#if error && !channel.name}`.
 const errorChannel: ChannelConfig = {
 	id: '',
 	name: '',
@@ -42,6 +40,7 @@ const errorChannel: ChannelConfig = {
 const createPageData = (overrides: Record<string, unknown> = {}) => ({
 	channel: mockChannel,
 	videos: mockVideos,
+	nextPage: videoPage.nextPage,
 	error: undefined,
 	...overrides
 });
@@ -50,8 +49,6 @@ const reloadMock = vi.fn();
 
 beforeEach(() => {
 	vi.clearAllMocks();
-	// jsdom's location.reload is not implemented (and location itself is not
-	// writable), so stub the whole global for tests that exercise onRetry
 	vi.stubGlobal('location', { ...window.location, reload: reloadMock });
 });
 
@@ -62,10 +59,8 @@ afterEach(() => {
 
 describe('+page.svelte - Channel', () => {
 	it('should render the normal channel composition when the channel loads successfully', () => {
-		// Act
 		const { container } = render(Page, { props: { data: createPageData() } });
 
-		// Assert — styled root wrapper, details rendered with both snippets, no error UI
 		expect(container.querySelector('.w-full.bg-primary.min-h-screen')).toBeTruthy();
 		expect(screen.getByTestId('channel-details-stub')).toBeTruthy();
 		expect(container.querySelector('.flex.min-h-screen.items-center')).toBeNull();
@@ -73,11 +68,8 @@ describe('+page.svelte - Channel', () => {
 	});
 
 	it('should pass the adapted videos through the videos snippet to ChannelVideos', () => {
-		// Act
 		render(Page, { props: { data: createPageData() } });
 
-		// Assert — the videos snippet rendered and the channelVideos derived
-		// resolved to data.videos
 		expect(vi.mocked(ChannelVideos)).toHaveBeenCalledWith(
 			expect.anything(),
 			expect.objectContaining({ videos: mockVideos })
@@ -95,8 +87,6 @@ describe('+page.svelte - Channel', () => {
 
 		const { container } = render(Page, { props: { data } });
 
-		// Centered error wrapper replaces the details view, and
-		// ErrorCard receives the complete prop contract in one call
 		expect(
 			container.querySelector('.flex.min-h-screen.items-center.justify-center.px-4')
 		).toBeTruthy();
