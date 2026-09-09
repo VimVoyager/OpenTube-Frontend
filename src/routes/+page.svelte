@@ -5,7 +5,7 @@
 	let { data }: { data: PageData } = $props();
 </script>
 
-<main class="container mx-auto w-full max-w-7xl px-4 py-8">
+<main class="w-full px-4 py-8">
 	{#if data.sections.length === 0}
 		<p class="py-16 text-center text-neutral-400">
 			Nothing to show right now. The upstream feeds may be unavailable — try again shortly.
