@@ -1,5 +1,6 @@
 <script lang="ts">
 	import '../app.css';
+	import { page } from '$app/state';
 	import 'shaka-player/dist/controls.css';
 	import { beforeNavigate, afterNavigate } from '$app/navigation';
 	import favicon from '$lib/assets/streaming-logo.png';
@@ -34,6 +35,8 @@
 	const isNavigatingToSearch = $derived(isNavigating && targetRouteId === '/results');
 	const isNavigatingToVideo = $derived(isNavigating && targetRouteId === '/video/[id]');
 
+	const isLanding = $derived(page.route.id === '/');
+
 	let { children } = $props();
 </script>
 
@@ -44,7 +47,7 @@
 </svelte:head>
 
 <div class="bg-primary min-h-screen">
-	<div class="mx-auto max-w-480">
+	<div class={isLanding ? 'w-full' : 'mx-auto max-w-480'}>
 		<div class="fixed inset-x-0 top-0 z-40">
 			<Navbar />
 		</div>
