@@ -188,7 +188,7 @@
 						{/key}
 					{:else if activeTab === 'playlist' && isPlaylist}
 						<PlaylistQueue
-							videos={relatedVideos}
+							videos={playlistVideos ?? []}
 							playlistId={playlistId ?? ''}
 							currentIndex={playlistIndex}
 						/>
