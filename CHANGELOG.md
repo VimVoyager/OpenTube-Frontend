@@ -6,10 +6,17 @@ The format is based on [keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-09-09
+
 ### Added
 
 - "Load more" button on search results, using the search API's next-page endpoint to fetch and append additional results without a full page reload.
 - "Load more" button on channel pages, using the channel API's next-page endpoint to fetch and append further uploads without a full page reload.
+
+### Fixed
+
+- Landing page carousels were clipped to the shared layout container instead of spanning the full viewport width
+- `PlaylistQueue` mobile view passed `relatedVideos` to the `videos` prop instead of `playlistVideos`, showing related videos in place of the playlist queue.
 
 ## [0.2.0] - 2026-08-27
 
@@ -33,6 +40,7 @@ The format is based on [keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Navigating between videos reloads the player in place instead of rebuilding it.
 - Fixed a teardown race condition that could produce intermittent errors when navigating away from a video.
 
-[Unreleased]: https://github.com/VimVoyager/OpenTube-Frontend/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/VimVoyager/OpenTube-Frontend/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/VimVoyager/OpenTube-Frontend/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/VimVoyager/OpenTube-Frontend/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/VimVoyager/OpenTube-Frontend/compare/v0.1.0...v0.1.1
