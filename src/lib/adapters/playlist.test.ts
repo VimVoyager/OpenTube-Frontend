@@ -92,6 +92,7 @@ describe('adaptPlaylistVideos', () => {
 
 		expect(result).toHaveLength(1);
 		expect(result[0]).toEqual({
+			type: 'video',
 			id: 'video1',
 			url: 'https://www.youtube.com/watch?v=video1',
 			title: 'Test Video',

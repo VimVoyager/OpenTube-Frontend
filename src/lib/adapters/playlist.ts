@@ -37,6 +37,7 @@ export function adaptPlaylistInfo(info: PlaylistApiResponse): PlaylistInfoConfig
 
 function adaptPlaylistVideo(video: RelatedItemApiResponse): RelatedVideoConfig {
 	return {
+		type: 'video',
 		id: extractIdFromUrl(video.url),
 		url: video.url,
 		title: video.name || 'Untitled',
