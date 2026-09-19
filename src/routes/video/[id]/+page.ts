@@ -3,7 +3,11 @@ import { getVideoDetails } from '$lib/api/details';
 import { getRelatedStreams } from '$lib/api/related';
 import { adaptPlayerConfig, type VideoPlayerConfig } from '$lib/adapters/player';
 import { adaptVideoMetadata, type VideoMetadata } from '$lib/adapters/metadata';
-import { adaptRelatedVideos, type RelatedVideoConfig } from '$lib/adapters/related';
+import {
+	adaptRelatedItems,
+	type RelatedItemConfig,
+	type RelatedVideoConfig
+} from '$lib/adapters/related';
 import {
 	adaptPlaylistInfo,
 	adaptPlaylistVideos,
@@ -31,7 +35,7 @@ interface ErrorPageData {
 		dislikeCount: number;
 		subscriberCount: number;
 	};
-	relatedVideos: RelatedVideoConfig[];
+	relatedItems: RelatedItemConfig[];
 	error: string;
 }
 
@@ -60,7 +64,7 @@ function createErrorPageData(error: unknown, videoId: string): ErrorPageData {
 			dislikeCount: 0,
 			subscriberCount: 0
 		},
-		relatedVideos: [],
+		relatedItems: [],
 		error: errorMessage
 	};
 }
@@ -68,7 +72,7 @@ function createErrorPageData(error: unknown, videoId: string): ErrorPageData {
 export interface VideoPageData {
 	playerConfig: VideoPlayerConfig;
 	metadata: VideoMetadata;
-	relatedVideos: RelatedVideoConfig[];
+	relatedItems: RelatedItemConfig[];
 	comments?: CommentConfig[];
 	playlistId?: string | null;
 	playlistIndex?: number | null;
@@ -94,7 +98,7 @@ export const load: PageLoad = async ({ params, url, fetch }): Promise<VideoPageD
 				getVideoDetails(params.id, fetch),
 				getManifest(params.id, fetch),
 				getRelatedStreams(params.id, fetch).catch((e) => {
-					console.warn('Failed to fetch related videos:', e);
+					console.warn('Failed to fetch related items:', e);
 					return [];
 				}),
 				getVideoComments(params.id, fetch).catch((e) => {
@@ -115,7 +119,7 @@ export const load: PageLoad = async ({ params, url, fetch }): Promise<VideoPageD
 		};
 
 		const metadata: VideoMetadata = adaptVideoMetadata(details, thumbnails.url);
-		const relatedVideos: RelatedVideoConfig[] = adaptRelatedVideos(
+		const relatedItems: RelatedItemConfig[] = adaptRelatedItems(
 			relatedStreams,
 			thumbnailPlaceholder,
 			logoPlaceholder
@@ -136,7 +140,7 @@ export const load: PageLoad = async ({ params, url, fetch }): Promise<VideoPageD
 			videoId: params.id,
 			playerConfig,
 			metadata,
-			relatedVideos,
+			relatedItems,
 			comments: adaptedComments,
 			playlistId,
 			playlistIndex,

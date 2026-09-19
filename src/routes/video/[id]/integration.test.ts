@@ -7,13 +7,7 @@ import manifestXmlFixture from '../../../tests/fixtures/api/manifestXmlFixture.x
 import relatedVideosFixture from '../../../tests/fixtures/api/relatedVideosResponse.json';
 import playlistResponseFixture from '../../../tests/fixtures/api/playlistResponse.json';
 import commentsResponseFixture from '../../../tests/fixtures/api/commentsResponse.json';
-
-// The API + Adapter Integration describes that used to live here are gone:
-// fetchers are covered by the describeJsonFetcher factory + manifest.test.ts
-// (incl. the muxed X-Stream-Type fallback), adapters by their own suites.
-// This file owns exactly one thing: the load function's orchestration of the
-// real api + adapter pipeline — parallel fetching, playlist context, partial
-// failure degradation, and error mapping.
+import type { RelatedVideoConfig } from '$lib/adapters/related';
 
 const createMockManifestXml = (duration: string = 'PT2M56S'): string =>
 	manifestXmlFixture
@@ -117,8 +111,8 @@ describe('video/[id] load function integration', () => {
 		});
 		expect(result.metadata.title).toBe('MURDER DRONES - Pilot');
 		expect(result.metadata.channelName).toBe('GLITCH');
-		expect(result.relatedVideos).toHaveLength(4);
-		expect(result.relatedVideos[0].title).toBe('MURDER DRONES - Heartbeat');
+		expect(result.relatedItems).toHaveLength(4);
+		expect((result.relatedItems[0] as RelatedVideoConfig).title).toBe('MURDER DRONES - Heartbeat');
 
 		expect(result.comments).toBeDefined();
 		expect(result.comments!.length).toBeGreaterThan(0);
@@ -213,9 +207,9 @@ describe('video/[id] load function integration', () => {
 
 			expect(result.metadata.title).toBe('MURDER DRONES - Pilot');
 			expect(result.playerConfig.manifestUrl).toBe('blob:mock-manifest-url');
-			expect(result.relatedVideos).toEqual([]);
+			expect(result.relatedItems).toEqual([]);
 			expect(result.error).toBeUndefined();
-			expect(warnSpy).toHaveBeenCalledWith('Failed to fetch related videos:', expect.any(Error));
+			expect(warnSpy).toHaveBeenCalledWith('Failed to fetch related items:', expect.any(Error));
 		});
 
 		it('continues loading when comments fail', async () => {
@@ -242,7 +236,7 @@ describe('video/[id] load function integration', () => {
 			expect(result.metadata.title).toBe('Error Loading Video');
 			expect(result.error).toContain('Failed to fetch');
 			expect(result.playerConfig.manifestUrl).toBe('');
-			expect(result.relatedVideos).toEqual([]);
+			expect(result.relatedItems).toEqual([]);
 		});
 
 		it('surfaces network error messages', async () => {

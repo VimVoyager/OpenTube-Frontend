@@ -13,6 +13,7 @@ import type { RelatedVideoConfig } from '$lib/adapters/related';
 
 const mockQueueVideos: RelatedVideoConfig[] = [
 	{
+		type: 'video',
 		id: 'video-one-id',
 		url: 'https://www.youtube.com/watch?v=video-one-id',
 		title: 'First Queue Video',
@@ -25,6 +26,7 @@ const mockQueueVideos: RelatedVideoConfig[] = [
 		uploadDate: '1 week ago'
 	},
 	{
+		type: 'video',
 		id: 'video-two-id',
 		url: 'https://www.youtube.com/watch?v=video-two-id',
 		title: 'Second Queue Video',
@@ -37,6 +39,7 @@ const mockQueueVideos: RelatedVideoConfig[] = [
 		uploadDate: '2 weeks ago'
 	},
 	{
+		type: 'video',
 		id: 'video-three-id',
 		url: 'https://www.youtube.com/watch?v=video-three-id',
 		title: 'Third Queue Video',
@@ -49,6 +52,7 @@ const mockQueueVideos: RelatedVideoConfig[] = [
 		uploadDate: '1 month ago'
 	},
 	{
+		type: 'video',
 		id: 'video-four-id',
 		url: 'https://www.youtube.com/watch?v=video-four-id',
 		title: 'Fourth Queue Video',
@@ -69,14 +73,11 @@ const defaultProps = {
 	playlistName: 'Test Playlist'
 };
 
-// let scrollIntoViewMock: ReturnType<typeof vi.fn>;
 let scrollIntoViewMock: Mock<(arg?: boolean | ScrollIntoViewOptions) => void>;
 
 beforeEach(() => {
 	vi.clearAllMocks();
 
-	// jsdom does not implement scrollIntoView; the scrollActiveIntoView action
-	// calls it on the active item, so it must be stubbed for every render
 	scrollIntoViewMock = vi.fn<(arg?: boolean | ScrollIntoViewOptions) => void>();
 	Element.prototype.scrollIntoView = scrollIntoViewMock;
 });
@@ -135,10 +136,8 @@ describe('PlaylistQueue', () => {
 		it('shows index numbers for inactive items and playing bars for the active one', () => {
 			render(PlaylistQueue, { props: { ...defaultProps, currentIndex: 1 } });
 
-			// inactive items show their 1-indexed positions — including the first
 			const firstLink = screen.getByText('First Queue Video').closest('a');
 			expect(firstLink?.textContent).toContain('1');
-			// the active item hides its number (playing bars instead)
 			const activeLink = screen.getByText('Second Queue Video').closest('a');
 			expect(activeLink?.textContent).not.toContain('2');
 		});
@@ -245,8 +244,6 @@ describe('PlaylistQueue', () => {
 			render(PlaylistQueue, { props: { ...defaultProps, videos: [] } });
 
 			expect(screen.getByText('Test Playlist')).toBeInTheDocument();
-			// pinned quirk: counter reads "1 / 0" for an empty queue
-			// (currentIndex + 1 with zero videos) — arguably a display bug
 			expect(screen.getByText('1 / 0')).toBeInTheDocument();
 			expect(screen.queryAllByRole('link')).toHaveLength(0);
 		});

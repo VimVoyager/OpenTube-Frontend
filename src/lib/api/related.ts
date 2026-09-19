@@ -1,7 +1,7 @@
 import { PUBLIC_API_URL } from '$env/static/public';
 import type { Image } from '$lib/api/types';
 
-const API_BASE_URL = PUBLIC_API_URL;
+const API_BASE_URL: string = PUBLIC_API_URL;
 
 /**
  * API response for related videos
@@ -24,6 +24,9 @@ export interface RelatedItemApiResponse {
 	uploaderAvatars: Image[];
 	uploaderVerified: boolean;
 	isShortFormContent?: boolean;
+	subscriberCount: number;
+	verified?: boolean;
+	streamCount: number;
 }
 
 /**

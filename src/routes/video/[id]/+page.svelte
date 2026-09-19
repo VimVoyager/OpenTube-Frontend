@@ -4,7 +4,7 @@
 	import { onMount } from 'svelte';
 	import VideoPlayer from '$lib/components/video/VideoPlayer.svelte';
 	import VideoDetail from '$lib/components/video/VideoDetail.svelte';
-	import VideoListings from '$lib/components/video/VideoListings.svelte';
+	import RelatedItemListings from '$lib/components/video/related/RelatedItemListings.svelte';
 	import ErrorCard from '$lib/components/ErrorCard.svelte';
 	import Comments from '$lib/components/video/Comments.svelte';
 	import PlaylistQueue from '$lib/components/video/PlaylistQueue.svelte';
@@ -35,7 +35,7 @@
 		}
 	);
 
-	let relatedVideos = $derived(data.relatedVideos ?? []);
+	let relatedItems = $derived(data.relatedItems ?? []);
 	let comments = $derived(data.comments ?? []);
 	let error = $derived(data.error ?? null);
 	let playlistId = $derived(data.playlistId ?? null);
@@ -124,7 +124,7 @@
 						currentIndex={playlistIndex ?? 0}
 					/>
 				{/if}
-				<VideoListings videos={relatedVideos} />
+				<RelatedItemListings items={relatedItems} />
 			</aside>
 
 			<!-- Mobile/Tablet: content tabs below the player -->
@@ -193,7 +193,7 @@
 							currentIndex={playlistIndex}
 						/>
 					{:else if activeTab === 'related'}
-						<VideoListings videos={relatedVideos} />
+						<RelatedItemListings items={relatedItems} />
 					{:else if comments.length > 0}
 						<div class="mt-6">
 							<h2 class="mb-4 text-lg font-semibold">{comments.length} Comments</h2>
