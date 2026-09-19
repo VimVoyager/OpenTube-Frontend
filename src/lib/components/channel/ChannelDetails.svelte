@@ -7,7 +7,7 @@
 
 	let {
 		channel,
-		activeTab = $bindable<ChannelTab>('home'),
+		activeTab = $bindable<ChannelTab>('videos'),
 		videos,
 		playlists
 	}: {
