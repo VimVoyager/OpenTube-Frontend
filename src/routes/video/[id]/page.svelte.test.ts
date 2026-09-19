@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor, within, fireEvent } from '@testing-library/svelte';
 import '@testing-library/jest-dom';
 import PageComponent from './+page.svelte';
-import type { RelatedVideoConfig } from '$lib/adapters/related';
+import type { RelatedVideoConfig, RelatedItemConfig } from '$lib/adapters/related';
 import type { CommentConfig } from '$lib/adapters/comments';
 import type { PlaylistInfoConfig } from '$lib/adapters/playlist';
 
@@ -25,8 +25,9 @@ describe('+page.svelte', () => {
 		subscriberCount: 1000000
 	};
 
-	const mockRelatedVideos = [
+	const mockRelatedItems: RelatedItemConfig[] = [
 		{
+			type: 'video',
 			id: 'related-1',
 			url: 'https://www.youtube.com/watch?v=related-1',
 			title: 'First Related Video',
@@ -39,6 +40,7 @@ describe('+page.svelte', () => {
 			uploadDate: '1 day ago'
 		},
 		{
+			type: 'video',
 			id: 'related-2',
 			url: 'https://www.youtube.com/watch?v=related-2',
 			title: 'Second Related Video',
@@ -51,6 +53,7 @@ describe('+page.svelte', () => {
 			uploadDate: '3 days ago'
 		},
 		{
+			type: 'video',
 			id: 'related-3',
 			url: 'https://www.youtube.com/watch?v=related-3',
 			title: 'Third Related Video',
@@ -101,6 +104,7 @@ describe('+page.svelte', () => {
 
 	const mockPlaylistVideos: RelatedVideoConfig[] = [
 		{
+			type: 'video',
 			id: 'pl-1',
 			url: 'https://www.youtube.com/watch?v=pl-1',
 			title: 'Playlist Video One',
@@ -113,6 +117,7 @@ describe('+page.svelte', () => {
 			uploadDate: '2 days ago'
 		},
 		{
+			type: 'video',
 			id: 'pl-2',
 			url: 'https://www.youtube.com/watch?v=pl-2',
 			title: 'Playlist Video Two',
@@ -139,11 +144,10 @@ describe('+page.svelte', () => {
 		description: null
 	};
 
-	// Full dataset used to exercise every branch (playlist + comments + related videos all present)
 	const fullData = {
 		playerConfig: mockPlayerConfig,
 		metadata: mockMetadata,
-		relatedVideos: mockRelatedVideos,
+		relatedItems: mockRelatedItems,
 		comments: mockComments,
 		playlistId: 'playlist-123',
 		playlistIndex: 1,
@@ -153,13 +157,11 @@ describe('+page.svelte', () => {
 
 	beforeEach(() => {
 		vi.clearAllMocks();
-		// jsdom doesn't implement scrollIntoView; PlaylistQueue.svelte calls it on mount.
 		Element.prototype.scrollIntoView = vi.fn();
 	});
 
 	describe('Error handling', () => {
 		it('should show error card and hide video detail/listings on error', () => {
-			// Error prop set: error card, message, retry button all render; related videos suppressed
 			const errorData = {
 				playerConfig: {
 					manifestUrl: '',
@@ -167,7 +169,7 @@ describe('+page.svelte', () => {
 					poster: ''
 				},
 				metadata: mockMetadata,
-				relatedVideos: mockRelatedVideos,
+				relatedItems: mockRelatedItems,
 				error: 'Failed to load video'
 			};
 			const { unmount } = render(PageComponent, { data: errorData });
@@ -179,7 +181,6 @@ describe('+page.svelte', () => {
 
 			unmount();
 
-			// No error prop, but empty manifestUrl: distinct "No Streams Available" state
 			const noStreamsData = {
 				playerConfig: {
 					manifestUrl: '',
@@ -187,7 +188,7 @@ describe('+page.svelte', () => {
 					poster: ''
 				},
 				metadata: mockMetadata,
-				relatedVideos: mockRelatedVideos
+				relatedItems: mockRelatedItems
 			};
 			render(PageComponent, { data: noStreamsData });
 
@@ -202,11 +203,10 @@ describe('+page.svelte', () => {
 
 	describe('Conditional rendering logic', () => {
 		it('should render full success composition and suppress it on error', async () => {
-			// Success case: player, VideoDetail, and VideoListings all render together
 			const data = {
 				playerConfig: mockPlayerConfig,
 				metadata: mockMetadata,
-				relatedVideos: mockRelatedVideos
+				relatedItems: mockRelatedItems
 			};
 			const { unmount } = render(PageComponent, { data });
 
@@ -227,7 +227,6 @@ describe('+page.svelte', () => {
 
 			unmount();
 
-			// Error case: VideoDetail (and by extension the success composition) is suppressed
 			const errorData = {
 				playerConfig: {
 					manifestUrl: '',
@@ -235,7 +234,7 @@ describe('+page.svelte', () => {
 					poster: ''
 				},
 				metadata: mockMetadata,
-				relatedVideos: [],
+				relatedItems: [],
 				error: 'Test error'
 			};
 			render(PageComponent, { data: errorData });
@@ -248,12 +247,11 @@ describe('+page.svelte', () => {
 			const data = {
 				playerConfig: mockPlayerConfig,
 				metadata: mockMetadata,
-				relatedVideos: mockRelatedVideos,
+				relatedItems: mockRelatedItems,
 				comments: mockComments
 			};
 			render(PageComponent, { data });
 
-			// Default active tab is 'details', so this heading can only come from the desktop pane
 			expect(screen.getByText(`${mockComments.length} Comments`)).toBeInTheDocument();
 		});
 
@@ -261,11 +259,10 @@ describe('+page.svelte', () => {
 			const data = {
 				playerConfig: mockPlayerConfig,
 				metadata: mockMetadata,
-				relatedVideos: mockRelatedVideos
+				relatedItems: mockRelatedItems
 			};
 			render(PageComponent, { data });
 
-			// Match the "<n> Comments" heading specifically, not the "Comments" tab button label
 			expect(screen.queryByText(/^\d+\s+comments$/i)).not.toBeInTheDocument();
 		});
 	});
@@ -275,7 +272,7 @@ describe('+page.svelte', () => {
 			const withPlaylist = {
 				playerConfig: mockPlayerConfig,
 				metadata: mockMetadata,
-				relatedVideos: mockRelatedVideos,
+				relatedItems: mockRelatedItems,
 				playlistId: 'playlist-123',
 				playlistIndex: 0,
 				playlistVideos: mockPlaylistVideos,
@@ -289,14 +286,12 @@ describe('+page.svelte', () => {
 			const withoutPlaylist = {
 				playerConfig: mockPlayerConfig,
 				metadata: mockMetadata,
-				relatedVideos: mockRelatedVideos
+				relatedItems: mockRelatedItems
 			};
 			const { container: containerNoPlaylist } = render(PageComponent, { data: withoutPlaylist });
 			const asideWithoutPlaylist = containerNoPlaylist.querySelector('aside');
 			const childCountWithoutPlaylist = asideWithoutPlaylist?.children.length ?? 0;
 
-			// The playlist branch adds a PlaylistQueue instance alongside VideoListings,
-			// so the sidebar should have strictly more child nodes when a playlist is active.
 			expect(childCountWithPlaylist).toBeGreaterThan(childCountWithoutPlaylist);
 		});
 	});
@@ -322,7 +317,7 @@ describe('+page.svelte', () => {
 			const data = {
 				playerConfig: mockPlayerConfig,
 				metadata: mockMetadata,
-				relatedVideos: mockRelatedVideos
+				relatedItems: mockRelatedItems
 			};
 			const { container } = render(PageComponent, { data });
 			const mobile = getMobilePane(container);
@@ -363,7 +358,7 @@ describe('+page.svelte', () => {
 			const data = {
 				playerConfig: mockPlayerConfig,
 				metadata: mockMetadata,
-				relatedVideos: mockRelatedVideos
+				relatedItems: mockRelatedItems
 			};
 			const { container } = render(PageComponent, { data });
 			const mobile = getMobilePane(container);
@@ -381,7 +376,7 @@ describe('+page.svelte', () => {
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any
 				playerConfig: undefined as any,
 				metadata: mockMetadata,
-				relatedVideos: []
+				relatedItems: []
 			};
 
 			render(PageComponent, { data });
@@ -394,7 +389,7 @@ describe('+page.svelte', () => {
 				playerConfig: mockPlayerConfig,
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any
 				metadata: undefined as any,
-				relatedVideos: []
+				relatedItems: []
 			};
 
 			const { container } = render(PageComponent, { data });
@@ -402,12 +397,12 @@ describe('+page.svelte', () => {
 			expect(container).toBeInTheDocument();
 		});
 
-		it('should handle undefined relatedVideos gracefully', () => {
+		it('should handle undefined relatedItems gracefully', () => {
 			const data = {
 				playerConfig: mockPlayerConfig,
 				metadata: mockMetadata,
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any
-				relatedVideos: undefined as any
+				relatedItems: undefined as any
 			};
 
 			const { container } = render(PageComponent, { data });
@@ -419,14 +414,13 @@ describe('+page.svelte', () => {
 			const data = {
 				playerConfig: mockPlayerConfig,
 				metadata: mockMetadata,
-				relatedVideos: mockRelatedVideos
+				relatedItems: mockRelatedItems
 				// comments, playlistId intentionally omitted
 			};
 
 			const { container } = render(PageComponent, { data });
 
 			expect(container.querySelector('aside')?.children.length).toBe(1);
-			// Match the "<n> Comments" heading specifically, not the "Comments" tab button label
 			expect(screen.queryByText(/^\d+\s+comments$/i)).not.toBeInTheDocument();
 		});
 	});
