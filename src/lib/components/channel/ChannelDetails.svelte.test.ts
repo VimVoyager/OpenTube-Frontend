@@ -210,7 +210,9 @@ describe('ChannelDetails', () => {
 			expect(screen.getByRole('tab', { name: 'Videos' }).getAttribute('aria-selected')).toBe(
 				'true'
 			);
-			expect(screen.getByRole('tab', { name: 'Playlists' }).getAttribute('aria-selected')).toBe('false');
+			expect(screen.getByRole('tab', { name: 'Playlists' }).getAttribute('aria-selected')).toBe(
+				'false'
+			);
 		});
 
 		it('should mark the provided activeTab as selected on initial render', () => {
@@ -219,7 +221,9 @@ describe('ChannelDetails', () => {
 			expect(screen.getByRole('tab', { name: 'Playlists' }).getAttribute('aria-selected')).toBe(
 				'true'
 			);
-			expect(screen.getByRole('tab', { name: 'Videos' }).getAttribute('aria-selected')).toBe('false');
+			expect(screen.getByRole('tab', { name: 'Videos' }).getAttribute('aria-selected')).toBe(
+				'false'
+			);
 		});
 
 		it('should render tablist with accessible aria-label', () => {
