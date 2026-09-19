@@ -1,5 +1,6 @@
 [
 	{
+		"type": "video",
 		"id": "heartbeat-id",
 		"url": "https://www.youtube.com/watch?v=heartbeat-id",
 		"title": "MURDER DRONES - Heartbeat",
@@ -12,6 +13,7 @@
 		"uploadDate": "3 years ago"
 	},
 	{
+		"type": "video",
 		"id": "pilot-id",
 		"url": "https://www.youtube.com/watch?v=pilot-id",
 		"title": "KNIGHTS OF GUINEVERE - Pilot",
@@ -24,6 +26,7 @@
 		"uploadDate": "3 months ago"
 	},
 	{
+		"type": "video",
 		"id": "cabin-fever-id",
 		"url": "https://www.youtube.com/watch?v=cabin-fever-id",
 		"title": "MURDER DRONES - Cabin Fever",
@@ -36,11 +39,12 @@
 		"uploadDate": "2 years ago"
 	},
 	{
+		"type": "video",
 		"id": "they-all-get-guns-id",
 		"url": "https://www.youtube.com/watch?v=they-all-get-guns-id",
 		"title": "THE AMAZING DIGITAL CIRCUS - They All Get Guns",
 		"thumbnail": "https://i.ytimg.com/vi/they-all-get-guns-id/hqdefault.jpg/md",
-		"channelName": "Unknown Channel",
+		"channelName": "",
 		"channelId": "c6347",
 		"channelAvatar": "https://yt3.ggpht.com/random-unicode-characters",
 		"viewCount": 0,
