@@ -131,11 +131,10 @@ describe('ChannelDetails', () => {
 			expect(screen.getByText('1,500 videos')).toBeTruthy();
 		});
 
-		it('should not render video count when videoCount is 0', () => {
+		it('should render "No videos available" when video count is 0', () => {
 			render(ChannelDetails, { props: { channel: glitchChannel } });
 
-			const videoCount = screen.queryByText(/videos/);
-			expect(videoCount).toBeNull();
+			expect(screen.getByText('No videos available'));
 		});
 	});
 
@@ -186,21 +185,20 @@ describe('ChannelDetails', () => {
 	});
 
 	describe('Tab bar', () => {
-		it('should render all three tabs', () => {
+		it('should render all tabs', () => {
 			render(ChannelDetails, { props: { channel: glitchChannel } });
 
-			expect(screen.getByRole('tab', { name: 'Home' })).toBeTruthy();
 			expect(screen.getByRole('tab', { name: 'Videos' })).toBeTruthy();
 			expect(screen.getByRole('tab', { name: 'Playlists' })).toBeTruthy();
 		});
 
-		it('should mark Home as selected by default', () => {
+		it('should mark Videos as selected by default', () => {
 			render(ChannelDetails, { props: { channel: glitchChannel } });
 
-			const homeTab = screen.getByRole('tab', { name: 'Home' });
+			const homeTab = screen.getByRole('tab', { name: 'Videos' });
 			expect(homeTab.getAttribute('aria-selected')).toBe('true');
 
-			const videosTab = screen.getByRole('tab', { name: 'Videos' });
+			const videosTab = screen.getByRole('tab', { name: 'Playlists' });
 			expect(videosTab.getAttribute('aria-selected')).toBe('false');
 		});
 
@@ -212,7 +210,9 @@ describe('ChannelDetails', () => {
 			expect(screen.getByRole('tab', { name: 'Videos' }).getAttribute('aria-selected')).toBe(
 				'true'
 			);
-			expect(screen.getByRole('tab', { name: 'Home' }).getAttribute('aria-selected')).toBe('false');
+			expect(screen.getByRole('tab', { name: 'Playlists' }).getAttribute('aria-selected')).toBe(
+				'false'
+			);
 		});
 
 		it('should mark the provided activeTab as selected on initial render', () => {
@@ -221,7 +221,9 @@ describe('ChannelDetails', () => {
 			expect(screen.getByRole('tab', { name: 'Playlists' }).getAttribute('aria-selected')).toBe(
 				'true'
 			);
-			expect(screen.getByRole('tab', { name: 'Home' }).getAttribute('aria-selected')).toBe('false');
+			expect(screen.getByRole('tab', { name: 'Videos' }).getAttribute('aria-selected')).toBe(
+				'false'
+			);
 		});
 
 		it('should render tablist with accessible aria-label', () => {
@@ -232,12 +234,6 @@ describe('ChannelDetails', () => {
 	});
 
 	describe('Tab content', () => {
-		it('should show home placeholder when Home tab is active and no snippet provided', () => {
-			render(ChannelDetails, { props: { channel: glitchChannel } });
-
-			expect(screen.getByText('Home content coming soon')).toBeTruthy();
-		});
-
 		it('should show videos placeholder when Videos tab is active and no snippet provided', async () => {
 			render(ChannelDetails, { props: { channel: glitchChannel } });
 
@@ -257,10 +253,9 @@ describe('ChannelDetails', () => {
 		it('should only show content for the active tab', async () => {
 			render(ChannelDetails, { props: { channel: glitchChannel } });
 
-			await fireEvent.click(screen.getByRole('tab', { name: 'Videos' }));
+			await fireEvent.click(screen.getByRole('tab', { name: 'Playlists' }));
 
-			expect(screen.queryByText('Home content coming soon')).toBeNull();
-			expect(screen.getByText('No videos available')).toBeTruthy();
+			expect(screen.getByText('No playlists available')).toBeTruthy();
 		});
 	});
 });

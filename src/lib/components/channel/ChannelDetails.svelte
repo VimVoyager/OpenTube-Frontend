@@ -7,20 +7,17 @@
 
 	let {
 		channel,
-		activeTab = $bindable<ChannelTab>('home'),
-		home,
+		activeTab = $bindable<ChannelTab>('videos'),
 		videos,
 		playlists
 	}: {
 		channel: ChannelConfig;
 		activeTab?: ChannelTab;
-		home?: import('svelte').Snippet;
 		videos?: import('svelte').Snippet;
 		playlists?: import('svelte').Snippet;
 	} = $props();
 
 	const tabs: { id: ChannelTab; label: string }[] = [
-		{ id: 'home', label: 'Home' },
 		{ id: 'videos', label: 'Videos' },
 		{ id: 'playlists', label: 'Playlists' }
 	];
@@ -42,7 +39,6 @@
 </script>
 
 <div class="flex w-full flex-col">
-	<!-- Banner -->
 	<div class="bg-secondary w-full overflow-hidden" style="aspect-ratio: 32/9; max-height: 200px;">
 		{#if channel.bannerUrl}
 			<img src={channel.bannerUrl} alt="Channel banner" class="h-full w-full object-cover" />
@@ -51,10 +47,8 @@
 		{/if}
 	</div>
 
-	<!-- Channel info row -->
 	<div class="px-6 pt-3 pb-4">
 		<div class="flex items-start gap-4">
-			<!-- Avatar — pulls up over the banner -->
 			<div class="z-10 -mt-10 shrink-0">
 				<img
 					src={channel.avatarUrl || logoPlaceholder}
@@ -64,9 +58,7 @@
 				/>
 			</div>
 
-			<!-- Name / stats / description -->
 			<div class="mt-2 flex min-w-0 flex-1 flex-col">
-				<!-- Channel name + verified badge -->
 				<div class="flex items-center gap-1.5">
 					<h1 class="text-primary text-xl leading-tight font-bold">{channel.name}</h1>
 					{#if channel.verified}
@@ -83,7 +75,6 @@
 					{/if}
 				</div>
 
-				<!-- Handle · subscribers · video count -->
 				<div class="text-secondary mt-0.5 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-xs">
 					{#if channel.handle}
 						<span>{channel.handle}</span>
@@ -96,7 +87,6 @@
 					{/if}
 				</div>
 
-				<!-- Description with expand/collapse -->
 				{#if channel.description}
 					<div class="text-secondary mt-2 max-w-2xl text-xs leading-relaxed">
 						<span>{displayedDescription}</span>
@@ -136,16 +126,7 @@
 
 	<!-- Tab content -->
 	<div class="mt-6">
-		{#if activeTab === 'home'}
-			{#if home}
-				{@render home()}
-			{:else}
-				<div class="flex flex-col items-center justify-center px-6 py-12 text-center">
-					<div class="mb-4 text-4xl">🏠</div>
-					<p class="text-secondary text-sm">Home content coming soon</p>
-				</div>
-			{/if}
-		{:else if activeTab === 'videos'}
+		{#if activeTab === 'videos'}
 			{#if videos}
 				{@render videos()}
 			{:else}
