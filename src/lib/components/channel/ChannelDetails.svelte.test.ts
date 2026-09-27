@@ -3,6 +3,7 @@ import { render, screen, fireEvent } from '@testing-library/svelte';
 import ChannelDetails from './ChannelDetails.svelte';
 import channelDetailsFixture from '../../../tests/fixtures/adapters/channelDetailsAdaptedResponse.json';
 import type { ChannelConfig } from '$lib/adapters/channel';
+import avatarFallback from '$lib/assets/placeholders/logofallback.svg?raw';
 
 // Mock asset imports
 vi.mock('$lib/assets/logo-placeholder.svg', () => ({
@@ -72,14 +73,14 @@ describe('ChannelDetails', () => {
 			render(ChannelDetails, { props: { channel: bareChannel } });
 
 			const avatar = screen.getByAltText(`${bareChannel.name} avatar`);
-			expect(avatar.getAttribute('src')).toBe('/placeholder-avatar.svg');
+			expect(avatar.getAttribute('src')).toBe(avatarFallback);
 		});
 
 		it('falls back to the logo placeholder when the avatar fails to load', async () => {
 			render(ChannelDetails, { props: { channel: glitchChannel } });
 			const avatar = screen.getByAltText(`${glitchChannel.name} avatar`); // adjust to actual alt
 			await fireEvent.error(avatar);
-			expect(avatar).toHaveAttribute('src', '/placeholder-avatar.svg');
+			expect(avatar).toHaveAttribute('src', avatarFallback);
 		});
 	});
 

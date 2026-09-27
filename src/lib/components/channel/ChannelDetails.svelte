@@ -1,5 +1,7 @@
 <script lang="ts">
-	import logoPlaceholder from '$lib/assets/logo-placeholder.svg';
+	import logoPlaceholder from '$lib/assets/placeholders/logofallback.svg?raw';
+	import videoCameraIcon from '$lib/assets/icons/videoCamera.svg?raw';
+	import playlistIcon from '$lib/assets/icons/playlist.svg?raw';
 
 	import type { ChannelConfig } from '$lib/adapters/channel';
 
@@ -131,7 +133,10 @@
 				{@render videos()}
 			{:else}
 				<div class="flex flex-col items-center justify-center px-6 py-12 text-center">
-					<div class="mb-4 text-4xl">📹</div>
+					<span class="text-muted mb-4 inline-block h-10 w-10">
+						<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+						{@html videoCameraIcon}
+					</span>
 					<p class="text-secondary text-sm">No videos available</p>
 				</div>
 			{/if}
@@ -140,7 +145,10 @@
 				{@render playlists()}
 			{:else}
 				<div class="flex flex-col items-center justify-center px-6 py-12 text-center">
-					<div class="mb-4 text-4xl">📋</div>
+					<span class="text-muted mb-4 inline-block h-10 w-10">
+						<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+						{@html playlistIcon}
+					</span>
 					<p class="text-secondary text-sm">No playlists available</p>
 				</div>
 			{/if}

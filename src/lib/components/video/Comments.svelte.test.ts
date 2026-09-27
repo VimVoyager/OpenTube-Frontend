@@ -3,6 +3,7 @@ import { render, fireEvent, waitFor } from '@testing-library/svelte';
 import '@testing-library/jest-dom';
 import Comments from './Comments.svelte';
 import type { CommentConfig } from '$lib/adapters/comments';
+import avatarFallback from '$lib/assets/placeholders/logofallback.svg';
 
 vi.mock('$lib/assets/logo-placeholder.svg', () => ({ default: '/logo-placeholder.svg' }));
 
@@ -249,7 +250,7 @@ describe('Comments.svelte', () => {
 				comment: { ...baseComment, authorAvatar: '' }
 			});
 			const avatar = getByAltText('@TestUser-avatar');
-			expect(avatar).toHaveAttribute('src', '/logo-placeholder.svg');
+			expect(avatar).toHaveAttribute('src', avatarFallback);
 		});
 
 		it('should fall back to logoPlaceholder on avatar load error', async () => {
@@ -258,7 +259,7 @@ describe('Comments.svelte', () => {
 
 			await fireEvent.error(avatar);
 
-			expect(avatar).toHaveAttribute('src', '/logo-placeholder.svg');
+			expect(avatar).toHaveAttribute('src', avatarFallback);
 		});
 	});
 

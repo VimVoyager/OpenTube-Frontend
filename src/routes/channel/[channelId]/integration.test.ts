@@ -3,6 +3,7 @@ import channelDetailsResponseFixture from '../../../tests/fixtures/api/channelDe
 import channelVideosResponseFixture from '../../../tests/fixtures/api/channelVideosApiResponse.json';
 import channelDetailsFixture from '../../../tests/fixtures/adapters/channelDetailsAdaptedResponse.json';
 import channelVideosFixture from '../../../tests/fixtures/adapters/channelVideosAdaptedResponse.json';
+import thumbnailFallback from '$lib/assets/placeholders/thumbnailFallback.svg?raw';
 
 // Mock only the HTTP boundary — real adapters run so the full pipeline
 // (API response → adapter → page data) is exercised end-to-end.
@@ -12,12 +13,12 @@ vi.mock('$lib/api/channel', () => ({
 }));
 
 // Mock asset imports (no real files available in test environment)
-vi.mock('$lib/assets/thumbnail-placeholder.jpg', () => ({
-	default: '/placeholder-thumbnail.jpg'
+vi.mock('$lib/assets/placeholder/thumbnailFallback.svg', () => ({
+	default: '/thumbnailFallback.svg'
 }));
 
-vi.mock('$lib/assets/logo-placeholder.svg', () => ({
-	default: '/placeholder-avatar.svg'
+vi.mock('$lib/assets/placeholder/logofallback.svg', () => ({
+	default: '/logofallback.svg'
 }));
 
 // Mock extractIdFromUrl so URL parsing doesn't pull in unrelated deps
@@ -85,7 +86,7 @@ describe('Channel +page.ts — integration', () => {
 
 			const result = await loadChannel();
 
-			expect(result.videos[0].thumbnail).toBe('/placeholder-thumbnail.jpg');
+			expect(result.videos[0].thumbnail).toBe(thumbnailFallback);
 		});
 	});
 

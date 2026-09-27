@@ -1,7 +1,7 @@
 import { getSearchResults, type SearchApiResponse } from '$lib/api/search';
 import { adaptSearchResults, type SearchResultsPage } from '$lib/adapters/search';
-import thumbnailPlaceholder from '$lib/assets/thumbnail-placeholder.jpg';
-import avatarPlaceholder from '$lib/assets/logo-placeholder.svg';
+import thumbnailPlaceholder from '$lib/assets/placeholders/thumbnailFallback.svg?raw';
+import avatarPlaceholder from '$lib/assets/placeholders/logofallback.svg?raw';
 import type { PageLoad } from './$types';
 
 const emptyResults: SearchResultsPage = { items: [], nextPage: null, hasNextPage: false };

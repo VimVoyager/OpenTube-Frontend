@@ -1,5 +1,5 @@
 <script lang="ts">
-	import logoPlaceholder from '$lib/assets/logo-placeholder.svg';
+	import logoPlaceholder from '$lib/assets/placeholders/logofallback.svg';
 	import { HeartIcon, ThumbsUpIcon, ChevronDownIcon, ChevronUpIcon } from 'lucide-svelte';
 	import { sanitizeHtml } from '$lib/sanitize';
 	import type { CommentConfig } from '$lib/adapters/comments';

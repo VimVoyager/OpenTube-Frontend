@@ -13,11 +13,11 @@ vi.mock('$env/static/public', () => ({
 	PUBLIC_PROXY_URL: 'http://localhost:8888'
 }));
 
-vi.mock('$lib/assets/logo-placeholder.svg', () => ({
+vi.mock('$lib/assets/placheholders/logofallback.svg', () => ({
 	default: 'mock-logo-placeholder.svg'
 }));
 
-vi.mock('$lib/assets/thumbnail-placeholder.svg', () => ({
+vi.mock('$lib/assets/placeholders/thumbnailFallback.svg', () => ({
 	default: 'mock-thumbnail-placeholder.svg'
 }));
 

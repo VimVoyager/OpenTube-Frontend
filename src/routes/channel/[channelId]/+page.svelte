@@ -7,8 +7,9 @@
 	import type { NextPage } from '$lib/api/types';
 	import { adaptChannelVideos, type ChannelVideoConfig } from '$lib/adapters/channel';
 	import { getChannelVideosNextPage } from '$lib/api/channel';
-	import thumbnailPlaceholder from '$lib/assets/thumbnail-placeholder.jpg';
-	import avatarPlaceholder from '$lib/assets/logo-placeholder.svg';
+	import thumbnailPlaceholder from '$lib/assets/placeholders/thumbnailFallback.svg?raw';
+	import avatarPlaceholder from '$lib/assets/placeholders/logofallback.svg?raw';
+	import playlistIcon from '$lib/assets/icons/playlist.svg?raw';
 
 	let { data }: { data: PageData } = $props();
 
@@ -26,8 +27,8 @@
 		}
 	);
 
-	let channelVideos = $derived<ChannelVideoConfig[]>([]);
-	let nextPage = $state<NextPage | null>(null);
+	let channelVideos = $derived<ChannelVideoConfig[]>(data.videos ?? []);
+	let nextPage = $derived<NextPage | null>(data.nextPage ?? null);
 	let loadingMore = $state(false);
 	let loadMoreError = $state<string | null>(null);
 
@@ -35,8 +36,8 @@
 	let activeTab = $state<ChannelTab>('videos');
 
 	$effect(() => {
-		channelVideos = data.videos ?? [];
-		nextPage = data.nextPage ?? null;
+		// eslint-disable-next-line @typescript-eslint/no-unused-expressions
+		data;
 		loadMoreError = null;
 	});
 
@@ -94,7 +95,9 @@
 							onclick={loadMore}
 							disabled={loadingMore}
 						>
-							{loadingMore ? 'Loading…' : 'Load more'}
+							{#if channelVideos.length !== 0}
+								{loadingMore ? 'Loading…' : 'Load more'}
+							{/if}
 						</button>
 					{/if}
 				</div>
@@ -102,7 +105,10 @@
 
 			{#snippet playlists()}
 				<div class="flex flex-col items-center justify-center px-6 py-12 text-center">
-					<div class="mb-4 text-4xl">📋</div>
+					<span class="text-muted mb-4 inline-block h-10 w-10">
+						<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+						{@html playlistIcon}
+					</span>
 					<p class="text-secondary text-sm">Playlists coming soon</p>
 				</div>
 			{/snippet}

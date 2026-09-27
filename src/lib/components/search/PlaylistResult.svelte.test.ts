@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/svelte';
 import PlaylistResult from './PlaylistResult.svelte';
 import searchResultFixture from '../../../tests/fixtures/adapters/searchAdaptedResponse.json';
+import thumbnailFallback from '$lib/assets/placeholders/thumbnailFallback.svg?raw';
 
 // Mock asset imports
 vi.mock('$lib/assets/thumbnail-placeholder.jpg', () => ({
@@ -114,7 +115,7 @@ describe('PlaylistResult', () => {
 			const thumbnails = screen.getAllByAltText('Thumbnail for Murder Drones');
 			expect(thumbnails).toHaveLength(2);
 			thumbnails.forEach((thumbnail) => {
-				expect(thumbnail.getAttribute('src')).toBe('/placeholder-thumbnail.jpg');
+				expect(thumbnail.getAttribute('src')).toBe(thumbnailFallback);
 			});
 		});
 	});
