@@ -7,8 +7,8 @@
 	import type { NextPage } from '$lib/api/types';
 	import { getSearchResultsNextPage } from '$lib/api/search';
 	import { adaptSearchResults, type SearchResultConfig } from '$lib/adapters/search';
-	import thumbnailPlaceholder from '$lib/assets/thumbnail-placeholder.jpg';
-	import avatarPlaceholder from '$lib/assets/logo-placeholder.svg';
+	import thumbnailPlaceholder from '$lib/assets/placeholders/thumbnailFallback.svg?raw';
+	import avatarPlaceholder from '$lib/assets/placeholders/logofallback.svg?raw';
 
 	let { data }: { data: PageData } = $props();
 

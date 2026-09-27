@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { formatCount } from '$lib/utils/formatters';
-	import avatarPlaceholder from '$lib/assets/logo-placeholder.svg';
+	import avatarPlaceholder from '$lib/assets/placeholders/logofallback.svg?raw';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import type { ChannelSearchResultConfig } from '$lib/adapters/search';

@@ -37,7 +37,7 @@ const errorChannel: ChannelConfig = {
 	verified: false
 };
 
-const createPageData = (overrides: Record<string, unknown> = {}) => ({
+const createPageData = (overrides: Partial<ChannelPageData> = {}): ChannelPageData => ({
 	channel: mockChannel,
 	videos: mockVideos,
 	nextPage: videoPage.nextPage,

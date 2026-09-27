@@ -2,14 +2,16 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/svelte';
 import VideoResult from './VideoResult.svelte';
 import searchResultFixtures from '../../../tests/fixtures/adapters/searchAdaptedResponse.json';
+import thumbnailFallback from '$lib/assets/placeholders/thumbnailFallback.svg?raw';
+import avatarFallback from '$lib/assets/placeholders/logofallback.svg?raw';
 import type { VideoSearchResultConfig } from '$lib/adapters/search';
 
 // Mock asset imports
-vi.mock('$lib/assets/thumbnail-placeholder.jpg', () => ({
+vi.mock('$lib/assets/placeholder/thumbnail-placeholder.jpg', () => ({
 	default: '/placeholder-thumbnail.jpg'
 }));
 
-vi.mock('$lib/assets/logo-placeholder.svg', () => ({
+vi.mock('$lib/assets/placehoder/logo-placeholder.svg', () => ({
 	default: '/placeholder-avatar.svg'
 }));
 
@@ -127,10 +129,10 @@ describe('VideoResult', () => {
 			render(VideoResult, { props: { result: bare } });
 			screen
 				.getAllByAltText('MURDER DRONES - Pilot thumbnail')
-				.forEach((t) => expect(t.getAttribute('src')).toBe('/placeholder-thumbnail.jpg'));
+				.forEach((t) => expect(t.getAttribute('src')).toBe(thumbnailFallback));
 			screen
 				.getAllByAltText('GLITCH')
-				.forEach((a) => expect(a.getAttribute('src')).toBe('/placeholder-avatar.svg'));
+				.forEach((a) => expect(a.getAttribute('src')).toBe(avatarFallback));
 		});
 	});
 

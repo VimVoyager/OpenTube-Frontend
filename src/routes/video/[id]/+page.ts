@@ -13,8 +13,8 @@ import {
 	adaptPlaylistVideos,
 	type PlaylistInfoConfig
 } from '$lib/adapters/playlist';
-import thumbnailPlaceholder from '$lib/assets/thumbnail-placeholder.jpg';
-import logoPlaceholder from '$lib/assets/logo-placeholder.svg';
+import thumbnailPlaceholder from '$lib/assets/placeholders/thumbnailFallback.svg?raw';
+import logoPlaceholder from '$lib/assets/placeholders/logofallback.svg?raw';
 import { getManifest } from '$lib/api/manifest';
 import { getVideoThumbnails } from '$lib/api/thumbnails';
 import { getPlaylist } from '$lib/api/playlist';

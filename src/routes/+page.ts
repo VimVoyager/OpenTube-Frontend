@@ -1,7 +1,7 @@
 import type { PageLoad } from './$types';
 import { getKioskInfo, type KioskInfoApiResponse } from '$lib/api/kiosk';
 import { adaptKioskVideos, type KioskVideoConfig } from '$lib/adapters/kiosk';
-import defaultThumbnail from '$lib/assets/thumbnail-placeholder.jpg';
+import defaultThumbnail from '$lib/assets/placeholders/thumbnailFallback.svg?raw';
 
 const DEFAULT_THUMBNAIL: string = defaultThumbnail;
 

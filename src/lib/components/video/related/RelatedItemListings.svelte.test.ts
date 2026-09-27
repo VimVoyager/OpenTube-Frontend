@@ -9,6 +9,7 @@ import { describe, it, expect } from 'vitest';
 import RelatedItemListings from './RelatedItemListings.svelte';
 import relatedVideosFixture from '../../../../tests/fixtures/adapters/relatedVideosAdaptedResponse.json';
 import type { RelatedVideoConfig } from '$lib/adapters/related';
+import logoPlaceholder from '$lib/assets/placeholders/logofallback.svg?raw';
 
 const mockRelatedVideos: RelatedVideoConfig[] = relatedVideosFixture as RelatedVideoConfig[];
 const [heartbeat] = mockRelatedVideos;
@@ -68,7 +69,7 @@ describe('RelatedItemListings', () => {
 
 			await fireEvent.error(avatar);
 
-			expect(avatar).toHaveAttribute('src', '/src/lib/assets/logo-placeholder.svg');
+			expect(avatar).toHaveAttribute('src', logoPlaceholder);
 		});
 	});
 

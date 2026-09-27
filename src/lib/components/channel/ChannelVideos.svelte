@@ -2,6 +2,7 @@
 	import { formatCount } from '$lib/utils/formatters';
 	import { resolve } from '$app/paths';
 	import VideoThumbnail from '$lib/components/VideoThumbnail.svelte';
+	import videoCameraIcon from '$lib/assets/icons/videoCamera.svg?raw';
 	import type { ChannelVideoConfig } from '$lib/adapters/channel';
 
 	let { videos }: { videos: ChannelVideoConfig[] } = $props();
@@ -10,7 +11,10 @@
 <div>
 	{#if videos.length === 0}
 		<div class="flex flex-col items-center justify-center px-6 py-12 text-center">
-			<div class="mb-4 text-4xl">📹</div>
+			<span class="text-muted mb-4 inline-block h-10 w-10">
+				<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+				{@html videoCameraIcon}
+			</span>
 			<p class="text-secondary text-sm">No videos available</p>
 		</div>
 	{:else}

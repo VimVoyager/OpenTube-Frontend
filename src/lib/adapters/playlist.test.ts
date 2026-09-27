@@ -8,6 +8,9 @@
 import { describe, it, expect } from 'vitest';
 import { adaptPlaylistInfo, adaptPlaylistVideos, type PlaylistInfoConfig } from './playlist';
 import { buildPlaylistResponse, buildRelatedItem } from '../../tests/fixtures/builder';
+import logoPlaceholder from '$lib/assets/placeholders/logofallback.svg?raw';
+import thumbnailFallback from '$lib/assets/placeholders/thumbnailFallback.svg?raw';
+import bannerPlaceholder from '$lib/assets/placeholders/bannerFallback.svg?raw';
 import type { PlaylistApiResponse } from '$lib/api/playlist';
 import type { RelatedVideoConfig } from '$lib/adapters/related';
 
@@ -52,8 +55,8 @@ describe('adaptPlaylistInfo', () => {
 				[{ url: 'https://example.com/only.jpg', width: 1060, height: 640 }],
 				'https://example.com/only.jpg'
 			],
-			['empty array', [], '/src/lib/assets/banner-fallback.jpg'],
-			['undefined', undefined, '/src/lib/assets/banner-fallback.jpg']
+			['empty array', [], bannerPlaceholder],
+			['undefined', undefined, bannerPlaceholder]
 		])('%s → %j', (_label, banners, expected) => {
 			const result = adaptPlaylistInfo(buildPlaylistResponse({ banners }));
 			expect(result.bannerUrl).toBe(expected);
@@ -124,18 +127,8 @@ describe('adaptPlaylistVideos', () => {
 			['missing name', { name: undefined }, 'title', 'Untitled'],
 			['empty name', { name: '' }, 'title', 'Untitled'],
 			['missing uploader name', { uploaderName: undefined }, 'channelName', 'Unknown'],
-			[
-				'missing thumbnails',
-				{ thumbnails: undefined },
-				'thumbnail',
-				'/src/lib/assets/thumbnail-placeholder.jpg'
-			],
-			[
-				'missing avatars',
-				{ uploaderAvatars: undefined },
-				'channelAvatar',
-				'mock-logo-placeholder.svg'
-			]
+			['missing thumbnails', { thumbnails: undefined }, 'thumbnail', thumbnailFallback],
+			['missing avatars', { uploaderAvatars: undefined }, 'channelAvatar', logoPlaceholder]
 		])('%s → %s = %j', (_label, override, field, expected) => {
 			const response = buildPlaylistResponse({ relatedItems: [buildRelatedItem(override)] });
 			const [video] = adaptPlaylistVideos(response);

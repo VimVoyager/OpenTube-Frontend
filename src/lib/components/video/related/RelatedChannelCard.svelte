@@ -1,5 +1,5 @@
 <script lang="ts">
-	import avatarPlaceholder from '$lib/assets/logo-placeholder.svg';
+	import avatarPlaceholder from '$lib/assets/placeholders/logofallback.svg?raw';
 	import { formatCount } from '$lib/utils/formatters';
 	import { resolve } from '$app/paths';
 	import type { RelatedChannelConfig } from '$lib/adapters/related';

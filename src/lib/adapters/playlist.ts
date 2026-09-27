@@ -1,8 +1,8 @@
 import { extractIdFromUrl } from '$lib/utils/streamSelection';
 import { selectBestImage } from '$lib/utils/mediaUtils';
-import logoPlaceholder from '$lib/assets/logo-placeholder.svg';
-import bannerPlaceholder from '$lib/assets/banner-fallback.jpg';
-import thumbnailPlaceholder from '$lib/assets/thumbnail-placeholder.jpg';
+import logoPlaceholder from '$lib/assets/placeholders/logofallback.svg?raw';
+import bannerPlaceholder from '$lib/assets/placeholders/bannerFallback.svg?raw';
+import thumbnailPlaceholder from '$lib/assets/placeholders/thumbnailFallback.svg?raw';
 import type { RelatedItemApiResponse } from '$lib/api/related';
 import type { PlaylistApiResponse } from '$lib/api/playlist';
 import type { RelatedVideoConfig } from '$lib/adapters/related';

@@ -3,6 +3,7 @@ import { render, screen, fireEvent } from '@testing-library/svelte';
 import { adaptSearchResults, type ChannelSearchResultConfig } from '$lib/adapters/search';
 import ChannelResult from './ChannelResult.svelte';
 import channelSearchResultFixtures from '../../../tests/fixtures/adapters/channelSearchResult.json';
+import avatarPlaceholder from '$lib/assets/placeholders/logofallback.svg?raw';
 
 vi.mock('$lib/assets/logo-placeholder.svg', () => ({
 	default: '/placeholder-avatar.svg'
@@ -92,7 +93,7 @@ describe('ChannelResult', () => {
 			const avatars = screen.getAllByAltText(glitchRobloxResult.name);
 			expect(avatars).toHaveLength(2);
 			avatars.forEach((avatar) => {
-				expect(avatar.getAttribute('src')).toBe('/placeholder-avatar.svg');
+				expect(avatar.getAttribute('src')).toBe(avatarPlaceholder);
 			});
 		});
 	});

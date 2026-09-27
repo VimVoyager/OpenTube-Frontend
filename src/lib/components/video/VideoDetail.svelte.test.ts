@@ -10,6 +10,7 @@ import { describe, it, expect } from 'vitest';
 import VideoDetail from './VideoDetail.svelte';
 import videoDetailsFixture from '../../../tests/fixtures/adapters/detailsResult.json';
 import type { VideoMetadata } from '$lib/adapters/metadata';
+import avatarFallback from '$lib/assets/placeholders/logofallback.svg?raw';
 
 const mockMetadata: VideoMetadata = videoDetailsFixture[0];
 const mockNoAvatarLargeNumbers: VideoMetadata = videoDetailsFixture[1];
@@ -33,7 +34,7 @@ describe('VideoDetail', () => {
 
 			expect(screen.getByAltText(mockNoAvatarLargeNumbers.channelName)).toHaveAttribute(
 				'src',
-				'/src/lib/assets/logo-placeholder.svg'
+				avatarFallback
 			);
 		});
 	});
