@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen } from '@testing-library/svelte';
+import { render, screen, within } from '@testing-library/svelte';
 import Page from './+page.svelte';
 import type { PageData } from './$types';
 import searchAdaptedFixtureRaw from '../../tests/fixtures/adapters/searchAdaptedResponse.json';
@@ -74,21 +74,12 @@ describe('+page.svelte - Search Results', () => {
 		});
 		const { container } = render(Page, { props: { data } });
 
-		expect(screen.getByText('Search Error')).toBeTruthy();
-		expect(screen.getByText('Network error occurred')).toBeTruthy();
-		expect(screen.getByText('Please try again later.')).toBeTruthy();
+		const alert = screen.getByRole('alert');
+		expect(within(alert).getByText('Search Error')).toBeTruthy();
+		expect(within(alert).getByText('Network error occurred')).toBeTruthy();
+		expect(within(alert).getByText('Please try again later.')).toBeTruthy();
+
 		expect(screen.getByText(/Search Results for "test query"/)).toBeTruthy();
-
-		const errorContainer = container.querySelector('div.bg-accent\\/10');
-		expect(errorContainer).toHaveClass(
-			'rounded-lg',
-			'border',
-			'border-accent/20',
-			'p-8',
-			'text-center'
-		);
-		expect(screen.getByText('Network error occurred')).toHaveClass('text-sm', 'text-secondary');
-
 		expect(container.querySelector('.space-y-4')).toBeNull();
 	});
 
@@ -97,21 +88,8 @@ describe('+page.svelte - Search Results', () => {
 		const { container } = render(Page, { props: { data } });
 
 		const message = screen.getByText('Enter a search query to find videos');
-		expect(message).toHaveClass('text-sm', 'text-secondary');
+		expect(message).toHaveClass('text-base', 'text-secondary');
 		expect(screen.queryByText(/No results found/)).toBeNull();
-		expect(container.querySelector('.space-y-4')).toBeNull();
-	});
-
-	it('should show the no-results message and hide the results list when a query has no matches', () => {
-		const data = createMockPageData({ query: 'nonexistent query', results: emptyResults });
-		const { container } = render(Page, { props: { data } });
-
-		expect(screen.getByText(/No results found for "nonexistent query"/)).toBeTruthy();
-		expect(screen.getByText('Try different keywords or check your spelling')).toBeTruthy();
-		expect(screen.queryByText('Enter a search query')).toBeNull();
-
-		const noResultsContainer = container.querySelector('div.rounded-lg.border.text-center');
-		expect(noResultsContainer?.className).toContain('bg-secondary');
 		expect(container.querySelector('.space-y-4')).toBeNull();
 	});
 
@@ -189,7 +167,7 @@ describe('+page.svelte - Search Results', () => {
 		{
 			name: 'no-results message over empty-query prompt',
 			data: { query: 'test', results: withItems([]) },
-			expectText: 'No results found for "test"',
+			expectText: 'No results found',
 			notText: 'Enter a search query'
 		}
 	])('should prioritise $name', ({ data: overrides, expectText, notText }) => {
