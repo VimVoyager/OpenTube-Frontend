@@ -73,7 +73,6 @@
 			variant="empty"
 			title="No Search Query"
 			message="Enter a search query to find videos"
-			icon="🔍"
 		/>
 
 		<!-- No Results State -->

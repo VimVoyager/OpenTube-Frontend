@@ -1,13 +1,18 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 
+	import errorIcon from '$lib/assets/icons/error.svg?raw';
+	import warningIcon from '$lib/assets/icons/warning.svg?raw';
+	import infoIcon from '$lib/assets/icons/info.svg?raw';
+	import emptyIcon from '$lib/assets/icons/error.svg?raw';
+
 	type Variant = 'error' | 'warning' | 'info' | 'empty';
 
 	let {
 		variant = 'error',
 		title,
 		message,
-		icon = null,
+		icon,
 		showRetry = false,
 		onRetry = null,
 		children
@@ -15,7 +20,7 @@
 		variant?: Variant;
 		title: string;
 		message: string | null;
-		icon?: string | null;
+		icon?: Snippet;
 		showRetry?: boolean;
 		onRetry?: (() => void) | null;
 		children?: Snippet;
@@ -23,57 +28,76 @@
 
 	// Default icons for each variant
 	const defaultIcons = {
-		error: '⚠️',
-		warning: '📹',
-		info: 'ℹ️',
-		empty: '🔍'
+		error: errorIcon,
+		warning: warningIcon,
+		info: infoIcon,
+		empty: emptyIcon
 	};
 
-	let displayIcon = $derived(icon ?? defaultIcons[variant]);
-
-	// Variant styles
-	const variantStyles = {
-		error: 'bg-accent/10 border-accent/20',
-		warning: 'bg-secondary border-default',
-		info: 'bg-secondary border-default',
-		empty: 'bg-secondary border-default'
-	};
-
-	const iconStyles = {
+	const tone: Record<Variant, string> = {
 		error: 'text-accent',
-		warning: 'text-muted',
+		warning: 'text-amber-400',
 		info: 'text-muted',
 		empty: 'text-muted'
 	};
 
-	let containerClasses = $derived(variantStyles[variant]);
-	let iconColorClasses = $derived(iconStyles[variant]);
+	let showButton = $derived(showRetry && !!onRetry);
 </script>
 
-<div class="rounded-lg border {containerClasses} mx-auto max-w-2xl p-8 text-center">
-	{#if displayIcon}
-		<div class="mb-4 text-5xl {iconColorClasses}">
-			{displayIcon}
+<div
+	role={variant === 'error' ? 'alert' : 'status'}
+	class="error-card mx-auto w-full max-w-2xl rounded-xl border p-5 sm:p-6 {tone[variant]}"
+>
+	<div class="flex items-start gap-5">
+		<div class="flex size-14 shrink-0 items-center justify-center" aria-hidden="true">
+			{#if icon}
+				{@render icon()}
+			{:else}
+				{@html defaultIcons[variant]}
+			{/if}
 		</div>
-	{/if}
 
-	<h2 class="text-primary mb-2 text-lg font-semibold">
-		{title}
-	</h2>
+		<div class="min-w-0 flex-1 pt-1.5">
+			<h2 class="text-primary text-xl leading-tight font-semibold">
+				{title}
+			</h2>
 
-	<p class="text-secondary mx-auto max-w-md text-sm">
-		{message}
-	</p>
+			{#if message}
+				<p class="text-secondary mt-1.5 text-base">
+					{message}
+				</p>
+			{/if}
 
-	{#if showRetry && onRetry}
-		<button
-			class="bg-accent hover:bg-accent-hover mt-6 rounded-md px-6 py-2 font-medium text-white transition-colors"
-			onclick={onRetry}
-		>
-			Retry
-		</button>
-	{/if}
+			{#if children || showButton}
+				<div class="error-card-divider text-secondary mt-4 border-t pt-4 text-sm">
+					{@render children?.()}
 
-	<!-- Optional slot for custom actions -->
-	{@render children?.()}
+					{#if showButton}
+						<button
+							type="button"
+							class="bg-accent hover:bg-accent-hover focus-visible:outline-accent rounded-md px-4 py-1.5 text-sm font-medium text-white transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 {children
+								? 'mt-3'
+								: ''}"
+							onclick={onRetry}
+						>
+							Retry
+						</button>
+					{/if}
+				</div>
+			{/if}
+		</div>
+	</div>
 </div>
+
+<style>
+	/* currentColor is the variant tone set on the card, so the border and
+			 tint always match the icon without needing per-variant classes. */
+	.error-card {
+		border-color: color-mix(in srgb, currentColor 35%, transparent);
+		background-color: color-mix(in srgb, currentColor 6%, transparent);
+	}
+
+	.error-card-divider {
+		border-color: color-mix(in srgb, currentColor 15%, transparent);
+	}
+</style>
