@@ -53,6 +53,7 @@
 			{#if icon}
 				{@render icon()}
 			{:else}
+				<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 				{@html defaultIcons[variant]}
 			{/if}
 		</div>
@@ -90,8 +91,6 @@
 </div>
 
 <style>
-	/* currentColor is the variant tone set on the card, so the border and
-			 tint always match the icon without needing per-variant classes. */
 	.error-card {
 		border-color: color-mix(in srgb, currentColor 35%, transparent);
 		background-color: color-mix(in srgb, currentColor 6%, transparent);

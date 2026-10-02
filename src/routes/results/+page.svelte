@@ -77,9 +77,10 @@
 
 		<!-- No Results State -->
 	{:else if !hasResults}
-		<ErrorCard variant="info" title="No Results Found" message={`No results found for "${query}"`}>
-			<p class="text-muted mt-4 text-sm">Try different keywords or check your spelling</p>
-		</ErrorCard>
+		<div class="py-6 text-center">
+			<h2 class="text-primary text-xl font-bold">No results found</h2>
+			<p class="text-secondary text-md mt-1">Try different keywords or check your spelling.</p>
+		</div>
 
 		<!-- Results List -->
 	{:else}
